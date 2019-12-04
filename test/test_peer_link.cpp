@@ -39,6 +39,7 @@ int main(int argc, char* argv[])
     // zmq wart: SSS, give time for pub to process any subscriptions.
     zclock_sleep(100);
 
+
     
     // back in publisher
     zstr_send(pub.zsock(), "Hello World!");

@@ -4,6 +4,8 @@
 #include <unordered_map>
 #include <string>
 #include <vector>
+#include <chrono>
+#include <json.hpp>
 
 namespace zio {
     enum borc_t { bind, connect };
@@ -62,6 +64,16 @@ namespace zio {
         0
     };
 
+
+    typedef struct { size_t size; char* data; } BUFF;
+    typedef std::string TEXT;
+    typedef nlohmann::json JSON;
+
+    struct TimeGranule {
+        uint64_t operator()() {
+            return std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+        }
+    };
 
 
 }
