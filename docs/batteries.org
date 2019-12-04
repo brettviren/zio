@@ -1,0 +1,12 @@
+#+title: ZIO Batteries Included
+
+ZIO provides some higher level functionality which does not bring in
+additional software dependencies.
+
+* Streamed merge/sort
+
+* Message grouping
+
+* Graphite feed
+
+

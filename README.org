@@ -1,89 +1,44 @@
-#+title: zio
+#+title: ZIO
 
-* zio messages
+* Introduction
 
-ZeroMQ message frames:
+ZIO provides a thin, simplifying wrapper around ZeroMQ's CZMQ and
+Zyre.  It provides:
 
-|---------+------------------------+-------|
-| name    | type                   | bytes |
-|---------+------------------------+-------|
-| magic   | "ZIO"                  |     3 |
-| level   | "%d"                   |     1 |
-| format  | "JSON", "TEXT", "BUFF" |     4 |
-| origin  | uint64                 |     8 |
-| granule | uint64                 |     8 |
-|---------+------------------------+-------|
-| payload | format dependent       |     N |
-|---------+------------------------+-------|
+- a general, container-based transport of data in a few convenient message formats.
 
-- magic :: three ASCII characters: "ZIO" marks this as a ZIO message
-- level :: a single digit, ASCII encoded gives the message level (see below)
-- format :: the payload format
-- origin :: an application-defined identifier for the origin of the message
-- granule :: an application-defined monotonically increasing count used for ordering of messages
-- payload :: frames as determined by format
+- a simplified discovery and presence mechanism based on Zyre.
 
-ZIO defines these formats:
+- some general purpose functionality for processing ZIO messages.
 
-- TEXT :: the payloads consists of free form text such as might be used for logging.
-- JSON :: the payload is structured data in JSON format.
-- BUFF :: the payload is application defined binary buffer of data.
+The goal of ZIO is to form the basis for a loosely coupled ecosystem
+of libraries and applications which can inter-communicate.  Some
+anticipated uses are:
 
-ZIO message have an importance level indicated by a single ASCII digit
-with higher values indicating greater importance and less frequency.
-The application is free to assign different meaning but ZIO recommends
-the following.
+- Wire-Cell Toolkit I/O requires accepting data from multi-threaded
+  contexts, aggregating it to a single thread and writing to one or
+  several file formats.  Reading requires the reverse, bringing data
+  back to WCT component threads for replay.
 
-1. trace, messages within nested loops or occurring with frequency far
-   higher than any "events".
-2. verbose, messages will be emitted from contexts occurring more than
-   once per event.
-3. debug, potentially many messages of different types but each
-   occurring once per event.
-4. info, a rare message but occurring for one event.
-5. summary, a message holding information about a collection of events
-6. warning, a problem was encountered and handled.
-7. error, a problem was encountered, not handled (eg ignored) but the
-   component continues.
-8. fatal, an error occurred and the component gives up (eg, component
-   throws/raises an exception or aborts shortly after).
+- Software self-trigger feature for DUNE DAQ (or others) require
+  streamed data processing to aggregate and locate "interesting"
+  portions of an original data stream.
 
-Here an "event" is some driving impetus to the component emitting the
-messages and which sets some time scale.  For example, a message
-processing component might consider an "event" to be each input
-message. 
+- Logging and structured metric production, processing and collection
+  from a distributed system.
 
+* Install
 
-* Notes
+#+begin_example
+  $ waf configure --prefix=/path/to/install
+  $ waf build [--notests]
+  $ waf install
+#+end_example
 
-** A potential Catch 22 with Discovery and Ephemeral Ports
+* More information
 
-Discovery involves broadcasting headers to the network which advertise
-the endpoints a peer has or will bind.  Other peers may receive these
-advertisements and then connect based on matching peer name and header
-key.
+- [[file:docs/messages.org]] describes the ZIO message format
 
-A peer socket may simultaneously bind and connect to multiple
-endpoints.  Furthermore a socket may bind to an endpoint specifying an
-/ephemeral port/ (eg, ~tcp://127.0.0.1:*~) in which case the full endpoint
-address to advertise may only be constructed after the call to ~bind()~
-completes.  (Ignored is the case that the IP address is also wildcard
-~tcp://*:*~.)
+- [[file:docs/batteries.org]] describes additional features ~libzio~ provides
 
-Thus there is an ordering conundrum that disrupts making discovery,
-bind and connect be atomic operations if ephemeral ports are allowed.
-And, given discovery is meant to reduce the amount of configuration
-information needed, it's reasonable that bind endpoints are specified
-as ephemeral.
-
-The only reasonable order of operation is then:
-
-1. bind and resolve ephemeral ports
-2. advertise binds
-3. listen for peer discovery
-4. pattern match on their headers and connect
-
-After advertisement (peer initialization) is complete then the final
-two steps are asynchronous.  The peer must decide either to wait for
-all expected peers to be discovered (and connections made) or to allow
-connections to be completed later.  
+- [[file:docs/misc.org]] holds some uncategorized ramblings

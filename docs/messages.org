@@ -1,0 +1,109 @@
+#+title:  ZIO messages
+
+ZIO messages are ZeroMQ messages which consist of a *header frame*
+followed by one or more *payload* frames.  The general layout is shown:
+
+|---------+------------------------+-------|
+| name    | type                   | bytes |
+|---------+------------------------+-------|
+| magic   | "ZIO"                  |     3 |
+| level   | "%d"                   |     1 |
+| format  | "JSON", "TEXT", "BUFF" |     4 |
+| origin  | uint64                 |     8 |
+| granule | uint64                 |     8 |
+|---------+------------------------+-------|
+| payload | format dependent       |     N |
+|---------+------------------------+-------|
+
+- magic :: three ASCII characters: "ZIO" marks this as a ZIO message
+- level :: a single digit, ASCII encoded gives the message level
+- format :: the payload format
+- origin :: an application-defined identifier for the origin of the message
+- granule :: an application-defined monotonically increasing count used for ordering of messages
+- payload :: frames as determined by format
+
+Note, the non-payload frame is intentionally suitable for use with
+ZeroMQ PUB/SUB prefix-matching.  Eg, a SUB may be interested only in
+~"ZIO5TEXT"~ messages.  The next sections describe the *level* and other
+elements of a ZIO header frame followed by discussion of *payload*.
+
+* Levels
+
+ZIO message have an importance *level* indicated by a single ASCII digit
+with higher values indicating greater importance and less frequency.
+ASCII digits "1" through "8", inclusive, are allowed.  No other values
+are allowed in this version of ZIO.  
+
+The application is free to assign different semantic meaning to these
+levels but the following interpretations are recommended and these
+terms are defined in ~libzio~.
+
+1. trace, messages are emitted from nested loops or occurring with
+   frequency far higher than any "events".
+2. verbose, messages will be emitted from contexts occurring more than
+   once per event.
+3. debug, potentially multiple messages of different types but each
+   type occurring once per event.
+4. info, a rare message, occurring no more than once event.
+5. summary, a message holding information about a collection of
+   events, emitted less than once per event.
+6. warning, a problem was encountered and handled.
+7. error, a problem was encountered, not handled (eg ignored) but the
+   emitting component continues to run.
+8. fatal, an error occurred and the component gives up (eg, component
+   throws/raises an exception or aborts shortly after).
+
+Here an "event" is some driving impetus to the component emitting the
+messages and which sets some time scale.  For example, a message
+processing component might consider an "event" to be each input
+message.  Or, it may be interpreted as each message which satisfies
+some criteria.
+
+* Format
+
+ZIO defines these formats:
+
+- TEXT :: the payloads consists of free form text such as might be used for logging.
+- JSON :: the payload is structured data in JSON format.
+- BUFF :: the payload is application defined binary buffer of data.
+
+ZIO formats do *not* specify the internal schema that the payload may
+follow.  Hints to the receiving application to parse the payload must
+be provided out-of-band or in-band in some self-describing manner.
+See more discussion under [[Payload]].
+
+* Origin
+
+In general, ZIO makes no requirement on the values placed in *origin*.
+The recommended interpretation of the *origin* field is to mark "where"
+a message originated.  
+
+Defining a convention for *origin* is application dependent.  ZIO
+recommends a hierarchical convention such that the lowest bits are
+used to distinguish leafs and highest bits trunks and so that bit
+masking can be meaningfully applied.
+
+* Granule
+
+In general, ZIO makes no requirement on the values placed in *granule*.
+The recommended interpretation of the *granule* field is that of a
+global ordering shared by all participating streams.  A likely
+interpretation of the *granule* is an absolute timestamp.  
+
+Defining a resolution and origin of the granule is application
+dependent.  If the application has no such requirements, ZIO
+recommends supplying microseconds since the Unix Epoch.
+
+* Payload
+
+A *payload* frame consists of a byte array advertised to follow the
+given *format*.  Any internal structure schema must be communicated
+either out-of-band of ZIO or with some hints or other self-describing
+mechanism in-band of the payload.
+
+If in-band self-description is needed, ZIO provides recommendations:
+
+- TEXT :: pre-define field or record delimiters, use prefix hints.
+- JSON :: present top level entity as an array with first element as an internal header or description, present top as object with special key holding a meta description.
+- BUFF :: use predefined header region (eg, similar to how ZIO message header is defined), use inherently self describing serialization such as protocol buffers
+

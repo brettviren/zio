@@ -1,0 +1,33 @@
+#+title: Notes
+
+* A potential Catch 22 with Discovery and Ephemeral Ports
+
+Discovery involves broadcasting headers to the network which advertise
+the endpoints a peer has or will bind.  Other peers may receive these
+advertisements and then connect based on matching peer name and header
+key.
+
+A peer socket may simultaneously bind and connect to multiple
+endpoints.  Furthermore a socket may bind to an endpoint specifying an
+/ephemeral port/ (eg, ~tcp://127.0.0.1:*~) in which case the full endpoint
+address to advertise may only be constructed after the call to ~bind()~
+completes.  (Ignored is the case that the IP address is also wildcard
+~tcp://*:*~.)
+
+Thus there is an ordering conundrum that disrupts making discovery,
+bind and connect be atomic operations if ephemeral ports are allowed.
+And, given discovery is meant to reduce the amount of configuration
+information needed, it's reasonable that bind endpoints are specified
+as ephemeral.
+
+The only reasonable order of operation is then:
+
+1. bind and resolve ephemeral ports
+2. advertise binds
+3. listen for peer discovery
+4. pattern match on their headers and connect
+
+After advertisement (peer initialization) is complete then the final
+two steps are asynchronous.  The peer must decide either to wait for
+all expected peers to be discovered (and connections made) or to allow
+connections to be completed later.  
