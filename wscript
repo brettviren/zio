@@ -18,13 +18,20 @@ def configure(cfg):
     cfg.check_cfg(package='libzyre', uselib_store='ZYRE', **p);
 
 def build(bld):
+    uses='ZMQ CZMQ ZYRE'.split()
     bld.shlib(features='cxx', includes='inc',
               source=bld.path.ant_glob('src/*.cpp'), target='zio',
-              uselib_store='ZIO', use='ZMQ CZMQ ZYRE')
+              uselib_store='ZIO', use=uses)
 
+    rpath = [bld.env["PREFIX"] + '/lib']
+    rpath += [bld.env["LIBPATH_%s"%u][0] for u in uses]
+    rpath = list(set(rpath))
+    print (rpath)
+             
     for tmain in bld.path.ant_glob('test/test*.cpp'):
-        bld.program(features = 'test',
+        bld.program(features = 'test cxx',
                     source = [tmain], target = tmain.name.replace('.cpp',''),
                     ut_cwd = bld.path, install_path = None,
                     includes = ['inc','build','test'],
-                    use = 'ZIO ZMQ CZMQ ZYRE')
+                    rpath = rpath,
+                    use = uses)
