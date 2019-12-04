@@ -24,9 +24,22 @@ namespace zio {
     typedef std::pair<header_key_t, header_value_t> header_t;
     typedef std::vector<header_t> headerset_t;
 
+    // a string holding some prefix match
+    typedef std::string prefixmatch_t;
+
     struct peer_info_t {
-        nickname_t nick;
+        nickname_t nick{""};
         headerset_t headers;
+
+        std::vector<header_value_t> lookup(const header_key_t& key) {
+            std::vector<header_value_t> ret;
+            for (const auto& one : headers) {
+                if (one.first == key) {
+                    ret.push_back(one.second);
+                }
+            }
+            return ret;
+        }
     };
     typedef std::unordered_map<uuid_t, peer_info_t> peerset_t;
     

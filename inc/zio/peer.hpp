@@ -19,7 +19,7 @@ namespace zio {
     public:
         /// Advertise own nickname and headers
         Peer(const nickname_t& nickname,
-             const headerset_t& headers);
+             const headerset_t& headers, bool verbose=false);
         ~Peer();
         
         const nickname_t nickname() { return m_nick; }
@@ -29,6 +29,9 @@ namespace zio {
         /// wait until an event if received.
         bool poll(timeout_t timeout = 0);
 
+        /// Continually poll until all queued zyre messages are processed.
+        void drain();
+
         /// Wait for a peer of a given nickname to be discovered.
         /// Return UUID if found, empty string if timeout occurs.
         std::vector<uuid_t> waitfor(const nickname_t& nickname, timeout_t timeout = -1);
@@ -36,42 +39,50 @@ namespace zio {
         /// Return known peers as map from UUID to nickname.  This
         /// will return new values on subsequent calls as peers enter
         /// and exit the network.
-        const peerset_t& peers() const { return m_known_peers; }
+        const peerset_t& peers();
 
-        /// Return true if peer is active on the network right now.
-        bool seen(const uuid_t& uuid);
+        /// Return info about peer.  If unknown, return default structure.
+        peer_info_t peer_info(const uuid_t& uuid);
+
+        /// Return true if peer has been seen ENTER the network and
+        /// not yet seen to EXIT.
+        bool isknown(const uuid_t& uuid);
 
         /// Return all UUIDs with matching nickname.
         std::vector<uuid_t> nickmatch(const nickname_t& nick);
 
     private:
         std::string m_nick;
+        bool m_verbose;
         zyre_t* m_zyre;
 
         peerset_t m_known_peers;
     };
 }
 
-zio::Peer::Peer(const nickname_t& nickname, const headerset_t& headers)
-    : m_nick(nickname), m_zyre(nullptr)
+zio::Peer::Peer(const nickname_t& nickname, const headerset_t& headers, bool verbose)
+    : m_nick(nickname), m_verbose(verbose), m_zyre(nullptr)
 {
     m_zyre = zyre_new(m_nick.c_str());
     if (!m_zyre) {
         std::string s = "Peer(" + m_nick + ") failed to create zyre";
         throw std::runtime_error(s);
     }
-    // debug
-    //zyre_set_verbose(m_zyre);
+    if (m_verbose) {
+        zyre_set_verbose(m_zyre);
+    }
     for (const auto& header : headers) {
         zyre_set_header(m_zyre, header.first.c_str(), "%s", header.second.c_str());
     }
     // fixme: starting this here negates the user doing various useful
     // things with the zyre node.
-    // zsys_debug("starting zyre node: '%s' on '%s'", m_nick.c_str(), nic);
     zyre_start(m_zyre);
 }
 zio::Peer::~Peer()
 {
+    if (m_verbose)
+        zsys_debug("%s: stop and destroy", m_nick.c_str());
+    zyre_stop(m_zyre);
     zyre_destroy(&m_zyre);
 }
 
@@ -88,11 +99,14 @@ bool zio::Peer::poll(timeout_t timeout)
         }
         zyre_event_t *event = zyre_event_new (m_zyre);
         const char* event_type = zyre_event_type(event);
-        //zsys_debug("%s: event '%s'", m_nick.c_str(), event_type);
-        //zyre_event_print(event);
+        if (m_verbose) {
+            zsys_debug("%s: event '%s'", m_nick.c_str(), event_type);
+            zyre_event_print(event);
+        }
         if (streq(event_type, "ENTER")) {
             uuid_t uuid = zyre_event_peer_uuid(event);
-            //zsys_debug("%s: see peer %s", m_nick.c_str(),uuid.c_str());
+            if (m_verbose)
+                zsys_debug("%s: see peer %s", m_nick.c_str(),uuid.c_str());
             peer_info_t pi;
             pi.nick = zyre_event_peer_name(event);
             zhash_t* hh = zyre_event_headers(event);
@@ -108,8 +122,9 @@ bool zio::Peer::poll(timeout_t timeout)
             }
             m_known_peers[uuid] = pi;
             zlist_destroy (&keys);
-            //zsys_debug("%s: add %s (%s), knows %ld peers",
-            //           m_nick.c_str(), pi.nick.c_str(), uuid.c_str(), m_known_peers.size());
+            if (m_verbose)
+                zsys_debug("%s: add %s (%s), knows %ld peers",
+                           m_nick.c_str(), pi.nick.c_str(), uuid.c_str(), m_known_peers.size());
             got_one = true;
         }
         else
@@ -119,6 +134,9 @@ bool zio::Peer::poll(timeout_t timeout)
             if (maybe != m_known_peers.end()) {
                 m_known_peers.erase(maybe);
             }
+            if (m_verbose)
+                zsys_debug("%s: remove %s, know %ld peers",
+                           m_nick.c_str(), uuid.c_str(), m_known_peers.size());
             got_one = true;
         }
         zyre_event_destroy(&event);
@@ -175,6 +193,35 @@ std::vector<zio::uuid_t> zio::Peer::waitfor(const nickname_t& nickname, timeout_
         }
     }
     return maybe;
+}
+
+void zio::Peer::drain()
+{
+    while (poll()) {};
+}
+
+bool zio::Peer::isknown(const uuid_t& uuid)
+{
+    drain();
+    peerset_t::iterator maybe = m_known_peers.find(uuid);
+    return maybe != m_known_peers.end();
+}
+
+const zio::peerset_t& zio::Peer::peers()
+{
+    drain();
+    return m_known_peers;
+}
+zio::peer_info_t zio::Peer::peer_info(const uuid_t& uuid)
+{
+    drain();
+    peerset_t::iterator maybe = m_known_peers.find(uuid);
+    if (maybe == m_known_peers.end()) {
+        zsys_debug("%s: failed to find peer %s out of %ld",
+                   m_nick.c_str(), uuid.c_str(), m_known_peers.size());
+        return peer_info_t{};
+    }
+    return maybe->second;
 }
 
 #endif

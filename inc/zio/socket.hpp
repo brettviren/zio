@@ -13,8 +13,9 @@
 
 namespace zio {
 
-    // A non-copyable wrapper around ZeroMQ/CZMQ socket.  This shall
-    // be used only from the thread in which it was created.
+    /// Socket provides a non-copyable wrapper around ZeroMQ/CZMQ
+    /// socket.  This shall be used only from the thread in which it
+    /// was created.
     class Socket {
     public:
         Socket(int stype);
@@ -22,11 +23,15 @@ namespace zio {
         Socket& operator=(const Socket&) = delete;
         ~Socket();
 
-        // Bind socket to address, return fully qualified endpoint.
+        /// Bind socket to address, return fully qualified endpoint.
         address_t bind(const address_t& address);
 
-        // Connect socket to address
+        /// Connect socket to address
         void connect(const address_t& address);
+
+        /// A SUB needs to subscribe to something, if it expects to
+        /// get messages.  Call this prior to any bind or connect.
+        void subscribe(const prefixmatch_t& sub = "");
 
         zsock_t* zsock() { return m_sock; }
 
@@ -65,6 +70,11 @@ void zio::Socket::connect(const address_t& address)
         std::string s = "failed to connect to " + address;
         throw std::runtime_error(s);
     }
+}
+
+void zio::Socket::subscribe(const prefixmatch_t& sub)
+{
+    zsock_set_subscribe(m_sock, sub.c_str());
 }
 
 #endif
