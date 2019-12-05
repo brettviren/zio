@@ -23,15 +23,33 @@
 #define ZIO_NODE_HPP_SEEN
 
 #include "zio/types.hpp"
+#include "zio/port.hpp"
+
+#include <memory>
 
 namespace zio {
 
+    typedef std::shared_ptr<Port> portptr_t;
 
     class Node {
+        nickname_t m_nick;
+        origin_t m_origin;
+        Peer* m_peer;
+        std::unordered_map<std::string, portptr_t> m_ports;
     public:
         Node(nickname_t nick, origin_t origin);
 
+        // create a port of type and name
+        portptr_t port(const std::string& name, int stype);
+
+        // return previously created port
+        portptr_t port(const std::string& name);
+
+
+        // bring node online
         void online();
+
+        // bring node offline
         void offline();
 
     };
