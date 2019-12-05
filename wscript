@@ -9,7 +9,7 @@ def options(opt):
     opt.load('waf_unit_test')
 
 def configure(cfg):
-    cfg.env.CXXFLAGS += ['-std=c++17']
+    cfg.env.CXXFLAGS += ['-std=c++17', '-g', '-O2']
     cfg.load('compiler_cxx')
     cfg.load('waf_unit_test')
     p = dict(mandatory=True, args='--cflags --libs')
@@ -23,10 +23,9 @@ def build(bld):
               source=bld.path.ant_glob('src/*.cpp'), target='zio',
               uselib_store='ZIO', use=uses)
 
-    rpath = [bld.env["PREFIX"] + '/lib']
+    rpath = [bld.env["PREFIX"] + '/lib', bld.path.find_or_declare(bld.out_dir)]
     rpath += [bld.env["LIBPATH_%s"%u][0] for u in uses]
     rpath = list(set(rpath))
-    print (rpath)
              
     for tmain in bld.path.ant_glob('test/test*.cpp'):
         bld.program(features = 'test cxx',
@@ -34,4 +33,4 @@ def build(bld):
                     ut_cwd = bld.path, install_path = None,
                     includes = ['inc','build','test'],
                     rpath = rpath,
-                    use = uses)
+                    use = ['zio'] + uses)

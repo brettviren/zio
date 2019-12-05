@@ -30,21 +30,6 @@ namespace zio {
     // a string holding some prefix match
     typedef std::string prefixmatch_t;
 
-    struct peer_info_t {
-        nickname_t nick{""};
-        headerset_t headers;
-
-        std::vector<header_value_t> lookup(const header_key_t& key) {
-            std::vector<header_value_t> ret;
-            for (const auto& one : headers) {
-                if (one.first == key) {
-                    ret.push_back(one.second);
-                }
-            }
-            return ret;
-        }
-    };
-    typedef std::unordered_map<uuid_t, peer_info_t> peerset_t;
     
 
     /// An address in ZeroMQ format, eg <transport>://<endpoint>
@@ -59,6 +44,7 @@ namespace zio {
             trace,verbose,debug,info,summary,warning,error,fatal,
         };
     }
+    static
     const char* MessageLevelString[] = {
         "undefined",
         "trace","verbose","debug","info","summary","warning","error","fatal",

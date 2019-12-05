@@ -35,10 +35,10 @@ namespace zio {
     template<typename TYPE>
     class Producer {
         std::shared_ptr<Socket> m_sock;
-        uint64_t m_origin;
+        origin_t m_origin;
         granule_func_t m_granule;
     public:
-        Producer(uint64_t origin,
+        Producer(origin_t origin,
                  std::shared_ptr<Socket> sptr = std::make_shared<Socket>(ZMQ_PUB),
                  granule_func_t gf = TimeGranule())
             : m_origin(origin)
@@ -54,7 +54,7 @@ namespace zio {
         ~Producer() {}
 
         std::shared_ptr<Socket> socket() const { return m_sock; }
-        uint64_t origin() const { return m_origin; }
+        origin_t origin() const { return m_origin; }
         granule_func_t granuler() const { return m_granule; }
 
         // bake levels semantics into method names
@@ -101,6 +101,9 @@ namespace zio {
         const std::string s = payload.dump();
         this->sendfull(lvl, "JSON", s.size(), s.data());
     }
+
+
+
 
 }
 
