@@ -1,0 +1,37 @@
+#+title: ZIO Format
+
+ZIO message payloads frames parsed given the value of the *format* ZIO
+message header frame field.  ZIO defines and reserves these formats:
+
+- BUFF :: The BUFF format is essentially no format.  It is an
+          anonymous array of bytes.  If "parsing" the payload requires
+          merely loading it into a contiguous block of memory then
+          this format is sufficient.
+
+- TEXT :: The TEXT format is essentially the BUFF format but limited
+          so that each byte is a printable character or otherwise a
+          value that one might typically expect in a ~std::string~.
+
+- JSON :: The JSON format is further limits the TEXT format so that
+          the contents may be parsed as a valid JSON document.
+
+- BSON :: Binary JSON
+
+- CBOR :: Concise Binary Object Representation
+
+- MSGP :: MessagePack
+
+- UBJS :: Universal Binary JSON Specification
+
+- PBUF :: Protocol Buffers
+
+The formats reserved by ZIO do *not* specify what, if any, internal
+schema any structure expressed in the format may follow.  Eg, TEXT may
+or may not be delimited by newlines.  Or, a JSON message may be an
+array or an object and its internal structure is not limited as long
+as it is the whole is represented as a valid JSON document.
+
+Application developers must thus rely on other hints to the receiving
+application to interpret the payload after it is parsed based on the
+ZIO *format* hint.  Some guidance and more discussion can be found in 
+[[file:message.org][message]] and in [[file:peer.org][peer]].

@@ -12,19 +12,6 @@ zio::header_t make_address_header(const std::string& portname, const std::string
     // Concentrate convention into some general header utils
 }
 
-static
-std::string get_hostname()
-{
-    zactor_t *beacon = zactor_new (zbeacon, NULL);
-    assert (beacon);
-    zsock_send (beacon, "si", "CONFIGURE", 31415);
-    char *tmp = zstr_recv (beacon);
-    std::string ret = tmp;
-    zstr_free (&tmp);
-    zactor_destroy (&beacon);    
-    return ret;
-}
-
 struct DirectBinder {
     zio::Socket& sock;
     std::string address;
@@ -41,9 +28,6 @@ struct DirectBinder {
 static
 std::string make_tcp_address(std::string hostname, int port)
 {
-    if (hostname.empty()) {
-        hostname = get_hostname();
-    }
     std::stringstream ss;
     ss << "tcp://" << hostname << ":";
     if (port)
@@ -68,8 +52,8 @@ struct HostPortBinder {
     }
 };
 
-zio::Port::Port(const std::string& name, int stype, const std::string& hostname)
-    : m_name(name), m_sock(stype), m_hostname(hostname), m_online(false)
+zio::Port::Port(const std::string& name, int stype, const PortCtx& ctx)
+    : m_name(name), m_sock(stype), m_ctx(ctx), m_online(false)
 {
 }
 
@@ -83,7 +67,7 @@ zio::Port::~Port()
 
 void zio::Port::bind()
 {
-    bind(m_hostname, 0);
+    bind(m_ctx.hostname, 0);
 }
 
 void zio::Port::bind(const std::string& hostname, int port)
@@ -94,7 +78,7 @@ void zio::Port::bind(const std::string& hostname, int port)
 
 void zio::Port::bind(const address_t& address)
 {
-    m_binders.push_back(DirectBinder{m_sock, m_hostname});
+    m_binders.push_back(DirectBinder{m_sock, m_ctx.hostname});
 }
 
 void zio::Port::connect(const address_t& address)
@@ -163,4 +147,14 @@ void zio::Port::offline()
         zsock_unbind(m_sock.zsock(), "%s", addr.c_str());
     }
     m_connected.clear();
+}
+
+
+void zio::Port::send(level::MessageLevel lvl, const Format& payload)
+{
+    zmsg_t* msg = zmsg_new();
+    zmsg_addstrf(msg, "ZIO%d%s%ld%ld", lvl,
+                 payload.type(), m_ctx.origin, m_ctx.gf());
+    zmsg_addmem(msg, payload.data(), payload.size());
+    zmsg_send(&msg, m_sock.zsock());    
 }

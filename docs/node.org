@@ -1,0 +1,85 @@
+#+title: ZIO Node
+
+A ~zio::Node~ represents one vertex a graph or network which is
+connected to other ZIO applications (which themselves may utilize
+~zio::Node~) by the ZIO messages they exchange.  In general, this ZIO
+graph is directed (possibly bidirectional) and possibly cyclic.  When
+~zio::Node~ is used, the network may be considered a specialized *ported
+graph*.  That is, a ZIO node has a set of "ports" each of which are
+identified by a name unique to the node and each have a ZeroMQ socket
+through which messages are passed.
+
+A ~zio::Node~ as a ~zio::Peer~ (see [[file::peer.org][peer]]) and uses it to advertise headers
+holding the addresses of any ports (~zio::Port~, see [[file::port.org][port]]) which have
+been asked to ~bind()~.  This allows other ZIO nodes (or in general
+other ZIO peers) to know an address to use to ~connect()~.  It thus
+allows edges to be formed in the graph based on specifying
+application-dependent *abstract addressing* which is not tied to
+specific transport or hardware.
+
+For example, some data source may be partitioned and access may be
+distributed across a set of nodes (eg, as in some DAQ layer or across
+various points of the Wire-Cell execution graph).  These nodes may
+each ~bind()~ and advertise the relevant address associated with a
+nickname or headers following some convention.  Another set of nodes
+knowing this convention may be configured ~connect()~ to addresses found
+by some match on the advertised information.  This allows the graph to
+*self-organize* without the human specifying detailed absolute
+addressing.  It also allows the graph to *self-heal* as nodes die and
+are reborn on different physical addresses but retain their nickname
+and headers.
+
+* Using ~zio::Node~
+
+
+A node carries the *nickname* and *origin* value.  The nickname is
+advertised by the node's peer and the origin is provided by all
+messages produced by the node's ports.
+
+#+begin_src c++
+  zio::Node node("mynode", 42);
+#+end_src
+
+A ZIO application using a node will populate its ports as needed
+specifying their name and ZeroMQ port type.  This information will be
+automatically provided by peer discovery.
+
+#+begin_src c++
+   auto input = node.port("input", ZMQ_SUB);
+   auto output = node.port("output", ZMQ_PUB);
+#+end_src
+
+After population, ports can be accessed by name.
+
+#+begin_src c++
+   auto ip = node.port("input");
+   auto op = node.port("output");
+#+end_src
+
+See [[file:port.org][port]] for details on using ports.  Once port operations are
+complete the node may go online.  
+
+#+begin_src c++
+  node.online();
+#+end_src
+
+This triggers any port binding, peer advertising of node nickname,
+related port address headers, and any extra headers provided to the
+node by the application and finally any port connections including
+indirect ones that rely on peer discovery.
+
+Later a node may be explicitly taken offline:
+
+#+begin_src c++
+  node.offline();
+#+end_src
+
+This will disconnect and unbind ports and destroy the node's peer
+object removing it from the ZIO discovery network.  The node itself
+retains all ports and the above state changes transition can be
+repeated:
+
+#+begin_src c++
+  node.online();
+#+end_src
+

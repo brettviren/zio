@@ -1,0 +1,51 @@
+#+title: ZIO Port
+
+intro t.b.d.
+
+* Using ~zio::Port~
+
+Given a port, a request may be made to bind in a variety of ways.
+
+#+begin_src c++
+  auto p = node.port("portname");
+
+  // bind to an unspecified (ephermeral) public TCP/IP address
+  p.bind();
+
+  // bind to a specific TCP address, either with and without a specific
+  // TCP port number.
+  p.bind("localhost", 5678);
+  p.bind("localhost", 0);
+
+  // bind to fully qualified address, in this case via ZeroMQ
+  // shared-memory transport.
+  p.bind("inproc://myqueue")
+#+end_src
+
+Likewise, a connect may be requested in a variety of ways.
+
+#+begin_src c++
+  // directly connect to a fully qualified ZeroMQ address
+  p.connect("tcp://localhost:5678");
+  p.connect("ipc://myunixsock");
+  p.connect("inproc://myqueue");
+
+  // indirectly connect to based on a node nickname and the name of one
+  // of its ports.
+  p.connect("somepeer", "itsport");
+#+end_src
+
+These calls do not immediately bind nor connect.  They merely register
+a request to perform the action.  This indirection is required so that
+the discovery mechanism provided by peering can be used to resolve a
+~connect()~ of the last type above.  We must allow ~somepeer~ a chance to
+go online before we can see it and determine what physical address the
+~itsport~ port uses.  
+
+In general a node may have multiple ports and so their binding must be
+all fully performed, then the peer may advertise, and finally any
+connects may proceed.  These state changes are handled by the
+~zio::Node::online()~ call (see [[file::node.org][node]]) when the ports are constructed
+through a node.  If ports are used in isolation then it is up to the
+application developer to follow the proper state transitions.
+

@@ -3,6 +3,8 @@
 
 #include "zio/socket.hpp"
 #include "zio/peer.hpp"
+#include "zio/format.hpp"
+#include "json.hpp"
 #include <map>
 
 
@@ -13,10 +15,22 @@ namespace zio {
 
 
 
+    struct TimeGranule {
+        granule_t operator()() {
+            return std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+        }
+    };
+
+    struct PortCtx {
+        std::string hostname;
+        origin_t origin;
+        granule_func_t gf{TimeGranule()};
+    };
+
     class Port {
         const std::string m_name;
         Socket m_sock;          // makes ports noncopyable
-        const std::string m_hostname;
+        PortCtx m_ctx;
         bool m_online;
 
         // functions which perform a bind() and return associated header
@@ -29,7 +43,7 @@ namespace zio {
 
 
     public:
-        Port(const std::string& name, int stype, const std::string& my_hostname = "");
+        Port(const std::string& name, int stype, const PortCtx& ctx);
         ~Port();
 
         // Register bind/connect requests
@@ -65,11 +79,19 @@ namespace zio {
         // Disconnect, unbind.
         void offline();
 
-        // void send();
+
+        // message passing via the port
+
+        void send(level::MessageLevel lvl, const Format& payload);
+
         // void recv();
 
-
     };
+
+    // Ports can not be copied because of the Socket but they
+    // typically must be shared.
+    typedef std::shared_ptr<Port> portptr_t;
+
 
 }
 #endif

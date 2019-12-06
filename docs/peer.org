@@ -1,0 +1,42 @@
+#+title: ZIO Peer
+
+ZIO provides a peering mechanism.  The term /peer/ in ZIO has two
+applicable meanings.  First, as a noun, it describes a mechanism where
+ZIO applications can be partners in a network or graph topology (see
+also [[file:node.org][node]]).  Second, as a verb, it describes a mechanism for ZIO
+application so see into the ZIO network in order to know things about
+other ZIO applications.  The peering is based on ZeroMQ's [[https://github.com/zeromq/zyre][Zyre]]
+technology and presented via ~zio::Peer~.
+
+* How it works
+
+A ~zio::Peer~ instance is created with a *nickname* and a set of *headers*
+each of which a key/value pair of strings.  After construction, this
+information is made available to all other accessible peers and
+likewise they are known to peer just constructed.  The nickname of a
+peer may not be unique but each peer has a unique id (UUID) to which
+the nickname and headers are associated.
+
+As peers come and go from the network each peer maintains this
+association and its owning application may query it at any time.  The
+~zio::Peer::peers()~ method will return the UUIDs of all known peers and
+with a UUID the ~zio::Peer::peer_info(uuid)~ method will return the
+nickname and all headers of a peer.
+
+In addition to knowing about a peer, it is common to need to
+synchronize between peers.  A common synchronization pattern is for
+one peer to wait for another to exist on the network.  The
+~zio::Peer::waitfor(nickname)~ method provides this synchronization.
+The method returns only when peer of the given nickname is seen (or a
+configurable timeout is reached).  The UUIDs of all peers with the
+matching nickname are returned.
+
+Another synchronization patter is to do the opposite and wait until a
+peer is gone from the network.  The ~zio::Peer::waituntil(uuid)~ method
+may be used for that.
+
+
+
+* Using ~zio::Peer~
+
+t.b.d.

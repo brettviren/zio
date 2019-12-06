@@ -1,18 +1,42 @@
 #include "zio/node.hpp"
 
-zio::Node::Node(nickname_t nick, origin_t origin)
-    : m_nick(nick), m_origin(origin), m_peer(nullptr)
+static
+std::string get_hostname()
 {
+    zactor_t *beacon = zactor_new (zbeacon, NULL);
+    assert (beacon);
+    zsock_send (beacon, "si", "CONFIGURE", 31415);
+    char *tmp = zstr_recv (beacon);
+    std::string ret = tmp;
+    zstr_free (&tmp);
+    zactor_destroy (&beacon);    
+    return ret;
 }
 
 
-zio::portptr_t zio::Node::port(const std::string& name, int stype)
+
+zio::Node::Node(nickname_t nick, origin_t origin,
+                const std::string& hostname, granule_func_t gf)
+    : m_nick(nick), m_origin(origin), m_defgf(gf), m_hostname(hostname), m_peer(nullptr)
+{
+    if (m_hostname.empty()) {
+        m_hostname = get_hostname();
+    }
+}
+
+
+zio::portptr_t zio::Node::port(const std::string& name, int stype, granule_func_t gf)
 {
     zio::portptr_t ret = port(name);
     if (ret) { return ret; }
-    ret = std::make_shared<Port>(name,stype);
+    ret = std::make_shared<Port>(name, stype, PortCtx{m_hostname, m_origin, gf});
     m_ports[name] = ret;
     return ret;
+}
+
+zio::portptr_t zio::Node::port(const std::string& name, int stype)
+{
+    return port(name, stype, m_defgf);
 }
 
 zio::portptr_t zio::Node::port(const std::string& name)

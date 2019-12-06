@@ -69,6 +69,11 @@ namespace zio {
         /// Return UUID if found, empty string if timeout occurs.
         std::vector<uuid_t> waitfor(const nickname_t& nickname, timeout_t timeout = -1);
 
+        /// Wait until a specific peer has left the network, or if is
+        /// already gone, return immediately or in any case no longer
+        /// than the timeout.
+        void waituntil(const uuid_t& uuid, timeout_t timeout = -1);
+
         /// Return known peers as map from UUID to nickname.  This
         /// will return new values on subsequent calls as peers enter
         /// and exit the network.

@@ -32,6 +32,7 @@ anticipated uses are:
 #+begin_example
   $ waf configure --prefix=/path/to/install
   $ waf build [--notests]
+  $ [waf build --alltests]
   $ waf install
 #+end_example
 

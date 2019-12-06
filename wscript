@@ -19,14 +19,16 @@ def configure(cfg):
 
 def build(bld):
     uses='ZMQ CZMQ ZYRE'.split()
-    bld.shlib(features='cxx', includes='inc',
-              source=bld.path.ant_glob('src/*.cpp'), target='zio',
-              uselib_store='ZIO', use=uses)
 
     rpath = [bld.env["PREFIX"] + '/lib', bld.path.find_or_declare(bld.out_dir)]
     rpath += [bld.env["LIBPATH_%s"%u][0] for u in uses]
     rpath = list(set(rpath))
+    print ('\n'.join([str(p) for p in rpath]))
              
+    bld.shlib(features='cxx', includes='inc', rpath=rpath,
+              source=bld.path.ant_glob('src/*.cpp'), target='zio',
+              uselib_store='ZIO', use=uses)
+
     for tmain in bld.path.ant_glob('test/test*.cpp'):
         bld.program(features = 'test cxx',
                     source = [tmain], target = tmain.name.replace('.cpp',''),

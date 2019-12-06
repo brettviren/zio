@@ -29,18 +29,24 @@
 
 namespace zio {
 
-    typedef std::shared_ptr<Port> portptr_t;
-
     class Node {
         nickname_t m_nick;
         origin_t m_origin;
+        granule_func_t m_defgf;
+        
+        std::string m_hostname;
         Peer* m_peer;
         std::unordered_map<std::string, portptr_t> m_ports;
     public:
-        Node(nickname_t nick, origin_t origin);
+        Node(nickname_t nick, origin_t origin,
+             const std::string& hostname="",
+             granule_func_t gf = TimeGranule());
 
-        // create a port of type and name
+        // Create a port of type and name using default granule function.
         portptr_t port(const std::string& name, int stype);
+        // Use a unique granule function with the prot.
+        portptr_t port(const std::string& name, int stype,
+                       granule_func_t gf);
 
         // return previously created port
         portptr_t port(const std::string& name);

@@ -1,42 +1,45 @@
 #+title:  ZIO messages
 
 ZIO messages are ZeroMQ messages which consist of a *header frame*
-followed by one or more *payload* frames.  The general layout is shown:
+followed by one or more *payload* frames.  The header is a block of data
+structured as:
 
-|---------+------------------------+-------|
-| name    | type                   | bytes |
-|---------+------------------------+-------|
-| magic   | "ZIO"                  |     3 |
-| level   | "%d"                   |     1 |
-| format  | "JSON", "TEXT", "BUFF" |     4 |
-| origin  | uint64                 |     8 |
-| granule | uint64                 |     8 |
-|---------+------------------------+-------|
-| payload | format dependent       |     N |
-|---------+------------------------+-------|
+|---------+---------------------+-------|
+| name    | type                | bytes |
+|---------+---------------------+-------|
+| magic   | "ZIO"               |     3 |
+| level   | "%d"                |     1 |
+| format  | (eg "JSON", "TEXT") |     4 |
+| origin  | uint64              |     8 |
+| granule | uint64              |     8 |
+|---------+---------------------+-------|
 
 - magic :: three ASCII characters: "ZIO" marks this as a ZIO message
 - level :: a single digit, ASCII encoded gives the message level
-- format :: the payload format
+- format :: a four byte format ID specifying the payload format, ZIO reserves a few.
 - origin :: an application-defined identifier for the origin of the message
 - granule :: an application-defined monotonically increasing count used for ordering of messages
-- payload :: frames as determined by format
 
-Note, the non-payload frame is intentionally suitable for use with
-ZeroMQ PUB/SUB prefix-matching.  Eg, a SUB may be interested only in
-~"ZIO5TEXT"~ messages.  The next sections describe the *level* and other
-elements of a ZIO header frame followed by discussion of *payload*.
+Note, the header frame is suitable for use with ZeroMQ PUB/SUB
+prefix-matching.  Eg, a SUB may be interested only in ~"ZIO5TEXT"~
+messages.  The next sections describe the *level* and other elements of
+a ZIO header frame followed by discussion of *payload*.
+
+Conspicuously absent fields include a sequence number and checksum.
+If these are needed for payload-level protocols, they payload frame(s)
+may contain them.
 
 * Levels
 
-ZIO message have an importance *level* indicated by a single ASCII digit
-with higher values indicating greater importance and less frequency.
-ASCII digits "1" through "8", inclusive, are allowed.  No other values
-are allowed in this version of ZIO.  
+ZIO message have a *level* indicated by a single ASCII digit.  The
+general interpretation is that of an importance level where a higher
+value indicates greater importance and also less frequency.  ASCII
+digits "1" through "8", inclusive, are allowed in ZIO messages.  No
+other value for level is allowed in this version of ZIO.
 
-The application is free to assign different semantic meaning to these
-levels but the following interpretations are recommended and these
-terms are defined in ~libzio~.
+The application is free to assign more specific semantic meaning to
+these levels but the following interpretations are recommended and
+they define terms are defined in ~libzio~.
 
 1. trace, messages are emitted from nested loops or occurring with
    frequency far higher than any "events".
@@ -61,16 +64,17 @@ some criteria.
 
 * Format
 
-ZIO defines these formats:
+The *format* field provides a hint for the parsing of the payload, if
+not its interpretation.  That is, given the format, a code consuming
+the payload should be able to read the payload into some general type
+of data structure.  
 
-- TEXT :: the payloads consists of free form text such as might be used for logging.
-- JSON :: the payload is structured data in JSON format.
-- BUFF :: the payload is application defined binary buffer of data.
-
-ZIO formats do *not* specify the internal schema that the payload may
-follow.  Hints to the receiving application to parse the payload must
-be provided out-of-band or in-band in some self-describing manner.
-See more discussion under [[Payload]].
+Except for the formats reserved by ZIO and described in [[file:format.org][format]], the
+application developer is free to set the *format* field to any four byte
+value.  It is suggested to try to make use of the reserved format and
+to not proliferate them due to conflating need for a new format hint
+with need for schema hints.  The latter is discussed below in section
+[[Payload]].
 
 * Origin
 
@@ -78,32 +82,70 @@ In general, ZIO makes no requirement on the values placed in *origin*.
 The recommended interpretation of the *origin* field is to mark "where"
 a message originated.  
 
-Defining a convention for *origin* is application dependent.  ZIO
-recommends a hierarchical convention such that the lowest bits are
-used to distinguish leafs and highest bits trunks and so that bit
-masking can be meaningfully applied.
+ZIO components may both consume and produce ZIO messages.  It is
+recommended that these components meaningfully transfer the origin.
+For example, if a component consumes and produces in a 1-to-1 manner,
+the origin should be retained.  If messages are consumed from multiple
+origins, produced messages should reflect the ensemble.  An origin
+numbering convention which allows these ensembles to be represented
+through bit masking is suggested.
 
 * Granule
 
 In general, ZIO makes no requirement on the values placed in *granule*.
-The recommended interpretation of the *granule* field is that of a
-global ordering shared by all participating streams.  A likely
-interpretation of the *granule* is an absolute timestamp.  
-
-Defining a resolution and origin of the granule is application
-dependent.  If the application has no such requirements, ZIO
+The recommended interpretation of the *granule* field is to provide
+ordering between different message origins.  A likely interpretation
+of the *granule* is that of an absolute timestamp from some globally
+shared clock (or approximately shared such as computer system clocks).
+If the application developer has no particular requirements, ZIO
 recommends supplying microseconds since the Unix Epoch.
 
 * Payload
 
-A *payload* frame consists of a byte array advertised to follow the
-given *format*.  Any internal structure schema must be communicated
-either out-of-band of ZIO or with some hints or other self-describing
-mechanism in-band of the payload.
+All frames that follow the header frame are payload frames.
+Ultimately, the payload frames are fully in the domain of the
+application developer.  ZIO does not dictate their use or format
+beyond the ZIO-reserved formats and providing the *format* field in the
+ZIO header.
 
-If in-band self-description is needed, ZIO provides recommendations:
 
-- TEXT :: pre-define field or record delimiters, use prefix hints.
-- JSON :: present top level entity as an array with first element as an internal header or description, present top as object with special key holding a meta description.
-- BUFF :: use predefined header region (eg, similar to how ZIO message header is defined), use inherently self describing serialization such as protocol buffers
+The header frame field *format* provides a hint as to how the payload
+frames may be *parsed* if not *interpreted*.  In simpler applications of
+ZIO, consumers may be developed with hard-wired knowledge of how to
+interpret the messages they are provided.  Operators may assure this
+hard-wiring is not violated by careful construction of ZIO network
+typologies (and ZIO [[file:peer.org][peer]] mechanism can help).  On the other hand,
+further hints are required for interpretation if the *schema* of the
+payload frames allow for differences in structure between messages of
+the same *format*.
 
+For example, it is expected that ZIO messages following the JSON
+format will be commonly used to send out [[https://en.wikipedia.org/wiki/Observability][observability]] metrics of
+various type (following various schema).  Given the origin ID, a
+consumer of the payload may have enough knowledge to know the schema
+and interpret the data structure represented in the JSON format.  When
+additional hints are required they must be provided either out-of-band
+of the message or in some way located in the payload without knowing
+details of the schema.  
+
+When in-band self-description is needed, ZIO provides the general
+suggestion of providing a schema-level "header" that it can be parsed
+and interpreted prior interpreting to the rest of the payload.  Some
+examples: in TEXT, use the equivalent to HTTP headers as prefix to the
+string with predefined delimiters and terminator.  For JSON use an
+initial object in a top-level array or a specially named key in a
+top-level object to hold required hints.  As BUFF is almost a
+completely general format, it is up to the application developer to
+provide any hinting.  But, of note, if BUFF is used to hold data which
+is serialized in one of the various popular mechanisms (eg, protocol
+buffers), a level of self-documentation of the schema exists (see
+protobuf "any" for example).  
+
+ZIO also provides some support for out-of-band hinting as part of its
+peer discovery system (based on [[https://github.com/zeromq/zyre][Zyre]]).  Using ~zio::Peer~ (see [[file::peer.org][peer]]) or
+better ~zio::Node~ (see [[file::node.org][node]]) an application developer may provide
+key/value pairs which can be known to other ZIO peers on the network.
+These can, for example, associate schema hints to origin IDs.  ZIO
+provides the mechanism to share this out-of-band information but it is
+the responsibility of application developers to make use of it (or
+not).
