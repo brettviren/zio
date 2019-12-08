@@ -6,9 +6,14 @@
 #include <vector>
 #include <chrono>
 #include <functional>
-
+#include <json.hpp>
 
 namespace zio {
+    // The great Nlohmann's JSON is brought in to ZIO as a first class
+    // type.
+    using json = nlohmann::json;
+
+
     enum borc_t { bind, connect };
 
     /// A timeout in milliseconds
@@ -30,7 +35,6 @@ namespace zio {
     // a string holding some prefix match
     typedef std::string prefixmatch_t;
 
-    
 
     /// An address in ZeroMQ format, eg <transport>://<endpoint>
     typedef std::string address_t;

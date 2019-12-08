@@ -1,8 +1,12 @@
 #+title:  ZIO messages
 
-ZIO messages are ZeroMQ messages which consist of a *header frame*
-followed by one or more *payload* frames.  The header is a block of data
-structured as:
+ZIO messages are ZeroMQ messages which consist of two parts:
+
+- header :: initial data in two frames following a fixed schema determined by ZIO.
+- payload :: zero or more frames holding application dependent data.
+
+The general message is illustrated in the following table where each
+subtable represents one message frame
 
 |---------+---------------------+-------|
 | name    | type                | bytes |
@@ -10,24 +14,37 @@ structured as:
 | magic   | "ZIO"               |     3 |
 | level   | "%d"                |     1 |
 | format  | (eg "JSON", "TEXT") |     4 |
+| label   | free string         |    N0 |
+|---------+---------------------+-------|
 | origin  | uint64              |     8 |
 | granule | uint64              |     8 |
+| seqno   | uint64              |     8 |
 |---------+---------------------+-------|
+| payload | per format          |    N1 |
+|---------+---------------------+-------|
+| payload | per format          |    N2 |
+|---------+---------------------+-------|
+| ...     |                     |       |
+|---------+---------------------+-------|
+
+
+The first two are header frames.  The first header frame holds the
+*prefix header*.  It is so named as its contents are subject to ZeroMQ
+PUB/SUB envelope prefix matching (subscription).  It provides these
+fields:
 
 - magic :: three ASCII characters: "ZIO" marks this as a ZIO message
 - level :: a single digit, ASCII encoded gives the message level
 - format :: a four byte format ID specifying the payload format, ZIO reserves a few.
+- label :: optional, application dependent string
+
+The second header field is called the *coordinate header* as it provides
+information on an abstracted "location" and "time" to associate with
+the payload.  It has binary fields each holding a 64 bit integer:
+
 - origin :: an application-defined identifier for the origin of the message
 - granule :: an application-defined monotonically increasing count used for ordering of messages
-
-Note, the header frame is suitable for use with ZeroMQ PUB/SUB
-prefix-matching.  Eg, a SUB may be interested only in ~"ZIO5TEXT"~
-messages.  The next sections describe the *level* and other elements of
-a ZIO header frame followed by discussion of *payload*.
-
-Conspicuously absent fields include a sequence number and checksum.
-If these are needed for payload-level protocols, they payload frame(s)
-may contain them.
+- seqno :: an monotonic counter set just prior to sending.
 
 * Levels
 
@@ -65,16 +82,18 @@ some criteria.
 * Format
 
 The *format* field provides a hint for the parsing of the payload, if
-not its interpretation.  That is, given the format, a code consuming
-the payload should be able to read the payload into some general type
-of data structure.  
+not its further interpretation.  That is, given the format, any code
+consuming the payload should be able to read the payload into memory
+in some suitable type of data structure.
 
 Except for the formats reserved by ZIO and described in [[file:format.org][format]], the
 application developer is free to set the *format* field to any four byte
 value.  It is suggested to try to make use of the reserved format and
 to not proliferate them due to conflating need for a new format hint
 with need for schema hints.  The latter is discussed below in section
-[[Payload]].
+[[Payload]].  If custom formats are used, it is further recommended to use
+four ASCII characters to facilitate prefix matching.  Finally, not
+that a single format name implies the format for all payload frames.
 
 * Origin
 

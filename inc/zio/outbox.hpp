@@ -39,7 +39,7 @@ namespace zio {
 
     // Two special types
     typedef Outbox<std::string, TEXT> Logger;
-    typedef Outbox<nlohmann::json, JSON> Metric;
+    typedef Outbox<json, JSON> Metric;
 
 }
 

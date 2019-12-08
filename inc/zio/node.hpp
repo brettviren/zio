@@ -25,8 +25,6 @@
 #include "zio/types.hpp"
 #include "zio/port.hpp"
 
-#include <memory>
-
 namespace zio {
 
     class Node {
@@ -37,10 +35,15 @@ namespace zio {
         std::string m_hostname;
         Peer* m_peer;
         std::unordered_map<std::string, portptr_t> m_ports;
+        bool m_verbose{false};
     public:
         Node(nickname_t nick, origin_t origin,
              const std::string& hostname="",
              granule_func_t gf = TimeGranule());
+        ~Node();
+
+        // set verbose
+        void set_verbose(bool verbose = true) { m_verbose = verbose; }
 
         // Create a port of type and name using default granule function.
         portptr_t port(const std::string& name, int stype);

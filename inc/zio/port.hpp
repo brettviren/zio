@@ -4,7 +4,8 @@
 #include "zio/socket.hpp"
 #include "zio/peer.hpp"
 #include "zio/format.hpp"
-#include "json.hpp"
+
+#include <memory>
 #include <map>
 
 
@@ -40,11 +41,14 @@ namespace zio {
         std::vector<address_t> m_connect_addresses, m_connected, m_bound;
         std::vector< std::pair<nodename_t, portname_t> > m_connect_nodeports;
         
-
+        uint64_t m_seqno{0};
+        bool m_verbose{false};
 
     public:
         Port(const std::string& name, int stype, const PortCtx& ctx);
         ~Port();
+
+        void set_verbose(bool verbose = true) { m_verbose = verbose; }
 
         // Register bind/connect requests
 
@@ -65,6 +69,9 @@ namespace zio {
         // Indirectly connect to a named node port
         void connect(const nodename_t& node, const portname_t& port);
 
+        // When this is a SUB then at least one subscription is
+        // required if there shall be any expectation of messages.
+        void subscribe(const std::string& prefix);
 
         // The rest are for the owning Node to call
 
@@ -82,10 +89,15 @@ namespace zio {
 
         // message passing via the port
 
-        void send(level::MessageLevel lvl, const Format& payload);
+        // send with level and a single payload and optional label.
+        void send(level::MessageLevel lvl, const Format& payload,
+                  const std::string& label = "");
 
-        // void recv();
-
+        // do a blocking recv().  Return 0 on success.  A negative
+        // value indicates an error stage: -1: failed on prefix
+        // header, -2 failed on coordinate header.
+        int recv(Header& header, byte_array_t& payload);
+        int recv(Header& header, std::vector<byte_array_t>& payloads);
     };
 
     // Ports can not be copied because of the Socket but they

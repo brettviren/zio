@@ -91,6 +91,11 @@ void zio::Port::connect(const nodename_t& node, const portname_t& port)
     m_connect_nodeports.push_back(std::make_pair(node,port));
 }
 
+void zio::Port::subscribe(const std::string& prefix)
+{
+    m_sock.subscribe(prefix);
+}
+
 
 zio::headerset_t zio::Port::do_binds()
 {
@@ -109,7 +114,6 @@ void zio::Port::online(zio::Peer& peer)
     m_online = true;
 
     for (const auto& nh : m_connect_nodeports) {
-        zsys_debug("waiting for %s", nh.first.c_str());
         auto uuids = peer.waitfor(nh.first);
         assert(uuids.size());
 
@@ -121,6 +125,10 @@ void zio::Port::online(zio::Peer& peer)
             assert(found.size());
             for (const auto& val : found) {
                 address_t addr = val.substr(prefix.size());
+                if (m_verbose) 
+                    zsys_debug("[port %s]: connect to %s at %s",
+                               m_name.c_str(),
+                               nh.second.c_str(), addr.c_str());
                 zsock_connect(m_sock.zsock(), "%s", addr.c_str());
                 m_connected.push_back(addr);
             }
@@ -150,11 +158,92 @@ void zio::Port::offline()
 }
 
 
-void zio::Port::send(level::MessageLevel lvl, const Format& payload)
+void zio::Port::send(level::MessageLevel lvl, const Format& payload,
+                     const std::string& label)
 {
+    if (m_verbose)
+        zsys_debug("[port %s]: send ZIO%d%4s%s",
+                   m_name.c_str(), lvl, payload.type(), label.c_str());
+                   
+
     zmsg_t* msg = zmsg_new();
-    zmsg_addstrf(msg, "ZIO%d%s%ld%ld", lvl,
-                 payload.type(), m_ctx.origin, m_ctx.gf());
+    zmsg_addstrf(msg, "ZIO%d%4s%s", lvl, payload.type(), label.c_str());
+    const int ncoords = 3;
+    uint64_t coords[ncoords] = {m_ctx.origin, m_ctx.gf(), m_seqno++};
+    zmsg_addmem(msg, coords, ncoords*sizeof(uint64_t));
     zmsg_addmem(msg, payload.data(), payload.size());
     zmsg_send(&msg, m_sock.zsock());    
+    if (m_verbose)
+        zsys_debug("[port %s]: send done", m_name.c_str());
+
+}
+
+int zio::Port::recv(Header& header, byte_array_t& payload)
+{
+    std::vector<byte_array_t> payloads;
+    int rc = recv(header, payloads);
+    if (rc < 0) {
+        return rc;
+    }
+    if (payloads.size() != 1) {
+        return -3;
+    }
+    payload = payloads[0];
+    return 0;
+}
+    
+int zio::Port::recv(Header& header, std::vector<byte_array_t>& payloads)
+{
+    zmsg_t* msg = zmsg_recv(m_sock.zsock());
+
+    // prefix header
+    if (zmsg_size(msg) > 0) {
+        char* h1 = zmsg_popstr(msg);
+        header.level = h1[3] - '0';
+        std::string h1s = h1;
+        header.format = h1s.substr(4,4);
+        header.label = h1s.substr(8);
+        free (h1);
+    }
+    else {
+        zmsg_destroy(&msg);
+        return -1;
+    }
+
+    const size_t wantsize = 3*sizeof(uint64_t);
+
+    // coordinate header
+    if (zmsg_size(msg) > 0) {
+        zframe_t* frame = zmsg_pop(msg);
+        if (zframe_size(frame) != wantsize) {
+            if (m_verbose)
+                zsys_warning("[port %s]: wrong coordinate frame size: %ld (expect %ld)",
+                             m_name.c_str(), zframe_size(frame), wantsize);
+                             
+            zframe_destroy(&frame);
+            zmsg_destroy(&msg);
+            return -2;
+        }
+        uint64_t* ogs = (uint64_t*)zframe_data(frame);
+        header.origin = ogs[0];
+        header.granule = ogs[1];
+        header.seqno = ogs[2];
+        zframe_destroy(&frame);
+    }
+    else {
+        zmsg_destroy(&msg);
+        return -2;
+    }
+
+    // payloads
+    while (zmsg_size(msg)) {
+        zframe_t* frame = zmsg_pop(msg);
+        std::uint8_t* b = zframe_data(frame);
+        size_t s = zframe_size(frame);
+        payloads.emplace_back(b, b+s);
+        zframe_destroy(&frame);
+    }
+    // This method does not handle multiple payloads
+    zmsg_destroy(&msg);
+    return 0;
 }

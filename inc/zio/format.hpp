@@ -10,20 +10,37 @@
 #ifndef ZIO_FORMAT_HPP_SEEN
 #define ZIO_FORMAT_HPP_SEEN
 
+#include "zio/types.hpp"
+
 #include <string>
 #include <vector>
 #include <cstring>
-#include <json.hpp>
 
 namespace zio {
 
     typedef std::vector<std::uint8_t> byte_array_t;
+
+    inline
+    std::string tostring(const byte_array_t& buf) {
+        return std::string(buf.begin(), buf.end());
+    }
+    inline
+    json tosjson(const byte_array_t& buf) {
+        std::string s = tostring(buf);
+        return json::parse(s);
+    }
 
     /*
       Each TYPE struct adds a constructor from one or more native
       representations to a byte_array_t and an operator() that returns
       the most fitting native type.  
      */
+
+    struct Header {
+        int level;
+        std::string format, label;
+        uint64_t origin, granule, seqno;
+    };
 
     struct Format {
         virtual const char* type() const = 0;
@@ -70,54 +87,54 @@ namespace zio {
 
     struct JSON : public Format {
         virtual const char* type() const { return "JSON"; };
-        JSON(const nlohmann::json& j) {
+        JSON(const json& j) {
             const std::string s = j.dump();
             buffer.insert(buffer.end(), s.begin(), s.end());
         }
-        nlohmann::json operator()() {
+        json operator()() {
             std::string s(buffer.begin(), buffer.end());
-            return nlohmann::json::parse(s);
+            return json::parse(s);
         }
     };
 
     struct BSON : public Format {
         virtual const char* type() const { return "BSON"; };
-        BSON(const nlohmann::json& j) {
-            buffer = nlohmann::json::to_bson(j);
+        BSON(const json& j) {
+            buffer = json::to_bson(j);
         }
-        nlohmann::json operator()() {
-            return nlohmann::json::from_bson(buffer);
+        json operator()() {
+            return json::from_bson(buffer);
         }
     };
 
     struct CBOR : public Format {
         virtual const char* type() const { return "CBOR"; };
-        CBOR(const nlohmann::json& j) {
-            buffer = nlohmann::json::to_cbor(j);
+        CBOR(const json& j) {
+            buffer = json::to_cbor(j);
 
         }
-        nlohmann::json operator()() {
-            return nlohmann::json::from_cbor(buffer);
+        json operator()() {
+            return json::from_cbor(buffer);
         }
     };
 
     struct MSGP : public Format {
         virtual const char* type() const { return "MSGP"; };
-        MSGP(const nlohmann::json& j) {
-            buffer = nlohmann::json::to_msgpack(j);
+        MSGP(const json& j) {
+            buffer = json::to_msgpack(j);
         }
-        nlohmann::json operator()() {
-            return nlohmann::json::from_msgpack(buffer);
+        json operator()() {
+            return json::from_msgpack(buffer);
         }
     };
 
     struct UBJS : public Format {
         virtual const char* type() const { return "UBJS"; };
-        UBJS(const nlohmann::json& j) {
-            buffer = nlohmann::json::to_ubjson(j);
+        UBJS(const json& j) {
+            buffer = json::to_ubjson(j);
         }
-        nlohmann::json operator()() {
-            return nlohmann::json::from_ubjson(buffer);
+        json operator()() {
+            return json::from_ubjson(buffer);
         }
     };
     

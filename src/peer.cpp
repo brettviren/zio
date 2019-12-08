@@ -1,6 +1,7 @@
 #include "zio/peer.hpp"
 
-zio::Peer::Peer(const nickname_t& nickname, const headerset_t& headers, bool verbose)
+zio::Peer::Peer(const nickname_t& nickname, const headerset_t& headers,
+                bool verbose)
     : m_nick(nickname), m_verbose(verbose), m_zyre(nullptr)
 {
     m_zyre = zyre_new(m_nick.c_str());
@@ -120,11 +121,16 @@ std::vector<zio::uuid_t> zio::Peer::waitfor(const nickname_t& nickname, timeout_
     std::vector<uuid_t> maybe = nickmatch(nickname);
 
     while (maybe.empty()) {
-        //zsys_debug("%s: waiting for %s", m_nick.c_str(), nickname.c_str());
+        if (m_verbose)
+            zsys_debug("%s: waiting for peer %s to come online",
+                       m_nick.c_str(), nickname.c_str());
         poll(timeout);
         maybe = nickmatch(nickname);
-        //zsys_debug("%s: poll done after %ld ms, have %ld",
-        //           m_nick.c_str(), zclock_usecs() / 1000 - start, maybe.size());
+        if (m_verbose)
+            zsys_debug("%s: see peer %s after %ld ms, have %ld",
+                       m_nick.c_str(), nickname.c_str(),
+                       zclock_usecs() / 1000 - start,
+                       maybe.size());
         if (timeout <= 0) {
             break;
         }
