@@ -37,10 +37,13 @@ namespace zio {
         std::unordered_map<std::string, portptr_t> m_ports;
         bool m_verbose{false};
     public:
-        Node(nickname_t nick, origin_t origin,
+        Node(nickname_t nick="", origin_t origin=0,
              const std::string& hostname="",
              granule_func_t gf = TimeGranule());
         ~Node();
+
+        void set_nick(const nickname_t& nick) { m_nick = nick; }
+        void set_origin(origin_t origin) { m_origin = origin; }
 
         // set verbose
         void set_verbose(bool verbose = true) { m_verbose = verbose; }
@@ -55,8 +58,9 @@ namespace zio {
         portptr_t port(const std::string& name);
 
 
-        // bring node online
-        void online();
+        // Bring node online using a zio::Peer with auto-generated
+        // headers and any extra ones.
+        void online(const headerset_t& extra_headers = {});
 
         // bring node offline
         void offline();

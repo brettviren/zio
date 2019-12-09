@@ -7,6 +7,8 @@
 
  */
 
+// fixme: add protobuf under conditional compilation
+
 #ifndef ZIO_FORMAT_HPP_SEEN
 #define ZIO_FORMAT_HPP_SEEN
 

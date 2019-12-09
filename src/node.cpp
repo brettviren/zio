@@ -58,11 +58,11 @@ zio::portptr_t zio::Node::port(const std::string& name)
 }
 
 
-void zio::Node::online()
+void zio::Node::online(const headerset_t& extra_headers)
 {
     if (m_peer) { return; }
 
-    headerset_t headers;
+    headerset_t headers = extra_headers;
     for (auto& np : m_ports) {
         headerset_t hs = np.second->do_binds();
         headers.insert(headers.end(), hs.begin(), hs.end());
