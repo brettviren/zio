@@ -48,12 +48,12 @@ namespace zio {
             trace,verbose,debug,info,summary,warning,error,fatal,
         };
     }
-    static
-    const char* MessageLevelString[] = {
-        "undefined",
-        "trace","verbose","debug","info","summary","warning","error","fatal",
-        0
-    };
+
+    // const char* MessageLevelString[]; = {
+    //     "undefined",
+    //     "trace","verbose","debug","info","summary","warning","error","fatal",
+    //     0
+    // };
 
     typedef uint64_t origin_t;
     typedef uint64_t granule_t;
