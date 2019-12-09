@@ -36,3 +36,15 @@ def build(bld):
                     includes = ['inc','build','test'],
                     rpath = rpath,
                     use = ['zio'] + uses)
+
+    bld.install_files('${PREFIX}/include', 'inc/json.hpp')
+    bld.install_files('${PREFIX}/include/zio', bld.path.ant_glob("inc/zio/*.hpp"))
+
+    # fake pkg-config
+    bld(source='zio.pc.in', VERSION=VERSION,
+        LLIBS='-lzio', REQUIRES='libczmq libzmq libzyre')
+    # fake libtool
+    bld(features='subst',
+        source='libzio.la.in', target='libzio.la',
+        **bld.env)
+    bld.install_files('${PREFIX}/lib', bld.path.find_or_declare("libzio.la"))

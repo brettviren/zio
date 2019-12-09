@@ -1,0 +1,10 @@
+prefix=@prefix@
+libdir=@libdir@
+includedir=${prefix}/include
+
+Name: zio
+Description: A general I/O system using zeromq to glue things together
+Version: @VERSION@
+Libs: -L${libdir} @LLIBS@
+Cflags: -I${includedir}
+Requires: @REQUIRES@
