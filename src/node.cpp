@@ -40,6 +40,7 @@ zio::portptr_t zio::Node::port(const std::string& name, int stype,
                                  PortCtx{m_hostname, m_origin, gf});
     ret->set_verbose(m_verbose);
     m_ports[name] = ret;
+    m_portnames.push_back(name);
     return ret;
 }
 

@@ -35,12 +35,17 @@ namespace zio {
         std::string m_hostname;
         Peer* m_peer;
         std::unordered_map<std::string, portptr_t> m_ports;
+        std::vector<std::string> m_portnames; // in order of creation.
         bool m_verbose{false};
     public:
         Node(nickname_t nick="", origin_t origin=0,
              const std::string& hostname="",
              granule_func_t gf = TimeGranule());
         ~Node();
+
+        nickname_t nick() const { return m_nick; }
+        origin_t origin() const { return m_origin; }
+        const std::vector<std::string>& portnames() const { return m_portnames; }
 
         void set_nick(const nickname_t& nick) { m_nick = nick; }
         void set_origin(origin_t origin) { m_origin = origin; }
