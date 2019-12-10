@@ -158,20 +158,21 @@ void zio::Port::offline()
 }
 
 
-void zio::Port::send(level::MessageLevel lvl, const Format& payload,
+void zio::Port::send(level::MessageLevel lvl, const std::string& format,
+                     const byte_array_t& buf,
                      const std::string& label)
 {
     if (m_verbose)
         zsys_debug("[port %s]: send ZIO%d%4s%s",
-                   m_name.c_str(), lvl, payload.type(), label.c_str());
+                   m_name.c_str(), lvl, format.c_str(), label.c_str());
                    
 
     zmsg_t* msg = zmsg_new();
-    zmsg_addstrf(msg, "ZIO%d%4s%s", lvl, payload.type(), label.c_str());
+    zmsg_addstrf(msg, "ZIO%d%4s%s", lvl, format.c_str(), label.c_str());
     const int ncoords = 3;
     uint64_t coords[ncoords] = {m_ctx.origin, m_ctx.gf(), m_seqno++};
     zmsg_addmem(msg, coords, ncoords*sizeof(uint64_t));
-    zmsg_addmem(msg, payload.data(), payload.size());
+    zmsg_addmem(msg, buf.data(), buf.size());
     zmsg_send(&msg, m_sock.zsock());    
     if (m_verbose)
         zsys_debug("[port %s]: send done", m_name.c_str());

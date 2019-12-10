@@ -16,79 +16,42 @@ MSGP
 UBJS
 */
 
-template<typename TYPE>
-TYPE makeit_string()
-{
-    std::string str = test_string;
-    return TYPE(str);
-}
-template<typename TYPE>
-TYPE makeit_datasize()
-{
-    const char* data = test_string;
-    return TYPE(data,strlen(data));
-}
-template<typename TYPE>
-TYPE makeit_cstr()
-{
-    return TYPE(test_string);
-}
+template<typename CONVERTER>
+struct testit_t {
+    typedef CONVERTER converter_type;
+    typedef typename converter_type::native_type native_type;
+    native_type m_dat;
+    converter_type convert;
+    testit_t(native_type data) : m_dat(data) { }
 
-template<typename TYPE>
-void assert_equal_str(TYPE obj)
-{
-    std::string want = test_string;
-    std::string got = obj();
-    //cerr << "want: '" << want << "', got: '" << got << "'\n";
-    assert(want == got);
-}
-template<typename TYPE>
-void testit_str()
-{
-    assert_equal_str<TYPE>(makeit_cstr<TYPE>());
-    assert_equal_str<TYPE>(makeit_datasize<TYPE>());
-    assert_equal_str<TYPE>(makeit_string<TYPE>());
-}
+    native_type native() { return m_dat; }
+    zio::byte_array_t tobuffer(const native_type& nat) {
+        zio::byte_array_t buf;
+        bool ok = convert(m_dat, buf);
+        assert(ok);
+        return buf;
+    }
+    native_type tonative(const zio::byte_array_t& buf) {
+        native_type nat;
+        bool ok = convert(buf, nat);
+        assert(ok);
+        return nat;
+    }
 
-template<typename TYPE>
-TYPE makeit_json()
-{
-    nlohmann::json j = test_json;
-    return TYPE (j);
-}
-
-template<typename TYPE>
-TYPE callit_json(const nlohmann::json& j)
-{
-    return TYPE (j);
-}
-
-template<typename TYPE>
-void assert_equal_json(TYPE obj)
-{
-    nlohmann::json want = test_json;
-    nlohmann::json got = obj();
-    cerr << "want:\n" << want << "\ngot:\n" << got << "\n";
-    assert(want == got);
-}
-
-template<typename TYPE>
-void testit_json()
-{
-    assert_equal_json<TYPE>(makeit_json<TYPE>());
-    assert_equal_json<TYPE>(callit_json<TYPE>(test_json));
-}
+    void test() {
+        assert (m_dat == native());
+        assert (tonative(tobuffer(m_dat)) == m_dat);
+    }
+};
 
 int main()
 {
-    testit_str<zio::BUFF>();
-    testit_str<zio::TEXT>();
-
-    testit_json<zio::JSON>();
-    testit_json<zio::BSON>();
-    testit_json<zio::CBOR>();
-    testit_json<zio::MSGP>();
-    testit_json<zio::UBJS>();
+    testit_t<zio::converter::text_t> ttext(test_string);
+    testit_t<zio::converter::json_t> tjson(test_json);
+    testit_t<zio::converter::bson_t> tbson(test_json);
+    testit_t<zio::converter::cbor_t> tcbor(test_json);
+    testit_t<zio::converter::msgp_t> tmsgp(test_json);
+    testit_t<zio::converter::ubjs_t> tubjs(test_json);
 
     return 0;
 }

@@ -16,6 +16,9 @@ def configure(cfg):
     cfg.check_cfg(package='libzmq', uselib_store='ZMQ', **p);
     cfg.check_cfg(package='libczmq', uselib_store='CZMQ', **p);
     cfg.check_cfg(package='libzyre', uselib_store='ZYRE', **p);
+    cfg.check_cfg(package='protobuf', uselib_store='PROTOBUF', **p);
+    cfg.write_config_header('config.h')
+
 
 def build(bld):
     uses='ZMQ CZMQ ZYRE'.split()
@@ -37,7 +40,6 @@ def build(bld):
                     rpath = rpath,
                     use = ['zio'] + uses)
 
-    bld.install_files('${PREFIX}/include', 'inc/json.hpp')
     bld.install_files('${PREFIX}/include/zio', bld.path.ant_glob("inc/zio/*.hpp"))
 
     # fake pkg-config

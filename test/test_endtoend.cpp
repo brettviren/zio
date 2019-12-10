@@ -1,5 +1,6 @@
 #include "zio/node.hpp"
 #include "zio/outbox.hpp"
+#include "zio/format.hpp"
 
 int main()
 {
@@ -23,13 +24,15 @@ int main()
     zsys_debug("test_endtoend: sending log message");
     log.info("Hello world!");
 
+    zio::converter::text_t tc;
+
     zio::Header header;
     zio::byte_array_t buffer;
     zsys_debug("test_endtoend: receiving");
     int rc = pi->recv(header, buffer);
     zsys_debug("test_endtoend: received (rc=%d)", rc);
     assert(rc == 0);
-    std::string line = zio::tostring(buffer);
+    std::string line = tc(buffer);
     assert(line == "Hello world!");
     assert(header.seqno == 0);
     assert(header.origin == 1);

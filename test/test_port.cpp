@@ -1,6 +1,6 @@
 #include "zio/port.hpp"
 #include "zio/peer.hpp"
-
+#include "zio/format.hpp"
 #include <iostream>
 using namespace std;
 
@@ -27,7 +27,9 @@ int main()
     // tell all ports to go online and give the peer so they can resovle any connects
     p.online(peer);
 
-    p.send(zio::level::info, zio::TEXT("Hello world!"));
+    zio::converter::text_t tc;
+
+    p.send(zio::level::info, tc.format(), tc("Hello world!"));
 
     // for completeness
     p.offline();

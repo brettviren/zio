@@ -6,11 +6,11 @@
 #include <vector>
 #include <chrono>
 #include <functional>
-#include <json.hpp>
+
+#include "zio/json.hpp"
 
 namespace zio {
-    // The great Nlohmann's JSON is brought in to ZIO as a first class
-    // type.
+    // The great Nlohmann's JSON.
     using json = nlohmann::json;
 
 

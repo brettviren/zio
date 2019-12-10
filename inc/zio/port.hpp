@@ -90,7 +90,8 @@ namespace zio {
         // message passing via the port
 
         // send with level and a single payload and optional label.
-        void send(level::MessageLevel lvl, const Format& payload,
+        void send(level::MessageLevel lvl, const std::string& format,
+                  const byte_array_t& payload,
                   const std::string& label = "");
 
         // do a blocking recv().  Return 0 on success.  A negative
