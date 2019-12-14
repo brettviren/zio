@@ -246,7 +246,13 @@ int zio::Port::recv(Header& header, std::vector<byte_array_t>& payloads)
         payloads.emplace_back(b, b+s);
         zframe_destroy(&frame);
     }
+
+    int rc = 0;
+    if (m_sock.type() == ZMQ_SERVER) {
+        rc = zmsg_routing_id(msg);
+    }
+
     // This method does not handle multiple payloads
     zmsg_destroy(&msg);
-    return 0;
+    return rc;
 }

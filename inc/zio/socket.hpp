@@ -37,6 +37,9 @@ namespace zio {
         /// Wrap ZMQ receiving 
         zmsg_t* recv();
 
+        /// Return ZMQ socket type
+        int type() { return zsock_type(m_sock); }
+
         zsock_t* zsock() { return m_sock; }
 
     private:

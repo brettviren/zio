@@ -27,7 +27,7 @@ void test_owoa(bool backwards)
     rc = zsock_send(c,"i",n);
     assert(rc >= 0);
     rc = zsock_recv(s,"i",&n);
-    assert(rc >= 0);
+    assert(rc > 0);             // should be routing ID strictly >0
     assert(n==42);
 
     zsock_destroy(&c);
