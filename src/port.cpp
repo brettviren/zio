@@ -173,7 +173,8 @@ void zio::Port::send(level::MessageLevel lvl, const std::string& format,
     uint64_t coords[ncoords] = {m_ctx.origin, m_ctx.gf(), m_seqno++};
     zmsg_addmem(msg, coords, ncoords*sizeof(uint64_t));
     zmsg_addmem(msg, buf.data(), buf.size());
-    zmsg_send(&msg, m_sock.zsock());    
+    m_sock.send(&msg);
+    //zmsg_send(&msg, m_sock.zsock());    
     if (m_verbose)
         zsys_debug("[port %s]: send done", m_name.c_str());
 
@@ -195,7 +196,8 @@ int zio::Port::recv(Header& header, byte_array_t& payload)
     
 int zio::Port::recv(Header& header, std::vector<byte_array_t>& payloads)
 {
-    zmsg_t* msg = zmsg_recv(m_sock.zsock());
+    //zmsg_t* msg = zmsg_recv(m_sock.zsock());
+    zmsg_t* msg = m_sock.recv();
 
     // prefix header
     if (zmsg_size(msg) > 0) {
