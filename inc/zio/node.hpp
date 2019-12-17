@@ -52,6 +52,7 @@ namespace zio {
 
         // set verbose
         void set_verbose(bool verbose = true) { m_verbose = verbose; }
+        bool verbose() const { return m_verbose; }
 
         // Create a port of type and name using default granule function.
         portptr_t port(const std::string& name, int stype);

@@ -78,7 +78,7 @@ void zio::Port::bind(const std::string& hostname, int port)
 
 void zio::Port::bind(const address_t& address)
 {
-    m_binders.push_back(DirectBinder{m_sock, m_ctx.hostname});
+    m_binders.push_back(DirectBinder{m_sock, address});
 }
 
 void zio::Port::connect(const address_t& address)
@@ -102,8 +102,12 @@ zio::headerset_t zio::Port::do_binds()
     zio::headerset_t ret;
     for (auto& binder : m_binders) {
         auto address = binder();
-        ret.push_back(make_address_header(m_name, address));
+        auto hdr = make_address_header(m_name, address);
+        ret.push_back(hdr);
         m_bound.push_back(address);
+        if (m_verbose)
+            zsys_debug("[port %s]: bind to %s = %s",
+                       m_name.c_str(), hdr.first.c_str(), hdr.second.c_str());
     }
     return ret;
 }
@@ -113,13 +117,36 @@ void zio::Port::online(zio::Peer& peer)
     if (m_online) { return; }
     m_online = true;
 
+    if (m_verbose) {
+        zsys_debug("[port %s]: going online with %d node ports, %d direct and %d indirect addresses",
+                   m_name.c_str(), m_connect_nodeports.size(),
+                   m_connect_addresses.size(), m_connect_nodeports.size());
+    }
+
+    for (const auto& addr : m_connect_addresses) {
+        if (m_verbose) 
+            zsys_debug("[port %s]: connect to %s",
+                       m_name.c_str(), addr.c_str());
+        zsock_connect(m_sock.zsock(), "%s", addr.c_str());
+        m_connected.push_back(addr);
+    }
+
     for (const auto& nh : m_connect_nodeports) {
+        if (m_verbose)
+            zsys_debug("[port %s]: wait for %s", m_name.c_str(), nh.first.c_str());
         auto uuids = peer.waitfor(nh.first);
         assert(uuids.size());
 
         const std::string prefix = nh.second + "@";
         for (auto uuid : uuids) {
             auto pi = peer.peer_info(uuid);
+
+            if (m_verbose) {
+                zsys_debug("[port %s]: peer info for %s [%s]",
+                           m_name.c_str(), pi.nick.c_str(), uuid.c_str());
+                for (const auto& hh : pi.headers) 
+                    zsys_debug("\t%s = %s", hh.first.c_str(), hh.second.c_str());
+            }
 
             auto found = pi.match("Zio-Port", prefix);
             assert(found.size());
@@ -135,10 +162,6 @@ void zio::Port::online(zio::Peer& peer)
         }
     }
     
-    for (const auto& addr : m_connect_addresses) {
-        zsock_connect(m_sock.zsock(), "%s", addr.c_str());
-        m_connected.push_back(addr);
-    }
 }
 
 
@@ -195,6 +218,8 @@ int zio::Port::recv(Header& header, byte_array_t& payload)
     
 int zio::Port::recv(Header& header, std::vector<byte_array_t>& payloads)
 {
+    if (m_verbose)
+        zsys_debug("[port %s]: receving", m_name.c_str());
     zmsg_t* msg = zmsg_recv(m_sock.zsock());
 
     // prefix header

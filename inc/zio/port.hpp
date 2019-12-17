@@ -49,6 +49,7 @@ namespace zio {
         ~Port();
 
         void set_verbose(bool verbose = true) { m_verbose = verbose; }
+        const std::string& name() const { return m_name; }
 
         // Register bind/connect requests
 

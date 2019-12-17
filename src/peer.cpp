@@ -127,7 +127,7 @@ std::vector<zio::uuid_t> zio::Peer::waitfor(const nickname_t& nickname, timeout_
         poll(timeout);
         maybe = nickmatch(nickname);
         if (m_verbose)
-            zsys_debug("%s: see peer %s after %ld ms, have %ld",
+            zsys_debug("%s: see peer %s after %ld ms, have %ld match",
                        m_nick.c_str(), nickname.c_str(),
                        zclock_usecs() / 1000 - start,
                        maybe.size());

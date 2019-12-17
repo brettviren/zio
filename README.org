@@ -1,45 +1,40 @@
-#+title: ZIO
+#+title: ZIO - a simplified, high level C++ interface to ZeroMQ and Zyre.
 
 * Introduction
 
-ZIO provides a thin, simplifying wrapper around ZeroMQ's CZMQ and
-Zyre.  It provides:
+ZIO provides an abstraction layer on top of general ZeroMQ
+functionality and in particular that provided by Zyre which allow for
+simplified development of distributed applications and libraries.
 
-- a general, container-based transport of data in a few convenient message formats.
+Some of the features ZIO provides include:
 
-- a simplified discovery and presence mechanism based on Zyre.
+- a "logger object" type interface to emitting messages supporting
+  both free form text strings as well as structured data metrics ([[file:docs/outbox.org][outbox]]).
 
-- some general purpose functionality for processing ZIO messages.
+- a high level, but still general message format ([[file:docs/messages.org][messages]] and [[file:docs/format.org][format]])
 
-The goal of ZIO is to form the basis for a loosely coupled ecosystem
-of libraries and applications which can inter-communicate.  Some
-anticipated uses are:
+- interface to Zyre peer discovery, persistence and reaction ([[file:docs/peer.org][peer]])
 
-- Wire-Cell Toolkit I/O requires accepting data from multi-threaded
-  contexts, aggregating it to a single thread and writing to one or
-  several file formats.  Reading requires the reverse, bringing data
-  back to WCT component threads for replay.
+- a "ported graph" abstraction which provides network topology
+  self-assembly and which may be used to develop distributed
+  applications that follow the /data flow programming/ paradigm ([[file:docs/node.org][node]]
+  and [[file:docs/port.org][port]]).
 
-- Software self-trigger feature for DUNE DAQ (or others) require
-  streamed data processing to aggregate and locate "interesting"
-  portions of an original data stream.
+- some message processing batteries included ([[file:docs/batteries.org][batteries]]).
 
-- Logging and structured metric production, processing and collection
-  from a distributed system.
+* Documentation
 
-* Install
+The links in the intro go to detailed descriptions of the major
+features.  Coming soon to a repo near you are:
+
+- [[file:docs/tutorial.org][Tutorial]] simple steps to get started
+- [[file:docs/howto.org][How-To]] starting point for achieving specific goals
+
+Until then, here's how to install ZIO:
 
 #+begin_example
-  $ waf configure --prefix=/path/to/install
-  $ waf build [--notests]
-  $ [waf build --alltests]
-  $ waf install
+  $ ./waf configure --prefix=/path/to/install
+  $ [./waf build --alltests]
+  $ ./waf install [--notests]
 #+end_example
 
-* More information
-
-- [[file:docs/messages.org]] describes the ZIO message format
-
-- [[file:docs/batteries.org]] describes additional features ~libzio~ provides
-
-- [[file:docs/misc.org]] holds some uncategorized ramblings
