@@ -95,9 +95,10 @@ namespace zio {
                   const byte_array_t& payload,
                   const std::string& label = "");
 
-        // do a blocking recv().  Return 0 on success.  A negative
-        // value indicates an error stage: -1: failed on prefix
-        // header, -2 failed on coordinate header.
+        // do a blocking recv().  Return non-negative on success (if
+        // socket deals with sender identities, >0 is that id).  A
+        // negative value indicates an error stage: -1: failed on
+        // prefix header, -2 failed on coordinate header.
         int recv(Header& header, byte_array_t& payload);
         int recv(Header& header, std::vector<byte_array_t>& payloads);
     };

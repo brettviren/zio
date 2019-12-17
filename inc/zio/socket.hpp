@@ -32,6 +32,14 @@ namespace zio {
         /// get messages.  Call this prior to any bind or connect.
         void subscribe(const prefixmatch_t& sub = "");
 
+        /// Wrap ZMQ sending 
+        void send(zmsg_t** msg);
+        /// Wrap ZMQ receiving 
+        zmsg_t* recv();
+
+        /// Return ZMQ socket type
+        int type() { return zsock_type(m_sock); }
+
         zsock_t* zsock() { return m_sock; }
 
     private:
