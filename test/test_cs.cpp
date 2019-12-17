@@ -15,12 +15,12 @@ void test_owoa(bool backwards)
     }
     const char * addr = "tcp://127.0.0.1:5678";
     int rc = 0;
-    rc = zsock_bind(tobind, addr);
+    rc = zsock_bind(tobind, "%s", addr);
     if (rc < 0 ) {
         zsys_error("%d %s", errno, strerror(errno));
     }
     assert (rc >= 0);
-    rc = zsock_connect(toconn, addr);
+    rc = zsock_connect(toconn, "%s", addr);
     assert(rc >= 0);
 
     int n = 42;
