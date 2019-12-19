@@ -32,18 +32,29 @@ namespace zio {
         /// get messages.  Call this prior to any bind or connect.
         void subscribe(const prefixmatch_t& sub = "");
 
-        /// Wrap ZMQ sending 
+        /// Wrap ZMQ sending, exposing the zmsg_t.
         void send(zmsg_t** msg);
-        /// Wrap ZMQ receiving 
-        zmsg_t* recv();
+
+        /// Wrap ZMQ receiving, exposing the zmsg_t.  Timeout in msec.
+        /// Return null msg if timeout occurs.
+        zmsg_t* recv(int timeout=-1);
 
         /// Return ZMQ socket type
         int type() { return zsock_type(m_sock); }
 
+        /// Return true if there is at least one message waiting in
+        /// the socket input queue.
+        bool pollin();
+
+        /// Return true if a send would not block
+        bool pollout();
+
+        // Access underlying ZeroMQ/CZMQ zsock_t.
         zsock_t* zsock() { return m_sock; }
 
     private:
         zsock_t* m_sock;
+        zpoller_t* m_poller;
     };
 
 }

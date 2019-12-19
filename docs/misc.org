@@ -1,5 +1,25 @@
 #+title: Notes
 
+* Thread safety
+
+Only recent "draft" sockets (CLIENT/SERVER and RADIO/DISH) are
+officially thread safe.  All others should not be relied on to work
+properly if used from any thread other than the one in which it was
+created.  The ~peer~ relies on Zyre which uses ROUTER/DEALER but they
+are kept to the Zyre actor thread.  However the actor PAIR could be
+subject to cross-thread use.  A ~node~ creates a ~peer~ when it goes
+"online" and destroys it when it goes "offline".  Thus, nodes which
+will be used between threads must use only thread-safe sockets and go
+online/offline in a common thread and must not use ~peer~ services in
+any other thread.
+
+* Socket buffering
+
+Early termination can cause loss of messages that have been sent out a
+socket but not yet received by the remote.  The holder of a socket
+arrange to keep that socket alive in some manner that assures
+transmission.
+
 * A potential Catch 22 with Discovery and Ephemeral Ports
 
 Discovery involves broadcasting headers to the network which advertise

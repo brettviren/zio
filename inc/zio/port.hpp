@@ -82,25 +82,27 @@ namespace zio {
         // Go online, making any connections, using peer to resolve if needed.
         void online(Peer& peer);
 
-
-
         // Disconnect, unbind.
         void offline();
 
 
-        // message passing via the port
-
-        // send with level and a single payload and optional label.
+        // Send with level and a single payload and optional label.
+        // This forces policy on the granule, origin and seqno.
         void send(level::MessageLevel lvl, const std::string& format,
                   const byte_array_t& payload,
                   const std::string& label = "");
 
-        // do a blocking recv().  Return non-negative on success (if
-        // socket deals with sender identities, >0 is that id).  A
-        // negative value indicates an error stage: -1: failed on
-        // prefix header, -2 failed on coordinate header.
-        int recv(Header& header, byte_array_t& payload);
-        int recv(Header& header, std::vector<byte_array_t>& payloads);
+        // Send with full user provided header, no policy.
+        void send(const Header& header, const byte_array_t& payload);
+
+        // Do a blocking recv() or timeout after given msec.  Return
+        // zero on success, -1 if timeout, -2 if message parse fails,
+        // -3 if multiple payload arrays available but only one requested.
+        int recv(Header& header, byte_array_t& payload, int timeout = -1);
+        int recv(Header& header, std::vector<byte_array_t>& payloads, int timeout = -1);
+
+        // Access wrapped socket.
+        Socket& socket();
     };
 
     // Ports can not be copied because of the Socket but they

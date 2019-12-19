@@ -6,9 +6,11 @@ zio::Socket::Socket(int stype)
     if (!m_sock) {
         throw std::runtime_error("failed to make socket");
     }
+    m_poller = zpoller_new(m_sock, NULL);
 }
 zio::Socket::~Socket()
 {
+    zpoller_destroy(&m_poller);
     zsock_destroy(&m_sock);
 }
 
@@ -48,8 +50,14 @@ void zio::Socket::send(zmsg_t** msgptr)
     }
     zmsg_send(msgptr, m_sock);
 }
-zmsg_t* zio::Socket::recv()
+zmsg_t* zio::Socket::recv(int timeout)
 {
+    if (timeout >= 0) {
+        void* sock = zpoller_wait(m_poller, timeout);
+        if (!sock) {
+            return NULL;
+        }
+    }
     zmsg_t* msg = zmsg_recv(m_sock);
     if (zsock_type(m_sock) == ZMQ_SERVER) {
         zmsg_t* decoded = zmsg_decode(zmsg_first(msg));
@@ -57,4 +65,14 @@ zmsg_t* zio::Socket::recv()
         return decoded;
     }
     return msg;
+}
+
+bool zio::Socket::pollin()
+{
+    return zsock_events(m_sock) & ZMQ_POLLIN;
+}
+
+bool zio::Socket::pollout()
+{
+    return zsock_events(m_sock) & ZMQ_POLLOUT;
 }

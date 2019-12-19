@@ -197,16 +197,36 @@ void zio::Port::send(level::MessageLevel lvl, const std::string& format,
     zmsg_addmem(msg, coords, ncoords*sizeof(uint64_t));
     zmsg_addmem(msg, buf.data(), buf.size());
     m_sock.send(&msg);
-    //zmsg_send(&msg, m_sock.zsock());    
     if (m_verbose)
         zsys_debug("[port %s]: send done", m_name.c_str());
 
 }
 
-int zio::Port::recv(Header& header, byte_array_t& payload)
+void zio::Port::send(const Header& header, const byte_array_t& payload)
+{
+    if (m_verbose)
+        zsys_debug("[port %s]: send ZIO%d%4s%s",
+                   m_name.c_str(), header.level,
+                   header.format.c_str(), header.label.c_str());
+                   
+
+    zmsg_t* msg = zmsg_new();
+    zmsg_addstrf(msg, "ZIO%d%4s%s", header.level,
+                 header.format.c_str(), header.label.c_str());
+    const int ncoords = 3;
+    uint64_t coords[ncoords] = {header.origin, header.granule, header.seqno};
+    zmsg_addmem(msg, coords, ncoords*sizeof(uint64_t));
+    zmsg_addmem(msg, payload.data(), payload.size());
+    m_sock.send(&msg);
+    if (m_verbose)
+        zsys_debug("[port %s]: send done", m_name.c_str());
+
+}
+
+int zio::Port::recv(Header& header, byte_array_t& payload, int timeout)
 {
     std::vector<byte_array_t> payloads;
-    int rc = recv(header, payloads);
+    int rc = recv(header, payloads, timeout);
     if (rc < 0) {
         return rc;
     }
@@ -217,12 +237,14 @@ int zio::Port::recv(Header& header, byte_array_t& payload)
     return 0;
 }
     
-int zio::Port::recv(Header& header, std::vector<byte_array_t>& payloads)
+int zio::Port::recv(Header& header, std::vector<byte_array_t>& payloads, int timeout)
 {
     if (m_verbose)
         zsys_debug("[port %s]: receving", m_name.c_str());
-    zmsg_t* msg = m_sock.recv();
-
+    zmsg_t* msg = m_sock.recv(timeout);
+    if (!msg) {
+        return -1;
+    }
     // prefix header
     if (zmsg_size(msg) > 0) {
         char* h1 = zmsg_popstr(msg);
@@ -234,7 +256,7 @@ int zio::Port::recv(Header& header, std::vector<byte_array_t>& payloads)
     }
     else {
         zmsg_destroy(&msg);
-        return -1;
+        return -2;
     }
 
     const size_t wantsize = 3*sizeof(uint64_t);

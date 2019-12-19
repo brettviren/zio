@@ -1,0 +1,20 @@
+#+title: ToDo
+
+- [ ] zio is not a great name for this package as one of its main
+  goals is to hide the "z".  Given it provides a graph metaphor,
+  GraphIO or GIO is better.  "graphio" is already used by libraries
+  providing graph representation serialization and by a drawing
+  program.  None apparent that provide an graph oriented I/O system.
+  
+- [ ] Add poller and reactor pattern.
+
+- [ ] Include reacting to Zyre events.
+
+- [ ] Track peers to which a node connects so as to provide
+  information on their disappearance and possible later reappearance.
+
+- [ ] To support extracting / injecting data with WCT components needs
+  (a) to be thread-safe when ~TbbFlow~ is used, (b) to not drop buffered
+  messages when the WCT graph execution is complete.  These two things
+  likely require a solution based on a synchronous query/response
+  protocol with CLIENT/SERVER sockets.
