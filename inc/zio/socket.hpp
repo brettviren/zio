@@ -12,9 +12,9 @@
 
 namespace zio {
 
-    /// Socket provides a non-copyable wrapper around ZeroMQ/CZMQ
-    /// socket.  This shall be used only from the thread in which it
-    /// was created.
+    /*!
+      @brief thin wrapper around ZeroMQ socket
+    */
     class Socket {
     public:
         Socket(int stype);
@@ -32,8 +32,8 @@ namespace zio {
         /// get messages.  Call this prior to any bind or connect.
         void subscribe(const prefixmatch_t& sub = "");
 
-        /// Wrap ZMQ sending, exposing the zmsg_t.
-        void send(zmsg_t** msg);
+        /// Send message out socket.
+        void send(const msg& msg);
 
         /// Wrap ZMQ receiving, exposing the zmsg_t.  Timeout in msec.
         /// Return null msg if timeout occurs.

@@ -55,9 +55,11 @@ namespace zio {
     //     0
     // };
 
+    typedef uint64_t ident_t;
     typedef uint64_t origin_t;
     typedef uint64_t granule_t;
     typedef std::function<granule_t(void)> granule_func_t;
+
 
 
 }

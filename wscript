@@ -28,11 +28,17 @@ def build(bld):
     rpath = list(set(rpath))
     print ('\n'.join([str(p) for p in rpath]))
              
+    #sources = bld.path.ant_glob('src/*.cpp');
+    sources = 'src/format.cpp src/message.cpp'
+
     bld.shlib(features='cxx', includes='inc', rpath=rpath,
-              source=bld.path.ant_glob('src/*.cpp'), target='zio',
+              source = sources, target='zio',
               uselib_store='ZIO', use=uses)
 
-    for tmain in bld.path.ant_glob('test/test*.cpp'):
+    #tsources = bld.path.ant_glob('test/test*.cpp')
+    tsources = bld.path.ant_glob('test/test_message.cpp')
+
+    for tmain in tsources:
         bld.program(features = 'test cxx',
                     source = [tmain], target = tmain.name.replace('.cpp',''),
                     ut_cwd = bld.path, install_path = None,

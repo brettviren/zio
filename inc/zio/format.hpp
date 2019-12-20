@@ -20,7 +20,6 @@
 
 namespace zio {
 
-    typedef std::vector<std::uint8_t> byte_array_t;
 
     // Convert between byte array to native type
     namespace converter {
@@ -86,20 +85,6 @@ namespace zio {
             }
         };
     }
-
-    /*
-      Each TYPE struct adds a constructor from one or more native
-      representations to a byte_array_t and an operator() that returns
-      the most fitting native type.  
-     */
-
-    struct Header {
-        int level;
-        std::string format, label;
-        uint64_t origin, granule, seqno;
-    };
-
-    typedef byte_array_t Payload;
 }
 
 #endif

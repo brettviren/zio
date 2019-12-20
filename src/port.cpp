@@ -52,8 +52,8 @@ struct HostPortBinder {
     }
 };
 
-zio::Port::Port(const std::string& name, int stype, const PortCtx& ctx)
-    : m_name(name), m_sock(stype), m_ctx(ctx), m_online(false)
+zio::Port::Port(const std::string& name, int stype, const std::string& hostname)
+    : m_name(name), m_sock(stype), m_hostname(hostname), m_online(false)
 {
 }
 
@@ -67,7 +67,7 @@ zio::Port::~Port()
 
 void zio::Port::bind()
 {
-    bind(m_ctx.hostname, 0);
+    bind(m_hostname, 0);
 }
 
 void zio::Port::bind(const std::string& hostname, int port)
@@ -181,124 +181,6 @@ void zio::Port::offline()
 }
 
 
-void zio::Port::send(level::MessageLevel lvl, const std::string& format,
-                     const byte_array_t& buf,
-                     const std::string& label)
-{
-    if (m_verbose)
-        zsys_debug("[port %s]: send ZIO%d%4s%s",
-                   m_name.c_str(), lvl, format.c_str(), label.c_str());
-                   
 
-    zmsg_t* msg = zmsg_new();
-    zmsg_addstrf(msg, "ZIO%d%4s%s", lvl, format.c_str(), label.c_str());
-    const int ncoords = 3;
-    uint64_t coords[ncoords] = {m_ctx.origin, m_ctx.gf(), m_seqno++};
-    zmsg_addmem(msg, coords, ncoords*sizeof(uint64_t));
-    zmsg_addmem(msg, buf.data(), buf.size());
-    m_sock.send(&msg);
-    if (m_verbose)
-        zsys_debug("[port %s]: send done", m_name.c_str());
 
-}
 
-void zio::Port::send(const Header& header, const byte_array_t& payload)
-{
-    if (m_verbose)
-        zsys_debug("[port %s]: send ZIO%d%4s%s",
-                   m_name.c_str(), header.level,
-                   header.format.c_str(), header.label.c_str());
-                   
-
-    zmsg_t* msg = zmsg_new();
-    zmsg_addstrf(msg, "ZIO%d%4s%s", header.level,
-                 header.format.c_str(), header.label.c_str());
-    const int ncoords = 3;
-    uint64_t coords[ncoords] = {header.origin, header.granule, header.seqno};
-    zmsg_addmem(msg, coords, ncoords*sizeof(uint64_t));
-    zmsg_addmem(msg, payload.data(), payload.size());
-    m_sock.send(&msg);
-    if (m_verbose)
-        zsys_debug("[port %s]: send done", m_name.c_str());
-
-}
-
-int zio::Port::recv(Header& header, byte_array_t& payload, int timeout)
-{
-    std::vector<byte_array_t> payloads;
-    int rc = recv(header, payloads, timeout);
-    if (rc < 0) {
-        return rc;
-    }
-    if (payloads.size() != 1) {
-        return -3;
-    }
-    payload = payloads[0];
-    return 0;
-}
-    
-int zio::Port::recv(Header& header, std::vector<byte_array_t>& payloads, int timeout)
-{
-    if (m_verbose)
-        zsys_debug("[port %s]: receving", m_name.c_str());
-    zmsg_t* msg = m_sock.recv(timeout);
-    if (!msg) {
-        return -1;
-    }
-    // prefix header
-    if (zmsg_size(msg) > 0) {
-        char* h1 = zmsg_popstr(msg);
-        header.level = h1[3] - '0';
-        std::string h1s = h1;
-        header.format = h1s.substr(4,4);
-        header.label = h1s.substr(8);
-        free (h1);
-    }
-    else {
-        zmsg_destroy(&msg);
-        return -2;
-    }
-
-    const size_t wantsize = 3*sizeof(uint64_t);
-
-    // coordinate header
-    if (zmsg_size(msg) > 0) {
-        zframe_t* frame = zmsg_pop(msg);
-        if (zframe_size(frame) != wantsize) {
-            if (m_verbose)
-                zsys_warning("[port %s]: wrong coordinate frame size: %ld (expect %ld)",
-                             m_name.c_str(), zframe_size(frame), wantsize);
-                             
-            zframe_destroy(&frame);
-            zmsg_destroy(&msg);
-            return -2;
-        }
-        uint64_t* ogs = (uint64_t*)zframe_data(frame);
-        header.origin = ogs[0];
-        header.granule = ogs[1];
-        header.seqno = ogs[2];
-        zframe_destroy(&frame);
-    }
-    else {
-        zmsg_destroy(&msg);
-        return -2;
-    }
-
-    // payloads
-    while (zmsg_size(msg)) {
-        zframe_t* frame = zmsg_pop(msg);
-        std::uint8_t* b = zframe_data(frame);
-        size_t s = zframe_size(frame);
-        payloads.emplace_back(b, b+s);
-        zframe_destroy(&frame);
-    }
-
-    int rc = 0;
-    if (m_sock.type() == ZMQ_SERVER) {
-        rc = zmsg_routing_id(msg);
-    }
-
-    // This method does not handle multiple payloads
-    zmsg_destroy(&msg);
-    return rc;
-}

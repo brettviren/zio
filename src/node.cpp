@@ -15,10 +15,12 @@ std::string get_hostname()
 
 
 
-zio::Node::Node(nickname_t nick, origin_t origin,
-                const std::string& hostname, granule_func_t gf)
-    : m_nick(nick), m_origin(origin), m_defgf(gf),
-      m_hostname(hostname), m_peer(nullptr)
+zio::Node::Node(nickname_t nick, ident_t ident,
+                const std::string& hostname)
+    : m_nick(nick)
+    , m_ident(ident)
+    , m_hostname(hostname)
+    , m_peer(nullptr)
 {
     if (m_hostname.empty()) {
         m_hostname = get_hostname();
@@ -31,22 +33,15 @@ zio::Node::~Node()
     m_ports.clear();
 }
 
-zio::portptr_t zio::Node::port(const std::string& name, int stype,
-                               granule_func_t gf)
+zio::portptr_t zio::Node::port(const std::string& name, int stype)
 {
     zio::portptr_t ret = port(name);
     if (ret) { return ret; }
-    ret = std::make_shared<Port>(name, stype,
-                                 PortCtx{m_hostname, m_origin, gf});
+    ret = std::make_shared<Port>(name, stype, m_hostname);
     ret->set_verbose(m_verbose);
     m_ports[name] = ret;
     m_portnames.push_back(name);
     return ret;
-}
-
-zio::portptr_t zio::Node::port(const std::string& name, int stype)
-{
-    return port(name, stype, m_defgf);
 }
 
 zio::portptr_t zio::Node::port(const std::string& name)

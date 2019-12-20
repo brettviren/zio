@@ -76,3 +76,17 @@ bool zio::Socket::pollout()
 {
     return zsock_events(m_sock) & ZMQ_POLLOUT;
 }
+
+#if 0
+void zio::Message::send(Socket& socket) const
+{
+    zmsg_t* msg = zmsg_new();
+    auto pre = m_header.prefix.dumps();
+    zmsg_addstrf(msg, pre.c_str());
+    zmsg_addmem(msg, &m_header.coord, sizeof(CoordHeader));
+    for (auto& pl : m_payload) {
+        zmsg_addmem(msg, pl.data(), pl.size());
+    }
+    socket.send(&msg);
+}
+#endif

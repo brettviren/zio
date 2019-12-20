@@ -1,9 +1,16 @@
 #+title:  ZIO messages
 
-ZIO messages are ZeroMQ messages which consist of two parts:
+ZIO messages are ZeroMQ messages.  They are composed of several
+"parts" (libzmq term) or "frames" (libczmq term) and the parts fall
+into one of two groups which are called:
 
 - header :: initial data in two frames following a fixed schema determined by ZIO.
 - payload :: zero or more frames holding application dependent data.
+
+As a detail, a multipart ZIO message is encoded/decoded to/from a
+single part ZeroMQ message if the socket used requires it (eg,
+thread-safe CLIENT/SERVER or RADIO/DISH).  To avoid the extra memory
+copy, use of other sockets do not incur codec.
 
 The general message is illustrated in the following table where each
 subtable represents one message frame
@@ -27,24 +34,31 @@ subtable represents one message frame
 | ...     |                     |       |
 |---------+---------------------+-------|
 
-
 The first two are header frames.  The first header frame holds the
 *prefix header*.  It is so named as its contents are subject to ZeroMQ
-PUB/SUB envelope prefix matching (subscription).  It provides these
-fields:
+PUB/SUB envelope prefix matching (subscription).  Except for the fixed
+literal ~ZIO~ the prefix header contents are freely provided by the
+application.  The *prefix header* contains these fields:
 
-- magic :: three ASCII characters: "ZIO" marks this as a ZIO message
+- magic :: three ASCII characters: ~ZIO~ marks this as a ZIO message
 - level :: a single digit, ASCII encoded gives the message level
 - format :: a four byte format ID specifying the payload format, ZIO reserves a few.
 - label :: optional, application dependent string
 
 The second header field is called the *coordinate header* as it provides
 information on an abstracted "location" and "time" to associate with
-the payload.  It has binary fields each holding a 64 bit integer:
+the payload.  Depending on application needs, this frame may be fully
+provided by the application.  Alternatively, ZIO provides support for
+implicitly maintaining these values.  The fields are each 64 bit
+unsigned integer:
 
-- origin :: an application-defined identifier for the origin of the message
+- origin :: an application-defined identifier for the origin of the message.
 - granule :: an application-defined monotonically increasing count used for ordering of messages
 - seqno :: an monotonic counter set just prior to sending.
+
+Details on these header quantities as well as information on the
+payload frames follow.
+
 
 * Levels
 
@@ -97,27 +111,26 @@ that a single format name implies the format for all payload frames.
 
 * Origin
 
-In general, ZIO makes no requirement on the values placed in *origin*.
-The recommended interpretation of the *origin* field is to mark "where"
-a message originated.  
-
-ZIO components may both consume and produce ZIO messages.  It is
-recommended that these components meaningfully transfer the origin.
-For example, if a component consumes and produces in a 1-to-1 manner,
-the origin should be retained.  If messages are consumed from multiple
-origins, produced messages should reflect the ensemble.  An origin
-numbering convention which allows these ensembles to be represented
-through bit masking is suggested.
+In general, the interpretation of the value of the *origin* field is
+application specific.  The recommended interpretation of *origin* is to
+identify "where" a message came from.  Some ZIO components provide
+algorithms which treat *origin* to identify messages with as forming a
+logical stream.
 
 * Granule
 
-In general, ZIO makes no requirement on the values placed in *granule*.
-The recommended interpretation of the *granule* field is to provide
-ordering between different message origins.  A likely interpretation
-of the *granule* is that of an absolute timestamp from some globally
-shared clock (or approximately shared such as computer system clocks).
-If the application developer has no particular requirements, ZIO
-recommends supplying microseconds since the Unix Epoch.
+In general, the interpretation of the value of the *granule* field is
+application specific.  The recommended interpretation of *granule* is to
+provide an ordering of messages within and across different values of
+*origin*.  
+
+* Seqno
+
+In general, the interpretation of the value of the *seqno* field is
+application specific.  The recommended interpretation of *seqno* is to
+enumerate a strictly a sequential count of messages produced from a
+given socket.  
+
 
 * Payload
 

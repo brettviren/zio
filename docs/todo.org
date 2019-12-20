@@ -1,5 +1,8 @@
 #+title: ToDo
 
+- [ ] remove message policy from port.  bind message policy to
+  send()/recv() methods taking a ~port~ (or a ~Socket~)
+
 - [ ] zio is not a great name for this package as one of its main
   goals is to hide the "z".  Given it provides a graph metaphor,
   GraphIO or GIO is better.  "graphio" is already used by libraries

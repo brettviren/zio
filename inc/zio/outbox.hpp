@@ -8,6 +8,7 @@
 #define ZIO_OUTBOX_HPP_SEEN
 
 #include "zio/port.hpp"
+#include "zio/format.hpp"
 
 namespace zio {
 
@@ -24,7 +25,7 @@ namespace zio {
         }
         void send(level::MessageLevel lvl, const native_type& payload) {
             byte_array_t buf = m_convert(payload);
-            m_port->send(lvl, m_convert.format(), buf);
+            zio::send(m_port->socket(), lvl, m_convert.format(), buf);
         }
 
         // bake levels semantics into method names

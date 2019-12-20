@@ -3,7 +3,6 @@
 
 #include "zio/socket.hpp"
 #include "zio/peer.hpp"
-#include "zio/format.hpp"
 
 #include <memory>
 #include <map>
@@ -15,23 +14,10 @@ namespace zio {
     typedef std::string portname_t;
 
 
-
-    struct TimeGranule {
-        granule_t operator()() {
-            return std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-        }
-    };
-
-    struct PortCtx {
-        std::string hostname;
-        origin_t origin;
-        granule_func_t gf{TimeGranule()};
-    };
-
     class Port {
         const std::string m_name;
-        Socket m_sock;          // makes ports noncopyable
-        PortCtx m_ctx;
+        Socket m_sock;          // this makes ports noncopyable
+        std::string m_hostname;
         bool m_online;
 
         // functions which perform a bind() and return associated header
@@ -41,11 +27,10 @@ namespace zio {
         std::vector<address_t> m_connect_addresses, m_connected, m_bound;
         std::vector< std::pair<nodename_t, portname_t> > m_connect_nodeports;
         
-        uint64_t m_seqno{0};
         bool m_verbose{false};
 
     public:
-        Port(const std::string& name, int stype, const PortCtx& ctx);
+        Port(const std::string& name, int stype, const std::string& hostname);
         ~Port();
 
         void set_verbose(bool verbose = true) { m_verbose = verbose; }
@@ -84,22 +69,6 @@ namespace zio {
 
         // Disconnect, unbind.
         void offline();
-
-
-        // Send with level and a single payload and optional label.
-        // This forces policy on the granule, origin and seqno.
-        void send(level::MessageLevel lvl, const std::string& format,
-                  const byte_array_t& payload,
-                  const std::string& label = "");
-
-        // Send with full user provided header, no policy.
-        void send(const Header& header, const byte_array_t& payload);
-
-        // Do a blocking recv() or timeout after given msec.  Return
-        // zero on success, -1 if timeout, -2 if message parse fails,
-        // -3 if multiple payload arrays available but only one requested.
-        int recv(Header& header, byte_array_t& payload, int timeout = -1);
-        int recv(Header& header, std::vector<byte_array_t>& payloads, int timeout = -1);
 
         // Access wrapped socket.
         Socket& socket();

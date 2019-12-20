@@ -1,4 +1,5 @@
 #include "zio/format.hpp"
+#include "zio/socket.hpp"
 
 std::string zio::converter::text_t::operator()(const byte_array_t& buf)
 {
@@ -57,3 +58,15 @@ zio::byte_array_t zio::converter::ubjs_t::operator()(const json& jobj)
     return json::to_ubjson(jobj);
 }
 
+void zio::send(Socket& sock,
+               level::MessageLevel lvl, const std::string& format,
+               const byte_array_t& buf, const std::string& label)
+{
+    zmsg_t* msg = zmsg_new();
+    zmsg_addstrf(msg, "ZIO%d%4s%s", lvl, format.c_str(), label.c_str());
+    const int ncoords = 3;
+    uint64_t coords[ncoords] = {m_ctx.origin, m_ctx.gf(), m_seqno++};
+    zmsg_addmem(msg, coords, ncoords*sizeof(uint64_t));
+    zmsg_addmem(msg, buf.data(), buf.size());
+    sock.send(&msg);
+}
