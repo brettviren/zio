@@ -1,0 +1,23 @@
+graph types {
+        rankdir=LR
+        peer[label="peer\nnick\nheaders"]
+        nod[shape=Mcircle,label="node\nident"]
+        port1[label="port\nname\nseqno"]
+        port2[label="port\nname\nseqno"]
+        sock1[label="socket",shape=circle]
+        sock2[label="socket",shape=circle]
+        msg[shape=record,label="{message}|{ZIOn}|{FORM}|{label}"]
+
+        {rank=same peer nod}
+        {rank=same port1 sock1}
+        {rank=same port2 sock2}
+
+        peer--nod
+
+        nod--port1--sock1
+        nod--port2--sock2
+
+        sock1--msg
+        sock2--msg
+
+}
