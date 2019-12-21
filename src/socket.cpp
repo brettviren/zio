@@ -1,11 +1,15 @@
 #include "zio/socket.hpp"
+#include "zio/exceptions.hpp"
 
 zio::Socket::Socket(int stype)
 {
     m_sock = zsock_new(stype);
-    if (!m_sock) {
-        throw std::runtime_error("failed to make socket");
-    }
+    /// apparently, can't even check for this because
+    /// zsock_new_checked() intercedes
+    ///
+    // if (!m_sock) {
+    //     throw zio::socket_error::create("failed to make socket");
+    // }
     m_poller = zpoller_new(m_sock, NULL);
 
     m_encoded = false;          
@@ -26,8 +30,7 @@ zio::address_t zio::Socket::bind(const address_t& address)
 {
     int port = zsock_bind(m_sock, "%s", address.c_str());
     if (port < 0) {
-        std::string s = "failed to bind to " + address;
-        throw std::runtime_error(s);
+        throw zio::socket_error::create(address.c_str());
     }
     return zsock_endpoint(m_sock);
 }
@@ -36,8 +39,7 @@ void zio::Socket::connect(const address_t& address)
 {
     int rc = zsock_connect(m_sock, "%s", address.c_str());
     if (rc < 0) {
-        std::string s = "failed to connect to " + address;
-        throw std::runtime_error(s);
+        throw zio::socket_error::create(address.c_str());
     }
 }
 

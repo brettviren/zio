@@ -116,6 +116,7 @@ void zio::Message::decode(const encoded_t& data)
         m_payload.emplace_back(b, b+s);
         zframe_destroy(&frame);
     }
+    zmsg_destroy(&msg);
 }
 
 void zio::Message::next(const payload_t& pl, granule_t gran)
