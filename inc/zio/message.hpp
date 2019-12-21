@@ -1,6 +1,6 @@
 /**
-   Functions to mange message data including send and receiving with a
-   socket.
+   Functions to manage message data including send and receiving with
+   a socket.
 
  */
 
@@ -12,14 +12,31 @@
 
 namespace zio {
 
+    namespace level {
+        enum MessageLevel {
+            reserved=0,
+            trace,verbose,debug,info,summary,warning,error,fatal,
+        };
+
+        const char* name(MessageLevel lvl);
+    }
+
     struct PrefixHeader {
         int level{0};
-        std::string format{""}, label{""};
+        std::string format{""};
+        std::string label{""};
 
         std::string dumps() const;
     };
+
+    typedef uint64_t origin_t;
+    typedef uint64_t granule_t;
+    typedef uint64_t seqno_t;
+
     struct CoordHeader {
-        uint64_t origin{0}, granule{0}, seqno{0};
+        origin_t origin{0};
+        granule_t granule{0};
+        seqno_t seqno{0};
     };
     struct Header {
         PrefixHeader prefix;
@@ -41,8 +58,16 @@ namespace zio {
 
 
         Message();
+        Message(const encoded_t& data);
         Message(const header_t h, const multiload_t& pl = multiload_t());
         
+        void set_level(int level) {
+            m_header.prefix.level = level;
+        }
+        void set_label(const std::string& label) {
+            m_header.prefix.label = label;
+        }
+
         /// Reset self to empty message
         void clear();
 
@@ -53,15 +78,19 @@ namespace zio {
         void decode(const encoded_t& dat);
 
         /// Access header
-        const header_t& header() const;
+        const header_t& header() const { return m_header; }
 
         /// Access payload(s)
-        const multiload_t& payload() const;
+        const multiload_t& payload() const { return m_payload; }
 
+        /// Set payload, increment seqno and set granule or if zero
+        /// use current system time in microseconds.
+        void next(const payload_t& pl, granule_t gran=0);
+        void next(const multiload_t& pl, granule_t gran=0);
 
     private:
         header_t m_header;
-        multiload_t m_playload;
+        multiload_t m_payload;
         
     };
 

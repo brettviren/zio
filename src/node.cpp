@@ -1,4 +1,5 @@
 #include "zio/node.hpp"
+#include "zio/senders.hpp"
 
 static
 std::string get_hostname()
@@ -15,10 +16,10 @@ std::string get_hostname()
 
 
 
-zio::Node::Node(nickname_t nick, ident_t ident,
+zio::Node::Node(nickname_t nick, origin_t origin,
                 const std::string& hostname)
     : m_nick(nick)
-    , m_ident(ident)
+    , m_origin(origin)
     , m_hostname(hostname)
     , m_peer(nullptr)
 {
@@ -53,6 +54,19 @@ zio::portptr_t zio::Node::port(const std::string& name)
     return it->second;    
 }
 
+zio::Logger zio::Node::logger(const std::string& name, int stype)
+{
+    return zio::Logger(TextSender(port(name, stype), m_origin));
+}
+
+
+zio::Metric zio::Node::metric(const std::string& name, int stype)
+{
+    return zio::Metric(JsonSender(port(name, stype), m_origin));
+}
+
+
+
 
 void zio::Node::online(const headerset_t& extra_headers)
 {
@@ -84,3 +98,4 @@ void zio::Node::offline()
     delete m_peer;
     m_peer = nullptr;
 }
+

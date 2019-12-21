@@ -1,50 +1,69 @@
-/**
-
-   The zio outboxes provide a type specific sender wrapper around a socket.
-
- */
-
 #ifndef ZIO_OUTBOX_HPP_SEEN
 #define ZIO_OUTBOX_HPP_SEEN
 
-#include "zio/port.hpp"
-#include "zio/format.hpp"
+#include "zio/message.hpp"
 
 namespace zio {
 
-    template<typename CONVERTER>
+    /*!
+      @brief output objects of a fixed native type.
+
+      An Outbox provides a "logger" like object to simplfy use in code
+      to send out messages of a fixed type.
+
+      It is templated on a native type and given a functional object
+      to handle actual sending.  This object should convert from
+      native type to Message.
+
+      See @ref Node for an outbox factory.
+    */
+    template<typename NATIVE>
     class Outbox {
     public:
-        typedef CONVERTER converter_type;
-        typedef typename converter_type::native_type native_type;
+        typedef NATIVE native_type;
+        typedef typename std::function<void(zio::level::MessageLevel lvl,
+                                            const native_type&)> sender_type;
 
-        Outbox(portptr_t port) : m_port(port) { }
+        Outbox(const sender_type& sender) : m_send(sender) { }
 
-        void operator()(level::MessageLevel lvl, const native_type& payload) {
-            send(lvl, payload);
+        void operator()(level::MessageLevel lvl, const native_type& nat) {
+            send(lvl, nat);
         }
-        void send(level::MessageLevel lvl, const native_type& payload) {
-            byte_array_t buf = m_convert(payload);
-            zio::send(m_port->socket(), lvl, m_convert.format(), buf);
+        void send(level::MessageLevel lvl, const native_type& nat) {
+            m_send(lvl, nat);
         }
 
         // bake levels semantics into method names
-        void trace(const native_type& payload)   { send(level::trace, payload); }
-        void verbose(const native_type& payload) { send(level::verbose, payload); }
-        void debug(const native_type& payload)   { send(level::debug, payload); }
-        void info(const native_type& payload)    { send(level::info, payload); }
-        void summary(const native_type& payload) { send(level::summary, payload); }
-        void warning(const native_type& payload) { send(level::warning, payload); }
-        void error(const native_type& payload)   { send(level::error, payload); }
-        void fatal(const native_type& payload)   { send(level::fatal, payload); }
+        void trace(const native_type& nat)
+            { send(level::trace, nat); }
+        void verbose(const native_type& nat)
+            { send(level::verbose, nat); }
+        void debug(const native_type& nat)
+            { send(level::debug, nat); }
+        void info(const native_type& nat)
+            { send(level::info, nat); }
+        void summary(const native_type& nat)
+            { send(level::summary, nat); }
+        void warning(const native_type& nat)
+            { send(level::warning, nat); }
+        void error(const native_type& nat)
+            { send(level::error, nat); }
+        void fatal(const native_type& nat)
+            { send(level::fatal, nat); }
+
     private:
-        portptr_t m_port;
-        converter_type m_convert;
+        sender_type m_send;
     };
 
-    /// Two special types.
-    typedef Outbox<converter::text_t> Logger;
-    typedef Outbox<converter::json_t> Metric;
+    /*!
+      @brief two special types of outboxes.
+    */
+
+    /// A text based logger to use like print().
+    typedef Outbox<std::string> Logger;
+
+    /// Emit structured data.
+    typedef Outbox<zio::json> Metric;
 
 }
 

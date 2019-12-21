@@ -1,23 +1,41 @@
 #include "zio/message.hpp"
-
+#include "zio/exceptions.hpp"
+#include <czmq.h>
 #include <sstream>
+#include <chrono>
+
+const char* zio::level::name(zio::level::MessageLevel lvl)
+{
+    const char* level_names[] = {
+        "undefined",
+        "trace","verbose","debug","info","summary",
+        "warning","error","fatal",
+        0
+    };
+    return level_names[lvl];
+}
+
+
 
 std::string zio::PrefixHeader::dumps() const
 {
     std::stringstream ss;
     ss << "ZIO" << '0'+level << format << label;
-    return s.str();
+    return ss.str();
 }
 
 zio::Message::Message()
 {
 }
-zio::Message::Message(const raw_msg_t& raw)
+
+zio::Message::Message(const encoded_t& data)
 {
-    this->parse(raw);
+    this->decode(data);
 }
-zio::Message::Message(const header_t h)
+
+zio::Message::Message(const header_t h, const multiload_t& pl)
     : m_header(h)
+    , m_payload(pl.begin(), pl.end())
 {
 }
 
@@ -27,7 +45,7 @@ void zio::Message::clear()
     m_payload.clear();
 }
         
-zio::Message::encoded_ zio::Message::encode() const
+zio::Message::encoded_t zio::Message::encode() const
 {
     zmsg_t* msg = zmsg_new();
     auto pre = m_header.prefix.dumps();
@@ -37,7 +55,7 @@ zio::Message::encoded_ zio::Message::encode() const
         zmsg_addmem(msg, pl.data(), pl.size());
     }
     zframe_t* frame = zmsg_encode(msg);
-    encoded_t ret(frame->data(), frame->data()+frame->size());
+    encoded_t ret(zframe_data(frame), zframe_data(frame)+zframe_size(frame));
     zframe_destroy(&frame);
     zmsg_destroy(&msg);
     // sigh, so much copying....
@@ -58,7 +76,7 @@ void zio::Message::decode(const encoded_t& data)
     if (!h1 or strlen(h1) < 8) {
         zmsg_destroy(&msg);
         free(h1);
-        throw zio::message_error(1, "bad prefix header");
+        throw zio::message_error::create(1, "bad prefix header");
     }
     m_header.prefix.level = h1[3] - '0';
     std::string h1s = h1;
@@ -68,15 +86,15 @@ void zio::Message::decode(const encoded_t& data)
     
     // coord header
     frame = zmsg_pop(msg);
-    if (!frame or zframe_size(frame) != 3*sizof(uint64_t)) {
+    if (!frame or zframe_size(frame) != 3*sizeof(uint64_t)) {
         zframe_destroy(&frame);
         zmsg_destroy(&msg);
-        throw zio::message_error(2, "bad coord header");
+        throw zio::message_error::create(2, "bad coord header");
     }
     uint64_t* ogs = (uint64_t*)zframe_data(frame);
-    header.origin = ogs[0];
-    header.granule = ogs[1];
-    header.seqno = ogs[2];
+    m_header.coord.origin = ogs[0];
+    m_header.coord.granule = ogs[1];
+    m_header.coord.seqno = ogs[2];
     zframe_destroy(&frame);    
 
     // payload
@@ -85,7 +103,7 @@ void zio::Message::decode(const encoded_t& data)
         if (!frame) {
             zframe_destroy(&frame);
             zmsg_destroy(&msg);
-            throw zio::message_error(3,"bad payload");
+            throw zio::message_error::create(3,"bad payload");
         }
         std::uint8_t* b = zframe_data(frame);
         size_t s = zframe_size(frame);
@@ -94,14 +112,20 @@ void zio::Message::decode(const encoded_t& data)
     }
 }
 
-const zio::header_t& zio::Message::header() const
+void zio::Message::next(const payload_t& pl, granule_t gran)
 {
-    return m_header;
+    multiload_t ml;
+    ml.push_back(pl);
+    next(ml, gran);
 }
 
-const zio::multiload_t& zio::Message::payload() const
+void zio::Message::next(const multiload_t& pl, granule_t gran)
 {
-    return m_payload;
+    if (gran == 0) {
+        gran = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+    }
+    m_header.coord.granule = gran;
+    ++m_header.coord.seqno;
+    m_payload = pl;
+
 }
-
-

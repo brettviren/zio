@@ -7,8 +7,11 @@
 #ifndef ZIO_SOCKET_HPP_SEEN
 #define ZIO_SOCKET_HPP_SEEN
 
-#include "zio/types.hpp"
 #include <czmq.h>
+#include <vector>
+#include <cstdint>
+
+#include "zio/types.hpp"
 
 namespace zio {
 
@@ -17,6 +20,8 @@ namespace zio {
     */
     class Socket {
     public:
+        typedef std::vector<std::uint8_t> msg_data_t;
+
         Socket(int stype);
         Socket(const Socket& ) = delete;
         Socket& operator=(const Socket&) = delete;
@@ -30,14 +35,15 @@ namespace zio {
 
         /// A SUB needs to subscribe to something, if it expects to
         /// get messages.  Call this prior to any bind or connect.
+        typedef std::string prefixmatch_t;
         void subscribe(const prefixmatch_t& sub = "");
 
         /// Send message out socket.
-        void send(const msg& msg);
+        void send(const msg_data_t& msg);
 
         /// Wrap ZMQ receiving, exposing the zmsg_t.  Timeout in msec.
         /// Return null msg if timeout occurs.
-        zmsg_t* recv(int timeout=-1);
+        msg_data_t recv(int timeout=-1);
 
         /// Return ZMQ socket type
         int type() { return zsock_type(m_sock); }

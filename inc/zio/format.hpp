@@ -20,7 +20,6 @@
 
 namespace zio {
 
-
     // Convert between byte array to native type
     namespace converter {
 
@@ -28,40 +27,40 @@ namespace zio {
         struct text_t {
             typedef std::string native_type;
             const char* format() const { return "TEXT"; }
-            std::string operator()(const byte_array_t& buf);
-            byte_array_t operator()(const std::string& str);
+            std::string operator()(const payload_t& buf);
+            payload_t operator()(const std::string& str);
         };
 
         // JSON in with variants on byte packing
         struct json_t {
             typedef json native_type;
             const char* format() const { return "JSON"; }
-            json operator()(const byte_array_t& buf);
-            byte_array_t operator()(const json& job);
+            json operator()(const payload_t& buf);
+            payload_t operator()(const json& job);
         };
         struct bson_t {
             typedef json native_type;
             const char* format() const { return "BSON"; }
-            json operator()(const byte_array_t& buf);
-            byte_array_t operator()(const json& job);
+            json operator()(const payload_t& buf);
+            payload_t operator()(const json& job);
         };
         struct cbor_t {
             typedef json native_type;
             const char* format() const { return "CBOR"; }
-            json operator()(const byte_array_t& buf);
-            byte_array_t operator()(const json& job);
+            json operator()(const payload_t& buf);
+            payload_t operator()(const json& job);
         };
         struct msgp_t {
             typedef json native_type;
             const char* format() const { return "MSGP"; }
-            json operator()(const byte_array_t& buf);
-            byte_array_t operator()(const json& job);
+            json operator()(const payload_t& buf);
+            payload_t operator()(const json& job);
         };
         struct ubjs_t {
             typedef json native_type;
             const char* format() const { return "UBJS"; }
-            json operator()(const byte_array_t& buf);
-            byte_array_t operator()(const json& job);
+            json operator()(const payload_t& buf);
+            payload_t operator()(const json& job);
         };
             
         /// Protobuf messages.  Provide as templates to leave protobuf
@@ -72,14 +71,14 @@ namespace zio {
         struct pbuf_t {
             typedef PB native_type;
             const char* format() const { return "PBUF"; }
-            PB operator()(const byte_array_t& buf) {
+            PB operator()(const payload_t& buf) {
                 PB msg;
                 msg.ParseFromArray(buf.data(), buf.size());
                 return msg;
             }
-            byte_array_t operator()(const PB& msg) {
+            payload_t operator()(const PB& msg) {
                 size_t siz = msg.ByteSize();
-                byte_array_t buf(siz);
+                payload_t buf(siz);
                 msg.SerializeToArray(buf.data(), siz);
                 return buf;
             }

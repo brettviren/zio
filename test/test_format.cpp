@@ -25,13 +25,13 @@ struct testit_t {
     testit_t(native_type data) : m_dat(data) { }
 
     native_type native() { return m_dat; }
-    zio::byte_array_t tobuffer(const native_type& nat) {
-        zio::byte_array_t buf;
+    zio::payload_t tobuffer(const native_type& nat) {
+        zio::payload_t buf;
         bool ok = convert(m_dat, buf);
         assert(ok);
         return buf;
     }
-    native_type tonative(const zio::byte_array_t& buf) {
+    native_type tonative(const zio::payload_t& buf) {
         native_type nat;
         bool ok = convert(buf, nat);
         assert(ok);

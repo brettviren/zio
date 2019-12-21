@@ -38,33 +38,32 @@ void zio::Socket::subscribe(const prefixmatch_t& sub)
     zsock_set_subscribe(m_sock, sub.c_str());
 }
 
-void zio::Socket::send(zmsg_t** msgptr)
+void zio::Socket::send(const zio::Socket::msg_data_t& data)
 {
-    if (zsock_type(m_sock) == ZMQ_CLIENT) {
-        zframe_t* allinone = zmsg_encode(*msgptr);
-        zmsg_t* encoded = zmsg_new();
-        zmsg_append(encoded, &allinone);
-        zmsg_destroy(msgptr);
-        zmsg_send(&encoded, m_sock);
-        return;
-    }
-    zmsg_send(msgptr, m_sock);
+    zmsg_t* msg = zmsg_new();
+    zmsg_addmem(msg, data.data(), data.size());
+    zmsg_send(&msg, m_sock);
 }
-zmsg_t* zio::Socket::recv(int timeout)
+
+zio::Socket::msg_data_t zio::Socket::recv(int timeout)
 {
     if (timeout >= 0) {
         void* sock = zpoller_wait(m_poller, timeout);
         if (!sock) {
-            return NULL;
+            return zio::Socket::msg_data_t();
         }
     }
     zmsg_t* msg = zmsg_recv(m_sock);
-    if (zsock_type(m_sock) == ZMQ_SERVER) {
-        zmsg_t* decoded = zmsg_decode(zmsg_first(msg));
-        zmsg_destroy(&msg);
-        return decoded;
+    if (!msg) {
+        return zio::Socket::msg_data_t();
     }
-    return msg;
+
+    zframe_t* frame = zmsg_pop(msg);
+    zio::Socket::msg_data_t ret(zframe_data(frame),
+                                zframe_data(frame) + zframe_size(frame));
+    zframe_destroy(&frame);
+    zmsg_destroy(&msg);
+    return ret;
 }
 
 bool zio::Socket::pollin()
@@ -76,17 +75,3 @@ bool zio::Socket::pollout()
 {
     return zsock_events(m_sock) & ZMQ_POLLOUT;
 }
-
-#if 0
-void zio::Message::send(Socket& socket) const
-{
-    zmsg_t* msg = zmsg_new();
-    auto pre = m_header.prefix.dumps();
-    zmsg_addstrf(msg, pre.c_str());
-    zmsg_addmem(msg, &m_header.coord, sizeof(CoordHeader));
-    for (auto& pl : m_payload) {
-        zmsg_addmem(msg, pl.data(), pl.size());
-    }
-    socket.send(&msg);
-}
-#endif

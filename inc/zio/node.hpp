@@ -24,12 +24,13 @@
 
 #include "zio/types.hpp"
 #include "zio/port.hpp"
+#include "zio/outbox.hpp"
 
 namespace zio {
 
     class Node {
         nickname_t m_nick;
-        ident_t m_ident;
+        origin_t m_origin;
 
         std::string m_hostname;
         Peer* m_peer;
@@ -37,16 +38,18 @@ namespace zio {
         std::vector<std::string> m_portnames; // in order of creation.
         bool m_verbose{false};
     public:
-        Node(nickname_t nick="", ident_t ident=0,
+        Node(nickname_t nick="", origin_t origin=0,
              const std::string& hostname="");
         ~Node();
 
         nickname_t nick() const { return m_nick; }
-        ident_t ident() const { return m_ident; }
-        const std::vector<std::string>& portnames() const { return m_portnames; }
+        origin_t origin() const { return m_origin; }
+        const std::vector<std::string>& portnames() const {
+            return m_portnames;
+        }
 
         void set_nick(const nickname_t& nick) { m_nick = nick; }
-        void set_ident(ident_t ident) { m_ident = ident; }
+        void set_origin(origin_t origin) { m_origin = origin; }
 
         // set verbose
         void set_verbose(bool verbose = true) { m_verbose = verbose; }
@@ -57,6 +60,12 @@ namespace zio {
 
         // return previously created port
         portptr_t port(const std::string& name);
+
+        // Return a logger.  Create if not yet created.
+        Logger logger(const std::string& name, int stype = ZMQ_PUB);
+
+        // Return a metric.  Create if not yet created.
+        Metric metric(const std::string& name, int stype = ZMQ_PUB);
 
         // Bring node online using a zio::Peer with auto-generated
         // headers and any extra ones.

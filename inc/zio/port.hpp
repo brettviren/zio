@@ -30,7 +30,8 @@ namespace zio {
         bool m_verbose{false};
 
     public:
-        Port(const std::string& name, int stype, const std::string& hostname);
+        Port(const std::string& name, int stype,
+             const std::string& hostname);
         ~Port();
 
         void set_verbose(bool verbose = true) { m_verbose = verbose; }
@@ -71,7 +72,7 @@ namespace zio {
         void offline();
 
         // Access wrapped socket.
-        Socket& socket();
+        Socket& socket() { return m_sock; }
     };
 
     // Ports can not be copied because of the Socket but they

@@ -42,12 +42,15 @@ namespace zio {
         }
 
     };
-    typedef std::unordered_map<uuid_t, peer_info_t> peerset_t;
 
+    typedef std::unordered_map<uuid_t, peer_info_t> peerset_t;
 
     /// Peer at the network to discover peers and advertise self.
     class Peer {
     public:
+        /// A timeout in milliseconds
+        typedef int timeout_t;
+
         ~Peer();
 
         /// Advertise own nickname and headers
