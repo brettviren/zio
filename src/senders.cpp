@@ -2,7 +2,7 @@
 
 zio::TextSender::TextSender(portptr_t portptr, origin_t origin)
     : port(portptr)
-    , msg({{0,"TEXT",""},{origin,0,0}})
+    , msg({{level::undefined,"TEXT",""},{origin,0,0}})
 {
 }
 
@@ -11,13 +11,15 @@ void zio::TextSender::operator()(zio::level::MessageLevel lvl,
 {
     msg.set_level(lvl);
     msg.next(payload_t(log.begin(), log.end()));
-    port->socket().send(msg.encode());
+    auto data = msg.encode();
+    zsys_debug("LOG[%d]: %s (len:%ld)", lvl, log.c_str(), data.size());
+    port->socket().send(data);
 }
 
 
 zio::JsonSender::JsonSender(portptr_t portptr, origin_t origin)
     : port(portptr)
-    , msg({{0,"JSON",""},{origin,0,0}})
+    , msg({{level::undefined,"JSON",""},{origin,0,0}})
 {
 }
 

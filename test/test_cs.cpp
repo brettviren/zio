@@ -13,7 +13,8 @@ void test_owoa(bool backwards)
         tobind=c;
         toconn=s;
     }
-    const char * addr = "tcp://127.0.0.1:5678";
+    //const char * addr = "tcp://127.0.0.1:5678";
+    const char * addr = "ipc://test_cs.ipc";
     int rc = 0;
     rc = zsock_bind(tobind, "%s", addr);
     if (rc < 0 ) {
@@ -24,11 +25,15 @@ void test_owoa(bool backwards)
     assert(rc >= 0);
 
     int n = 42;
-    rc = zsock_send(c,"i",n);
+    rc = zsock_bsend(c,"4",n);
     assert(rc >= 0);
-    rc = zsock_recv(s,"i",&n);
-    assert(rc > 0);             // should be routing ID strictly >0
+    n=0;
+    rc = zsock_brecv(s,"4",&n);
+    uint32_t rid = zsock_routing_id(s);
+    zsys_debug("%d %d %u bw:%d", rc, n, rid, backwards);
+    assert(rc == 0);
     assert(n==42);
+    assert(rid != 0);
 
     zsock_destroy(&c);
     zsock_destroy(&s);

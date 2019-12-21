@@ -52,3 +52,6 @@ def build(bld):
         source='libzio.la.in', target='libzio.la',
         **bld.env)
     bld.install_files('${PREFIX}/lib', bld.path.find_or_declare("libzio.la"))
+    
+    from waflib.Tools import waf_unit_test
+    bld.add_post_fun(waf_unit_test.summary)

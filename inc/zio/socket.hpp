@@ -61,6 +61,7 @@ namespace zio {
     private:
         zsock_t* m_sock;
         zpoller_t* m_poller;
+        bool m_encoded;
     };
 
 }

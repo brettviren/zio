@@ -14,7 +14,7 @@ namespace zio {
 
     namespace level {
         enum MessageLevel {
-            reserved=0,
+            undefined=0,
             trace,verbose,debug,info,summary,warning,error,fatal,
         };
 
@@ -22,7 +22,7 @@ namespace zio {
     }
 
     struct PrefixHeader {
-        int level{0};
+        level::MessageLevel level{level::undefined};
         std::string format{""};
         std::string label{""};
 
@@ -61,7 +61,7 @@ namespace zio {
         Message(const encoded_t& data);
         Message(const header_t h, const multiload_t& pl = multiload_t());
         
-        void set_level(int level) {
+        void set_level(level::MessageLevel level) {
             m_header.prefix.level = level;
         }
         void set_label(const std::string& label) {
@@ -82,6 +82,7 @@ namespace zio {
 
         /// Access payload(s)
         const multiload_t& payload() const { return m_payload; }
+        multiload_t& payload() { return m_payload; }
 
         /// Set payload, increment seqno and set granule or if zero
         /// use current system time in microseconds.

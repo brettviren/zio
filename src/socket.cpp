@@ -7,6 +7,14 @@ zio::Socket::Socket(int stype)
         throw std::runtime_error("failed to make socket");
     }
     m_poller = zpoller_new(m_sock, NULL);
+
+    m_encoded = false;          
+    if (stype == ZMQ_SERVER or
+        stype == ZMQ_CLIENT or
+        stype == ZMQ_RADIO or
+        stype == ZMQ_DISH)
+        m_encoded = true;
+    // encode for single message part
 }
 zio::Socket::~Socket()
 {
@@ -40,8 +48,16 @@ void zio::Socket::subscribe(const prefixmatch_t& sub)
 
 void zio::Socket::send(const zio::Socket::msg_data_t& data)
 {
-    zmsg_t* msg = zmsg_new();
-    zmsg_addmem(msg, data.data(), data.size());
+    zmsg_t* msg = NULL;
+    if (m_encoded) {            // send encoded into one message part
+        msg = zmsg_new();
+        zmsg_addmem(msg, data.data(), data.size());
+    }
+    else {
+        zframe_t* frame = zframe_new(data.data(), data.size());
+        msg = zmsg_decode(frame);
+        zframe_destroy(&frame);
+    }
     zmsg_send(&msg, m_sock);
 }
 
@@ -57,8 +73,14 @@ zio::Socket::msg_data_t zio::Socket::recv(int timeout)
     if (!msg) {
         return zio::Socket::msg_data_t();
     }
-
-    zframe_t* frame = zmsg_pop(msg);
+    
+    zframe_t* frame = 0;
+    if (m_encoded) {
+        frame = zmsg_pop(msg);
+    }
+    else{
+        frame = zmsg_encode(msg);
+    }
     zio::Socket::msg_data_t ret(zframe_data(frame),
                                 zframe_data(frame) + zframe_size(frame));
     zframe_destroy(&frame);

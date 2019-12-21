@@ -20,7 +20,11 @@ const char* zio::level::name(zio::level::MessageLevel lvl)
 std::string zio::PrefixHeader::dumps() const
 {
     std::stringstream ss;
-    ss << "ZIO" << '0'+level << format << label;
+    char num = '0' + level;
+    ss << "ZIO" << num << format;
+    if (label.size() > 0) {
+        ss << label;
+    }
     return ss.str();
 }
 
@@ -78,10 +82,12 @@ void zio::Message::decode(const encoded_t& data)
         free(h1);
         throw zio::message_error::create(1, "bad prefix header");
     }
-    m_header.prefix.level = h1[3] - '0';
+    m_header.prefix.level = level::MessageLevel(h1[3] - '0');
     std::string h1s = h1;
     m_header.prefix.format = h1s.substr(4,4);
-    m_header.prefix.label = h1s.substr(8);
+    if (h1s.size() > 8) {
+        m_header.prefix.label = h1s.substr(8);
+    }
     free (h1);    
     
     // coord header

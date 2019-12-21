@@ -10,7 +10,7 @@ int main()
     // this test generally pretends to be the guts of a node.
 
     // create many ports
-    zio::Port port("name1", ZMQ_PUB, {"127.0.0.1", 42});
+    zio::Port port("name1", ZMQ_PUB, "127.0.0.1");
     port.bind();
     // port.connect("name2", "portA");
 
