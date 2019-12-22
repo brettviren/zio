@@ -1,0 +1,66 @@
+@startuml
+title Inject data
+activate server
+server -> server : BIND
+note left
+        relative order of
+        two does not matter.
+end note
+
+activate client
+client -> server : CONNECT
+
+group initiate
+client -> server : REQ (2 creds)
+note left
+        client extends
+        credit to server.
+end note
+client -> server : PAY (2)
+note left
+        client will wait
+        on first transfer.
+end note
+end
+group transfer
+server --> client : data(BOS)
+server --> client : data(PL)
+client -> server : PAY (2)
+server --> client : data(PL)
+server --> client : data(PL)
+client -> server : PAY (2)
+server --> client : data(EOS)
+client -> server : PAY (1)
+client -> client : handle EOS 
+note left
+Transmission may continue.
+end note
+server --> client : data(BOS)
+server --> client : data(PL)
+client -> server : PAY (2)
+server --> client : data(EOS)
+client -> server : PAY (1)
+client -> client : handle EOS 
+end
+group finalize
+server --> client : EOT
+note left
+server indicates
+end of data.
+end note
+
+client -> server : PAY (1)
+note left
+client returns
+all credit as ack
+end note
+
+client -> client : handle EOT
+note left
+client no longer recv()
+end note
+end
+
+destroy client
+@enduml
+
