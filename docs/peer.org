@@ -11,11 +11,12 @@ technology and presented via ~zio::Peer~.
 * How it works
 
 A ~zio::Peer~ instance is created with a *nickname* and a set of *headers*
-each of which a key/value pair of strings.  After construction, this
-information is made available to all other accessible peers and
-likewise they are known to peer just constructed.  The nickname of a
-peer may not be unique but each peer has a unique id (UUID) to which
-the nickname and headers are associated.
+each of which a key/value pair of strings.  Each key must be unique in
+the set of headers.  After construction, this information is made
+available to all other accessible peers and likewise they are known to
+the peer that was just constructed.  The nickname of a peer is not
+required to be unique in the ZIO network but each peer has a unique id
+(UUID) to which the nickname and headers are associated.
 
 As peers come and go from the network each peer maintains this
 association and its owning application may query it at any time.  The

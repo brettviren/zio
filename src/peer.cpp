@@ -1,5 +1,18 @@
 #include "zio/peer.hpp"
 
+zio::headerset_t zio::peer_info_t::branch(const std::string& prefix)
+{
+    const size_t len = prefix.size();
+    headerset_t ret;
+    for (const auto& hh : headers) {
+        if (hh.first.substr(0,len) != prefix) {
+            continue;
+        }
+        ret[hh.first.substr(len)] = hh.second;
+    }
+    return ret;
+}
+
 zio::Peer::Peer(const nickname_t& nickname, const headerset_t& headers,
                 bool verbose)
     : m_nick(nickname), m_verbose(verbose), m_zyre(nullptr)
@@ -47,7 +60,7 @@ bool zio::Peer::poll(timeout_t timeout)
         if (streq(event_type, "ENTER")) {
             uuid_t uuid = zyre_event_peer_uuid(event);
             if (m_verbose)
-                zsys_debug("%s: see peer %s", m_nick.c_str(),uuid.c_str());
+                zsys_debug("%s: see peer \"%s\"", m_nick.c_str(),uuid.c_str());
             peer_info_t pi;
             pi.nick = zyre_event_peer_name(event);
             zhash_t* hh = zyre_event_headers(event);
@@ -57,14 +70,14 @@ bool zio::Peer::poll(timeout_t timeout)
                 void* vptr = zhash_lookup(hh, static_cast<char*>(cursor));
                 header_key_t key = static_cast<char*>(cursor);
                 header_value_t val = static_cast<char*>(vptr);
-                pi.headers.push_back(header_t(key,val));
+                pi.headers[key] = val;
                 //zsys_debug("%s: add header %s:%s", m_nick.c_str(),key.c_str(),val.c_str());
                 cursor = zlist_next(keys);
             }
             m_known_peers[uuid] = pi;
             zlist_destroy (&keys);
             if (m_verbose)
-                zsys_debug("%s: add %s (%s), knows %ld peers",
+                zsys_debug("%s: add peer \"%s\" (%s), knows %ld other",
                            m_nick.c_str(), pi.nick.c_str(), uuid.c_str(), m_known_peers.size());
             got_one = true;
         }
@@ -122,12 +135,12 @@ std::vector<zio::uuid_t> zio::Peer::waitfor(const nickname_t& nickname, timeout_
 
     while (maybe.empty()) {
         if (m_verbose)
-            zsys_debug("%s: waiting for peer %s to come online",
+            zsys_debug("%s: waiting for peer \"%s\" to come online",
                        m_nick.c_str(), nickname.c_str());
         poll(timeout);
         maybe = nickmatch(nickname);
         if (m_verbose)
-            zsys_debug("%s: see peer %s after %ld ms, have %ld match",
+            zsys_debug("%s: see peer \"%s\" after %ld ms, have %ld match",
                        m_nick.c_str(), nickname.c_str(),
                        zclock_usecs() / 1000 - start,
                        maybe.size());

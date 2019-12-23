@@ -47,6 +47,7 @@ namespace zio {
 
         /// Return ZMQ socket type
         int type() { return zsock_type(m_sock); }
+        std::string stype() { return zsock_type_str(m_sock); }
 
         /// Return true if there is at least one message waiting in
         /// the socket input queue.

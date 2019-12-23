@@ -14,7 +14,7 @@ int main(int argc, char* argv[])
 
     // in a publisher application
     zio::Socket pub(ZMQ_PUB);
-    const std::string addr = pub.bind("tcp://127.0.0.1:*");
+    const std::string addr = pub.bind("inproc://testpeerlink");
     zio::Peer pubpeer("pub",{{"Feed",addr}}, verbose);
 
     // in a subscriber application
@@ -28,13 +28,13 @@ int main(int argc, char* argv[])
         cerr << "pub nick is " << pubinfo.nick << endl;
     assert (pubinfo.nick == "pub");
     assert (pubinfo.headers.size() == 1);
-    auto feeds = pubinfo.lookup("Feed");
+    auto feeds = pubinfo.branch("Feed");
     if (verbose)
-        cerr << "got " << feeds.size() << " feeds\n";
+        cerr << "got " << feeds.size() << ": " << feeds[""] << endl;
     assert(feeds.size() == 1);
     zio::Socket sub(ZMQ_SUB);
     sub.subscribe();
-    sub.connect(feeds[0]);
+    sub.connect(feeds[""]);
 
     // zmq wart: SSS, give time for pub to process any subscriptions.
     zclock_sleep(100);

@@ -1,16 +1,8 @@
 #include "zio/port.hpp"
 #include "zio/types.hpp"
 #include <sstream>
-
-static
-zio::header_t make_address_header(const std::string& portname, const std::string& address)
-{
-    const std::string port_header_key = "Zio-Port";
-    return zio::header_t(port_header_key, portname + "@" + address);
-    // fixme: above bakes in a convention of header:
-    // Zio-Port: <portname>@<address>
-    // Concentrate convention into some general header utils
-}
+#include <algorithm>
+#include <string>
 
 struct DirectBinder {
     zio::Socket& sock;
@@ -97,19 +89,30 @@ void zio::Port::subscribe(const std::string& prefix)
 }
 
 
+void zio::Port::set_header(const std::string& leafname, const std::string& value)
+{
+    std::string key = "zio.port." + m_name + "." + leafname;
+    m_headers[key] = value;
+}
+
 zio::headerset_t zio::Port::do_binds()
 {
-    zio::headerset_t ret;
+    std::stringstream ss;
+    std::string comma = "";
+
     for (auto& binder : m_binders) {
         auto address = binder();
-        auto hdr = make_address_header(m_name, address);
-        ret.push_back(hdr);
+        ss << comma << address;
+        comma = " ";
         m_bound.push_back(address);
-        if (m_verbose)
-            zsys_debug("[port %s]: bind to %s = %s",
-                       m_name.c_str(), hdr.first.c_str(), hdr.second.c_str());
     }
-    return ret;
+    std::string addresses = ss.str();
+    set_header("address", addresses);
+
+    set_header("socket", m_sock.stype());
+
+    return m_headers;
+
 }
 
 void zio::Port::online(zio::Peer& peer)
@@ -137,25 +140,23 @@ void zio::Port::online(zio::Peer& peer)
         auto uuids = peer.waitfor(nh.first);
         assert(uuids.size());
 
-        const std::string prefix = nh.second + "@";
         for (auto uuid : uuids) {
             auto pi = peer.peer_info(uuid);
 
-            if (m_verbose) {
-                zsys_debug("[port %s]: peer info for %s [%s]",
-                           m_name.c_str(), pi.nick.c_str(), uuid.c_str());
-                for (const auto& hh : pi.headers) 
-                    zsys_debug("\t%s = %s", hh.first.c_str(), hh.second.c_str());
+            std::string maybe_addresses = pi.branch("zio.port." + nh.second)[".address"];
+            if (maybe_addresses.empty()) {
+                zsys_warning("[port %s]: found %s:%s (%s) lacking address header",
+                             m_name.c_str(), nh.first.c_str(), nh.second.c_str(), uuid.c_str());
+                continue;
             }
-
-            auto found = pi.match("Zio-Port", prefix);
-            assert(found.size());
-            for (const auto& val : found) {
-                address_t addr = val.substr(prefix.size());
+            std::stringstream ss(maybe_addresses);
+            std::string addr;
+            while(std::getline(ss, addr, ' ')) {
+                if (addr.empty() or addr[0] == ' ') continue;
                 if (m_verbose) 
-                    zsys_debug("[port %s]: connect to %s at %s",
+                    zsys_debug("[port %s]: connect to %s:%s at %s",
                                m_name.c_str(),
-                               nh.second.c_str(), addr.c_str());
+                               nh.first.c_str(), nh.second.c_str(), addr.c_str());
                 zsock_connect(m_sock.zsock(), "%s", addr.c_str());
                 m_connected.push_back(addr);
             }

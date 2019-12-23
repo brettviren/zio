@@ -1,8 +1,8 @@
 #include "zio/senders.hpp"
 
-zio::TextSender::TextSender(portptr_t portptr, origin_t origin)
-    : port(portptr)
-    , msg({{level::undefined,"TEXT",""},{origin,0,0}})
+zio::TextSender::TextSender(Node& node, std::string portname, int socket_type)
+    : port(node.port(portname, socket_type))
+    , msg({{level::undefined,"TEXT",""},{node.origin(),0,0}})
 {
 }
 
@@ -17,9 +17,9 @@ void zio::TextSender::operator()(zio::level::MessageLevel lvl,
 }
 
 
-zio::JsonSender::JsonSender(portptr_t portptr, origin_t origin)
-    : port(portptr)
-    , msg({{level::undefined,"JSON",""},{origin,0,0}})
+zio::JsonSender::JsonSender(Node& node, std::string portname, int socket_type)
+    : port(node.port(portname, socket_type))
+    , msg({{level::undefined,"JSON",""},{node.origin(),0,0}})
 {
 }
 
@@ -31,4 +31,3 @@ void zio::JsonSender::operator()(zio::level::MessageLevel lvl,
     msg.next(payload_t(s.begin(), s.end()));
     port->socket().send(msg.encode());
 }
-

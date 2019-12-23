@@ -15,20 +15,6 @@ namespace zio {
 
 
     class Port {
-        const std::string m_name;
-        Socket m_sock;          // this makes ports noncopyable
-        std::string m_hostname;
-        bool m_online;
-
-        // functions which perform a bind() and return associated header
-        typedef std::function<address_t()> binder_t;
-        std::vector<binder_t> m_binders;
-
-        std::vector<address_t> m_connect_addresses, m_connected, m_bound;
-        std::vector< std::pair<nodename_t, portname_t> > m_connect_nodeports;
-        
-        bool m_verbose{false};
-
     public:
         Port(const std::string& name, int stype,
              const std::string& hostname);
@@ -60,6 +46,9 @@ namespace zio {
         // required if there shall be any expectation of messages.
         void subscribe(const std::string& prefix);
 
+        // Set header "zio.port.<portname>.<leafname> = <value>
+        void set_header(const std::string& leafname, const std::string& value);
+
         // The rest are for the owning Node to call
 
         // Do any requested binds, return all corresponding port headers.
@@ -73,6 +62,24 @@ namespace zio {
 
         // Access wrapped socket.
         Socket& socket() { return m_sock; }
+
+    private:
+        const std::string m_name;
+        Socket m_sock;          // this makes ports noncopyable
+        std::string m_hostname;
+        bool m_online;
+        std::map<std::string, std::string> m_headers;
+
+        // functions which perform a bind() and return associated header
+        typedef std::function<address_t()> binder_t;
+        std::vector<binder_t> m_binders;
+
+        std::vector<address_t> m_connect_addresses, m_connected, m_bound;
+        std::vector< std::pair<nodename_t, portname_t> > m_connect_nodeports;
+        
+        bool m_verbose{false};
+
+
     };
 
     // Ports can not be copied because of the Socket but they

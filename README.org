@@ -34,7 +34,7 @@ Until then, here's how to install ZIO:
 
 #+begin_example
   $ ./waf configure --prefix=/path/to/install
-  $ [./waf build --alltests]
+  $ [./waf build --alltests -j1]
   $ ./waf install [--notests]
 #+end_example
 

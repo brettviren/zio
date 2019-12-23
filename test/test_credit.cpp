@@ -69,6 +69,10 @@ server_actor (zsock_t* pipe, void *args)
     zsock_signal(pipe, 0);
 
     FILE *file = fopen ("testdata", "r");
+    if (!file) {
+        zsys_error("This test needs a test file called 'testdata', make with:\n"
+                   "\ndd if=/dev/urandom of=testdata bs=1M count=1024\n");
+    }
     assert (file);
 
     zsock_t *router = zsock_new (ZMQ_ROUTER);

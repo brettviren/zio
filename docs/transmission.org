@@ -59,6 +59,15 @@ data is stored by the server.  Other examples may include data
 structure schema if the payload data are not sufficiently
 self-describing.
 
+There are no meaningfully different message levels for ~CRED~ message so
+this attribute is set to 0 (undefined).  Payload ~data~ messages may
+have application defined levels.  Likewise, ~origin~, ~granule~ and ~seqno~
+are not relevant to ~CRED~.  It is recommended to set them in the same 
+manner as ~data~ messages.
+
+The next section describes the ~CRED~ protocol and illustrates the
+distinction between ~CRED~ control messages and payload ~data~ messages.
+
 * Protocol
 
 The ZIO transmission protocol is described in the following sequence diagrams for the cases of extraction and injection.

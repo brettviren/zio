@@ -7,6 +7,7 @@
 
 #include "zio/message.hpp"
 #include "zio/port.hpp"
+#include "zio/node.hpp"
 
 namespace zio {
 
@@ -14,15 +15,16 @@ namespace zio {
         Message msg;
         portptr_t port;
         TextSender() {}
-        TextSender(portptr_t p, origin_t origin);
+        TextSender(Node& node, std::string portname, int socket_type = ZMQ_PUB);
         void operator()(zio::level::MessageLevel lvl, const std::string& log);
 
     };
+    
     struct JsonSender {
         Message msg;
         portptr_t port;
         JsonSender() {}
-        JsonSender(portptr_t p, origin_t origin);
+        JsonSender(Node& node, std::string portname, int socket_type = ZMQ_PUB);
         void operator()(zio::level::MessageLevel lvl, const zio::json& met);
     };
 

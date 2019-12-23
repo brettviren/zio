@@ -1,6 +1,24 @@
 #+title: ZIO Port
 
-intro t.b.d.
+* Introduction
+
+A ZIO port associates information to a socket in the context of a
+~node~.  It has a short *name* to which it is uniquely known in the ~node~.
+It may have one or more ZeroMQ addresses to which is has bound.
+Through the [[file:peer.org][peer]] mechanism the network knows of port information
+through the port peer headers.
+
+|-----------------+--------------------------|
+| ~zio.port.<name>~ | description              |
+|-----------------+--------------------------|
+| ~.address~        | ZeroMQ transport address |
+| ~.socket~         | ZeroMQ socket type name  |
+|-----------------+--------------------------|
+
+Applications may extend the port peer header set prior to the node
+going online.
+
+
 
 * Using ~zio::Port~
 

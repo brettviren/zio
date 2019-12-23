@@ -15,31 +15,28 @@
 
 namespace zio {
 
+    /// A peer asserts a nickname
+    typedef std::string nickname_t;
+    /// Uniquely identify a peer
+    typedef std::string uuid_t;
+
+    /// A "header" is on in a set of key/value pairs asserted by a peer.
+    typedef std::string header_key_t;
+    typedef std::string header_value_t;
+
+    // header key must be unique in a header set
+    typedef std::pair<header_key_t, header_value_t> header_t;
+    typedef std::map<header_key_t, header_value_t> headerset_t;
+
     struct peer_info_t {
         nickname_t nick{""};
         headerset_t headers;
 
-        std::vector<header_value_t> lookup(const header_key_t& key) {
-            std::vector<header_value_t> ret;
-            for (const auto& one : headers) {
-                if (one.first == key) {
-                    ret.push_back(one.second);
-                }
-            }
-            return ret;
-        }
-
-        std::vector<header_value_t> match(const header_key_t& key, const std::string& prefix) {
-            std::vector<header_value_t> ret;
-            const auto psiz = prefix.size();
-            for (const auto& val : lookup(key)) {
-                const auto vsiz = val.size();
-                if (vsiz < psiz) continue;
-                if (val.substr(0,psiz) != prefix) continue;
-                ret.push_back(val);
-            }
-            return ret;
-        }
+        // return a new mapping with entries of matching prefix.
+        // Eg, {"a":"blech", "a.b":"foo", "a.b.c":"bar"}.
+        // Branched on "a.b." returns: {c:"bar"}.
+        // Branched on "a.b"  returns: {"":"foo", ".c":"bar"}
+        headerset_t branch(const std::string& prefix);
 
     };
 

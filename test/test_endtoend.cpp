@@ -1,5 +1,6 @@
 #include "zio/node.hpp"
 #include "zio/outbox.hpp"
+#include "zio/senders.hpp"
 #include "zio/format.hpp"
 
 void test_it(int sender_stype, int recver_stype)
@@ -22,7 +23,7 @@ void test_it(int sender_stype, int recver_stype)
     recver.online();
 
 
-    zio::Logger log = sender.logger("outbox");
+    zio::Logger log(zio::TextSender(sender, "outbox"));
 
     // zmq wart: SSS, give time for pub to process any subscriptions.
     //zclock_sleep(100);

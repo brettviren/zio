@@ -52,8 +52,8 @@ void zio::Message::clear()
 zio::Message::encoded_t zio::Message::encode() const
 {
     zmsg_t* msg = zmsg_new();
-    auto pre = m_header.prefix.dumps();
-    zmsg_addstrf(msg, pre.c_str());
+    std::string pre = m_header.prefix.dumps();
+    zmsg_addstr(msg, pre.c_str());
     zmsg_addmem(msg, &m_header.coord, sizeof(CoordHeader));
     for (auto& pl : m_payload) {
         zmsg_addmem(msg, pl.data(), pl.size());

@@ -54,19 +54,6 @@ zio::portptr_t zio::Node::port(const std::string& name)
     return it->second;    
 }
 
-zio::Logger zio::Node::logger(const std::string& name, int stype)
-{
-    return zio::Logger(TextSender(port(name, stype), m_origin));
-}
-
-
-zio::Metric zio::Node::metric(const std::string& name, int stype)
-{
-    return zio::Metric(JsonSender(port(name, stype), m_origin));
-}
-
-
-
 
 void zio::Node::online(const headerset_t& extra_headers)
 {
@@ -75,7 +62,7 @@ void zio::Node::online(const headerset_t& extra_headers)
     headerset_t headers = extra_headers;
     for (auto& np : m_ports) {
         headerset_t hs = np.second->do_binds();
-        headers.insert(headers.end(), hs.begin(), hs.end());
+        headers.insert(hs.begin(), hs.end());
     }
     if (m_verbose) {
         zsys_debug("[node %s] going online with:", m_nick.c_str());
