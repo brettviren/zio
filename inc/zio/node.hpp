@@ -61,12 +61,6 @@ namespace zio {
         // return previously created port
         portptr_t port(const std::string& name);
 
-        // Return a logger.  Create if not yet created.
-        Logger logger(const std::string& name, int stype = ZMQ_PUB);
-
-        // Return a metric.  Create if not yet created.
-        Metric metric(const std::string& name, int stype = ZMQ_PUB);
-
         // Bring node online using a zio::Peer with auto-generated
         // headers and any extra ones.
         void online(const headerset_t& extra_headers = {});

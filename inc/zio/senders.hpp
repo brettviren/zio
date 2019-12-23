@@ -1,7 +1,6 @@
 /*!
 
-  Senders provide functional objects to send data simply, hiding
-  details of the port and its node.
+  Senders provide simplified and typed sending to a port.
 
 */
 
@@ -18,7 +17,7 @@ namespace zio {
         Message msg;
         portptr_t port;
         TextSender() {}
-        TextSender(Node& node, std::string portname, int socket_type = ZMQ_PUB);
+        explicit TextSender(portptr_t port);
         void operator()(zio::level::MessageLevel lvl, const std::string& log);
 
     };
@@ -27,7 +26,7 @@ namespace zio {
         Message msg;
         portptr_t port;
         JsonSender() {}
-        JsonSender(Node& node, std::string portname, int socket_type = ZMQ_PUB);
+        explicit JsonSender(portptr_t port);
         void operator()(zio::level::MessageLevel lvl, const zio::json& met);
     };
 

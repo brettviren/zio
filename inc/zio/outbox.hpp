@@ -8,7 +8,7 @@
 namespace zio {
 
     /*!
-      @brief output objects of a fixed native type.
+      @brief output objects of a fixed native type with levels expressed as methods.
 
       An Outbox provides a "logger" like object to simplfy use in code
       to send out messages of a fixed type.
@@ -17,7 +17,6 @@ namespace zio {
       to handle actual sending.  This object should convert from
       native type to Message.
 
-      See @ref Node for an outbox factory.
     */
     template<typename NATIVE>
     class Outbox {
@@ -26,7 +25,7 @@ namespace zio {
         typedef typename std::function<void(zio::level::MessageLevel lvl,
                                             const native_type&)> sender_type;
 
-        Outbox(const sender_type& sender) : m_send(sender) { }
+        explicit Outbox(const sender_type& sender) : m_send(sender) { }
         virtual ~Outbox() { }
 
         void operator()(level::MessageLevel lvl, const native_type& nat) {

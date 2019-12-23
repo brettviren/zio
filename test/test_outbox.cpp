@@ -6,8 +6,8 @@ int main()
     zio::Node node("answer", 42);
     node.set_verbose(true);
 
-    zio::Logger logger(zio::TextSender(node, "logs", ZMQ_PUSH));
-    zio::Metric metric(zio::JsonSender(node, "metrics", ZMQ_PUSH));
+    zio::Logger logger(zio::TextSender(node.port("logs", ZMQ_PUSH)));
+    zio::Metric metric(zio::JsonSender(node.port("metrics", ZMQ_PUSH)));
     node.port("logs")->bind();
     node.port("metrics")->bind();
     node.online();

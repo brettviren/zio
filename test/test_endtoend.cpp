@@ -7,7 +7,7 @@ void test_it(int sender_stype, int recver_stype)
 {
     zio::Node sender("sender",1);
     sender.set_verbose();
-    auto po = sender.port("outbox", sender_stype);
+    zio::portptr_t po = sender.port("outbox", sender_stype);
     po->bind("inproc://endtoend");
     //po->connect("recver","inbox");
     sender.online();
@@ -23,7 +23,15 @@ void test_it(int sender_stype, int recver_stype)
     recver.online();
 
 
-    zio::Logger log(zio::TextSender(sender, "outbox"));
+    ///// zio::Logger ggg(zio::TextSender(po));
+    // error: request for member ‘info’ in ‘ggg’, which is of
+    // non-class type ‘zio::Logger(zio::TextSender) {aka
+    // zio::Outbox<std::__cxx11::basic_string<char>
+    // >(zio::TextSender)}'
+    ///// thinks it's a functionn declaration?
+
+    zio::TextSender ts(po);
+    zio::Logger log(ts);
 
     // zmq wart: SSS, give time for pub to process any subscriptions.
     //zclock_sleep(100);
