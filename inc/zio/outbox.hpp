@@ -27,11 +27,12 @@ namespace zio {
                                             const native_type&)> sender_type;
 
         Outbox(const sender_type& sender) : m_send(sender) { }
+        virtual ~Outbox() { }
 
         void operator()(level::MessageLevel lvl, const native_type& nat) {
             send(lvl, nat);
         }
-        void send(level::MessageLevel lvl, const native_type& nat) {
+        virtual void send(level::MessageLevel lvl, const native_type& nat) {
             m_send(lvl, nat);
         }
 

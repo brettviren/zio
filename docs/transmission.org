@@ -76,8 +76,10 @@ The ZIO transmission protocol is described in the following sequence diagrams fo
 
 The protocol begins with usual socket binding and connection with
 either CLIENT or SERVER performing either (or both) and in any order
-but under the usual rules of ZeroMQ (round-robin sends, fair-queued
-recvs).
+but under the usual rules of ZeroMQ.  Since client to server is a
+round-robin send, both variants of the ~CRED~ protocol assume a client
+connects to a single server.  A server may have multiple outstanding
+clients.
 
 The client makes an initiating request (~REQ~) message.  It sets the
 number of credits (example of 2 in diagram) to be in play during

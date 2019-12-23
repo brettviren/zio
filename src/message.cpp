@@ -48,7 +48,7 @@ void zio::Message::clear()
     m_header = header_t();
     m_payload.clear();
 }
-        
+
 zio::Message::encoded_t zio::Message::encode() const
 {
     zmsg_t* msg = zmsg_new();
@@ -118,21 +118,15 @@ void zio::Message::decode(const encoded_t& data)
     }
     zmsg_destroy(&msg);
 }
-
-void zio::Message::next(const payload_t& pl, granule_t gran)
+        
+void zio::Message::set_coord(origin_t origin, granule_t gran)
 {
-    multiload_t ml;
-    ml.push_back(pl);
-    next(ml, gran);
-}
-
-void zio::Message::next(const multiload_t& pl, granule_t gran)
-{
+    ++m_header.coord.seqno;
     if (gran == 0) {
         gran = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
     }
-    m_header.coord.granule = gran;
-    ++m_header.coord.seqno;
-    m_payload = pl;
-
+    m_header.coord.granule = gran;    
+    if (origin) {
+        m_header.coord.origin = origin;
+    }
 }

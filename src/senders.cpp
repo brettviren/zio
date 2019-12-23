@@ -10,10 +10,9 @@ void zio::TextSender::operator()(zio::level::MessageLevel lvl,
                                  const std::string& log)
 {
     msg.set_level(lvl);
-    msg.next(payload_t(log.begin(), log.end()));
-    auto data = msg.encode();
-    zsys_debug("LOG[%d]: %s (len:%ld)", lvl, log.c_str(), data.size());
-    port->socket().send(data);
+    msg.payload().clear();
+    msg.payload().push_back(payload_t(log.begin(), log.end()));
+    port->send(msg);
 }
 
 
@@ -27,7 +26,8 @@ void zio::JsonSender::operator()(zio::level::MessageLevel lvl,
                                  const zio::json& met)
 {           
     msg.set_level(lvl);
+    msg.payload().clear();
     std::string s = met.dump();
-    msg.next(payload_t(s.begin(), s.end()));
-    port->socket().send(msg.encode());
+    msg.payload().push_back(payload_t(s.begin(), s.end()));
+    port->send(msg);
 }

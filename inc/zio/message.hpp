@@ -67,6 +67,9 @@ namespace zio {
         void set_label(const std::string& label) {
             m_header.prefix.label = label;
         }
+        /// prepare for sending, advance seqno, set granule (if 0 use
+        /// time), origin (if 0 do not set).
+        void set_coord(origin_t origin=0, granule_t gran=0);
 
         /// Reset self to empty message
         void clear();
@@ -84,10 +87,6 @@ namespace zio {
         const multiload_t& payload() const { return m_payload; }
         multiload_t& payload() { return m_payload; }
 
-        /// Set payload, increment seqno and set granule or if zero
-        /// use current system time in microseconds.
-        void next(const payload_t& pl, granule_t gran=0);
-        void next(const multiload_t& pl, granule_t gran=0);
 
     private:
         header_t m_header;

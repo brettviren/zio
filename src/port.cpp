@@ -183,5 +183,22 @@ void zio::Port::offline()
 
 
 
+void zio::Port::send(zio::Message& msg)
+{
+    msg.set_coord(m_origin);
+    auto data = msg.encode();
+    // zsys_debug("LOG[%d]: %s (len:%ld)", lvl, log.c_str(), data.size());
+    m_sock.send(data);
+}
+
+bool zio::Port::recv(Message& msg, int timeout)
+{
+    zio::Message::encoded_t dat = m_sock.recv(timeout);
+    if (dat.empty()) {
+        return false;
+    }
+    msg.decode(dat);
+    return true;
+}
 
 

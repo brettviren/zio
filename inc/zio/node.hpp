@@ -49,7 +49,7 @@ namespace zio {
         }
 
         void set_nick(const nickname_t& nick) { m_nick = nick; }
-        void set_origin(origin_t origin) { m_origin = origin; }
+        void set_origin(origin_t origin);
 
         // set verbose
         void set_verbose(bool verbose = true) { m_verbose = verbose; }

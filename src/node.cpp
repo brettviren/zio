@@ -39,6 +39,7 @@ zio::portptr_t zio::Node::port(const std::string& name, int stype)
     zio::portptr_t ret = port(name);
     if (ret) { return ret; }
     ret = std::make_shared<Port>(name, stype, m_hostname);
+    ret->set_origin(m_origin);
     ret->set_verbose(m_verbose);
     m_ports[name] = ret;
     m_portnames.push_back(name);
@@ -86,3 +87,11 @@ void zio::Node::offline()
     m_peer = nullptr;
 }
 
+
+void zio::Node::set_origin(origin_t origin)
+{
+    m_origin = origin;
+    for (auto& np : m_ports) {
+        np.second->set_origin(origin);
+    }
+}

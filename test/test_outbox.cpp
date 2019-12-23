@@ -32,7 +32,9 @@ int main()
     zsys_debug("Now, receive three LOGs");
     zio::Message msg;
     for (int ind=0; ind<3; ++ind) {
-        msg.decode(logp->socket().recv());
+        bool ok  = logp->recv(msg);
+        assert(ok);
+
         auto hdr = msg.header();
         zsys_debug("\t%d %d", ind, hdr.coord.seqno);
         assert(hdr.coord.seqno == ind+1);

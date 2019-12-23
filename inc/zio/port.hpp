@@ -3,6 +3,7 @@
 
 #include "zio/socket.hpp"
 #include "zio/peer.hpp"
+#include "zio/message.hpp"
 
 #include <memory>
 #include <map>
@@ -19,6 +20,9 @@ namespace zio {
         Port(const std::string& name, int stype,
              const std::string& hostname);
         ~Port();
+
+        // The owning node's origin.
+        void set_origin(origin_t origin) { m_origin = origin; }
 
         void set_verbose(bool verbose = true) { m_verbose = verbose; }
         const std::string& name() const { return m_name; }
@@ -60,8 +64,12 @@ namespace zio {
         // Disconnect, unbind.
         void offline();
 
+        void send(Message& msg);
+        // recieve a message, return false if timeout
+        bool recv(Message& msg, int timeout=-1);
+
         // Access wrapped socket.
-        Socket& socket() { return m_sock; }
+        //Socket& socket() { return m_sock; }
 
     private:
         const std::string m_name;
@@ -69,6 +77,7 @@ namespace zio {
         std::string m_hostname;
         bool m_online;
         std::map<std::string, std::string> m_headers;
+        origin_t m_origin;
 
         // functions which perform a bind() and return associated header
         typedef std::function<address_t()> binder_t;

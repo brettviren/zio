@@ -35,13 +35,8 @@ void test_it(int sender_stype, int recver_stype)
 
     zio::Message msg;
     zsys_debug("test_endtoend: receiving");
-    auto data = pi->socket().recv(1000);
-    zsys_debug("recv frame data: %d bytes", data.size());
-    for (size_t ind=0; ind<data.size(); ++ind) {
-        zsys_debug("\t%d: [%c] (%d)", ind, (char)data[ind], (int)data[ind]);
-    }
-    assert(!data.empty());
-    msg.decode(data);
+    bool ok = pi->recv(msg, 1000);
+    assert(ok);
 
     std::string line = tc(msg.payload()[0]);
     assert(line == "Hello world!");

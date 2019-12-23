@@ -1,4 +1,7 @@
-/** Senders provide functional objects to send data simply.
+/*!
+
+  Senders provide functional objects to send data simply, hiding
+  details of the port and its node.
 
 */
 
