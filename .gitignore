@@ -1,3 +1,5 @@
 *~
 .lock-waf*
 build
+testdata
+cut

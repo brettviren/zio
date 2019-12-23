@@ -47,9 +47,15 @@ The body of the ~CRED~ message shall be a JSON string representation of
 an object.  The JSON object may have arbitrary application-dependent
 attributes and these related to transmission protocol
 
-- A ~REQ~ may specify the attribute ~~request~ to be either ~extract~ or ~inject~.  The ~extract~ declares that data will be transmitted *from* the client while ~inject~ will transmit *to* the client.  If omitted, the value ~extract~ shall be assumed.
+- A ~REQ~ may specify the attribute ~request~ to be either ~extract~ or
+  ~inject~.  The ~extract~ declares that data will be transmitted *from* the
+  client while ~inject~ will transmit *to* the client.  If omitted, the
+  value ~extract~ shall be assumed.
 
-- A ~REQ~ or a ~PAY~ message may have an attribute ~credit~ which gives an integer number.  The ~REQ~ credit indicates the number of credits "in play" in the protocol.  The ~PAY~ credit indicates how many credits are being payed.  If omitted the value of unity shall be assumed.
+- A ~REQ~ or a ~PAY~ message may have an attribute ~credit~ which gives an
+  integer number.  The ~REQ~ credit indicates the number of credits "in
+  play" in the protocol.  The ~PAY~ credit indicates how many credits
+  are being payed.  If omitted the value of unity shall be assumed.
 
 The object may be extended by the client/server applications.  One
 likely extension would include identifiers to locate one data stream
