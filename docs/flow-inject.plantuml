@@ -1,0 +1,41 @@
+@startuml
+title Extract data
+activate server
+        server -> server: BIND
+        activate client
+                client -> server : CONNECT
+                group initiate
+                        client -> server : BOT
+                        client -> server : PAY (2)
+                        note right
+                                immediately pay
+                                wait on first BOS
+                        end note
+                end
+                group transfer
+                        server  -> client : BOS (s1)
+                        client --> server : PAY (1)
+                        server  -> client : DAT (s1)
+                        server  -> client : BOS (s2)
+                        client --> server : PAY (2)
+                        server  -> client : DAT (s1)
+                        server  -> client : DAT (s2)
+                        client --> server : PAY (2)
+                        server  -> client : EOS (s2)
+                        client --> server : PAY (1)
+                        server  -> client : DAT (s1)
+                        server  -> client : EOS (s1)
+                        client --> server : PAY (2)
+                end
+                group finalize
+                        server -> client : EOT
+                        client --> server : PAY (1)
+                        client -> client : handle EOT
+                        note left
+                                last PAY is EOT ack
+                                client can terminate
+                                or start new BOT
+                        end note
+                end
+                destroy client
+                @enduml

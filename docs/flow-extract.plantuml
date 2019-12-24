@@ -1,0 +1,51 @@
+@startuml
+title Extract data
+activate server
+        server -> server: BIND
+        activate client
+                client -> server : CONNECT
+                group initiate
+                        client -> server : BOT
+                        note left
+                                total credit (eg 2)
+                                stream description
+                        end note
+                        server --> client : PAY (2)
+                        note right
+                                wait for
+                                first pay
+                        end note
+                end
+                group transfer
+                        client  -> server : BOS (s1)
+                        note right
+                                1 cred
+                        end note
+                        server --> client : PAY (1)
+                        note right
+                                2 cred
+                        end note
+                        client  -> server : DAT (s1)
+                        client  -> server : BOS (s2)
+                        server --> client : PAY (2)
+                        client  -> server : DAT (s1)
+                        client  -> server : DAT (s2)
+                        server --> client : PAY (2)
+                        client  -> server : EOS (s2)
+                        server --> client : PAY (1)
+                        client  -> server : DAT (s1)
+                        client  -> server : EOS (s1)
+                        server --> client : PAY (2)
+                end
+                group finalize
+                        client -> server : EOT
+                        server --> client : PAY (1)
+                        client -> client : handle EOT
+                        note left
+                                last PAY is EOT ack
+                                client can terminate
+                                or start new BOT
+                        end note
+                end
+                destroy client
+                @enduml

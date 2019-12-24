@@ -1,9 +1,9 @@
 #include "zio/extract.hpp"
 
-zio::Extract::Extract(portptr_t port, int credits, zio::json extra)
+zio::ExtractClient::ExtractClient(portptr_t port, int credits, zio::json extra)
     : m_port(port)
     , m_credits(0), m_total_credits(credits)
-    , m_credmsg({{level::undefined, "CRED", "REQ"},{0,0,0}})
+    , m_credmsg({{level::undefined, "CRED", ""},{0,0,0}})
     , m_done{false}
 {
     m_credmsg.set_label("REQ");
@@ -13,7 +13,7 @@ zio::Extract::Extract(portptr_t port, int credits, zio::json extra)
     m_credmsg.payload().push_back(payload_t(s.begin(), s.end()));
     port->send(m_credmsg);
 }
-zio::Extract::~Extract()
+zio::ExtractClient::~ExtractClient()
 {
     // Caller didn't explicitly send end of transmission, do best
     // effort to send it just before we destruct, but don't wait.
@@ -22,11 +22,13 @@ zio::Extract::~Extract()
     }
 }
 
-void zio::Extract::slurp_credit(int timeout)
+bool zio::ExtractClient::slurp_credit(int timeout)
 {
     while (m_credits < m_total_credits) {
         bool ok = m_port->recv(m_credmsg, timeout);
-        if (!ok) { break; }     // timeout
+        if (!ok) {              // timeout
+            return false;
+        }
         std::string label = m_credmsg.header().prefix.label;
         if (label != "PAY") {
             zsys_warning("[port %s]: unexpected CRED message type: %s",
@@ -46,10 +48,10 @@ void zio::Extract::slurp_credit(int timeout)
         }
         m_credits += pay;
     }
-
+    return true;
 }
 
-bool zio::Extract::send(Message& msg)
+void zio::ExtractClient::send(Message& msg)
 {
     slurp_credit(0);
     if (!m_credits) {
@@ -60,7 +62,7 @@ bool zio::Extract::send(Message& msg)
     --m_credits;
 }
 
-bool zio::Extract::eot(int timeout)
+bool zio::ExtractClient::eot(int timeout)
 {
     if (m_done) { return true; }
 
@@ -68,6 +70,6 @@ bool zio::Extract::eot(int timeout)
     m_credmsg.payload().clear();
     m_port->send(m_credmsg);
 
-    slurp_credit(timeout);
+    return slurp_credit(timeout);
 }
 
