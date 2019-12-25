@@ -10,12 +10,21 @@ zio::ExtractServer::ExtractServer(portptr_t port)
     m_port->recv(m_credmsg);
     
 }
-zio::ExtractServer::~ExtractServer();
+zio::ExtractServer::~ExtractServer()
+{
+}
 
         /// Recieve a payload data message and maybe timeout.  Return
         /// true if message recieved.  False is returned if a timeout
         /// occurs or if EOT was sent.  
-bool zio::ExtractServer::recv(Message& msg, int timeout=-1);
+bool zio::ExtractServer::recv(Message& msg, int timeout)
+{
+    return false;
+}
 
         /// Return true if end-of-transmission is reached.
-bool zio::ExtractServer::eot() const;
+bool zio::ExtractServer::eot() const
+{
+    return false;
+}
+

@@ -18,12 +18,12 @@ namespace zio {
         /** Create a client side of the ZIO data flow extraction
             protocol.
         */
-        ExtractClient(portptr_t port);
+        ExtractClient(portptr_t port, int credits, zio::json extra);
         ~ExtractClient();
 
         /// Send BOT and PAY initial credits
-        void bot(int credits, std::vector<std::string> streams,
-                 zio::json extra = {});
+        // void bot(int credits, std::vector<std::string> streams,
+        //          zio::json extra = {});
 
         // Try to send a data message.
         void send(Message& msg);
@@ -62,10 +62,9 @@ namespace zio {
     private:
         portptr_t m_port;
         Message m_credmsg; 
-        std::map<
         int m_credits, m_total_credits;
         bool m_eot;
-    }
+    };
 
 }
 
