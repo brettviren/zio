@@ -1,0 +1,27 @@
+@startuml
+left to right direction
+title ZIO data flow states
+[*] --> server : SERVER
+[*] --> client : CLIENT
+server --> sending : BOT [dir=inject] / set_bot;send_bot
+server --> recving : BOT [dir=extract] / set_bot;send_bot
+client --> recving : BOT [dir=inject] / set_bot;send_bot
+client --> sending : BOT [dir=extract] / set_bot;send_bot
+state sending {
+        [*] --> cansend
+        cansend --> broke : DAT [cred=1] / send_dat;--cred
+        cansend -> cansend : DAT [cred>1] / send_dat;--cred
+        broke --> cansend : PAY / ++cred
+        cansend -> cansend : PAY / ++cred
+}
+state recving {
+        [*] -> waiting
+        waiting --> gotdat : DAT / ++cred;
+        gotdat -> gotdat : DAT / ++cred;
+        gotdat -> gotdat : PAY [cred>1] / send_pay;--cred;
+        gotdat --> waiting : PAY [cred=1] / send_pay;--cred;
+}
+
+
+
+@enduml
