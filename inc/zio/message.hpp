@@ -67,6 +67,13 @@ namespace zio {
         void set_label(const std::string& label) {
             m_header.prefix.label = label;
         }
+        std::string format() const {
+            return m_header.prefix.format;
+        }
+        std::string label() const {
+            return m_header.prefix.label;
+        }
+
         /// prepare for sending, advance seqno, set granule (if 0 use
         /// time), origin (if 0 do not set).
         void set_coord(origin_t origin=0, granule_t gran=0);

@@ -1,166 +1,82 @@
 #+title: ZIO data flow
 
-At the level of a ZIO ~port~, ZIO does not assert any particular
-communication protocol.  A ZIO message is simply sent or received.
-The mid-level ~outbox~ interface operates in a "spray and pray" protocol
-where there are no guarantees that any particular message is received
-(except for those provided by ZeroMQ and TCP or other transports).  In
-particular, ZeroMQ buffer coupled with quick exiting of a ~node~ can
-lead to messages being lost.  
+ZIO /data flow/ adds a stateful protocol between two ZIO ports which
+allows for one-way, point-to-point transmission of a stream of
+application-dependent payload messages.  
 
-ZIO data flow adds a protocol layer which provides additional
-guarantees and features.
+Such transmission may also be enacted directly with
+application-managed ZIO ports, say, using PUSH/PULL socket types.
+What ZIO data flow transmission adds is a [[http://zguide.zeromq.org/page:all#toc211][credit-based flow control]]
+protocol.
 
-- streams :: messages flowing between ZIO ports are grouped into
-  logical streams based on they sharing a stream identifier.
+ZIO data flow also limits the ports to using ZeroMQ CLIENT/SERVER
+socket types.  This focuses the implementation while selects socket
+types that are suitable for endpoints that apply multiple threads to
+socket operations.
 
-- synchronization :: the readiness of endpoints can be assured for
-  both the start and end of transmissions.
+* Flow protocol
 
-- flow control :: during transmission, a feedback mechanism
-  (credit-based flow control) protects against message starvation and
-  overloading.
+The ZIO /data flow/ protocol begins with the client sending a ~BOT~
+(message details are below) to the server which provides the /direction/
+and server replies with a ~BOT~ providing the number of credits to use
+for the subsequent transfer.  
 
-* Client vs server
+After ~BOT~ exchange, initial implicitly extended in the amount given by
+the server's ~BOT~.  The holder and payer of credit is the server if the
+/direction/ is /extract/ and is the client if the /direction/ is /inject/.
 
-At the port level, ZIO allows any ZeroMQ socket type to be used but
-ZIO data flow only supports the use of CLIENT/SERVER sockets.  This is
-to assure thread-safety when sockets must be used by more than one
-thread and to simplify implementation.  Flow is also limited to an
-N-clients to 1-server pattern.  A general N-to-M pattern may be
-enacted but the client ~node~ will need one port for each of M servers.
+The /transfer/ state is then entered and following the above dichotomy
+it progresses in two possible modes depending on the value of the
+/direction.  If direction is /extract/ the server listeners for ~DAT~ and
+issues ~PAY~ and vice versa for /inject/.  This exchange may then continue
+indefinitely or until either side issues ~EOT~.
 
-In ZIO data flow it is always the client which initiates the protocol
-(detailed below).  However, in the usual ZeroMQ fashion, either client
-or server may bind or connect (and the server may do both) and their
-relative ordering does not matter.  ZIO data flow ports may
-participate in the usual ZIO peering process.
+[[file:flow-extract.png]]
 
-* ZIO data flows, transmissions and streams
+Not illustrated but the server may respond to a ~BOT~ with an immediate
+~EOT~ in order to explicitly reject the transfer.  And, at any point,
+either endpoint may explicitly terminate the transmission by sending
+an ~EOT~.  If received, an endpoint should acknowledge the termination
+by also sending an ~EOT~.  In the illustration, the endpoint sending
+payload data initiates termination.
 
-A ZIO data *flow* is deconstructed into a number of *transmissions* and
-these are further deconstructed into *streams*.  
+In real world applications the protocol may be interrupted at any
+time.  It provides no support for interruptions other than what is
+provided by ZeroMQ.  If messages cease to arrive from an endpoint the
+application may consult a ZIO ~peer~ to determine if that endpoint is
+still online.
 
-Within a flow, a transmission begins with a BOT
-(begin-of-transmission) and ends with an EOT (end-of-transmission).  A
-flow may consists of a series of BOT/EOT.
+* Flow messages
 
-Within a transmission, a number of streams may be sent.  Unlike
-transmissions, multiple (logical) streams may exist concurrently
-although only one message from any stream is sent at any given time.
-A stream must begin with BOS (begin-of-stream) and end with an EOS
-(end-of-stream).  Occurrences of EOS/BOS are independent between
-different streams.  Between these pairs, a stream sends a number of
-DAT (data) which hold the application-defined and encoded payload
-message.
+ZIO data flow introduces a new ZIO message of type ~FLOW~.  This message
+type has no meaningful "level" and so it is set to undefined (0).  The
+payload frames of a ~FLOW~ message are unused by the ZIO /data flow/
+protocol and are available for application use.  The protocol is
+implemented using the ~label~ field of the ZIO message prefix header.
+This field shall hold a string representing a JSON object which is
+here called the /flow object/.  
 
-* FLOW messages
+A /flow object/ shall always have an attribute named ~flow~ the value of
+which defines a (sub) message type in the /data flow/ protocol.  Any
+~FLOW~ message lacking this attribute may be dropped.  The ~flow~
+attribute may hold a value of: ~BOT~, ~EOT~, ~DAT~ or ~PAY~.  Depending on the
+value, additional attributes may be required or optional.  The meaning
+of these (sub) message types and their associated attributes are
+described:
 
-ZIO data flow introduces a new message of type ~FLOW~.  This message
-type has no meaningful "level" and so it is set to undefined (0).  A
-~FLOW~ message carries both flow control and payload messages and its
-specific meaning is determined by its header field ~label~ which holds a
-string representing a JSON object.
+- ~BOT~ :: begin-of-transmission, client sends with ~direction~ set to
+  ~extract~ or ~inject~, server sends with ~credits~ set to an integer.  ~BOT~
+  explicitly extends initial credit.
 
-The ~label~ object shall have an attribute of key ~cmd~ with a value that
-represents the meaning (sub type) of the ~FLOW~ message.  For each
-possible value, a number of other attributes may be expected as
-summarized:
+- ~EOT~ :: end-of-transmission, either side may send, receiver should
+  echo back.  No associated attributes.
 
-- ~BOT~ :: begin-of-transmission, a new transmission is initiated.  Any
-  prior transmission and streams are terminated as if their ~EOS~ and
-  ~EOT~ were sent.
-  - ~direction~ :: the sub-protocol, either ~extract~ or ~inject~
-  - ~credits~ :: the number of credits to use in flow control
-  - ~streams~ :: a (sub) object describing the streams in the just
-    initiated transmission.
-- ~PAY~ :: credit is extended from one endpoint to another
-  - ~credit~ :: the number of credits, optional if omitted then 1 is assumed
-- ~EOT~ :: end-of-transmission, any prior streams are terminated as if
-  their ~EOS~ were sent.
-  - n/a :: no additional attributes
-- ~BOS~ :: begin-of-stream, any prior stream of the same identification
-  is terminated as if its ~EOS~ were sent.
-  - ~ident~ :: the stream identifier as included in ~BOT.streams~
-- ~EOS~ :: end-of-stream, explicitly end a stream
-  - ~ident~ :: the stream identifier as included in ~BOT.streams~
-- ~DAT~ :: the message payload holds an application specific encoded message 
-  - ~ident~ :: the stream identifier as included in ~BOT.streams~
+- ~PAY~ :: credit is extended from one endpoint to another as given in
+  the ~credit~ attribute with a whole number value.
 
+- ~DAT~ :: the message payload holds an application specific encoded
+  message and no additional attribute is associated.
 
-* Credit-based flow control
-
-
-To guard buffer usage, a credit-based flow control is used.  This
-requires a protocol extension beyond simple "spray and pray", eg as
-used by ~outbox~.  Credit-based flow control is a simple extension of
-request/reply where instead of the usual synchronous exchange, a
-limited number of requests may be sent at once and independently from
-their subsequent replies.  A sender may only send if it has credit and
-deducts one unit of credit for each send.  A receiver extends credit
-to a sender when it can.  If a receiver is thus slow to accept
-messages, the sender eventually ceases sending until the receiver can
-once again extend new credit.  When a flow is finished, a special
-end-of-transmission message can be sent to the receiver and final
-credit replenishment, thus both ends know when it is safe to
-terminate.  This extension is describe more in the following sectins.
-
-
-
-* ZIO data flow protocols
-
-The ZIO flow protocol has two sub-protocols set by the ~direction~
-attribute to a ~BOT~ type of ~FLOW~ message.  Two directions are supported.
-
-- ~extract~ :: payload data is sent from client to server.  This is best
-  for an N-to-1 flow aggregation pattern.
-
-- ~inject~ :: payload data is sent from server to client.  This is best
-  for a 1-to-N flow dispersal pattern.
-
-In both cases the client initiates with a ~BOT~ and in both cases the ~EOT~, ~BOS~, ~EOS~ and ~DAT~ messages travel in opposite directions as the ~PAY~.  In ~extract~, it is the server that issues ~PAY~ and in ~inject~ it is the client.
-
-An example of one transmission of the extract and the inject
-sub-protocols each with two streams are illustrated in the following
-sequence diagrams.
-
-[[file:flow-extract.png]][[file:flow-inject.png]]
-
-It begins with usual socket bind and connect with either CLIENT or
-SERVER performing either (or both).  Only a single client is drawn but
-in general, a server may support multiple concurrent clients.  If so,
-their [[https://www.youtube.com/watch?v=wyKQe_i9yyo][streams shall not cross]].
-
-The client starts the transmission with the ~BOT~ message.  It sets the
-number of credits (example of 2 in diagrams) to be in play during the
-transmission.  If an extraction is initiated then the client may wait
-on reception of one or more initial credits (~PAY~ message).  If an
-injection is initiated then the client should immediately send a ~PAY~
-message of one (or preferably all) credits to the server and may then
-wait for the first transmitted message (which should be a ~BOS~).
-
-Transmission repeats as an asynchronous exchange of ~PAY~ and ~DAT~ (or
-other) messages.  The end supplying ~DAT~ messages may end and restart
-their streams or terminate the transmission with an ~EOT~.  A well
-formed flow should bookend ~B~ with ~E~ message but robust endpoints
-should handle their lack.  For example, a ~BOT~ (or an ~EOT~) should imply
-an ~EOS~ on all streams, even these ends were not sent.
-
-At any time, and end sending payload can wait until its credit is
-replenished in order to know that the other end has caught up.  That
-is the ~PAY~ message may act as acknowledgments when needed.  In
-particular, at ~EOT~ care should be taken to wait for returned ~PAY~ in
-order to not exit early and lose buffered messages.  An ack on the
-ultimate ~PAY~ is [[https://en.wikipedia.org/wiki/Two_Generals'_Problem][not provided]].
-
-* Heartbeat
-
-ZIO flows do not (currently) support in-band heartbeats.  Instead ZIO
-peering is relied on to discover if an endpoint has gone offline.
-Applications should take care to use timeouts on any ~recv()~ and check
-the ~peer~ to see if the node holding the remote port still exists.
-
-
-
-
+The application may augment the /flow object/ with additional attributes
+and is free to fill the payload frame or frames of any ~FLOW~ message.
 

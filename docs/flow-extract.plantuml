@@ -1,5 +1,5 @@
 @startuml
-title Extract data
+title Extract data from client to server
 activate server
         server -> server: BIND
         activate client
@@ -7,17 +7,15 @@ activate server
                 group initiate
                         client -> server : BOT
                         note left
-                                total credit (eg 2)
-                                stream description
+                                direction
                         end note
-                        server --> client : PAY (2)
+                        server -> client : BOT
                         note right
-                                wait for
-                                first pay
+                                credits (eg 2)
                         end note
                 end
-                group transfer
-                        client  -> server : BOS (s1)
+                group transfer (extract)
+                        client  -> server : DAT
                         note right
                                 1 cred
                         end note
@@ -25,27 +23,16 @@ activate server
                         note right
                                 2 cred
                         end note
-                        client  -> server : DAT (s1)
-                        client  -> server : BOS (s2)
+                        client  -> server : DAT
+                        client  -> server : DAT
                         server --> client : PAY (2)
-                        client  -> server : DAT (s1)
-                        client  -> server : DAT (s2)
-                        server --> client : PAY (2)
-                        client  -> server : EOS (s2)
+                        client  -> server : DAT
                         server --> client : PAY (1)
-                        client  -> server : DAT (s1)
-                        client  -> server : EOS (s1)
-                        server --> client : PAY (2)
-                end
-                group finalize
+                        client  -> server : DAT
+                        client  -> server : DAT
                         client -> server : EOT
-                        server --> client : PAY (1)
-                        client -> client : handle EOT
-                        note left
-                                last PAY is EOT ack
-                                client can terminate
-                                or start new BOT
-                        end note
+                        server --> client : PAY (2)
+                        server --> client : EOT
                 end
                 destroy client
                 @enduml

@@ -69,7 +69,7 @@ namespace zio {
         bool recv(Message& msg, int timeout=-1);
 
         // Access wrapped socket.
-        //Socket& socket() { return m_sock; }
+        Socket& socket() { return m_sock; }
 
     private:
         const std::string m_name;
