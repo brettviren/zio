@@ -76,14 +76,12 @@ namespace zio {
 
         /*!  
 
-          @brief A ZIO data flow server handles receiving messages
-          from a number of clients and delegates the rest of the
-          protocol to other layers of the application including
-          credit-based flow.
+          @brief A ZIO data flow server provides a source of messages
+          from multiple remote clients.
+
         */
         class Server {
         public:
-            typedef endpoint_t client_t;
 
             /// Create a data flow server on a port.
             Server(portptr_t port, int max_credits=10);
@@ -93,29 +91,34 @@ namespace zio {
             /// to structure embodying the received information.
             /// Application should use it but Server owns it and may
             /// invalidate it.
-            client_t* recv(int timeout=-1);
+            endpoint_t* recv(int timeout=-1);
 
             /// Access recent info about a client by its ID number or
             /// NULL if it is not known.  Object is owned by Server
             /// and pointer will be invalidated when client is
             /// destroyed.
-            client_t* client(int cid);
+            endpoint_t* endpoint(int id);
 
-            /// Destroy a client, invalidating any outstanding
+            /// Destroy an endpoint, invalidating any outstanding
             /// pointers.  Note, application assumes duty to call EOT.
-            void destroy(client_t** client);
+            void destroy(endpoint_t** ep);
 
         private:
             portptr_t m_port;
             int m_max_credits;
 
             // filled on recv of BOT, 
-            std::map<int, client_t> m_clients;
+            std::map<int, endpoint_t> m_endpoints;
         };
 
+        /*!  
+
+          @brief A ZIO data flow client provides a source of messages
+          from a single remote server.
+
+        */
         class Client {
         public:
-            typedef endpoint_t server_t;
 
             /// Create a data flow client on a port.
             Client(portptr_t port);
@@ -125,10 +128,10 @@ namespace zio {
             /// to structure embodying the received information.
             /// Application should use it but Client owns it and may
             /// invalidate it.
-            server_t* recv(int timeout=-1);
+            endpoint_t* recv(int timeout=-1);
         private:
             portptr_t m_port;
-            server_t m_server;
+            endpoint_t m_endpoint;
         };        
     }
 }
