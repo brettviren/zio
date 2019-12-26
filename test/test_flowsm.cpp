@@ -106,11 +106,13 @@ struct flow_protocol {
                 ,"established"_s + event<ev_sending> / [this](const ev_sending& ev){credits=ev.credits;} = "sending"_s
                 ,"established"_s + event<ev_recving> / [this](const ev_recving& ev){credits=0;} = "recving"_s
 
+
                 ,"sending"_s + on_entry<_> / []{std::cout<<"wait for pay\n";}
                 ,"sending"_s + event<ev_pay> / [this](const ev_pay& p, actioncbs&ac) {
                                                    credits += p.credits;
                                                    ac.got_pay(p);
                                                }
+
 
                 ,"recving"_s + on_entry<_> / []{std::cout<<"wait for dat\n";}
                 ,"recving"_s + event<ev_dat> / [this](const ev_dat& d, actioncbs&ac) {
@@ -119,7 +121,7 @@ struct flow_protocol {
                                                }
 
 
-                ,*"bad state"_s + unexpected_event<_> / []{std::cout<<"whoops\n";} = X
+                ,*"bad state"_s + unexpected_event<_> / [](eventcbs& ev){ev.error();} = X
                 );
         }
     };
@@ -172,18 +174,14 @@ int main()
     using namespace sml;
 
     flow_protocol::actioncbs ac {
-        // disconnect
         [](bool initiator) { std::cout << "disconnect "<<initiator<<"\n"; },
-        // send_bot
         [](const flow_protocol::ev_bot& bot) { std::cout << "send_bot(" << bot << ")\n"; },
-        // recv_bot
         [](const flow_protocol::ev_bot& bot) { std::cout << "recv_bot(" << bot << ")\n"; },
         [](const flow_protocol::ev_eot& eot) { std::cout << "eot(" << eot << ")\n"; },
         [](const flow_protocol::ev_dat& dat) { std::cout << "got_dat(" << dat << ")\n"; },
         [](const flow_protocol::ev_pay& pay) { std::cout << "got_pay(" << pay << ")\n"; }
     };
     flow_protocol::eventcbs ev {
-        // error
         []() { std::cout << "error\n"; },
     };
 
