@@ -45,7 +45,7 @@ def build(bld):
     bld.install_files('${PREFIX}/include/zio', bld.path.ant_glob("inc/zio/*.hpp"))
 
     # fake pkg-config
-    bld(source='zio.pc.in', VERSION=VERSION,
+    bld(source='libzio.pc.in', VERSION=VERSION,
         LLIBS='-lzio', REQUIRES='libczmq libzmq libzyre')
     # fake libtool
     bld(features='subst',

@@ -69,7 +69,7 @@ zio::flow::Server::Server(portptr_t port, int max_credits)
     assert(m_port->socket().type() == ZMQ_SERVER);
 }
 
-zio::flow::Server::client_t* zio::flow::Server::recv(int timeout)
+zio::flow::endpoint_t* zio::flow::Server::recv(int timeout)
 {
     Message msg;
     bool ok = m_port->recv(msg, timeout);
@@ -81,7 +81,7 @@ zio::flow::Server::client_t* zio::flow::Server::recv(int timeout)
     // this should probably be subsumed into zio::Socket
     int cid = zsock_routing_id(m_port->socket().zsock());
 
-    client_t* cl = client(cid);
+    zio::flow::endpoint_t* cl = endpoint(cid);
     if (!cl) {
         if (flowobj["flow"] != "BOT") {
             return nullptr;
@@ -109,30 +109,30 @@ zio::flow::Server::client_t* zio::flow::Server::recv(int timeout)
         }
 
 
-        m_clients.emplace(std::make_pair(cid, client_t{cid, credits, max_credits,
+        m_endpoints.emplace(std::make_pair(cid, endpoint_t{cid, credits, max_credits,
                         idir, Sender(m_port, cid), msg}));
-        return client(cid);
+        return endpoint(cid);
     }
     cl->flowmsg = msg;
     return cl;
 }
 
-zio::flow::Server::client_t* zio::flow::Server::client(int cid)
+zio::flow::endpoint_t* zio::flow::Server::endpoint(int cid)
 {
-    auto it = m_clients.find(cid);
-    if (it == m_clients.end()) {
+    auto it = m_endpoints.find(cid);
+    if (it == m_endpoints.end()) {
         return nullptr;
     }
     return &it->second;
 }
-void zio::flow::Server::destroy(zio::flow::Server::client_t** clptr)
+void zio::flow::Server::destroy(zio::flow::endpoint_t** clptr)
 {
     if (!clptr) { return; }
     if (!*clptr) { return; }
     int cid = (**clptr).id;
-    client_t* mine = client(cid);
+    zio::flow::endpoint_t* mine = endpoint(cid);
     if (mine) {
-        m_clients.erase(cid);
+        m_endpoints.erase(cid);
     }
     else {
         delete *clptr;
@@ -146,11 +146,11 @@ void zio::flow::Server::destroy(zio::flow::Server::client_t** clptr)
 
 zio::flow::Client::Client(portptr_t port)
     : m_port(port)
-    , m_server{0, 0, 0, zio::flow::undefined, Sender(port)}
+    , m_endpoint{0, 0, 0, zio::flow::undefined, Sender(port)}
 {
 }
 
-zio::flow::Client::server_t* zio::flow::Client::recv(int timeout)
+zio::flow::endpoint_t* zio::flow::Client::recv(int timeout)
 {
     Message msg;
     bool ok = m_port->recv(msg, timeout);
@@ -171,15 +171,15 @@ zio::flow::Client::server_t* zio::flow::Client::recv(int timeout)
         if (!(dir == "extract" or dir == "inject")) {
             return nullptr;
         }
-        m_server.credits = 0;
-        m_server.total_credits = flowobj["credits"];
+        m_endpoint.credits = 0;
+        m_endpoint.total_credits = flowobj["credits"];
         zio::flow::Direction idir = zio::flow::inject;
         if (dir == "extract") {
             idir = zio::flow::extract;
-            m_server.credits = m_server.total_credits;
+            m_endpoint.credits = m_endpoint.total_credits;
         }
-        m_server.direction = idir;
+        m_endpoint.direction = idir;
     }
-    m_server.flowmsg = msg;
-    return &m_server;
+    m_endpoint.flowmsg = msg;
+    return &m_endpoint;
 }
