@@ -1,0 +1,50 @@
+@startuml
+participant "port" as port
+participant "zio::flow::Flow" as cc
+participant app
+title ZIO Flow API Sequence
+activate app
+        app -> cc : create(BOT)
+        activate cc
+                cc -> port : send(BOT)
+                cc -> port : recv(wait)
+                port -> cc : BOT
+
+                == sender mode ==
+
+                app -> cc : put(DAT)
+                group if broke
+                        cc -> port : recv(wait)
+                        port -> cc : PAY
+                        cc -> cc : ++credit
+                end
+                cc -> port : send(DAT)
+                cc -> cc : --credit
+
+                == recver mode ==
+
+                app -> cc : get(DAT&, wait)
+                group if rich
+                        cc -> port : send(PAY)
+                        cc -> cc : --credit
+                end
+                cc -> port : recv(wait)
+                port -> cc : DAT
+                cc -> cc : ++credit;
+                cc -> app : DAT
+
+                == either mode == 
+
+                group we terminate
+                        app -> cc : eot(wait)
+                        cc -> port : send(EOT)
+                        cc -> port : recv(wait)
+                        port -> cc : EOT
+                end
+                group they terminate
+                        port -> cc : EOT
+                end
+
+        deactivate cc
+deactivate app
+@enduml

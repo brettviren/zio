@@ -17,6 +17,66 @@ namespace zio {
     namespace flow {
         enum Direction { undefined, extract, inject };
 
+
+        class Flow {
+        public:
+            /*!
+              @breif create a flow with an intial BOT message
+
+              The BOT shall indicate desired direction of flow from
+              the point of view of this instance (extract or inject)
+              and may indicate recomended number of credits.
+            */
+            Flow(portptr_t port, Message bot);
+            ~Flow();
+
+            /*!
+              @brief put a payload message into the flow
+
+              Return false if an EOT was received in the process.
+            */
+            bool put(Message dat);
+            
+            /*!
+              @brief get a payload message from the flow
+
+              Return false immediately if an EOT was received instead.
+
+              Negative timeout waits forever, otherwise gives timeout
+              in milliseconds to wait for a FLOW message.
+            */
+            bool get(Message& dat, int timeout=-1);
+
+            /*!
+              @brief send EOT to other end and wait for reply
+
+              Return false if no EOT was received, otherwise set msg
+              to that EOT message.  Timeout is in milliseconds or less
+              than zero to wait indefinitely.
+
+              Note: if calling in response to an EOT sent from the
+              other end, a subsequent EOT receipt is not expected.
+              Use timeout=0.
+            */
+            bool eot(Message& msg, int timeout=-1);
+
+        private:
+            portptr_t m_port;
+            int m_credits, m_total_credits;
+            bool m_sender;      // false if we are recver
+
+        };
+
+
+
+
+
+
+
+
+
+
+
         /*! 
 
           @brief send data flow protocol messages.
@@ -120,8 +180,10 @@ namespace zio {
         class Client {
         public:
 
-            /// Create a data flow client on a port.
-            Client(portptr_t port);
+            /// Create a data flow client on online port and send initial BOT
+            Client(portptr_t port,
+                   Direction direction,
+                   int suggested_credits = 0);
 
             /// Attempt to recive a message from the port.  Return
             /// nullptr if timeout occurs.  Otherwise, return pointer

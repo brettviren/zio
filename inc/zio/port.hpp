@@ -64,6 +64,7 @@ namespace zio {
         // Disconnect, unbind.
         void offline();
 
+        // non-const ref, coord header gets set.
         void send(Message& msg);
         // recieve a message, return false if timeout
         bool recv(Message& msg, int timeout=-1);

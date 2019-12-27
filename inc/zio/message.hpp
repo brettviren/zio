@@ -10,6 +10,8 @@
 #include <vector>
 #include <string>
 
+#include "zio/types.hpp"
+
 namespace zio {
 
     namespace level {
@@ -72,6 +74,9 @@ namespace zio {
         }
         std::string label() const {
             return m_header.prefix.label;
+        }
+        zio::json label_object() const {
+            return zio::json::parse(label());
         }
 
         /// prepare for sending, advance seqno, set granule (if 0 use

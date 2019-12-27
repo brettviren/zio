@@ -15,6 +15,7 @@ activate server
                         end note
                 end
                 group transfer (inject)
+                        client --> server : PAY (2)
                         server  -> client : DAT
                         note left
                                 1 cred

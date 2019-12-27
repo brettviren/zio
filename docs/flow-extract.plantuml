@@ -15,6 +15,7 @@ activate server
                         end note
                 end
                 group transfer (extract)
+                        server --> client : PAY (2)
                         client  -> server : DAT
                         note right
                                 1 cred

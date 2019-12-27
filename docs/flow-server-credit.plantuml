@@ -1,0 +1,27 @@
+@startuml
+title ZIO Flow Server Sequence
+participant "port" as port
+participant "server" as sc
+participant "factory" as factory
+participant "handler" as app
+
+sc -> port : recv(wait)
+port -> sc : cid,BOT
+sc -> factory : BOT'
+factory -> app : spawn actor\nwith pipe
+activate app
+        app -> sc : BOT'
+        sc -> app : BOT
+
+        port -> sc : cid,PAY/DAT/EOT
+        group Flow Sequence
+                sc -> app : PAY/DAT/EOT
+                app -> app : cc
+                note left
+                        service port
+                end note
+                app -> sc : DAT/PAY/EOT
+        end
+        sc -> port : DAT/PAY/EOT
+deactivate app
+@enduml
