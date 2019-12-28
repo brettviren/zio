@@ -52,7 +52,7 @@ namespace zio {
         void set_origin(origin_t origin);
 
         // set verbose
-        void set_verbose(bool verbose = true) { m_verbose = verbose; }
+        void set_verbose(bool verbose = true);
         bool verbose() const { return m_verbose; }
 
         // Create a port of type and name using default granule function.

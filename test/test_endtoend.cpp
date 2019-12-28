@@ -8,6 +8,7 @@ void test_it(int sender_stype, int recver_stype)
     zio::Node sender("sender",1);
     sender.set_verbose();
     zio::portptr_t po = sender.port("outbox", sender_stype);
+    //po->bind();
     po->bind("inproc://endtoend");
     //po->connect("recver","inbox");
     sender.online();
@@ -58,8 +59,8 @@ void test_it(int sender_stype, int recver_stype)
 
 int main()
 {
-    test_it(ZMQ_PUB, ZMQ_SUB);
-    zsys_debug("PUB/SUB complete");
+    // test_it(ZMQ_PUB, ZMQ_SUB);
+    // zsys_debug("PUB/SUB complete");
 
     test_it(ZMQ_PUSH, ZMQ_PULL);
     zsys_debug("PUSH/PULL complete");

@@ -55,6 +55,8 @@ namespace zio {
              const headerset_t& headers, bool verbose=false);
 
 
+        void set_verbose(bool verbose=true);
+
         const nickname_t nickname() { return m_nick; }
 
         /// Poll network for updates, timeout in msec.  Return true if

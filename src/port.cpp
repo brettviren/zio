@@ -59,17 +59,22 @@ zio::Port::~Port()
 
 void zio::Port::bind()
 {
+    zsys_debug("[port %s] bind default", m_name.c_str());
     bind(m_hostname, 0);
 }
 
 void zio::Port::bind(const std::string& hostname, int port)
 {
+    zsys_debug("[port %s]: bind host/port: %s:%d",
+               m_name.c_str(), hostname.c_str(), port);
     HostPortBinder binder{m_sock, hostname, 0};
     m_binders.push_back(binder);
 }
 
 void zio::Port::bind(const address_t& address)
 {
+    zsys_debug("[port %s]: bind address: %s",
+               m_name.c_str(), address.c_str());
     m_binders.push_back(DirectBinder{m_sock, address});
 }
 
@@ -100,6 +105,8 @@ zio::headerset_t zio::Port::do_binds()
     std::stringstream ss;
     std::string comma = "";
 
+    zsys_debug("DEBUG: binders: %d", m_binders.size());
+        
     for (auto& binder : m_binders) {
         auto address = binder();
         ss << comma << address;
@@ -108,8 +115,11 @@ zio::headerset_t zio::Port::do_binds()
     }
     std::string addresses = ss.str();
     set_header("address", addresses);
-
     set_header("socket", m_sock.stype());
+    for (const auto& hh : m_headers) {
+        zsys_debug("[port %s]: %s = %s",
+                   m_name.c_str(), hh.first.c_str(), hh.second.c_str());
+    }
 
     return m_headers;
 
@@ -121,9 +131,12 @@ void zio::Port::online(zio::Peer& peer)
     m_online = true;
 
     if (m_verbose) {
-        zsys_debug("[port %s]: going online with %d node ports, %d direct and %d indirect addresses",
-                   m_name.c_str(), m_connect_nodeports.size(),
-                   m_connect_addresses.size(), m_connect_nodeports.size());
+        zsys_debug("[port %s]: going online with %d(%d+%d) connects, %d binds",
+                   m_name.c_str(), 
+                   m_connect_nodeports.size()+m_connect_addresses.size(),
+                   m_connect_nodeports.size(),
+                   m_connect_addresses.size(),
+                   m_binders.size());
     }
 
     for (const auto& addr : m_connect_addresses) {
@@ -136,20 +149,24 @@ void zio::Port::online(zio::Peer& peer)
 
     for (const auto& nh : m_connect_nodeports) {
         if (m_verbose)
-            zsys_debug("[port %s]: wait for %s", m_name.c_str(), nh.first.c_str());
+            zsys_debug("[port %s]: wait for %s",
+                       m_name.c_str(), nh.first.c_str());
         auto uuids = peer.waitfor(nh.first);
         assert(uuids.size());
+        if (m_verbose)
+            zsys_debug("[port %s]: %d peers match %s",
+                       m_name.c_str(), uuids.size(), nh.first.c_str());
 
         for (auto uuid : uuids) {
             auto pi = peer.peer_info(uuid);
 
-            std::string maybe_addresses = pi.branch("zio.port." + nh.second)[".address"];
-            if (maybe_addresses.empty()) {
+            std::string maybe = pi.branch("zio.port." + nh.second)[".address"];
+            if (maybe.empty()) {
                 zsys_warning("[port %s]: found %s:%s (%s) lacking address header",
                              m_name.c_str(), nh.first.c_str(), nh.second.c_str(), uuid.c_str());
                 continue;
             }
-            std::stringstream ss(maybe_addresses);
+            std::stringstream ss(maybe);
             std::string addr;
             while(std::getline(ss, addr, ' ')) {
                 if (addr.empty() or addr[0] == ' ') continue;

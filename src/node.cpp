@@ -95,3 +95,9 @@ void zio::Node::set_origin(origin_t origin)
         np.second->set_origin(origin);
     }
 }
+void zio::Node::set_verbose(bool verbose)
+{
+    m_verbose = verbose;
+    if (m_peer) 
+        m_peer->set_verbose(verbose);
+}
