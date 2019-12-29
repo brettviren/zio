@@ -1,0 +1,40 @@
+#+title: ZIO - a simplified, high level C++ interface to ZeroMQ and Zyre.
+
+* Introduction
+
+ZIO provides a high-level interface to ZeroMQ, Zyre and some patterns
+described in the [[http://zguide.zeromq.org/][zguide]].  It also provides a /ported graph/ model for
+constructing a network topology.
+
+Some of the features ZIO provides include:
+
+- a "logger object" type interface to emitting messages supporting
+  both free form text strings as well as structured data metrics ([[file:docs/outbox.org][outbox]]).
+
+- a high level, but still general message format ([[file:docs/messages.org][messages]] and [[file:docs/format.org][format]])
+
+- interface to Zyre peer discovery, persistence and reaction ([[file:docs/peer.org][peer]])
+
+- a "ported graph" abstraction which provides network topology
+  self-assembly and which may be used to develop distributed
+  applications that follow the /data flow programming/ paradigm ([[file:docs/node.org][node]]
+  and [[file:docs/port.org][port]]).
+
+- some message processing batteries included ([[file:docs/batteries.org][batteries]]).
+
+* Documentation
+
+The links in the intro go to detailed descriptions of the major
+features.  Coming soon to a repo near you are:
+
+- [[file:docs/tutorial.org][Tutorial]] simple steps to get started
+- [[file:docs/howto.org][How-To]] starting point for achieving specific goals
+
+Until then, here's how to install ZIO:
+
+#+begin_example
+  $ ./waf configure --prefix=/path/to/install
+  $ [./waf build --alltests -j1]
+  $ ./waf install [--notests]
+#+end_example
+
