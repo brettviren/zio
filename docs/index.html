@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2019-12-29 Sun 12:41 -->
+<!-- 2019-12-29 Sun 13:22 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>ZIO - C++ interface to ZeroMQ and Zyre.</title>
@@ -256,16 +256,10 @@ for the JavaScript code in this tag.
 
 </div>
 
-<div id="outline-container-org1d90f0b" class="outline-2">
-<h2 id="org1d90f0b"><span class="section-number-2">1</span> Introduction</h2>
-<div class="outline-text-2" id="text-1">
 <p>
 ZIO provides a high-level interface to ZeroMQ, Zyre and some patterns
-described in the <a href="http://zguide.zeromq.org/">zguide</a>.  It also provides a <i>ported graph</i> model for
-constructing a network topology.
-</p>
-
-<p>
+described in the <a href="http://zguide.zeromq.org/">zguide</a>.  It also
+provides a <i>ported graph</i> model for constructing a network topology.
 Some of the features ZIO provides include:
 </p>
 
@@ -284,33 +278,21 @@ and <a href="port.html">port</a>).</li>
 
 <li>some message processing batteries included (<a href="batteries.html">batteries</a>).</li>
 </ul>
-</div>
-</div>
-
-<div id="outline-container-org105016e" class="outline-2">
-<h2 id="org105016e"><span class="section-number-2">2</span> Documentation</h2>
-<div class="outline-text-2" id="text-2">
-<p>
-The links in the intro go to detailed descriptions of the major
-features.  Coming soon to a repo near you are:
-</p>
-
-<ul class="org-ul">
-<li><a href="tutorial.html">Tutorial</a> simple steps to get started</li>
-<li><a href="howto.html">How-To</a> starting point for achieving specific goals</li>
-</ul>
 
 <p>
-Until then, here's how to install ZIO:
+See the navigation links for entry to more documentation.
 </p>
+
+<p>
+This package installs in the usual <a href="https://waf.io">Waf</a> way.
+</p>
+
 
 <pre class="example">
 $ ./waf configure --prefix=/path/to/install
-$ [./waf build --alltests -j1]
-$ ./waf install [--notests]
+$ ./waf build 
+$ ./waf install
 </pre>
-</div>
-</div>
 </div>
 </body>
 </html>

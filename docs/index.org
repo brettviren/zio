@@ -5,12 +5,9 @@
 
 #+include: nav.org
 
-* Introduction
-
 ZIO provides a high-level interface to ZeroMQ, Zyre and some patterns
-described in the [[http://zguide.zeromq.org/][zguide]].  It also provides a /ported graph/ model for
-constructing a network topology.
-
+described in the [[http://zguide.zeromq.org/][zguide]].  It also
+provides a /ported graph/ model for constructing a network topology.
 Some of the features ZIO provides include:
 
 - a "logger object" type interface to emitting messages supporting
@@ -27,19 +24,14 @@ Some of the features ZIO provides include:
 
 - some message processing batteries included ([[file:batteries.org][batteries]]).
 
-* Documentation
+See the navigation links for entry to more documentation.
 
-The links in the intro go to detailed descriptions of the major
-features.  Coming soon to a repo near you are:
+This package installs in the usual [[https://waf.io][Waf]] way.
 
-- [[file:tutorial.org][Tutorial]] simple steps to get started
-- [[file:howto.org][How-To]] starting point for achieving specific goals
-
-Until then, here's how to install ZIO:
 
 #+begin_example
   $ ./waf configure --prefix=/path/to/install
-  $ [./waf build --alltests -j1]
-  $ ./waf install [--notests]
+  $ ./waf build 
+  $ ./waf install
 #+end_example
 
