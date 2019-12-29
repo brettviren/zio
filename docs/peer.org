@@ -1,4 +1,6 @@
 #+title: ZIO Peer
+#+setupfile: setup.org
+#+include: nav.org
 
 ZIO provides a peering mechanism.  The term /peer/ in ZIO has two
 applicable meanings.  First, as a noun, it describes a mechanism where

@@ -1,4 +1,6 @@
 #+title: ZIO Batteries Included
+#+setupfile: setup.org
+#+include: nav.org
 
 ZIO provides some higher level functionality which does not bring in
 additional software dependencies.

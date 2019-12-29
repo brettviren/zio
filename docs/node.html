@@ -3,10 +3,10 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2019-12-29 Sun 12:41 -->
+<!-- 2019-12-29 Sun 12:35 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>ZIO - C++ interface to ZeroMQ and Zyre.</title>
+<title>ZIO Node</title>
 <meta name="generator" content="Org mode" />
 <meta name="author" content="Brett Viren" />
 <style type="text/css">
@@ -194,7 +194,6 @@
   /*]]>*/-->
 </style>
 <link rel="stylesheet" type="text/css" href="org.css"/>
-<link rel="stylesheet" type="text/css" href="org1.css" />
 <script type="text/javascript">
 /*
 @licstart  The following is the entire license notice for the
@@ -243,8 +242,20 @@ for the JavaScript code in this tag.
 </script>
 </head>
 <body>
-<div id="content">
-<h1 class="title">ZIO - C++ interface to ZeroMQ and Zyre.</h1>
+<div id="org-div-home-and-up">
+ <a accesskey="h" href="."> UP </a>
+ |
+ <a accesskey="H" href="index.html"> HOME </a>
+</div><div id="content">
+<h1 class="title">ZIO Node</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#orge01cb1d">1. Using <code>zio::Node</code></a></li>
+</ul>
+</div>
+</div>
 <div class="nav">
 <ul class="org-ul">
 <li><a href="index.html">Main Page</a></li>
@@ -256,59 +267,114 @@ for the JavaScript code in this tag.
 
 </div>
 
-<div id="outline-container-org1d90f0b" class="outline-2">
-<h2 id="org1d90f0b"><span class="section-number-2">1</span> Introduction</h2>
+<p>
+A <code>zio::Node</code> represents one vertex a graph or network which is
+connected to other ZIO applications (which themselves may utilize
+<code>zio::Node</code>) by the ZIO messages they exchange.  In general, this ZIO
+graph is directed (possibly bidirectional) and possibly cyclic.  When
+<code>zio::Node</code> is used, the network may be considered a specialized <b>ported
+graph</b>.  That is, a ZIO node has a set of "ports" each of which are
+identified by a name unique to the node and each have a ZeroMQ socket
+through which messages are passed.
+</p>
+
+<p>
+A <code>zio::Node</code> as a <code>zio::Peer</code> (see <a href=":peer.html">peer</a>) and uses it to advertise headers
+holding the addresses of any ports (<code>zio::Port</code>, see <a href=":port.html">port</a>) which have
+been asked to <code>bind()</code>.  This allows other ZIO nodes (or in general
+other ZIO peers) to know an address to use to <code>connect()</code>.  It thus
+allows edges to be formed in the graph based on specifying
+application-dependent <b>abstract addressing</b> which is not tied to
+specific transport or hardware.
+</p>
+
+<p>
+For example, some data source may be partitioned and access may be
+distributed across a set of nodes (eg, as in some DAQ layer or across
+various points of the Wire-Cell execution graph).  These nodes may
+each <code>bind()</code> and advertise the relevant address associated with a
+nickname or headers following some convention.  Another set of nodes
+knowing this convention may be configured <code>connect()</code> to addresses found
+by some match on the advertised information.  This allows the graph to
+<b>self-organize</b> without the human specifying detailed absolute
+addressing.  It also allows the graph to <b>self-heal</b> as nodes die and
+are reborn on different physical addresses but retain their nickname
+and headers.
+</p>
+
+<div id="outline-container-orge01cb1d" class="outline-2">
+<h2 id="orge01cb1d"><span class="section-number-2">1</span> Using <code>zio::Node</code></h2>
 <div class="outline-text-2" id="text-1">
 <p>
-ZIO provides a high-level interface to ZeroMQ, Zyre and some patterns
-described in the <a href="http://zguide.zeromq.org/">zguide</a>.  It also provides a <i>ported graph</i> model for
-constructing a network topology.
+A node carries the <b>nickname</b> and <b>origin</b> value.  The nickname is
+advertised by the node's peer and the origin is provided by all
+messages produced by the node's ports.
 </p>
 
-<p>
-Some of the features ZIO provides include:
-</p>
-
-<ul class="org-ul">
-<li>a "logger object" type interface to emitting messages supporting
-both free form text strings as well as structured data metrics (<a href="outbox.html">outbox</a>).</li>
-
-<li>a high level, but still general message format (<a href="messages.html">messages</a> and <a href="format.html">format</a>)</li>
-
-<li>interface to Zyre peer discovery, persistence and reaction (<a href="peer.html">peer</a>)</li>
-
-<li>a "ported graph" abstraction which provides network topology
-self-assembly and which may be used to develop distributed
-applications that follow the <i>data flow programming</i> paradigm (<a href="node.html">node</a>
-and <a href="port.html">port</a>).</li>
-
-<li>some message processing batteries included (<a href="batteries.html">batteries</a>).</li>
-</ul>
-</div>
-</div>
-
-<div id="outline-container-org105016e" class="outline-2">
-<h2 id="org105016e"><span class="section-number-2">2</span> Documentation</h2>
-<div class="outline-text-2" id="text-2">
-<p>
-The links in the intro go to detailed descriptions of the major
-features.  Coming soon to a repo near you are:
-</p>
-
-<ul class="org-ul">
-<li><a href="tutorial.html">Tutorial</a> simple steps to get started</li>
-<li><a href="howto.html">How-To</a> starting point for achieving specific goals</li>
-</ul>
-
-<p>
-Until then, here's how to install ZIO:
-</p>
-
-<pre class="example">
-$ ./waf configure --prefix=/path/to/install
-$ [./waf build --alltests -j1]
-$ ./waf install [--notests]
+<div class="org-src-container">
+<pre class="src src-c++"><span style="color: #e9b2e3;">zio</span>::<span style="color: #8cc4ff;">Node</span> <span style="color: #fcaf3e;">node</span>(<span style="color: #e9b96e;">"mynode"</span>, 42);
 </pre>
+</div>
+
+<p>
+A ZIO application using a node will populate its ports as needed
+specifying their name and ZeroMQ port type.  This information will be
+automatically provided by peer discovery.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-c++"><span style="color: #b4fa70;">auto</span> <span style="color: #fcaf3e;">input</span> = node.port(<span style="color: #e9b96e;">"input"</span>, ZMQ_SUB);
+<span style="color: #b4fa70;">auto</span> <span style="color: #fcaf3e;">output</span> = node.port(<span style="color: #e9b96e;">"output"</span>, ZMQ_PUB);
+</pre>
+</div>
+
+<p>
+After population, ports can be accessed by name.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-c++"><span style="color: #b4fa70;">auto</span> <span style="color: #fcaf3e;">ip</span> = node.port(<span style="color: #e9b96e;">"input"</span>);
+<span style="color: #b4fa70;">auto</span> <span style="color: #fcaf3e;">op</span> = node.port(<span style="color: #e9b96e;">"output"</span>);
+</pre>
+</div>
+
+<p>
+See <a href="port.html">port</a> for details on using ports.  Once port operations are
+complete the node may go online.  
+</p>
+
+<div class="org-src-container">
+<pre class="src src-c++">node.online();
+</pre>
+</div>
+
+<p>
+This triggers any port binding, peer advertising of node nickname,
+related port address headers, and any extra headers provided to the
+node by the application and finally any port connections including
+indirect ones that rely on peer discovery.
+</p>
+
+<p>
+Later a node may be explicitly taken offline:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-c++">node.offline();
+</pre>
+</div>
+
+<p>
+This will disconnect and unbind ports and destroy the node's peer
+object removing it from the ZIO discovery network.  The node itself
+retains all ports and the above state changes transition can be
+repeated:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-c++">node.online();
+</pre>
+</div>
 </div>
 </div>
 </div>

@@ -1,4 +1,6 @@
 #+title: Notes
+#+setupfile: setup.org
+#+include: nav.org
 
 * Thread safety
 

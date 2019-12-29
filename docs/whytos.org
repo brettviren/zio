@@ -1,5 +1,6 @@
-#+title: ZIO outbox
+#+title: ZIO design discussion
 #+setupfile: setup.org
 #+include: nav.org
+
 
 t.b.d.

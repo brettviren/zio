@@ -1,0 +1,299 @@
+body {
+	font-size: 18px;
+	color: #222222;
+	background-color: #FFFFFF;
+	font-family: sans-serif;
+	line-height: 1.3;
+}
+h1 {
+	margin: 0;
+	font-size: 1.6666666666666667em;
+	margin-bottom: 0.9em;
+	font-family: sans-serif;
+	color: #E05F27;
+}
+h2 {
+	margin: 0;
+	font-size: 1.5em;
+	margin-bottom: 0.75em;
+	font-family: sans-serif;
+	color: #2F7BDE;
+}
+h3 {
+	margin: 0;
+	font-size: 1.3333333333333333em;
+	margin-bottom: 0.75em;
+	font-family: sans-serif;
+	color: #598249;
+}
+h4 {
+	margin: 0;
+	font-size: 1.1666666666666667em;
+	margin-bottom: 0.5em;
+	font-family: sans-serif;
+}
+p, ul, pre, td, th, label {
+	margin: 0;
+	font-size: 1em;
+	margin-bottom: 0.5em;
+	font-family: sans-serif;
+}
+/* Override for source code blocks */
+pre {
+	font-family: monospace;
+}
+
+code {
+	/* no wrapping in code blocks (in addition to pre) */
+	white-space: nowrap;
+	background-color: #000000;
+	color: #00FF00;
+	border-radius: 5px;
+}
+
+
+/* Fit images */
+img {
+	max-width:100%;
+	max-height:100%;
+}
+
+h1, h2, h3, h4, h5, h6, h7 {
+	/* All headers should not be split */
+	display: inline-block;
+	width: 100%;
+}
+
+/*  Simple colors here */
+h5, h6, h7, li {
+	color: #909396;
+}
+pre {
+	background-color: #000000;
+	color: #00FF00;
+	border: 1px solid black;
+}
+::selection {
+	background:rgba(57, 60, 63, 0.99);
+}
+::-moz-selection  {
+	background:rgba(57, 60, 63, 0.99);
+}
+a:link, a:hover, a:active {
+	color: #d6372f;
+}
+a:visited {
+	color: #c02119;
+}
+
+p.small, #postamble {
+	margin: 0;
+	font-size: 0.8333333333333334em;
+	margin-bottom: 1.8em;
+}
+table {
+	border-collapse: collapse;
+	margin-bottom: 1.5em;
+        margin-left: auto;
+        margin-right: auto;
+}
+/* @end */
+
+/* @group Layout */
+
+#content {
+	max-width: 80%;
+	margin-left: 0;
+	margin-right: auto;
+}
+
+/* #header {
+	height: 10em;
+}
+*/
+
+#table-of-contents #full { display: none; } /* Hide the full TOC by default */
+
+#table-of-contents:hover #full{
+  display: block; /* Show it on hover */
+}
+#table-of-contents {
+	max-width: 15em;
+	float: right;
+	overflow: auto;
+	font-size: 16px;
+	position: fixed;
+	z-index: 10;
+        right: 0;
+        top: 1em;
+        width: 20%;
+}
+
+#org-div-home-and-up {
+	max-width: 15em;
+	float: right;
+	overflow: auto;
+	font-size: 16px;
+	position: fixed;
+	z-index: 10;
+        right: 0;
+        top: 0;
+        width: 20%;
+}
+.nav {
+	max-width: 15em;
+	float: right;
+	overflow: auto;
+	font-size: 16px;
+	position: fixed;
+	z-index: 10;
+        right: 0;
+        bottom: 0;
+        width: 20%;
+}
+
+/* #main { */
+div.outline-2 {
+	max-width: 45em;
+	/* The lines below are useful if the "main" div isn't available and
+	   div.outline-2 has to be used. */
+	position: relative;
+}
+
+#postamble {
+	clear: both;
+	text-align: center;
+}
+
+div.outline-2 pre {
+	overflow: auto;
+}
+
+/* @end */
+
+/* @group Header */
+
+h1.title {
+	margin-top: 10px;
+	text-align: center;
+}
+
+h1.title {
+	font-size: 2.2em;
+	font-weight: bold;
+	margin-bottom: 0.8em;
+}
+
+/* @end */
+
+/* @group Org Keywords */
+
+.todo {
+	color: #bd3832;
+}
+
+.done {
+	color: #598249;
+}
+
+.tag {
+	color: #2F7BDE;
+	text-transform: lowercase;
+	/* This will be obscured by the surrounding span tag, so blank everything. */
+	background: #2B2B2C;
+	border: none;
+/* position: relative;
+	text-align: right;
+	right: 1em; */
+}
+
+.org-ol {
+	/* This is a bit of a hack... */
+	margin-top: 0;
+}
+
+.timestamp {
+}
+
+.timestamp-kwd  {
+	/* keyword associated with a time stamp, like SCHEDULED */
+}
+
+.target {
+	/* target for links */
+}
+
+/* @end */
+
+/* @group Table of Contents */
+
+#table-of-contents ul,
+#table-of-contents ol {
+	padding-left: 1em;
+}
+
+/* @end */
+
+/* @group Outline Level 2 */
+
+.outline-2 h2 {
+
+	border-bottom: 1px solid #161616;
+	border-radius: 2px;
+}
+
+.outline-2 {
+	padding: 5px;
+	/* margin-bottom: 10px; */
+	/* border-top: 1px solid #ccc; */
+}
+
+/* @end */
+
+td {
+	border: 1px solid black;
+}
+
+
+h1 span, h2 span, h3 span, h4 span, h5 span, h6 span {
+
+	border: 1px solid #161616;
+	border-radius: 2px;
+}
+
+.outline-1, .outline-2, .outline-3, .outline-4, .outline-5, .outline-6 {
+	margin-left: 1em;
+}
+
+
+a {
+	text-decoration: none;
+}
+a:hover {
+	border-bottom: 1px dotted;
+}
+
+#postamble p {
+	margin: 0px;
+}
+
+.footpara { display: inline; }
+
+.footdef { margin-bottom: 3em; font-size: 80%; }
+
+.div-wrap {
+	display: grid;
+	grid-template-columns: repeat(5, 1fr);
+	grid-gap: 5px;
+}
+
+.div-left {
+	grid-column: span 2 / auto;
+}
+.div-right {
+	grid-column: span 2 / auto;
+	text-align: right;
+}
+.div-center {
+	text-align: center;
+}

@@ -3,10 +3,10 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2019-12-29 Sun 12:41 -->
+<!-- 2019-12-29 Sun 12:32 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>ZIO - C++ interface to ZeroMQ and Zyre.</title>
+<title>ZIO Peer</title>
 <meta name="generator" content="Org mode" />
 <meta name="author" content="Brett Viren" />
 <style type="text/css">
@@ -161,19 +161,6 @@
   .footdef  { margin-bottom: 1em; }
   .figure { padding: 1em; }
   .figure p { text-align: center; }
-  .equation-container {
-    display: table;
-    text-align: center;
-    width: 100%;
-  }
-  .equation {
-    vertical-align: middle;
-  }
-  .equation-label {
-    display: table-cell;
-    text-align: right;
-    vertical-align: middle;
-  }
   .inlinetask {
     padding: 10px;
     border: 2px solid gray;
@@ -194,13 +181,12 @@
   /*]]>*/-->
 </style>
 <link rel="stylesheet" type="text/css" href="org.css"/>
-<link rel="stylesheet" type="text/css" href="org1.css" />
 <script type="text/javascript">
 /*
 @licstart  The following is the entire license notice for the
 JavaScript code in this tag.
 
-Copyright (C) 2012-2019 Free Software Foundation, Inc.
+Copyright (C) 2012-2018 Free Software Foundation, Inc.
 
 The JavaScript code in this tag is free software: you can
 redistribute it and/or modify it under the terms of the GNU
@@ -243,8 +229,21 @@ for the JavaScript code in this tag.
 </script>
 </head>
 <body>
-<div id="content">
-<h1 class="title">ZIO - C++ interface to ZeroMQ and Zyre.</h1>
+<div id="org-div-home-and-up">
+ <a accesskey="h" href="."> UP </a>
+ |
+ <a accesskey="H" href="index.html"> HOME </a>
+</div><div id="content">
+<h1 class="title">ZIO Peer</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org5027b00">1. How it works</a></li>
+<li><a href="#org21bf403">2. Using <code>zio::Peer</code></a></li>
+</ul>
+</div>
+</div>
 <div class="nav">
 <ul class="org-ul">
 <li><a href="index.html">Main Page</a></li>
@@ -256,59 +255,63 @@ for the JavaScript code in this tag.
 
 </div>
 
-<div id="outline-container-org1d90f0b" class="outline-2">
-<h2 id="org1d90f0b"><span class="section-number-2">1</span> Introduction</h2>
+<p>
+ZIO provides a peering mechanism.  The term <i>peer</i> in ZIO has two
+applicable meanings.  First, as a noun, it describes a mechanism where
+ZIO applications can be partners in a network or graph topology (see
+also <a href="node.html">node</a>).  Second, as a verb, it describes a mechanism for ZIO
+application so see into the ZIO network in order to know things about
+other ZIO applications.  The peering is based on ZeroMQ's <a href="https://github.com/zeromq/zyre">Zyre</a>
+technology and presented via <code>zio::Peer</code>.
+</p>
+
+<div id="outline-container-org5027b00" class="outline-2">
+<h2 id="org5027b00"><span class="section-number-2">1</span> How it works</h2>
 <div class="outline-text-2" id="text-1">
 <p>
-ZIO provides a high-level interface to ZeroMQ, Zyre and some patterns
-described in the <a href="http://zguide.zeromq.org/">zguide</a>.  It also provides a <i>ported graph</i> model for
-constructing a network topology.
+A <code>zio::Peer</code> instance is created with a <b>nickname</b> and a set of <b>headers</b>
+each of which a key/value pair of strings.  Each key must be unique in
+the set of headers.  After construction, this information is made
+available to all other accessible peers and likewise they are known to
+the peer that was just constructed.  The nickname of a peer is not
+required to be unique in the ZIO network but each peer has a unique id
+(UUID) to which the nickname and headers are associated.
 </p>
 
 <p>
-Some of the features ZIO provides include:
+As peers come and go from the network each peer maintains this
+association and its owning application may query it at any time.  The
+<code>zio::Peer::peers()</code> method will return the UUIDs of all known peers and
+with a UUID the <code>zio::Peer::peer_info(uuid)</code> method will return the
+nickname and all headers of a peer.
 </p>
 
-<ul class="org-ul">
-<li>a "logger object" type interface to emitting messages supporting
-both free form text strings as well as structured data metrics (<a href="outbox.html">outbox</a>).</li>
+<p>
+In addition to knowing about a peer, it is common to need to
+synchronize between peers.  A common synchronization pattern is for
+one peer to wait for another to exist on the network.  The
+<code>zio::Peer::waitfor(nickname)</code> method provides this synchronization.
+The method returns only when peer of the given nickname is seen (or a
+configurable timeout is reached).  The UUIDs of all peers with the
+matching nickname are returned.
+</p>
 
-<li>a high level, but still general message format (<a href="messages.html">messages</a> and <a href="format.html">format</a>)</li>
-
-<li>interface to Zyre peer discovery, persistence and reaction (<a href="peer.html">peer</a>)</li>
-
-<li>a "ported graph" abstraction which provides network topology
-self-assembly and which may be used to develop distributed
-applications that follow the <i>data flow programming</i> paradigm (<a href="node.html">node</a>
-and <a href="port.html">port</a>).</li>
-
-<li>some message processing batteries included (<a href="batteries.html">batteries</a>).</li>
-</ul>
+<p>
+Another synchronization patter is to do the opposite and wait until a
+peer is gone from the network.  The <code>zio::Peer::waituntil(uuid)</code> method
+may be used for that.
+</p>
 </div>
 </div>
 
-<div id="outline-container-org105016e" class="outline-2">
-<h2 id="org105016e"><span class="section-number-2">2</span> Documentation</h2>
+
+
+<div id="outline-container-org21bf403" class="outline-2">
+<h2 id="org21bf403"><span class="section-number-2">2</span> Using <code>zio::Peer</code></h2>
 <div class="outline-text-2" id="text-2">
 <p>
-The links in the intro go to detailed descriptions of the major
-features.  Coming soon to a repo near you are:
+t.b.d.
 </p>
-
-<ul class="org-ul">
-<li><a href="tutorial.html">Tutorial</a> simple steps to get started</li>
-<li><a href="howto.html">How-To</a> starting point for achieving specific goals</li>
-</ul>
-
-<p>
-Until then, here's how to install ZIO:
-</p>
-
-<pre class="example">
-$ ./waf configure --prefix=/path/to/install
-$ [./waf build --alltests -j1]
-$ ./waf install [--notests]
-</pre>
 </div>
 </div>
 </div>

@@ -1,4 +1,6 @@
 #+title: ZIO data flow
+#+setupfile: setup.org
+#+include: nav.org
 
 ZIO /data flow protocol/ supports one-way transmission of
 application-dependent payload messages between two ports with

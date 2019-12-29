@@ -1,4 +1,6 @@
 #+title: ZIO Format
+#+setupfile: setup.org
+#+include: nav.org
 
 ZIO message payloads frames parsed given the value of the *format* ZIO
 message header frame field.  ZIO defines and reserves these formats:

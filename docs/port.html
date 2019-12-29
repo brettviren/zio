@@ -3,10 +3,10 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2019-12-29 Sun 12:41 -->
+<!-- 2019-12-29 Sun 12:48 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>ZIO - C++ interface to ZeroMQ and Zyre.</title>
+<title>ZIO Port</title>
 <meta name="generator" content="Org mode" />
 <meta name="author" content="Brett Viren" />
 <style type="text/css">
@@ -194,7 +194,6 @@
   /*]]>*/-->
 </style>
 <link rel="stylesheet" type="text/css" href="org.css"/>
-<link rel="stylesheet" type="text/css" href="org1.css" />
 <script type="text/javascript">
 /*
 @licstart  The following is the entire license notice for the
@@ -243,8 +242,21 @@ for the JavaScript code in this tag.
 </script>
 </head>
 <body>
-<div id="content">
-<h1 class="title">ZIO - C++ interface to ZeroMQ and Zyre.</h1>
+<div id="org-div-home-and-up">
+ <a accesskey="h" href="."> UP </a>
+ |
+ <a accesskey="H" href="index.html"> HOME </a>
+</div><div id="content">
+<h1 class="title">ZIO Port</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#orgaebb40b">1. Introduction</a></li>
+<li><a href="#orgac0cee7">2. Using <code>zio::Port</code></a></li>
+</ul>
+</div>
+</div>
 <div class="nav">
 <ul class="org-ul">
 <li><a href="index.html">Main Page</a></li>
@@ -256,59 +268,110 @@ for the JavaScript code in this tag.
 
 </div>
 
-<div id="outline-container-org1d90f0b" class="outline-2">
-<h2 id="org1d90f0b"><span class="section-number-2">1</span> Introduction</h2>
+<div id="outline-container-orgaebb40b" class="outline-2">
+<h2 id="orgaebb40b"><span class="section-number-2">1</span> Introduction</h2>
 <div class="outline-text-2" id="text-1">
 <p>
-ZIO provides a high-level interface to ZeroMQ, Zyre and some patterns
-described in the <a href="http://zguide.zeromq.org/">zguide</a>.  It also provides a <i>ported graph</i> model for
-constructing a network topology.
+A ZIO port associates information to a socket in the context of a
+<code>node</code>.  It has a short <b>name</b> to which it is uniquely known in the <code>node</code>.
+It may have one or more ZeroMQ addresses to which is has bound.
+Through the <a href="peer.html">peer</a> mechanism the network knows of port information
+through the port peer headers.
 </p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left"><code>zio.port.&lt;name&gt;</code></th>
+<th scope="col" class="org-left">description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left"><code>.address</code></td>
+<td class="org-left">ZeroMQ transport address</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>.socket</code></td>
+<td class="org-left">ZeroMQ socket type name</td>
+</tr>
+</tbody>
+</table>
 
 <p>
-Some of the features ZIO provides include:
+Applications may extend the port peer header set prior to the node
+going online.
 </p>
-
-<ul class="org-ul">
-<li>a "logger object" type interface to emitting messages supporting
-both free form text strings as well as structured data metrics (<a href="outbox.html">outbox</a>).</li>
-
-<li>a high level, but still general message format (<a href="messages.html">messages</a> and <a href="format.html">format</a>)</li>
-
-<li>interface to Zyre peer discovery, persistence and reaction (<a href="peer.html">peer</a>)</li>
-
-<li>a "ported graph" abstraction which provides network topology
-self-assembly and which may be used to develop distributed
-applications that follow the <i>data flow programming</i> paradigm (<a href="node.html">node</a>
-and <a href="port.html">port</a>).</li>
-
-<li>some message processing batteries included (<a href="batteries.html">batteries</a>).</li>
-</ul>
 </div>
 </div>
 
-<div id="outline-container-org105016e" class="outline-2">
-<h2 id="org105016e"><span class="section-number-2">2</span> Documentation</h2>
+
+
+<div id="outline-container-orgac0cee7" class="outline-2">
+<h2 id="orgac0cee7"><span class="section-number-2">2</span> Using <code>zio::Port</code></h2>
 <div class="outline-text-2" id="text-2">
 <p>
-The links in the intro go to detailed descriptions of the major
-features.  Coming soon to a repo near you are:
+Given a port, a request may be made to bind in a variety of ways.
 </p>
 
-<ul class="org-ul">
-<li><a href="tutorial.html">Tutorial</a> simple steps to get started</li>
-<li><a href="howto.html">How-To</a> starting point for achieving specific goals</li>
-</ul>
+<div class="org-src-container">
+<pre class="src src-c++"><span style="color: #b4fa70;">auto</span> <span style="color: #fcaf3e;">p</span> = node.port(<span style="color: #e9b96e;">"portname"</span>);
+
+<span style="color: #73d216;">// </span><span style="color: #73d216;">bind to an unspecified (ephermeral) public TCP/IP address</span>
+p.bind();
+
+<span style="color: #73d216;">// </span><span style="color: #73d216;">bind to a specific TCP address, either with and without a specific</span>
+<span style="color: #73d216;">// </span><span style="color: #73d216;">TCP port number.</span>
+p.bind(<span style="color: #e9b96e;">"localhost"</span>, 5678);
+p.bind(<span style="color: #e9b96e;">"localhost"</span>, 0);
+
+<span style="color: #73d216;">// </span><span style="color: #73d216;">bind to fully qualified address, in this case via ZeroMQ</span>
+<span style="color: #73d216;">// </span><span style="color: #73d216;">shared-memory transport.</span>
+p.bind(<span style="color: #e9b96e;">"inproc://myqueue"</span>)
+</pre>
+</div>
 
 <p>
-Until then, here's how to install ZIO:
+Likewise, a connect may be requested in a variety of ways.
 </p>
 
-<pre class="example">
-$ ./waf configure --prefix=/path/to/install
-$ [./waf build --alltests -j1]
-$ ./waf install [--notests]
+<div class="org-src-container">
+<pre class="src src-c++"><span style="color: #73d216;">// </span><span style="color: #73d216;">directly connect to a fully qualified ZeroMQ address</span>
+p.connect(<span style="color: #e9b96e;">"tcp://localhost:5678"</span>);
+p.connect(<span style="color: #e9b96e;">"ipc://myunixsock"</span>);
+p.connect(<span style="color: #e9b96e;">"inproc://myqueue"</span>);
+
+<span style="color: #73d216;">// </span><span style="color: #73d216;">indirectly connect to based on a node nickname and the name of one</span>
+<span style="color: #73d216;">// </span><span style="color: #73d216;">of its ports.</span>
+p.connect(<span style="color: #e9b96e;">"somepeer"</span>, <span style="color: #e9b96e;">"itsport"</span>);
 </pre>
+</div>
+
+<p>
+These calls do not immediately bind nor connect.  They merely register
+a request to perform the action.  This indirection is required so that
+the discovery mechanism provided by peering can be used to resolve a
+<code>connect()</code> of the last type above.  We must allow <code>somepeer</code> a chance to
+go online before we can see it and determine what physical address the
+<code>itsport</code> port uses.  
+</p>
+
+<p>
+In general a node may have multiple ports and so their binding must be
+all fully performed, then the peer may advertise, and finally any
+connects may proceed.  These state changes are handled by the
+<code>zio::Node::online()</code> call (see <a href=":node.html">node</a>) when the ports are constructed
+through a node.  If ports are used in isolation then it is up to the
+application developer to follow the proper state transitions.
+</p>
 </div>
 </div>
 </div>

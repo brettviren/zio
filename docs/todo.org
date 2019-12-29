@@ -1,4 +1,6 @@
 #+title: ToDo
+#+setupfile: setup.org
+#+include: nav.org
 
 - [ ] remove message policy from port.  bind message policy to
   send()/recv() methods taking a ~port~ (or a ~Socket~)

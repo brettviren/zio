@@ -1,0 +1,574 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2019-12-29 Sun 12:32 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ZIO messages</title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="Brett Viren" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { width: 90%; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="org.css"/>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2018 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="org-div-home-and-up">
+ <a accesskey="h" href="."> UP </a>
+ |
+ <a accesskey="H" href="index.html"> HOME </a>
+</div><div id="content">
+<h1 class="title">ZIO messages</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org1d059d2">1. Levels</a></li>
+<li><a href="#org6175c4e">2. Format</a></li>
+<li><a href="#org19ff7af">3. Origin</a></li>
+<li><a href="#org0c29db4">4. Granule</a></li>
+<li><a href="#orga3c4057">5. Seqno</a></li>
+<li><a href="#org87e7edd">6. Payload</a></li>
+</ul>
+</div>
+</div>
+<div class="nav">
+<ul class="org-ul">
+<li><a href="index.html">Main Page</a></li>
+<li><a href="tutorial.html">Tutorial</a></li>
+<li><a href="howtos.html">How-to guides</a></li>
+<li><a href="whytos.html">Why-to descriptions</a></li>
+<li><a href="api.html">API Reference</a></li>
+</ul>
+
+</div>
+
+<p>
+ZIO messages are ZeroMQ messages.  They are composed of several
+"parts" (libzmq term) or "frames" (libczmq term) and the parts fall
+into one of two groups which are called:
+</p>
+
+<dl class="org-dl">
+<dt>header</dt><dd>initial data in two frames following a fixed schema determined by ZIO.</dd>
+<dt>payload</dt><dd>zero or more frames holding application dependent data.</dd>
+</dl>
+
+<p>
+As a detail, a multipart ZIO message is encoded/decoded to/from a
+single part ZeroMQ message if the socket used requires it (eg,
+thread-safe CLIENT/SERVER or RADIO/DISH).  To avoid the extra memory
+copy, use of other sockets do not incur codec.
+</p>
+
+<p>
+The general message is illustrated in the following table where each
+subtable represents one message frame
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-right" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">name</th>
+<th scope="col" class="org-left">type</th>
+<th scope="col" class="org-right">bytes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">magic</td>
+<td class="org-left">"ZIO"</td>
+<td class="org-right">3</td>
+</tr>
+
+<tr>
+<td class="org-left">level</td>
+<td class="org-left">"%d"</td>
+<td class="org-right">1</td>
+</tr>
+
+<tr>
+<td class="org-left">format</td>
+<td class="org-left">(eg "JSON", "TEXT")</td>
+<td class="org-right">4</td>
+</tr>
+
+<tr>
+<td class="org-left">label</td>
+<td class="org-left">free string</td>
+<td class="org-right">N0</td>
+</tr>
+</tbody>
+<tbody>
+<tr>
+<td class="org-left">origin</td>
+<td class="org-left">uint64</td>
+<td class="org-right">8</td>
+</tr>
+
+<tr>
+<td class="org-left">granule</td>
+<td class="org-left">uint64</td>
+<td class="org-right">8</td>
+</tr>
+
+<tr>
+<td class="org-left">seqno</td>
+<td class="org-left">uint64</td>
+<td class="org-right">8</td>
+</tr>
+</tbody>
+<tbody>
+<tr>
+<td class="org-left">payload</td>
+<td class="org-left">per format</td>
+<td class="org-right">N1</td>
+</tr>
+</tbody>
+<tbody>
+<tr>
+<td class="org-left">payload</td>
+<td class="org-left">per format</td>
+<td class="org-right">N2</td>
+</tr>
+</tbody>
+<tbody>
+<tr>
+<td class="org-left">&#x2026;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-right">&#xa0;</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+The first two are header frames.  The first header frame holds the
+<b>prefix header</b>.  It is so named as its contents are subject to ZeroMQ
+PUB/SUB envelope prefix matching (subscription).  Except for the fixed
+literal <code>ZIO</code> the prefix header contents are freely provided by the
+application.  The <b>prefix header</b> contains these fields:
+</p>
+
+<dl class="org-dl">
+<dt>magic</dt><dd>three ASCII characters: <code>ZIO</code> marks this as a ZIO message</dd>
+<dt>level</dt><dd>a single digit, ASCII encoded gives the message level</dd>
+<dt>format</dt><dd>a four byte format ID specifying the payload format, ZIO reserves a few.</dd>
+<dt>label</dt><dd>optional, application dependent string</dd>
+</dl>
+
+<p>
+The second header field is called the <b>coordinate header</b> as it provides
+information on an abstracted "location" and "time" to associate with
+the payload.  Depending on application needs, this frame may be fully
+provided by the application.  Alternatively, ZIO provides support for
+implicitly maintaining these values.  The fields are each 64 bit
+unsigned integer:
+</p>
+
+<dl class="org-dl">
+<dt>origin</dt><dd>an application-defined identifier for the origin of the message.</dd>
+<dt>granule</dt><dd>an application-defined monotonically increasing count used for ordering of messages</dd>
+<dt>seqno</dt><dd>an monotonic counter set just prior to sending.</dd>
+</dl>
+
+<p>
+Details on these header quantities as well as information on the
+payload frames follow.
+</p>
+
+
+<div id="outline-container-org1d059d2" class="outline-2">
+<h2 id="org1d059d2"><span class="section-number-2">1</span> Levels</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+ZIO message have a <b>level</b> indicated by a single ASCII digit.  The
+general interpretation is that of an importance level where a higher
+value indicates greater importance and also less frequency.  ASCII
+digits "1" through "8", inclusive, are allowed in ZIO messages.  No
+other value for level is allowed in this version of ZIO.
+</p>
+
+<p>
+The application is free to assign more specific semantic meaning to
+these levels but the following interpretations are recommended and
+they define terms are defined in <code>libzio</code>.
+</p>
+
+<ol class="org-ol">
+<li>trace, messages are emitted from nested loops or occurring with
+frequency far higher than any "events".</li>
+<li>verbose, messages will be emitted from contexts occurring more than
+once per event.</li>
+<li>debug, potentially multiple messages of different types but each
+type occurring once per event.</li>
+<li>info, a rare message, occurring no more than once event.</li>
+<li>summary, a message holding information about a collection of
+events, emitted less than once per event.</li>
+<li>warning, a problem was encountered and handled.</li>
+<li>error, a problem was encountered, not handled (eg ignored) but the
+emitting component continues to run.</li>
+<li>fatal, an error occurred and the component gives up (eg, component
+throws/raises an exception or aborts shortly after).</li>
+</ol>
+
+<p>
+Here an "event" is some driving impetus to the component emitting the
+messages and which sets some time scale.  For example, a message
+processing component might consider an "event" to be each input
+message.  Or, it may be interpreted as each message which satisfies
+some criteria.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org6175c4e" class="outline-2">
+<h2 id="org6175c4e"><span class="section-number-2">2</span> Format</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+The <b>format</b> field provides a hint for the parsing of the payload, if
+not its further interpretation.  That is, given the format, any code
+consuming the payload should be able to read the payload into memory
+in some suitable type of data structure.
+</p>
+
+<p>
+Except for the formats reserved by ZIO and described in <a href="format.html">format</a>, the
+application developer is free to set the <b>format</b> field to any four byte
+value.  It is suggested to try to make use of the reserved format and
+to not proliferate them due to conflating need for a new format hint
+with need for schema hints.  The latter is discussed below in section
+<a href="#org87e7edd">6</a>.  If custom formats are used, it is further recommended to use
+four ASCII characters to facilitate prefix matching.  Finally, not
+that a single format name implies the format for all payload frames.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org19ff7af" class="outline-2">
+<h2 id="org19ff7af"><span class="section-number-2">3</span> Origin</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+In general, the interpretation of the value of the <b>origin</b> field is
+application specific.  The recommended interpretation of <b>origin</b> is to
+identify "where" a message came from.  Some ZIO components provide
+algorithms which treat <b>origin</b> to identify messages with as forming a
+logical stream.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org0c29db4" class="outline-2">
+<h2 id="org0c29db4"><span class="section-number-2">4</span> Granule</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+In general, the interpretation of the value of the <b>granule</b> field is
+application specific.  The recommended interpretation of <b>granule</b> is to
+provide an ordering of messages within and across different values of
+<b>origin</b>.  
+</p>
+</div>
+</div>
+
+<div id="outline-container-orga3c4057" class="outline-2">
+<h2 id="orga3c4057"><span class="section-number-2">5</span> Seqno</h2>
+<div class="outline-text-2" id="text-5">
+<p>
+In general, the interpretation of the value of the <b>seqno</b> field is
+application specific.  The recommended interpretation of <b>seqno</b> is to
+enumerate a strictly a sequential count of messages produced from a
+given socket.  
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-org87e7edd" class="outline-2">
+<h2 id="org87e7edd"><span class="section-number-2">6</span> Payload</h2>
+<div class="outline-text-2" id="text-6">
+<p>
+All frames that follow the header frame are payload frames.
+Ultimately, the payload frames are fully in the domain of the
+application developer.  ZIO does not dictate their use or format
+beyond the ZIO-reserved formats and providing the <b>format</b> field in the
+ZIO header.
+</p>
+
+
+<p>
+The header frame field <b>format</b> provides a hint as to how the payload
+frames may be <b>parsed</b> if not <b>interpreted</b>.  In simpler applications of
+ZIO, consumers may be developed with hard-wired knowledge of how to
+interpret the messages they are provided.  Operators may assure this
+hard-wiring is not violated by careful construction of ZIO network
+typologies (and ZIO <a href="peer.html">peer</a> mechanism can help).  On the other hand,
+further hints are required for interpretation if the <b>schema</b> of the
+payload frames allow for differences in structure between messages of
+the same <b>format</b>.
+</p>
+
+<p>
+For example, it is expected that ZIO messages following the JSON
+format will be commonly used to send out <a href="https://en.wikipedia.org/wiki/Observability">observability</a> metrics of
+various type (following various schema).  Given the origin ID, a
+consumer of the payload may have enough knowledge to know the schema
+and interpret the data structure represented in the JSON format.  When
+additional hints are required they must be provided either out-of-band
+of the message or in some way located in the payload without knowing
+details of the schema.  
+</p>
+
+<p>
+When in-band self-description is needed, ZIO provides the general
+suggestion of providing a schema-level "header" that it can be parsed
+and interpreted prior interpreting to the rest of the payload.  Some
+examples: in TEXT, use the equivalent to HTTP headers as prefix to the
+string with predefined delimiters and terminator.  For JSON use an
+initial object in a top-level array or a specially named key in a
+top-level object to hold required hints.  As BUFF is almost a
+completely general format, it is up to the application developer to
+provide any hinting.  But, of note, if BUFF is used to hold data which
+is serialized in one of the various popular mechanisms (eg, protocol
+buffers), a level of self-documentation of the schema exists (see
+protobuf "any" for example).  
+</p>
+
+<p>
+ZIO also provides some support for out-of-band hinting as part of its
+peer discovery system (based on <a href="https://github.com/zeromq/zyre">Zyre</a>).  Using <code>zio::Peer</code> (see <a href=":peer.html">peer</a>) or
+better <code>zio::Node</code> (see <a href=":node.html">node</a>) an application developer may provide
+key/value pairs which can be known to other ZIO peers on the network.
+These can, for example, associate schema hints to origin IDs.  ZIO
+provides the mechanism to share this out-of-band information but it is
+the responsibility of application developers to make use of it (or
+not).
+</p>
+</div>
+</div>
+</div>
+</body>
+</html>

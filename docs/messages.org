@@ -1,4 +1,6 @@
 #+title:  ZIO messages
+#+setupfile: setup.org
+#+include: nav.org
 
 ZIO messages are ZeroMQ messages.  They are composed of several
 "parts" (libzmq term) or "frames" (libczmq term) and the parts fall

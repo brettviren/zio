@@ -3,10 +3,10 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2019-12-29 Sun 12:41 -->
+<!-- 2019-12-29 Sun 12:32 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>ZIO - C++ interface to ZeroMQ and Zyre.</title>
+<title>Notes</title>
 <meta name="generator" content="Org mode" />
 <meta name="author" content="Brett Viren" />
 <style type="text/css">
@@ -161,19 +161,6 @@
   .footdef  { margin-bottom: 1em; }
   .figure { padding: 1em; }
   .figure p { text-align: center; }
-  .equation-container {
-    display: table;
-    text-align: center;
-    width: 100%;
-  }
-  .equation {
-    vertical-align: middle;
-  }
-  .equation-label {
-    display: table-cell;
-    text-align: right;
-    vertical-align: middle;
-  }
   .inlinetask {
     padding: 10px;
     border: 2px solid gray;
@@ -194,13 +181,12 @@
   /*]]>*/-->
 </style>
 <link rel="stylesheet" type="text/css" href="org.css"/>
-<link rel="stylesheet" type="text/css" href="org1.css" />
 <script type="text/javascript">
 /*
 @licstart  The following is the entire license notice for the
 JavaScript code in this tag.
 
-Copyright (C) 2012-2019 Free Software Foundation, Inc.
+Copyright (C) 2012-2018 Free Software Foundation, Inc.
 
 The JavaScript code in this tag is free software: you can
 redistribute it and/or modify it under the terms of the GNU
@@ -243,8 +229,22 @@ for the JavaScript code in this tag.
 </script>
 </head>
 <body>
-<div id="content">
-<h1 class="title">ZIO - C++ interface to ZeroMQ and Zyre.</h1>
+<div id="org-div-home-and-up">
+ <a accesskey="h" href="."> UP </a>
+ |
+ <a accesskey="H" href="index.html"> HOME </a>
+</div><div id="content">
+<h1 class="title">Notes</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#orgb13b754">1. Thread safety</a></li>
+<li><a href="#orge49e836">2. Socket buffering</a></li>
+<li><a href="#org078cd79">3. A potential Catch 22 with Discovery and Ephemeral Ports</a></li>
+</ul>
+</div>
+</div>
 <div class="nav">
 <ul class="org-ul">
 <li><a href="index.html">Main Page</a></li>
@@ -256,59 +256,80 @@ for the JavaScript code in this tag.
 
 </div>
 
-<div id="outline-container-org1d90f0b" class="outline-2">
-<h2 id="org1d90f0b"><span class="section-number-2">1</span> Introduction</h2>
+<div id="outline-container-orgb13b754" class="outline-2">
+<h2 id="orgb13b754"><span class="section-number-2">1</span> Thread safety</h2>
 <div class="outline-text-2" id="text-1">
 <p>
-ZIO provides a high-level interface to ZeroMQ, Zyre and some patterns
-described in the <a href="http://zguide.zeromq.org/">zguide</a>.  It also provides a <i>ported graph</i> model for
-constructing a network topology.
+Only recent "draft" sockets (CLIENT/SERVER and RADIO/DISH) are
+officially thread safe.  All others should not be relied on to work
+properly if used from any thread other than the one in which it was
+created.  The <code>peer</code> relies on Zyre which uses ROUTER/DEALER but they
+are kept to the Zyre actor thread.  However the actor PAIR could be
+subject to cross-thread use.  A <code>node</code> creates a <code>peer</code> when it goes
+"online" and destroys it when it goes "offline".  Thus, nodes which
+will be used between threads must use only thread-safe sockets and go
+online/offline in a common thread and must not use <code>peer</code> services in
+any other thread.
 </p>
-
-<p>
-Some of the features ZIO provides include:
-</p>
-
-<ul class="org-ul">
-<li>a "logger object" type interface to emitting messages supporting
-both free form text strings as well as structured data metrics (<a href="outbox.html">outbox</a>).</li>
-
-<li>a high level, but still general message format (<a href="messages.html">messages</a> and <a href="format.html">format</a>)</li>
-
-<li>interface to Zyre peer discovery, persistence and reaction (<a href="peer.html">peer</a>)</li>
-
-<li>a "ported graph" abstraction which provides network topology
-self-assembly and which may be used to develop distributed
-applications that follow the <i>data flow programming</i> paradigm (<a href="node.html">node</a>
-and <a href="port.html">port</a>).</li>
-
-<li>some message processing batteries included (<a href="batteries.html">batteries</a>).</li>
-</ul>
 </div>
 </div>
 
-<div id="outline-container-org105016e" class="outline-2">
-<h2 id="org105016e"><span class="section-number-2">2</span> Documentation</h2>
+<div id="outline-container-orge49e836" class="outline-2">
+<h2 id="orge49e836"><span class="section-number-2">2</span> Socket buffering</h2>
 <div class="outline-text-2" id="text-2">
 <p>
-The links in the intro go to detailed descriptions of the major
-features.  Coming soon to a repo near you are:
+Early termination can cause loss of messages that have been sent out a
+socket but not yet received by the remote.  The holder of a socket
+arrange to keep that socket alive in some manner that assures
+transmission.
 </p>
+</div>
+</div>
 
-<ul class="org-ul">
-<li><a href="tutorial.html">Tutorial</a> simple steps to get started</li>
-<li><a href="howto.html">How-To</a> starting point for achieving specific goals</li>
-</ul>
+<div id="outline-container-org078cd79" class="outline-2">
+<h2 id="org078cd79"><span class="section-number-2">3</span> A potential Catch 22 with Discovery and Ephemeral Ports</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+Discovery involves broadcasting headers to the network which advertise
+the endpoints a peer has or will bind.  Other peers may receive these
+advertisements and then connect based on matching peer name and header
+key.
+</p>
 
 <p>
-Until then, here's how to install ZIO:
+A peer socket may simultaneously bind and connect to multiple
+endpoints.  Furthermore a socket may bind to an endpoint specifying an
+<i>ephemeral port</i> (eg, <code>tcp://127.0.0.1:*</code>) in which case the full endpoint
+address to advertise may only be constructed after the call to <code>bind()</code>
+completes.  (Ignored is the case that the IP address is also wildcard
+<code>tcp://*:*</code>.)
 </p>
 
-<pre class="example">
-$ ./waf configure --prefix=/path/to/install
-$ [./waf build --alltests -j1]
-$ ./waf install [--notests]
-</pre>
+<p>
+Thus there is an ordering conundrum that disrupts making discovery,
+bind and connect be atomic operations if ephemeral ports are allowed.
+And, given discovery is meant to reduce the amount of configuration
+information needed, it's reasonable that bind endpoints are specified
+as ephemeral.
+</p>
+
+<p>
+The only reasonable order of operation is then:
+</p>
+
+<ol class="org-ol">
+<li>bind and resolve ephemeral ports</li>
+<li>advertise binds</li>
+<li>listen for peer discovery</li>
+<li>pattern match on their headers and connect</li>
+</ol>
+
+<p>
+After advertisement (peer initialization) is complete then the final
+two steps are asynchronous.  The peer must decide either to wait for
+all expected peers to be discovered (and connections made) or to allow
+connections to be completed later.  
+</p>
 </div>
 </div>
 </div>

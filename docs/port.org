@@ -1,4 +1,6 @@
 #+title: ZIO Port
+#+setupfile: setup.org
+#+include: nav.org
 
 * Introduction
 

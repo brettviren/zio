@@ -1,4 +1,6 @@
 #+title: ZIO Node
+#+setupfile: setup.org
+#+include: nav.org
 
 A ~zio::Node~ represents one vertex a graph or network which is
 connected to other ZIO applications (which themselves may utilize
