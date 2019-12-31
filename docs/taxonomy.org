@@ -1,0 +1,21 @@
+#+title: ZIO Taxonomy
+
+ZIO provides a /ported graph/ ([[file:node.org][node]], [[file:port.org][port]]) abstraction to network
+topology.  Behavior of sets of nodes and ports may be arbitrary but
+certain behavior can be called out to form a taxonomy.
+
+* Spray and Pray
+
+The [[file:outbox.org][spray-and-pray]] (SAP) behavior is when a node has something to say
+but doesn't care who hears it.  When used with PUB/SUB sockets, it is
+useful for emitting logging and metrics in an M-to-N pattern.  When
+used with PUSH/PULL it may be used to form the "scatter" in a
+scatter-gather pattern.
+
+* Flow
+
+The [[file:flow.org][flow]] behavior is for uni-directional transfer of data from one
+node to another in a quasi-synchronous manner.  It strictly uses
+CLIENT/SERVER.
+
+

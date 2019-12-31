@@ -2,89 +2,73 @@
 #+setupfile: setup.org
 #+include: nav.org
 
-ZIO /data flow protocol/ supports one-way transmission of
-application-dependent payload messages between two ports with
-additional guarantees beyond those that are provided by ZIO ports in
-general.  These guarantees include:
+ZIO /data flow protocol/ is a layer on top of basic ZIO [[file::port.org][ports]].  It
+provides for one-way transmission of application-dependent payload
+messages between two ports with additional guarantees beyond those
+that are provided by ZIO ports in general.  These guarantees include:
 
-- The endpoints use only the ZeroMQ socket types CLIENT or SERVER.
+- The distributed application endpoints are expected to use the ZeroMQ
+  socket types CLIENT while any shared resource (file, compute,
+  broker) are accessed via the socket type SERVER.
 
-- For any given transmission, the payload message flow may proceed in
+- For any given transmission, the /payload/ message flow may proceed in
   one direction only (CLIENT to SERVER or vice versa).
 
-- The total number of messages buffered by the sockets at both
-  endpoints combined will not exceed a given maximum.
+- The total number of messages buffered for the transmission by the
+  sockets at both endpoints combined will not exceed a given maximum.
 
-- The client side may be safely used in an execution context serviced
-  by different threads at different points in time.  The server side
-  is guaranteed only if it executes fully in one thread (although
-  usual ZeroMQ inter-thread communication is allowed).
+- The client side may be used safely in an execution context serviced
+  by different threads at different points in time (eg in a TBB Flow
+  Graph).  Depending on the server side implementation, it may also
+  satisfy this guarantee.
 
-The benefits of these guarantees (some might call them restrictions or
-limitations) are described in the section of the ZeroMQ guide covering
-[[http://zguide.zeromq.org/page:all#toc211][credit-based flow control]].
-
-* API
-
-#+begin_src c++
-// t.b.d
-// client
-cl.send()
-cl.recv()
-// server
-client (cl(s.recv()->spawn())
-#+end_src
+Some of the benefits of these guarantees (some might call them
+restrictions or limitations) are described in the section of the
+ZeroMQ guide covering [[http://zguide.zeromq.org/page:all#toc211][credit-based flow control]].
 
 * Flow protocol
 
+
 The ZIO /data flow protocol/ is partly illustrated in the UML sequence
-diagram below.  It shows two phases: /initiate/ and /transfer/.  In
-/initiate/ the client always sends to the server.  In /transfer/ the
-exchange depends on the parameters determined in the /initiate/ phase.
+diagram.  The protocol has two phases: /initiate/ and /transfer/.
 
 [[file:flow-extract.png]]
 
-In /initate/, the client sends a begin-of-transmission (~BOT~) message and
-the server responds with another ~BOT~.  Either holds two required
-values:
+*Initiate* starts with the client sending a begin-of-transmission (~BOT~)
+message and the server responding with another ~BOT~.  Both required
+these attributes: *direction* gives the /flow direction/ (see below) of
+the flow from the point of view of the message sender and *credits*
+gives the number of credits in play in the protocol
 
-- direction : the /direction/ (see below) of the flow from the point of
-  view of the message sender.
-
-- credits : the number of credits to use
-
-The /direction/ is one of two values: /extract/ means endpoint will send
-payload data and /inject/ means the endpoint expects to receive payload
-data.
+The /direction/ is one of two values: /extract/ means the endpoint will
+*send* payload data and /inject/ means the endpoint expects to *receive*
+payload data.
 
 The server receives the client's ~BOT~ and in forming its reply ~BOT~
-shall reverse the /direction/ field and may adjust[fn:credits] the
-number of credits downward.  The client receives the reply and shall
-accept the number of credits.
+shall reverse the /direction/ field and may adjust the number of credits
+downward.  The client receives the reply and shall accept the number
+of credits as the total in play for transmission phase.  
+
+Note, choice of this number requires some trial.  Increasing it will,
+to a point, reduce latency effects that will degrading throughput.
+Increasing it will also increase memory usage in the endpoints as well
+as latency to perform any synchronization, such as at shutdown.
 
 Alternatively (and not shown in the diagram) the server may
 immediately respond with end-of-transmission (~EOT~) if the request is
 rejected.
 
+*Transfer* phase of the protocol has a mirror symmetry under exchange of
+flow /direction/.  If the client ~BOT~ specifies the /extract/ direction
+then the client side is /sender/ of payload messages, else it is the
+server side.  The end which is not the /sender/ is the /recver/.  These
+terms describe the direction of ~DAT~ messages and ~PAY~ messages are sent
+in the opposite direction (/sender/ receives ~PAY~).  Like ~BOT~, ~EOT~ travel
+both directions.
 
-[fn:credits]  The number credits likely will be selected to limit
-memory usage on the server as it may be servicing multiple clients on
-multiple remote hosts.
-
-
-
-The /transfer/ state is then entered.  It will proceed in one of the two
-possible flow /direction/ and these two variants are a mirror symmetry
-of each other (with respect to exchange of client and server).  If the
-client ~BOT~ specifies the /extract/ direction then the client side is
-/sender/ of payload messages, else it is the server side.  The end which
-is not the /sender/ is the /recver/.  These describe the direction of ~DAT~
-messages and ~PAY~ messages are sent in the opposite direction (/sender/
-receives ~PAY~).  Like ~BOT~, ~EOT~ travel both directions.
-
-Regardless of the /direction/ the /transfer/ starts out by the /recver/
-sending a number of credits in a ~PAY~ message and decrementing the
-number of held credits by an equal amount.  The /recver/ may send
+Regardless of the /direction/ the /transfer/ phase starts out by the
+/recver/ sending a number of credits in a ~PAY~ message and decrementing
+the number of held credits by an equal amount.  The /recver/ may send
 subsequent ~PAY~ messages anytime it posses credit and may send any
 amount up to and including the amount currently held.  A /recver/ credit
 is replenished one unit for every ~DAT~ message received.
@@ -115,12 +99,12 @@ the other end is still online or not.
 * Flow messages
 
 ZIO data flow introduces a new ZIO message of type ~FLOW~.  This message
-type has no meaningful "level" and so it is set to undefined (0).  The
-payload frames of a ~FLOW~ message are unused by the ZIO /data flow/
-protocol and are available for application use.  The protocol is
-implemented using the ~label~ field of the ZIO message prefix header.
-This field shall hold a string representing a JSON object which is
-here called the /flow object/.  
+type has no meaningful "level" and so it is set to
+~zio::level::undefined~ (0).  The payload frames of a ~FLOW~ message are
+unused by the ZIO /data flow/ protocol and are available for application
+use.  The protocol is implemented using the ~label~ field of the ZIO
+message prefix header.  This field shall hold a string representing a
+JSON object which is here called the /flow object/.
 
 A /flow object/ shall always have an attribute named ~flow~ the value of
 which defines a (sub) message type in the /data flow/ protocol.  Any
@@ -131,8 +115,7 @@ of these (sub) message types and their associated attributes are
 described:
 
 - ~BOT~ :: begin-of-transmission, client sends with ~direction~ set to
-  ~extract~ or ~inject~, server sends with ~credits~ set to an integer.  ~BOT~
-  explicitly extends initial credit.
+  ~extract~ or ~inject~, server sends with ~credits~ set to an integer.
 
 - ~EOT~ :: end-of-transmission, either side may send, receiver should
   echo back.  No associated attributes.
@@ -157,21 +140,25 @@ application which owns it.
 
 [[file:flow-credit.png]]
 
-A ~Flow~ is created on a ~port~ by an application.  The ~port~ should
-already be online.  A ~Flow~ is created with a ~BOT~ which is then sent
-out the port and the ~Flow~ will wait for a ~BOT~ (or ~EOT~) response.
-Based on the ~BOT~ /direction/ it will enter either /sender/ or /recver/ mode.
-As described above, the ~BOT~ direction is from the point of view of the
-source of the ~BOT~ message and so for example a ~Flow~ will be /sender/ if
-the ~BOT~ indicates the other endpoint wants direction /inject/.
+A ~zio::flow::Flow~ is created on a ~port~ by an application.  The ~port~
+should be brought online prior to any method calls.  If the ~Flow~
+object implements a client-side the application must first call
+~send_bot()~ and then ~recv_bot()~.  If the object implements directly a
+server-side then these two shall be reversed.
 
-Depending on the mode, the application may then call synchronous the
-methods ~put()~ (/sender/ mode) or ~get()~ (/recver/ mode).  Proper mode
-operation may be asserted.  During their calls, asynchronous
-communication with the port proceeds and both may ~recv()~ messages from
-the port.  If a ~recv()~ returns and ~EOT~ (instead of the expected ~PAY~ or
-~DAT~) these methods return ~false~.  The application should check this
-return and call ~eot()~, possibly with a zero timeout, to issue a reply.
+Based on the ~BOT~ /direction/, the object will be either in /sender/ or
+/recver/ mode.  The application may call ~is_sender()~ to determine which
+(although the app should also know this from providing the initial ~BOT~).  
+The sequence for each mode are included in the diagram.
+
+After the ~BOT~ handshake and depending on mode he application may then
+call the synchronous methods ~put()~ (/sender/ mode) or ~get()~ (/recver/
+mode) in order to exchange ~DAT~ messages.  Proper mode operation may be
+asserted.  During their calls, asynchronous communication with the
+port proceeds and both may ~recv()~ messages from the port.  If a ~recv()~
+returns and ~EOT~ (instead of the expected ~PAY~ or ~DAT~) these methods
+return ~false~.  The application should check this return and call
+~eot()~, possibly with a zero timeout, to issue a reply.
 
 Such an ~EOT~ would arise because either mode on either end may call
 ~eot()~ at any time.  When so initiated by the application, the timeout
@@ -180,22 +167,39 @@ sockets.  If an ~EOT~ reply is received, this method returns ~true~.  A
 number of ~PAY~ (if /sender/) or ~DAT~ (if /recver/) messages may arrive
 before the reply-~EOT~ and they shall be discarded.
 
-The ~Flow~ class is designed to be used both as the core of a ZIO flow
-client and also as a client /handler/ inside a multi-client ZIO flow
-server.  In order to achieve this symmetry, the server implementation
-must perform a minor sleight-of-hand.  This is illustrated in the
-following UML sequence diagram.
+* Simple Flow Server
+
+A /data flow server/ may also be implemented using the ~zio::flow::Flow~
+class by simply using a SERVER socket for its port and calling
+~recv_bot()~ prior to ~send_bot()~ in opposition to the diagram above.
+
+* Flow Broker
+
+A simple flow server will break if more than one client attempts to
+enter the conversation.  The ZeroMQ SERVER feature "routing ID" must
+be used to isolate each conversation inside the server logic.
+
+ZIO provides a broker micro-framework to help simply creating
+multi-client servers.  It is called a broker as it works by moderating
+message traffic between remote clients and local client handlers.
+These handlers are provided by the application and may be implemented
+with ~zio::flow::Flow~.  An illustration of how this broker works is
+illustrated in the Following UML sequence diagram.
 
 [[file:flow-server-credit.png]]
 
 In the illustration, the server listens on its own server port (a
-SERVER socket) for ~FLOW~ messages coming from a Flow clients.  When a
-~BOT~ is received from new client a local /handler/ is constructed via a
-factory.  This handler executes as an actor (ZeroMQ ~zactor_t~).
+SERVER socket) for ~FLOW~ messages coming from (remote) Flow clients.
+When a ~BOT~ is received from new client the broker will modify it to
+hold the ZeroMQ routing ID (~cid~ in the diagram) and pass it to an
+application-provided /factory/.  ................
+
+
+This handler executes as an actor (ZeroMQ ~zactor_t~).
 Internally, it operates exactly like shown in the ZIO Flow API
 Sequence diagram except the ~zio::flow::Flow~ is constructed around a
 ~port~ that wraps the PAIR socket of the actor pipe.  The other end of
-that pipe is held by the factory.  
+that pipe is held by the factory.
 
 This is the first sleight-of-hand the server must do.  The second is
 in handling the ~BOT~ messages.  The /direction/ of the ~BOT~ from the

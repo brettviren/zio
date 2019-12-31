@@ -1,18 +1,14 @@
 #include "zio/port.hpp"
-#include "zio/types.hpp"
+
 #include <sstream>
 #include <algorithm>
 #include <string>
 
 struct DirectBinder {
-    zio::Socket& sock;
+    zio::socket_t& sock;
     std::string address;
-    zio::address_t operator()() {
-        int port = zsock_bind(sock.zsock(), "%s", address.c_str());
-        if (port < 0) {
-            std::string msg = "failed to bind to " + address;
-            throw std::runtime_error(msg);
-        }
+    std::string operator()() {
+        sock.bind(address);
         return address;
     }
 };
@@ -30,22 +26,18 @@ std::string make_tcp_address(std::string hostname, int port)
 }
 
 struct HostPortBinder {
-    zio::Socket& sock;
+    zio::socket_t& sock;
     std::string hostname;
     int tcpportnum{0};
-    zio::address_t operator()() {
-        zio::address_t address = make_tcp_address(hostname, tcpportnum);
-        tcpportnum = zsock_bind(sock.zsock(), "%s", address.c_str());
-        if (tcpportnum < 0) {
-            std::string msg = "failed to bind to " + address;
-            throw std::runtime_error(msg);
-        }
-        return make_tcp_address(hostname, tcpportnum);
+    std::string operator()() {
+        std::string address = make_tcp_address(hostname, tcpportnum);
+        sock.bind(address);
+        return address;
     }
 };
 
 zio::Port::Port(const std::string& name, int stype, const std::string& hostname)
-    : m_name(name), m_sock(stype), m_hostname(hostname), m_online(false)
+    : m_name(name), m_sock(m_ctx , stype), m_hostname(hostname), m_online(false)
 {
 }
 
@@ -90,7 +82,8 @@ void zio::Port::connect(const nodename_t& node, const portname_t& port)
 
 void zio::Port::subscribe(const std::string& prefix)
 {
-    m_sock.subscribe(prefix);
+    if (zio::sock_type(m_sock) == ZMQ_SUB) 
+        m_sock.setsockopt(ZMQ_SUBSCRIBE, prefix.c_str(), prefix.size());
 }
 
 
@@ -115,14 +108,13 @@ zio::headerset_t zio::Port::do_binds()
     }
     std::string addresses = ss.str();
     set_header("address", addresses);
-    set_header("socket", m_sock.stype());
+    set_header("socket", zio::sock_type_name(zio::sock_type(m_sock)));
     for (const auto& hh : m_headers) {
         zsys_debug("[port %s]: %s = %s",
                    m_name.c_str(), hh.first.c_str(), hh.second.c_str());
     }
 
     return m_headers;
-
 }
 
 void zio::Port::online(zio::Peer& peer)
@@ -143,7 +135,7 @@ void zio::Port::online(zio::Peer& peer)
         if (m_verbose) 
             zsys_debug("[port %s]: connect to %s",
                        m_name.c_str(), addr.c_str());
-        zsock_connect(m_sock.zsock(), "%s", addr.c_str());
+        m_sock.connect(addr);
         m_connected.push_back(addr);
     }
 
@@ -174,7 +166,7 @@ void zio::Port::online(zio::Peer& peer)
                     zsys_debug("[port %s]: connect to %s:%s at %s",
                                m_name.c_str(),
                                nh.first.c_str(), nh.second.c_str(), addr.c_str());
-                zsock_connect(m_sock.zsock(), "%s", addr.c_str());
+                m_sock.connect(addr);
                 m_connected.push_back(addr);
             }
         }
@@ -189,32 +181,56 @@ void zio::Port::offline()
     m_online = false;
 
     for (const auto& addr : m_connected) {
-        zsock_disconnect(m_sock.zsock(), "%s", addr.c_str());
+        m_sock.disconnect(addr);
     }
 
     for (const auto &addr : m_bound) {
-        zsock_unbind(m_sock.zsock(), "%s", addr.c_str());
+        m_sock.unbind(addr);
     }
     m_connected.clear();
 }
 
+static bool needs_codec(int stype)
+{
+    return
+        stype == ZMQ_SERVER ||
+        stype == ZMQ_CLIENT ||
+        stype == ZMQ_RADIO ||
+        stype == ZMQ_DISH;
+}
 
 
 void zio::Port::send(zio::Message& msg)
 {
     msg.set_coord(m_origin);
-    auto data = msg.encode();
-    // zsys_debug("LOG[%d]: %s (len:%ld)", lvl, log.c_str(), data.size());
-    m_sock.send(data);
+    if (needs_codec(zio::sock_type(m_sock))) {
+        zio::message_t spmsg = msg.encode();
+        m_sock.send(spmsg, zio::send_flags::none);
+        return;
+    }
+    zio::multipart_t mpmsg = msg.toparts();
+    mpmsg.send(m_sock);
 }
 
 bool zio::Port::recv(Message& msg, int timeout)
 {
-    zio::Message::encoded_t dat = m_sock.recv(timeout);
-    if (dat.empty()) {
-        return false;
+    zio::pollitem_t items[] = {{m_sock, 0, ZMQ_POLLIN, 0}};
+    int item = zio::poll(&items[0], 1, timeout);
+    if (!item) return false;
+
+    if (needs_codec(zio::sock_type(m_sock))) {
+        zio::message_t spmsg;
+        auto res = m_sock.recv(spmsg);
+        if (!res) return false;
+        msg.decode(spmsg);
+        return true;
     }
-    msg.decode(dat);
+
+    zio::multipart_t mpmsg;
+    bool ok = mpmsg.recv(m_sock);
+    if (!ok) return false;
+    msg.fromparts(mpmsg);
+
     return true;
 }
 

@@ -2,7 +2,7 @@
 #define ZIO_OUTBOX_HPP_SEEN
 
 #include "zio/message.hpp"
-#include "zio/types.hpp"
+
 #include <functional>
 
 namespace zio {

@@ -1,9 +1,9 @@
 #ifndef ZIO_PORT_HPP_SEEN
 #define ZIO_PORT_HPP_SEEN
 
-#include "zio/socket.hpp"
 #include "zio/peer.hpp"
 #include "zio/message.hpp"
+#include "zio/interned.hpp"
 
 #include <memory>
 #include <map>
@@ -11,20 +11,34 @@
 
 namespace zio {
 
-    typedef std::string nodename_t;
-    typedef std::string portname_t;
+    /*! 
+      @brief a port holds a socket in the context of a node
 
+      A port provides an identity (name) for the socket in the context
+      of a node to the network (via a peer) and to the application
+      (via a method).
 
+      It provides direct and discovery-based bind() and connect().
+
+      Finally, using its send() and recv() their messages will adhere
+      to the ZIO conventions.
+
+    */
     class Port {
     public:
+        typedef std::string address_t;
+        typedef std::string nodename_t;
+        typedef std::string portname_t;
+
         Port(const std::string& name, int stype,
-             const std::string& hostname);
+             const std::string& hostname = "127.0.0.1");
         ~Port();
 
         // The owning node's origin.
         void set_origin(origin_t origin) { m_origin = origin; }
 
         void set_verbose(bool verbose = true) { m_verbose = verbose; }
+
         const std::string& name() const { return m_name; }
 
         // Register bind/connect requests
@@ -48,33 +62,35 @@ namespace zio {
 
         // When this is a SUB then at least one subscription is
         // required if there shall be any expectation of messages.
-        void subscribe(const std::string& prefix);
+        void subscribe(const std::string& prefix = "");
 
         // Set header "zio.port.<portname>.<leafname> = <value>
         void set_header(const std::string& leafname, const std::string& value);
 
-        // The rest are for the owning Node to call
-
-        // Do any requested binds, return all corresponding port headers.
+        /// For node.  Do any requested binds, return all
+        /// corresponding port headers.
         headerset_t do_binds();
 
-        // Go online, making any connections, using peer to resolve if needed.
+        /// For node.  Go online, making any connections, using peer
+        /// to resolve if needed.
         void online(Peer& peer);
 
-        // Disconnect, unbind.
+        /// For node.  Disconnect, unbind.
         void offline();
 
-        // non-const ref, coord header gets set.
+        /// Send a message.  Note, msg is modified to set coords.
         void send(Message& msg);
-        // recieve a message, return false if timeout
+
+        /// Recieve a message, return false if timeout
         bool recv(Message& msg, int timeout=-1);
 
-        // Access wrapped socket.
-        Socket& socket() { return m_sock; }
+        // Access the underlying cppzmq socket.
+        zio::socket_t& socket() { return m_sock; }
 
     private:
         const std::string m_name;
-        Socket m_sock;          // this makes ports noncopyable
+        zio::context_t m_ctx;
+        zio::socket_t m_sock;
         std::string m_hostname;
         bool m_online;
         std::map<std::string, std::string> m_headers;
@@ -89,13 +105,10 @@ namespace zio {
         
         bool m_verbose{false};
 
-
     };
 
-    // Ports can not be copied because of the Socket but they
-    // typically must be shared.
+    // The context can't be copied and ports like to be shared.
     typedef std::shared_ptr<Port> portptr_t;
-
 
 }
 #endif

@@ -7,10 +7,10 @@ participant "handler" as app
 
 sc -> port : recv(wait)
 port -> sc : cid,BOT
-sc -> factory : BOT'
-factory -> app : spawn actor\nwith pipe
+sc -> factory : BOT' (w/cid)
+factory -> app : spawn handler\nBOT'
 activate app
-        app -> sc : BOT'
+        app -> sc : BOT' 
         sc -> app : BOT
 
         port -> sc : cid,PAY/DAT/EOT

@@ -1,7 +1,7 @@
 // basic peer discovery and presence with linking up
 
 #include "zio/peer.hpp"
-#include "zio/socket.hpp"
+#include "zio/interned.hpp"
 
 #include <iostream>
 using namespace std;
@@ -12,9 +12,12 @@ int main(int argc, char* argv[])
     if (argc>1)
         verbose=true;
 
+    zio::context_t ctx;
+
     // in a publisher application
-    zio::Socket pub(ZMQ_PUB);
-    const std::string addr = pub.bind("inproc://testpeerlink");
+    zio::socket_t pub(ctx, ZMQ_PUB);
+    const std::string addr = "inproc://testpeerlink";
+    pub.bind(addr);
     zio::Peer pubpeer("pub",{{"Feed",addr}}, verbose);
 
     // in a subscriber application
@@ -32,28 +35,33 @@ int main(int argc, char* argv[])
     if (verbose)
         cerr << "got " << feeds.size() << ": " << feeds[""] << endl;
     assert(feeds.size() == 1);
-    zio::Socket sub(ZMQ_SUB);
-    sub.subscribe();
+    zio::socket_t sub(ctx, ZMQ_SUB);
+    std::string prefix = "";
+    sub.setsockopt(ZMQ_SUBSCRIBE, prefix.c_str(), prefix.size());
+
     sub.connect(feeds[""]);
 
     // zmq wart: SSS, give time for pub to process any subscriptions.
     zclock_sleep(100);
 
 
-    
+    std::string hw = "Hello World!";
     // back in publisher
-    zstr_send(pub.zsock(), "Hello World!");
+    pub.send(zio::buffer(hw.data(), hw.size()));
     if (verbose)
-        cerr << "published\n";
+        cerr << "send "<<hw<<"\n";
 
 
     // back in subscriber
-    char* resp = zstr_recv(sub.zsock());
-    assert(resp);
-    assert(streq(resp, "Hello World!"));
+    zio::message_t msg;
+    auto res = sub.recv(msg);
+    assert(res);
+    std::string hw2(static_cast<char*>(msg.data()), msg.size());
+    assert(hw2 == hw);
     if (verbose)
-        cerr << resp <<endl;
-    free (resp);
+        cerr << "recv "<<hw2<<"\n";
+
+
     
     return 0;
 }

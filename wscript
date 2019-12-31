@@ -18,7 +18,6 @@ def configure(cfg):
     cfg.check_cfg(package='libzyre', uselib_store='ZYRE', **p);
     cfg.check_cfg(package='protobuf', uselib_store='PROTOBUF', **p);
     cfg.write_config_header('config.h')
-    cfg.recurse("docs")
 
 def build(bld):
     uses='ZMQ CZMQ ZYRE'.split()
@@ -55,4 +54,3 @@ def build(bld):
     
     from waflib.Tools import waf_unit_test
     bld.add_post_fun(waf_unit_test.summary)
-    bld.recurse("docs")

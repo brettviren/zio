@@ -1,14 +1,17 @@
 @startuml
+title ZIO Flow API Sequence
 participant "port" as port
 participant "zio::flow::Flow" as cc
 participant app
-title ZIO Flow API Sequence
 activate app
-        app -> cc : create(BOT)
+        app -> cc : create(port)
         activate cc
+                app -> cc : send_bot()
                 cc -> port : send(BOT)
+                app -> cc : recv_bot()
                 cc -> port : recv(wait)
                 port -> cc : BOT
+                cc -> app : BOT
 
                 == sender mode ==
 

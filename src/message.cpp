@@ -28,105 +28,143 @@ std::string zio::PrefixHeader::dumps() const
     return ss.str();
 }
 
+void zio::PrefixHeader::loads(const std::string& p)
+{
+    level = static_cast<zio::level::MessageLevel>(p[3]-'0');
+    format = p.substr(4,4);
+    label = p.substr(8);
+}        
+
 zio::Message::Message()
+    : m_rid(0)
 {
 }
 
-zio::Message::Message(const encoded_t& data)
-{
-    this->decode(data);
-}
-
-zio::Message::Message(const header_t h, const multiload_t& pl)
+zio::Message::Message(const header_t h, multipart_t&& pl)
     : m_header(h)
-    , m_payload(pl.begin(), pl.end())
+    , m_payload(std::move(pl))
+    , m_rid(0)
 {
 }
 
-void zio::Message::clear()
+zio::Message::Message(const header_t h)
+    : m_header(h)
+    , m_rid(0)
 {
-    m_header = header_t();
-    m_payload.clear();
 }
 
-zio::Message::encoded_t zio::Message::encode() const
+zio::Message::Message(const std::string& form, level::MessageLevel lvl)
+    : m_header({{lvl,form,""},{0,0,0}})
+    , m_rid(0)
 {
-    zmsg_t* msg = zmsg_new();
-    std::string pre = m_header.prefix.dumps();
-    zmsg_addstr(msg, pre.c_str());
-    zmsg_addmem(msg, &m_header.coord, sizeof(CoordHeader));
-    for (auto& pl : m_payload) {
-        zmsg_addmem(msg, pl.data(), pl.size());
-    }
-    zframe_t* frame = zmsg_encode(msg);
-    encoded_t ret(zframe_data(frame), zframe_data(frame)+zframe_size(frame));
-    zframe_destroy(&frame);
-    zmsg_destroy(&msg);
-    // sigh, so much copying....
-    // if this is a problem, we can probably directly pack into ZMQ format
-    return ret;
 }
 
-void zio::Message::decode(const encoded_t& data)
+zio::level::MessageLevel zio::Message::level() const
 {
-    clear();
-
-    zframe_t* frame = zframe_new(data.data(), data.size());
-    zmsg_t* msg = zmsg_decode(frame);
-    zframe_destroy(&frame);
-
-    // prefix header
-    char* h1 = zmsg_popstr(msg);
-    if (!h1 or strlen(h1) < 8) {
-        zmsg_destroy(&msg);
-        free(h1);
-        throw zio::message_error::create(1, "bad prefix header");
-    }
-    m_header.prefix.level = level::MessageLevel(h1[3] - '0');
-    std::string h1s = h1;
-    m_header.prefix.format = h1s.substr(4,4);
-    if (h1s.size() > 8) {
-        m_header.prefix.label = h1s.substr(8);
-    }
-    free (h1);    
-    
-    // coord header
-    frame = zmsg_pop(msg);
-    if (!frame or zframe_size(frame) != 3*sizeof(uint64_t)) {
-        zframe_destroy(&frame);
-        zmsg_destroy(&msg);
-        throw zio::message_error::create(2, "bad coord header");
-    }
-    uint64_t* ogs = (uint64_t*)zframe_data(frame);
-    m_header.coord.origin = ogs[0];
-    m_header.coord.granule = ogs[1];
-    m_header.coord.seqno = ogs[2];
-    zframe_destroy(&frame);    
-
-    // payload
-    while (zmsg_size(msg)) {
-        frame = zmsg_pop(msg);
-        if (!frame) {
-            zframe_destroy(&frame);
-            zmsg_destroy(&msg);
-            throw zio::message_error::create(3,"bad payload");
-        }
-        std::uint8_t* b = zframe_data(frame);
-        size_t s = zframe_size(frame);
-        m_payload.emplace_back(b, b+s);
-        zframe_destroy(&frame);
-    }
-    zmsg_destroy(&msg);
+    return m_header.prefix.level;
 }
-        
+void zio::Message::set_level(level::MessageLevel level) 
+{
+    m_header.prefix.level = level;
+}
+void zio::Message::set_label(const std::string& label)
+{
+    m_header.prefix.label = label;
+}
+std::string zio::Message::format() const {
+    return m_header.prefix.format;
+}
+void zio::Message::set_format(const std::string& form)
+{
+    assert(form.size() <= 4);
+    m_header.prefix.format = form;
+}
+std::string zio::Message::label() const {
+    return m_header.prefix.label;
+}
+
 void zio::Message::set_coord(origin_t origin, granule_t gran)
 {
     ++m_header.coord.seqno;
     if (gran == 0) {
-        gran = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+        auto tmp = std::chrono::system_clock::now().time_since_epoch();
+        gran = std::chrono::duration_cast<std::chrono::microseconds>(tmp).count();
     }
     m_header.coord.granule = gran;    
     if (origin) {
         m_header.coord.origin = origin;
+    }
+}
+
+zio::message_t zio::Message::encode() const
+{
+    auto parts = toparts();
+    size_t size = 0;
+    for (auto& part : parts) {
+        size += sizeof(int) + part.size();
+    }
+    zio::message_t ret(size);
+    std::uint8_t* out = ret.data<std::uint8_t>();
+    for (auto& part : parts) {
+        int siz = part.size();
+        memcpy(out, &siz, sizeof(int));
+        out += sizeof(int);
+        memcpy(out, part.data(), siz);
+        out += siz;
+    }
+    if (m_rid>0) 
+        ret.set_routing_id(m_rid);
+    return ret;
+}
+
+void zio::Message::decode(const zio::message_t& data)
+{
+    const std::uint8_t* dat = data.data<std::uint8_t>();
+    size_t tot = data.size();
+
+    zio::multipart_t mpmsg;
+
+    size_t ind=0;
+    while (ind < tot) {
+        int siz=0;
+        memcpy(&siz, dat+ind, sizeof(int));
+        ind += sizeof(int);
+        mpmsg.addmem(dat+ind, siz);
+        ind += siz;
+    }
+    fromparts(mpmsg);           //  clears rid
+
+    m_rid = data.routing_id();
+}
+        
+zio::multipart_t zio::Message::toparts() const
+{
+    zio::multipart_t mpmsg;
+
+    std::string p = m_header.prefix.dumps();
+    mpmsg.addmem(p.data(), p.size());
+    mpmsg.addtyp(m_header.coord);
+    for (const auto& spmsg: m_payload) {
+        mpmsg.addmem(spmsg.data(), spmsg.size());
+    }
+    return mpmsg;
+}
+
+void zio::Message::fromparts(const zio::multipart_t& mpmsg)
+{
+    m_rid = 0;
+    const size_t nparts = mpmsg.size();
+
+    const auto& m0 = mpmsg[0];
+    std::string p(static_cast<const char*>(m0.data()), m0.size());
+    m_header.prefix.loads(p);
+    
+    const auto& m1 = mpmsg[1];
+    m_header.coord = *m1.data<zio::CoordHeader>();
+
+    m_payload.clear();
+    for (size_t ind=2; ind<nparts; ++ind) {
+        const auto& m = mpmsg[ind];
+        m_payload.addmem(m.data(), m.size());
     }
 }

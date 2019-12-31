@@ -8,10 +8,10 @@
 #ifndef ZIO_PEER_HPP_SEEN
 #define ZIO_PEER_HPP_SEEN
 
-#include "zio/types.hpp"
-
 #include <zyre.h>
-#include <czmq.h>
+#include <map>
+#include <string>
+#include <vector>
 
 namespace zio {
 
@@ -40,7 +40,7 @@ namespace zio {
 
     };
 
-    typedef std::unordered_map<uuid_t, peer_info_t> peerset_t;
+    typedef std::map<uuid_t, peer_info_t> peerset_t;
 
     /// Peer at the network to discover peers and advertise self.
     class Peer {
@@ -52,7 +52,7 @@ namespace zio {
 
         /// Advertise own nickname and headers
         Peer(const nickname_t& nickname,
-             const headerset_t& headers, bool verbose=false);
+             const headerset_t& headers={}, bool verbose=false);
 
 
         void set_verbose(bool verbose=true);

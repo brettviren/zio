@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2019-12-29 Sun 12:48 -->
+<!-- 2019-12-30 Mon 09:55 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>ZIO Port</title>
@@ -161,19 +161,6 @@
   .footdef  { margin-bottom: 1em; }
   .figure { padding: 1em; }
   .figure p { text-align: center; }
-  .equation-container {
-    display: table;
-    text-align: center;
-    width: 100%;
-  }
-  .equation {
-    vertical-align: middle;
-  }
-  .equation-label {
-    display: table-cell;
-    text-align: right;
-    vertical-align: middle;
-  }
   .inlinetask {
     padding: 10px;
     border: 2px solid gray;
@@ -243,7 +230,7 @@ for the JavaScript code in this tag.
 </head>
 <body>
 <div id="org-div-home-and-up">
- <a accesskey="h" href="."> UP </a>
+ <a accesskey="h" href=""> UP </a>
  |
  <a accesskey="H" href="index.html"> HOME </a>
 </div><div id="content">
@@ -252,8 +239,8 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgaebb40b">1. Introduction</a></li>
-<li><a href="#orgac0cee7">2. Using <code>zio::Port</code></a></li>
+<li><a href="#org818ce43">1. Introduction</a></li>
+<li><a href="#orga271aea">2. Using <code>zio::Port</code></a></li>
 </ul>
 </div>
 </div>
@@ -268,8 +255,8 @@ for the JavaScript code in this tag.
 
 </div>
 
-<div id="outline-container-orgaebb40b" class="outline-2">
-<h2 id="orgaebb40b"><span class="section-number-2">1</span> Introduction</h2>
+<div id="outline-container-org818ce43" class="outline-2">
+<h2 id="org818ce43"><span class="section-number-2">1</span> Introduction</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 A ZIO port associates information to a socket in the context of a
@@ -315,27 +302,27 @@ going online.
 
 
 
-<div id="outline-container-orgac0cee7" class="outline-2">
-<h2 id="orgac0cee7"><span class="section-number-2">2</span> Using <code>zio::Port</code></h2>
+<div id="outline-container-orga271aea" class="outline-2">
+<h2 id="orga271aea"><span class="section-number-2">2</span> Using <code>zio::Port</code></h2>
 <div class="outline-text-2" id="text-2">
 <p>
 Given a port, a request may be made to bind in a variety of ways.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-c++"><span style="color: #b4fa70;">auto</span> <span style="color: #fcaf3e;">p</span> = node.port(<span style="color: #e9b96e;">"portname"</span>);
+<pre class="src src-c++"><span style="font-weight: bold;">auto</span> <span style="font-weight: bold; font-style: italic;">p</span> = node.port(<span style="font-style: italic;">"portname"</span>);
 
-<span style="color: #73d216;">// </span><span style="color: #73d216;">bind to an unspecified (ephermeral) public TCP/IP address</span>
+<span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">bind to an unspecified (ephermeral) public TCP/IP address</span>
 p.bind();
 
-<span style="color: #73d216;">// </span><span style="color: #73d216;">bind to a specific TCP address, either with and without a specific</span>
-<span style="color: #73d216;">// </span><span style="color: #73d216;">TCP port number.</span>
-p.bind(<span style="color: #e9b96e;">"localhost"</span>, 5678);
-p.bind(<span style="color: #e9b96e;">"localhost"</span>, 0);
+<span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">bind to a specific TCP address, either with and without a specific</span>
+<span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">TCP port number.</span>
+p.bind(<span style="font-style: italic;">"localhost"</span>, 5678);
+p.bind(<span style="font-style: italic;">"localhost"</span>, 0);
 
-<span style="color: #73d216;">// </span><span style="color: #73d216;">bind to fully qualified address, in this case via ZeroMQ</span>
-<span style="color: #73d216;">// </span><span style="color: #73d216;">shared-memory transport.</span>
-p.bind(<span style="color: #e9b96e;">"inproc://myqueue"</span>)
+<span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">bind to fully qualified address, in this case via ZeroMQ</span>
+<span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">shared-memory transport.</span>
+p.bind(<span style="font-style: italic;">"inproc://myqueue"</span>)
 </pre>
 </div>
 
@@ -344,14 +331,14 @@ Likewise, a connect may be requested in a variety of ways.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-c++"><span style="color: #73d216;">// </span><span style="color: #73d216;">directly connect to a fully qualified ZeroMQ address</span>
-p.connect(<span style="color: #e9b96e;">"tcp://localhost:5678"</span>);
-p.connect(<span style="color: #e9b96e;">"ipc://myunixsock"</span>);
-p.connect(<span style="color: #e9b96e;">"inproc://myqueue"</span>);
+<pre class="src src-c++"><span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">directly connect to a fully qualified ZeroMQ address</span>
+p.connect(<span style="font-style: italic;">"tcp://localhost:5678"</span>);
+p.connect(<span style="font-style: italic;">"ipc://myunixsock"</span>);
+p.connect(<span style="font-style: italic;">"inproc://myqueue"</span>);
 
-<span style="color: #73d216;">// </span><span style="color: #73d216;">indirectly connect to based on a node nickname and the name of one</span>
-<span style="color: #73d216;">// </span><span style="color: #73d216;">of its ports.</span>
-p.connect(<span style="color: #e9b96e;">"somepeer"</span>, <span style="color: #e9b96e;">"itsport"</span>);
+<span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">indirectly connect to based on a node nickname and the name of one</span>
+<span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">of its ports.</span>
+p.connect(<span style="font-style: italic;">"somepeer"</span>, <span style="font-style: italic;">"itsport"</span>);
 </pre>
 </div>
 

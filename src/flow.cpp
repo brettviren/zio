@@ -1,33 +1,57 @@
 #include "zio/flow.hpp"
 
-zio::flow::Flow::Flow(zio::portptr_t port, zio::Message bot)
+zio::flow::Flow::Flow(zio::portptr_t port)
     : m_port(port)
     , m_credits(0)
     , m_total_credits(0)
     , m_sender(true)
 {
+}
+zio::flow::Flow::~Flow()
+{
+    // fixme: should we eot here?
+}
+
+
+void zio::flow::Flow::send_bot(zio::Message& bot)
+{
+    auto lobj = zio::json::parse(bot.label());
+    lobj["flow"] = "BOT";
+    bot.set_label(lobj.dump());
     m_port->send(bot);
-
-    bool ok = m_port->recv(bot);
-    assert(ok);
-    auto lobj = bot.label_object();
-
+}
+bool zio::flow::Flow::recv_bot(zio::Message& bot, int timeout)
+{
+    bool ok = m_port->recv(bot, timeout);
+    if (!ok) {
+        zsys_warning("[flow %s]: timeout receiving BOT", m_port->name().c_str());
+        return false;
+    }
+    auto lobj = zio::json::parse(bot.label());
+    std::string flowtype = lobj["flow"];
+    if (flowtype != "BOT") {
+        zsys_warning("[flow %s]: did not get BOT, got %s",
+                     m_port->name().c_str(), flowtype.c_str());
+        return false;
+    }
     m_total_credits = lobj["credits"];
-
-    // lobj is from the point of view of the other end
-    if (lobj["direction"] = "extract") { 
-        // they want extraction so we are reciever
+    // lobj is from the point of view of the OTHER end
+    std::string dir = lobj["direction"];
+    if (dir == "extract") { 
         m_sender = false;
-        // recver starts flush with credits
         m_credits = m_total_credits;
     }
-    else {
-        // they want injection so we are sender
+    else if (dir == "inject") {
         m_sender = true;
-        // sender must wait for some PAY
         m_credits = 0;          
     }
+    else {
+        zsys_warning("[flow %s]: unknown direction: %s",
+                     m_port->name().c_str(), dir.c_str());
+        return false;
+    }
 
+    return true;
 }
 
 
@@ -44,10 +68,11 @@ int slurp_credit(zio::portptr_t port, int timeout)
     if (!ok) {              // timeout
         return 0;
     }
-    auto obj = msg.label_object();
+    auto obj = zio::json::parse(msg.label());
     std::string flowtype = obj["flow"];
     if (flowtype == "PAY") {
         int credit = obj["credit"];
+        zsys_debug("flow::put() got %d credits", credit);
         return credit;
     }
     if (flowtype == "EOT") {
@@ -57,7 +82,7 @@ int slurp_credit(zio::portptr_t port, int timeout)
 }
 
 
-bool zio::flow::Flow::put(zio::Message dat)
+bool zio::flow::Flow::put(zio::Message& dat)
 {
     if (m_credits < m_total_credits) {
         // quick try to get any PAY already sitting in buffers
@@ -76,6 +101,9 @@ bool zio::flow::Flow::put(zio::Message dat)
         assert (c>0);
         m_credits = c;
     }
+    auto obj = zio::json::parse(dat.label());
+    obj["flow"] = "DAT";
+    dat.set_label(obj.dump());
     m_port->send(dat);
     --m_credits;
     return true;
@@ -84,32 +112,37 @@ bool zio::flow::Flow::put(zio::Message dat)
 
 bool zio::flow::Flow::get(zio::Message& dat, int timeout)
 {
-    zio::Message msg;
     if (m_credits) {
-        zio::json o{{"flow","PAY"},{"credit",m_credits}};
-        msg.set_label(o.dump());
+        Message msg("FLOW");
+        zio::json obj{{"flow","PAY"},{"credit",m_credits}};
+        msg.set_label(obj.dump());
+        zsys_debug("flow::get() send %d credits", m_credits);
         m_credits=0;
         m_port->send(msg);
     }
-    bool ok = m_port->recv(msg, timeout);
+    bool ok = m_port->recv(dat, timeout);
     if (!ok) { return false; }
-    auto lobj = msg.label_object();
+    auto lobj = zio::json::parse(dat.label());
     if (lobj["flow"] != "DAT") {
         return false;
     }
-    dat = msg;
+    ++m_credits;
     return true;
 }
 
 bool zio::flow::Flow::eot(Message& msg, int timeout)
 {
+    auto obj = zio::json::parse(msg.label());
+    obj["flow"] = "EOT";
+    msg.set_label(obj.dump());
+
     m_port->send(msg);
     while (true) {
         bool ok = m_port->recv(msg, timeout);
         if (!ok) {              // timeout
             return false;
         }
-        auto lobj = msg.label_object();
+        auto lobj = zio::json::parse(msg.label());
         if (lobj["flow"] != "EOT") {
             return true;
         }
@@ -119,195 +152,3 @@ bool zio::flow::Flow::eot(Message& msg, int timeout)
 
 
 
-
-
-
-
-
-
-
-zio::flow::Sender::Sender(portptr_t port, int routing_id)
-    : m_port(port)
-    , m_rid(routing_id)
-    , m_flowmsg({{zio::level::undefined,"FLOW",""},{0,0,0}})
-{
-}
-
-void zio::flow::Sender::bot(flow::Direction fd, int credits,
-                            const zio::json& extra,
-                            const payload_t& payload)
-{
-    const std::vector<std::string> dir2nam = {
-        "undefined", "extract", "inject" };
-    auto obj = extra;
-    obj["flow"] = "BOT";
-    obj["direction"] = dir2nam[fd];
-    obj["credits"] = credits;
-    send(obj, payload);
-}
-void zio::flow::Sender::eot(const zio::json& extra,
-                            const payload_t& payload)
-{
-    auto obj = extra;
-    obj["flow"] = "EOT";
-    send(obj, payload);
-}
-void zio::flow::Sender::pay(int credits,
-                            const zio::json& extra,
-                            const payload_t& payload)
-{
-    auto obj = extra;
-    obj["flow"] = "PAY";
-    obj["credits"] = credits;
-    send(obj, payload);
-}
-void zio::flow::Sender::dat(const zio::json& extra,
-                            const payload_t& payload)
-{
-    auto obj = extra;
-    obj["flow"] = "DAT";
-    send(obj, payload);
-}
-
-
-void zio::flow::Sender::send(const zio::json& flowobj,
-                             const payload_t& payload)
-{
-    // this should probably be subsumed into zio::Socket
-    if (m_rid and m_port->socket().type() == ZMQ_SERVER) {
-        zsock_set_routing_id(m_port->socket().zsock(), m_rid);
-    }
-    m_flowmsg.set_label(flowobj.dump());
-    m_flowmsg.payload().clear();
-    m_flowmsg.payload().push_back(payload);
-    m_port->send(m_flowmsg);
-}
-
-
-
-// Server
-
-zio::flow::Server::Server(portptr_t port, int max_credits)
-    : m_port(port)
-    , m_max_credits(max_credits)
-{
-    assert(m_port->socket().type() == ZMQ_SERVER);
-}
-
-zio::flow::endpoint_t* zio::flow::Server::recv(int timeout)
-{
-    Message msg;
-    bool ok = m_port->recv(msg, timeout);
-    if (!ok) { return nullptr; }
-    if (msg.format() != "FLOW") { return nullptr; }
-
-    auto flowobj = zio::json::parse(msg.label());
-
-    // this should probably be subsumed into zio::Socket
-    int cid = zsock_routing_id(m_port->socket().zsock());
-
-    zio::flow::endpoint_t* cl = endpoint(cid);
-    if (!cl) {
-        if (flowobj["flow"] != "BOT") {
-            return nullptr;
-        }
-        std::string  dir;
-        if (flowobj["direction"].is_string()) {
-            dir = flowobj["direction"];
-        }
-        else {
-            return nullptr;
-        }
-        if (!(dir == "extract" or dir == "inject")) {
-            return nullptr;
-        }
-        int max_credits = m_max_credits;
-        if (flowobj["credits"].is_number()) {
-            int want = flowobj["credits"];
-            max_credits = std::min(want, max_credits);
-        }
-        int credits = max_credits; // inject, server starts with full credit
-        zio::flow::Direction idir = zio::flow::inject;
-        if (dir == "extract") {
-            idir = zio::flow::extract;
-            credits = 0;        // server starts with no credit
-        }
-
-
-        m_endpoints.emplace(std::make_pair(cid, endpoint_t{cid, credits, max_credits,
-                        idir, Sender(m_port, cid), msg}));
-        return endpoint(cid);
-    }
-    cl->flowmsg = msg;
-    return cl;
-}
-
-zio::flow::endpoint_t* zio::flow::Server::endpoint(int cid)
-{
-    auto it = m_endpoints.find(cid);
-    if (it == m_endpoints.end()) {
-        return nullptr;
-    }
-    return &it->second;
-}
-void zio::flow::Server::destroy(zio::flow::endpoint_t** clptr)
-{
-    if (!clptr) { return; }
-    if (!*clptr) { return; }
-    int cid = (**clptr).id;
-    zio::flow::endpoint_t* mine = endpoint(cid);
-    if (mine) {
-        m_endpoints.erase(cid);
-    }
-    else {
-        delete *clptr;
-        *clptr = nullptr;
-    }
-}
-
-
-
-/// client
-
-zio::flow::Client::Client(portptr_t port,
-                          zio::flow::Direction direction,
-                          int suggested_credits)
-    : m_port(port)
-    , m_endpoint{0, 0, 0, zio::flow::undefined, Sender(port)}
-{
-    m_endpoint.send.bot(direction, suggested_credits);
-}
-
-zio::flow::endpoint_t* zio::flow::Client::recv(int timeout)
-{
-    Message msg;
-    bool ok = m_port->recv(msg, timeout);
-    if (!ok) { return nullptr; }
-    if (msg.format() != "FLOW") { return nullptr; }
-
-    auto flowobj = zio::json::parse(msg.label());
-
-    // intercept BOT reply
-    if (flowobj["flow"] = "BOT") {
-        std::string  dir;
-        if (flowobj["direction"].is_string()) {
-            dir = flowobj["direction"];
-        }
-        else {
-            return nullptr;
-        }
-        if (!(dir == "extract" or dir == "inject")) {
-            return nullptr;
-        }
-        m_endpoint.credits = 0;
-        m_endpoint.total_credits = flowobj["credits"];
-        zio::flow::Direction idir = zio::flow::inject;
-        if (dir == "extract") {
-            idir = zio::flow::extract;
-            m_endpoint.credits = m_endpoint.total_credits;
-        }
-        m_endpoint.direction = idir;
-    }
-    m_endpoint.flowmsg = msg;
-    return &m_endpoint;
-}

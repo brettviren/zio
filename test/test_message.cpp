@@ -2,43 +2,60 @@
 #include <czmq.h>
 #include <cassert>
 
+#include <iostream>
+
+using namespace std;
+
 int main()
 {
-    zsys_init();
+
 
     std::string label = "Extra spicy";
 
     zio::Message msg({{zio::level::MessageLevel(4),"TEXT",label},
                       {0xdeadbeaf,1234,0}});
     std::string spl = "Recipe for grandma's hot wings";
-    msg.payload().emplace_back(spl.begin(), spl.end());
+    msg.add(zio::message_t(spl.data(), spl.size()));
 
-
-    auto hh = msg.header();
-    assert (hh.prefix.level == 4);
-    assert (hh.prefix.format == "TEXT");
-    assert (hh.coord.seqno == 0);
+    assert (msg.level() == 4);
+    assert (msg.format() == "TEXT");
+    assert (msg.seqno() == 0);
     assert(!msg.payload().empty());
     {
-        std::string s(msg.payload()[0].begin(),msg.payload()[0].end());
+        std::string s(msg.payload()[0].data<const char>(),msg.payload()[0].size());
         assert(s == spl);
     }
 
-    auto raw = msg.encode();
-    for (size_t ind=0; ind<raw.size(); ++ind) {
-        zsys_debug("%d: [%c] (%d)", ind, (char)raw[ind], (int)raw[ind]);
+    auto spmsg = msg.encode();
+    char* raw = spmsg.data<char>();
+    size_t raw_size = spmsg.size();
+    for (size_t ind=0; ind<raw_size; ++ind) {
+        char c = raw[ind];
+        cerr << ind << "[" << c << "] (" << (int)c << ")\n";
     }
 
-    msg.decode(raw);
+    msg.decode(spmsg);
 
-    assert (hh.prefix.level == 4);
-    assert (hh.prefix.format == "TEXT");
-    assert (hh.coord.seqno == 0);
+
+    assert (msg.level() == 4);
+    assert (msg.format() == "TEXT");
+    assert (msg.seqno() == 0);
     assert(!msg.payload().empty());
     {
-        std::string s(msg.payload()[0].begin(),msg.payload()[0].end());
+        std::string s(msg.payload()[0].data<const char>(),msg.payload()[0].size());
         assert(s == spl);
     }
 
+    zio::json lobj{{"flow","EOT"},{"direction","extract"}};
+    msg.set_label(lobj.dump());
+    auto obj = zio::json::parse(msg.label());
+    assert(obj["flow"] == "EOT");
+    assert(obj["direction"] == "extract");
+    obj["direction"] = "inject";
+    cerr <<msg.label()<< endl;
+    msg.set_label(obj.dump());
+    obj = zio::json::parse(msg.label());
+    assert(obj["direction"] == "inject");
+    cerr <<msg.label()<< endl;
     return 0;
 }

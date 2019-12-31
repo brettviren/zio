@@ -1,22 +1,22 @@
-#include "zio/socket.hpp"
-#include "zio/exceptions.hpp"
+#include "zio/interned.hpp"
 
 #include <iostream>
 
 static
 void test_socket()
 {
-    zio::Socket s(ZMQ_PUB);
+    zio::context_t ctx;
+    zio::socket_t s(ctx, ZMQ_PUB);
     try {
         s.bind("wrong");
     }
-    catch (zio::socket_error& se) {
+    catch (zio::error_t& se) {
         std::cout << "Correctly caught " << se.what() << std::endl;
     }
     try {
         s.connect("wrong");
     }
-    catch (zio::socket_error& se) {
+    catch (zio::error_t& se) {
         std::cout << "Correctly caught " << se.what() << std::endl;
     }
     

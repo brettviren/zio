@@ -22,9 +22,7 @@
 #ifndef ZIO_NODE_HPP_SEEN
 #define ZIO_NODE_HPP_SEEN
 
-#include "zio/types.hpp"
 #include "zio/port.hpp"
-#include "zio/outbox.hpp"
 
 namespace zio {
 
@@ -37,9 +35,11 @@ namespace zio {
         std::unordered_map<std::string, portptr_t> m_ports;
         std::vector<std::string> m_portnames; // in order of creation.
         bool m_verbose{false};
+
     public:
         Node(nickname_t nick="", origin_t origin=0,
              const std::string& hostname="");
+
         ~Node();
 
         nickname_t nick() const { return m_nick; }

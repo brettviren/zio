@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2019-12-29 Sun 12:32 -->
+<!-- 2019-12-31 Tue 11:25 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>ZIO messages</title>
@@ -161,6 +161,19 @@
   .footdef  { margin-bottom: 1em; }
   .figure { padding: 1em; }
   .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
   .inlinetask {
     padding: 10px;
     border: 2px solid gray;
@@ -186,7 +199,7 @@
 @licstart  The following is the entire license notice for the
 JavaScript code in this tag.
 
-Copyright (C) 2012-2018 Free Software Foundation, Inc.
+Copyright (C) 2012-2019 Free Software Foundation, Inc.
 
 The JavaScript code in this tag is free software: you can
 redistribute it and/or modify it under the terms of the GNU
@@ -230,7 +243,7 @@ for the JavaScript code in this tag.
 </head>
 <body>
 <div id="org-div-home-and-up">
- <a accesskey="h" href="."> UP </a>
+ <a accesskey="h" href=""> UP </a>
  |
  <a accesskey="H" href="index.html"> HOME </a>
 </div><div id="content">
@@ -239,12 +252,17 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org1d059d2">1. Levels</a></li>
-<li><a href="#org6175c4e">2. Format</a></li>
-<li><a href="#org19ff7af">3. Origin</a></li>
-<li><a href="#org0c29db4">4. Granule</a></li>
-<li><a href="#orga3c4057">5. Seqno</a></li>
-<li><a href="#org87e7edd">6. Payload</a></li>
+<li><a href="#orgf095182">1. Schema</a>
+<ul>
+<li><a href="#orge983d17">1.1. Levels</a></li>
+<li><a href="#org3231b68">1.2. Format</a></li>
+<li><a href="#org86a8243">1.3. Origin</a></li>
+<li><a href="#org7ddfe74">1.4. Granule</a></li>
+<li><a href="#org07b2c0d">1.5. Seqno</a></li>
+<li><a href="#org3aa238e">1.6. Payload</a></li>
+</ul>
+</li>
+<li><a href="#orgd44e2a2">2. Single-part vs Multi-part</a></li>
 </ul>
 </div>
 </div>
@@ -260,26 +278,28 @@ for the JavaScript code in this tag.
 </div>
 
 <p>
-ZIO messages are ZeroMQ messages.  They are composed of several
-"parts" (libzmq term) or "frames" (libczmq term) and the parts fall
-into one of two groups which are called:
+ZIO messages are ultimately ZeroMQ messages but overlay a schema
+convention for a portion of these messages.  On this convention, a
+<a href="taxonomy.html">taxonomy</a> of ZIO behavior is built.
+</p>
+
+<div id="outline-container-orgf095182" class="outline-2">
+<h2 id="orgf095182"><span class="section-number-2">1</span> Schema</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+A ZIO message is composed of several "segments" (avoiding "frame" and
+"part" here, see <a href="#orgd44e2a2">2</a> below).  The segments fall
+into one of two categories which are called:
 </p>
 
 <dl class="org-dl">
-<dt>header</dt><dd>initial data in two frames following a fixed schema determined by ZIO.</dd>
-<dt>payload</dt><dd>zero or more frames holding application dependent data.</dd>
+<dt>header</dt><dd>leading data, follows a fixed schema determined by ZIO.</dd>
+<dt>payload</dt><dd>trailing data in application-defined schema.</dd>
 </dl>
 
 <p>
-As a detail, a multipart ZIO message is encoded/decoded to/from a
-single part ZeroMQ message if the socket used requires it (eg,
-thread-safe CLIENT/SERVER or RADIO/DISH).  To avoid the extra memory
-copy, use of other sockets do not incur codec.
-</p>
-
-<p>
-The general message is illustrated in the following table where each
-subtable represents one message frame
+A general message is illustrated in the following table where each
+subtable represents one message segment.
 </p>
 
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
@@ -366,12 +386,11 @@ subtable represents one message frame
 </tbody>
 </table>
 
+
 <p>
-The first two are header frames.  The first header frame holds the
-<b>prefix header</b>.  It is so named as its contents are subject to ZeroMQ
-PUB/SUB envelope prefix matching (subscription).  Except for the fixed
-literal <code>ZIO</code> the prefix header contents are freely provided by the
-application.  The <b>prefix header</b> contains these fields:
+The first two segments comprise the ZIO message header.  The first
+header segment is called the <b>prefix header</b>.  The <b>prefix header</b>
+contains these fields:
 </p>
 
 <dl class="org-dl">
@@ -382,57 +401,63 @@ application.  The <b>prefix header</b> contains these fields:
 </dl>
 
 <p>
-The second header field is called the <b>coordinate header</b> as it provides
-information on an abstracted "location" and "time" to associate with
-the payload.  Depending on application needs, this frame may be fully
-provided by the application.  Alternatively, ZIO provides support for
-implicitly maintaining these values.  The fields are each 64 bit
-unsigned integer:
+Up to the <code>label</code> (but often including it as well) the prefix header can
+be interpreted as an ASCII string and is suitable for use as a PUB/SUB
+subscription prefix (thus the segment name).  Except for the
+restrictions above, the prefix header contents may be freely provided.
+</p>
+
+<p>
+The second header segment is called the <b>coordinate header</b> and has
+three 64 bit unsigned integer fields with the following
+interpretations:
 </p>
 
 <dl class="org-dl">
-<dt>origin</dt><dd>an application-defined identifier for the origin of the message.</dd>
-<dt>granule</dt><dd>an application-defined monotonically increasing count used for ordering of messages</dd>
-<dt>seqno</dt><dd>an monotonic counter set just prior to sending.</dd>
+<dt>origin</dt><dd>identify the entity that produced the message.</dd>
+<dt>granule</dt><dd>provide an ordering value for the message</dd>
+<dt>seqno</dt><dd>index this message in a sequence of related messages.</dd>
 </dl>
 
 <p>
-Details on these header quantities as well as information on the
-payload frames follow.
+Additional details about these header quantities as well as
+information on the payload segments follow.
 </p>
+</div>
 
 
-<div id="outline-container-org1d059d2" class="outline-2">
-<h2 id="org1d059d2"><span class="section-number-2">1</span> Levels</h2>
-<div class="outline-text-2" id="text-1">
+<div id="outline-container-orge983d17" class="outline-3">
+<h3 id="orge983d17"><span class="section-number-3">1.1</span> Levels</h3>
+<div class="outline-text-3" id="text-1-1">
 <p>
 ZIO message have a <b>level</b> indicated by a single ASCII digit.  The
 general interpretation is that of an importance level where a higher
 value indicates greater importance and also less frequency.  ASCII
-digits "1" through "8", inclusive, are allowed in ZIO messages.  No
+digits "0" through "8", inclusive, are allowed in ZIO messages.  No
 other value for level is allowed in this version of ZIO.
 </p>
 
 <p>
-The application is free to assign more specific semantic meaning to
-these levels but the following interpretations are recommended and
-they define terms are defined in <code>libzio</code>.
+The value "0" is explicitly reserved to me interpreted as <code>undefined</code>
+and used in cases where no meaningful level exists.  The following
+interpretations are recommended for the remaining levels and they are
+provided in an enumeration defined in <code>libzio</code>.
 </p>
 
 <ol class="org-ol">
-<li>trace, messages are emitted from nested loops or occurring with
+<li><code>trace</code>, messages are emitted from nested loops or occurring with
 frequency far higher than any "events".</li>
-<li>verbose, messages will be emitted from contexts occurring more than
+<li><code>verbose</code>, messages will be emitted from contexts occurring more than
 once per event.</li>
-<li>debug, potentially multiple messages of different types but each
+<li><code>debug</code>, potentially multiple messages of different types but each
 type occurring once per event.</li>
-<li>info, a rare message, occurring no more than once event.</li>
-<li>summary, a message holding information about a collection of
+<li><code>info</code>, a rare message, occurring no more than once event.</li>
+<li><code>summary</code>, a message holding information about a collection of
 events, emitted less than once per event.</li>
-<li>warning, a problem was encountered and handled.</li>
-<li>error, a problem was encountered, not handled (eg ignored) but the
+<li><code>warning</code>, a problem was encountered and handled.</li>
+<li><code>error</code>, a problem was encountered, not handled (eg ignored) but the
 emitting component continues to run.</li>
-<li>fatal, an error occurred and the component gives up (eg, component
+<li><code>fatal</code>, an error occurred and the component gives up (eg, component
 throws/raises an exception or aborts shortly after).</li>
 </ol>
 
@@ -446,129 +471,161 @@ some criteria.
 </div>
 </div>
 
-<div id="outline-container-org6175c4e" class="outline-2">
-<h2 id="org6175c4e"><span class="section-number-2">2</span> Format</h2>
-<div class="outline-text-2" id="text-2">
+<div id="outline-container-org3231b68" class="outline-3">
+<h3 id="org3231b68"><span class="section-number-3">1.2</span> Format</h3>
+<div class="outline-text-3" id="text-1-2">
 <p>
-The <b>format</b> field provides a hint for the parsing of the payload, if
-not its further interpretation.  That is, given the format, any code
-consuming the payload should be able to read the payload into memory
-in some suitable type of data structure.
+The <b>format</b> field provides a hint for the parsing of the payload, and
+possibly its further interpretation.  That is, given the format,
+application code consuming the payload should be able to read the
+payload into memory in some suitable type of data structure and
+possibly react to its content.
 </p>
 
 <p>
 Except for the formats reserved by ZIO and described in <a href="format.html">format</a>, the
 application developer is free to set the <b>format</b> field to any four byte
-value.  It is suggested to try to make use of the reserved format and
+value.  It is suggested to try to make use of the reserved formats and
 to not proliferate them due to conflating need for a new format hint
 with need for schema hints.  The latter is discussed below in section
-<a href="#org87e7edd">6</a>.  If custom formats are used, it is further recommended to use
-four ASCII characters to facilitate prefix matching.  Finally, not
-that a single format name implies the format for all payload frames.
+<a href="#org3aa238e">1.6</a>.  If custom formats are used, it is further recommended to use
+four ASCII characters to facilitate prefix matching. 
 </p>
 </div>
 </div>
 
-<div id="outline-container-org19ff7af" class="outline-2">
-<h2 id="org19ff7af"><span class="section-number-2">3</span> Origin</h2>
-<div class="outline-text-2" id="text-3">
+<div id="outline-container-org86a8243" class="outline-3">
+<h3 id="org86a8243"><span class="section-number-3">1.3</span> Origin</h3>
+<div class="outline-text-3" id="text-1-3">
 <p>
 In general, the interpretation of the value of the <b>origin</b> field is
-application specific.  The recommended interpretation of <b>origin</b> is to
-identify "where" a message came from.  Some ZIO components provide
-algorithms which treat <b>origin</b> to identify messages with as forming a
-logical stream.
+application specific and a ZIO <a href="node.html">node</a> and its <a href="port.html">ports</a> have support for
+managing it.  The recommended interpretation of <b>origin</b> is to identify
+"where" a message came from.  
 </p>
 </div>
 </div>
 
-<div id="outline-container-org0c29db4" class="outline-2">
-<h2 id="org0c29db4"><span class="section-number-2">4</span> Granule</h2>
-<div class="outline-text-2" id="text-4">
+
+<div id="outline-container-org7ddfe74" class="outline-3">
+<h3 id="org7ddfe74"><span class="section-number-3">1.4</span> Granule</h3>
+<div class="outline-text-3" id="text-1-4">
 <p>
 In general, the interpretation of the value of the <b>granule</b> field is
-application specific.  The recommended interpretation of <b>granule</b> is to
-provide an ordering of messages within and across different values of
-<b>origin</b>.  
+application specific and ZIO provides support for interpreting
+<b>granule</b> as the time at which the message was created, measured in
+microseconds from the Unix Expoch.  The intent is for granule to
+provide a means to synchronize related messages from different
+origins.
 </p>
 </div>
 </div>
 
-<div id="outline-container-orga3c4057" class="outline-2">
-<h2 id="orga3c4057"><span class="section-number-2">5</span> Seqno</h2>
-<div class="outline-text-2" id="text-5">
+
+<div id="outline-container-org07b2c0d" class="outline-3">
+<h3 id="org07b2c0d"><span class="section-number-3">1.5</span> Seqno</h3>
+<div class="outline-text-3" id="text-1-5">
 <p>
 In general, the interpretation of the value of the <b>seqno</b> field is
-application specific.  The recommended interpretation of <b>seqno</b> is to
-enumerate a strictly a sequential count of messages produced from a
-given socket.  
+application specific.  The <b>seqno</b> value is intended to provide an
+index into some logical sequence which spans messages in some set.
+The set may be associated with all messages from a given port, a
+given origin, or across some larger set of sources.  In a simple
+case, it can count the messages from one port in order to detect
+message loss (eg, if PUB/SUB is used).
 </p>
 </div>
 </div>
 
-
-<div id="outline-container-org87e7edd" class="outline-2">
-<h2 id="org87e7edd"><span class="section-number-2">6</span> Payload</h2>
-<div class="outline-text-2" id="text-6">
+<div id="outline-container-org3aa238e" class="outline-3">
+<h3 id="org3aa238e"><span class="section-number-3">1.6</span> Payload</h3>
+<div class="outline-text-3" id="text-1-6">
 <p>
-All frames that follow the header frame are payload frames.
-Ultimately, the payload frames are fully in the domain of the
-application developer.  ZIO does not dictate their use or format
-beyond the ZIO-reserved formats and providing the <b>format</b> field in the
-ZIO header.
-</p>
-
-
-<p>
-The header frame field <b>format</b> provides a hint as to how the payload
-frames may be <b>parsed</b> if not <b>interpreted</b>.  In simpler applications of
-ZIO, consumers may be developed with hard-wired knowledge of how to
-interpret the messages they are provided.  Operators may assure this
-hard-wiring is not violated by careful construction of ZIO network
-typologies (and ZIO <a href="peer.html">peer</a> mechanism can help).  On the other hand,
-further hints are required for interpretation if the <b>schema</b> of the
-payload frames allow for differences in structure between messages of
-the same <b>format</b>.
+All segments that follow the header are called <i>payload</i>.  Ultimately,
+the payload is fully in the domain of the application developer.  ZIO
+does not dictate their use or format beyond the ZIO-reserved formats
+and providing the <b>format</b> field in the ZIO header.
 </p>
 
 <p>
-For example, it is expected that ZIO messages following the JSON
-format will be commonly used to send out <a href="https://en.wikipedia.org/wiki/Observability">observability</a> metrics of
-various type (following various schema).  Given the origin ID, a
-consumer of the payload may have enough knowledge to know the schema
-and interpret the data structure represented in the JSON format.  When
-additional hints are required they must be provided either out-of-band
-of the message or in some way located in the payload without knowing
-details of the schema.  
+The header field <b>format</b> is intended to provide the hint needed to at
+least <b>parse</b> the payload if not also to <b>interpret</b> it.  The field <b>label</b>
+may be used to provide further hinting.
 </p>
 
 <p>
-When in-band self-description is needed, ZIO provides the general
-suggestion of providing a schema-level "header" that it can be parsed
-and interpreted prior interpreting to the rest of the payload.  Some
-examples: in TEXT, use the equivalent to HTTP headers as prefix to the
-string with predefined delimiters and terminator.  For JSON use an
-initial object in a top-level array or a specially named key in a
-top-level object to hold required hints.  As BUFF is almost a
-completely general format, it is up to the application developer to
-provide any hinting.  But, of note, if BUFF is used to hold data which
-is serialized in one of the various popular mechanisms (eg, protocol
-buffers), a level of self-documentation of the schema exists (see
-protobuf "any" for example).  
+For example, it is expected that payload of a message with <b>format</b> set
+to <code>JSON</code> can be parsed as a string in JSON format.  Interpreting the
+resulting data structure may then rely on a variety of
+application-dependent hints.  These include
 </p>
 
-<p>
-ZIO also provides some support for out-of-band hinting as part of its
-peer discovery system (based on <a href="https://github.com/zeromq/zyre">Zyre</a>).  Using <code>zio::Peer</code> (see <a href=":peer.html">peer</a>) or
-better <code>zio::Node</code> (see <a href=":node.html">node</a>) an application developer may provide
-key/value pairs which can be known to other ZIO peers on the network.
-These can, for example, associate schema hints to origin IDs.  ZIO
-provides the mechanism to share this out-of-band information but it is
-the responsibility of application developers to make use of it (or
-not).
-</p>
+<ul class="org-ul">
+<li>Existence of some predefined attributes in the JSON object,</li>
+<li>Auxiliary information from the message <b>label</b> or</li>
+<li>Header information from the <a href="peer.html">peer</a> headers from the <a href="node.html">node</a> that sent the message.</li>
+</ul>
 </div>
 </div>
 </div>
+
+
+<div id="outline-container-orgd44e2a2" class="outline-2">
+<h2 id="orgd44e2a2"><span class="section-number-2">2</span> Single-part vs Multi-part</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+ZeroMQ supports a concept of single-part vs multi-part
+messages<sup><a id="fnr.1" class="footref" href="#fn.1">1</a></sup>.  A "part" represents an atomic transfer of data
+between the application and the ZeroMQ socket (or vice versa) while
+both single- and multi-part messages are transferred atomically
+between ZeroMQ sockets.
+</p>
+
+
+<p>
+The different types of ZeroMQ sockets place different requirements on
+the "part-cardinality" of the messages they process.  So called
+"thread-safe" sockets<sup><a id="fnr.2" class="footref" href="#fn.2">2</a></sup> (CLIENT/SERVER, RADIO/DISH) require
+"single-part" messages while others (REP/REQ/ROUTER/DEALER) require
+"multi-part" and others (PAIR,PUB/SUB, PUSH/PULL) require neither but
+can process either.
+</p>
+
+
+<p>
+When a ZIO message is processed by a ZIO port the part-cardinality is
+assured taking into account the socket type.  If the ZIO message 
+</p>
+</div>
+</div>
+<div id="footnotes">
+<h2 class="footnotes">Footnotes: </h2>
+<div id="text-footnotes">
+
+<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1">1</a></sup> <div class="footpara"><p class="footpara">
+The terminology in the ZeroMQ libraries on single- vs
+multi-part is a bit confused.  In libzmq, the part-cardinality is in
+the flags <code>ZMQ_SNDMORE</code> and <code>ZMQ_RCVMORE</code>.  With such flags, the eventual
+message that ZeroMQ forms behind the scenes is multi-part.  Without
+them, it's not.  In CZMQ, a single-part message is embodied in a
+<code>zframe_t</code> and multi-part is a <code>zmsg_t</code>.  However, a <code>zmsg_t</code> with a single
+a single <code>zframe_t</code> results in a single-part message (right?).  The
+cardinality can also be obscured depending on the CZMQ functions used.
+In <code>cppzmq</code> (the "official" C++ bindings to libzmq and used by ZIO) the
+dichotomy is made distinct, <code>message_t</code> is single-part and <code>multipart_t</code>
+is not.
+</p></div></div>
+
+<div class="footdef"><sup><a id="fn.2" class="footnum" href="#fnr.2">2</a></sup> <div class="footpara"><p class="footpara">
+Here, "thread-safe" means the ability to use a socket from
+different threads over its lifetime.  All ZeroMQ sockets can be used
+from threads but "thread-unsafe" sockets must reside in the same
+thread for their lifetime.  Some corner-cases may work but ZIO adheres
+strictly to the recommendation by ZeroMQ documentation.
+</p></div></div>
+
+
+</div>
+</div></div>
 </body>
 </html>

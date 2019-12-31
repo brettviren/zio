@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2019-12-29 Sun 12:02 -->
+<!-- 2019-12-30 Mon 13:42 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>ZIO data flow</title>
@@ -265,7 +265,7 @@ for the JavaScript code in this tag.
 </head>
 <body>
 <div id="org-div-home-and-up">
- <a accesskey="h" href="."> UP </a>
+ <a accesskey="h" href=""> UP </a>
  |
  <a accesskey="H" href="index.html"> HOME </a>
 </div><div id="content">
@@ -274,11 +274,12 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org97a7068">1. API</a></li>
-<li><a href="#orge920552">2. Flow protocol</a></li>
-<li><a href="#org3dac784">3. Flow messages</a></li>
-<li><a href="#orgbf27944">4. Flow API</a></li>
-<li><a href="#orgc1fceb4">5. Extending Flow API</a></li>
+<li><a href="#org411b9ed">1. Flow protocol</a></li>
+<li><a href="#org08b53a8">2. Flow messages</a></li>
+<li><a href="#org24b9827">3. Flow API</a></li>
+<li><a href="#org909ef8b">4. Simple Flow Server</a></li>
+<li><a href="#org8b464c3">5. Flow Broker</a></li>
+<li><a href="#org8af1cd6">6. Extending Flow API</a></li>
 </ul>
 </div>
 </div>
@@ -294,56 +295,41 @@ for the JavaScript code in this tag.
 </div>
 
 <p>
-ZIO <i>data flow protocol</i> supports one-way transmission of
-application-dependent payload messages between two ports with
-additional guarantees beyond those that are provided by ZIO ports in
-general.  These guarantees include:
+ZIO <i>data flow protocol</i> is a layer on top of basic ZIO <a href=":port.html">ports</a>.  It
+provides for one-way transmission of application-dependent payload
+messages between two ports with additional guarantees beyond those
+that are provided by ZIO ports in general.  These guarantees include:
 </p>
 
 <ul class="org-ul">
-<li>The endpoints use only the ZeroMQ socket types CLIENT or SERVER.</li>
+<li>The distributed application endpoints are expected to use the ZeroMQ
+socket types CLIENT while any shared resource (file, compute,
+broker) are accessed via the socket type SERVER.</li>
 
-<li>For any given transmission, the payload message flow may proceed in
+<li>For any given transmission, the <i>payload</i> message flow may proceed in
 one direction only (CLIENT to SERVER or vice versa).</li>
 
-<li>The total number of messages buffered by the sockets at both
-endpoints combined will not exceed a given maximum.</li>
+<li>The total number of messages buffered for the transmission by the
+sockets at both endpoints combined will not exceed a given maximum.</li>
 
-<li>The client side may be safely used in an execution context serviced
-by different threads at different points in time.  The server side
-is guaranteed only if it executes fully in one thread (although
-usual ZeroMQ inter-thread communication is allowed).</li>
+<li>The client side may be used safely in an execution context serviced
+by different threads at different points in time (eg in a TBB Flow
+Graph).  Depending on the server side implementation, it may also
+satisfy this guarantee.</li>
 </ul>
 
 <p>
-The benefits of these guarantees (some might call them restrictions or
-limitations) are described in the section of the ZeroMQ guide covering
-<a href="http://zguide.zeromq.org/page:all#toc211">credit-based flow control</a>.
+Some of the benefits of these guarantees (some might call them
+restrictions or limitations) are described in the section of the
+ZeroMQ guide covering <a href="http://zguide.zeromq.org/page:all#toc211">credit-based flow control</a>.
 </p>
 
-<div id="outline-container-org97a7068" class="outline-2">
-<h2 id="org97a7068"><span class="section-number-2">1</span> API</h2>
+<div id="outline-container-org411b9ed" class="outline-2">
+<h2 id="org411b9ed"><span class="section-number-2">1</span> Flow protocol</h2>
 <div class="outline-text-2" id="text-1">
-<div class="org-src-container">
-<pre class="src src-c++"><span style="color: #73d216;">// </span><span style="color: #73d216;">t.b.d</span>
-<span style="color: #73d216;">// </span><span style="color: #73d216;">client</span>
-cl.send()
-cl.recv()
-<span style="color: #73d216;">// </span><span style="color: #73d216;">server</span>
-client (cl(s.recv()-&gt;spawn())
-</pre>
-</div>
-</div>
-</div>
-
-<div id="outline-container-orge920552" class="outline-2">
-<h2 id="orge920552"><span class="section-number-2">2</span> Flow protocol</h2>
-<div class="outline-text-2" id="text-2">
 <p>
 The ZIO <i>data flow protocol</i> is partly illustrated in the UML sequence
-diagram below.  It shows two phases: <i>initiate</i> and <i>transfer</i>.  In
-<i>initiate</i> the client always sends to the server.  In <i>transfer</i> the
-exchange depends on the parameters determined in the <i>initiate</i> phase.
+diagram.  The protocol has two phases: <i>initiate</i> and <i>transfer</i>.
 </p>
 
 
@@ -353,29 +339,31 @@ exchange depends on the parameters determined in the <i>initiate</i> phase.
 </div>
 
 <p>
-In <i>initate</i>, the client sends a begin-of-transmission (<code>BOT</code>) message and
-the server responds with another <code>BOT</code>.  Either holds two required
-values:
+<b>Initiate</b> starts with the client sending a begin-of-transmission (<code>BOT</code>)
+message and the server responding with another <code>BOT</code>.  Both required
+these attributes: <b>direction</b> gives the <i>flow direction</i> (see below) of
+the flow from the point of view of the message sender and <b>credits</b>
+gives the number of credits in play in the protocol
 </p>
 
-<ul class="org-ul">
-<li>direction : the <i>direction</i> (see below) of the flow from the point of
-view of the message sender.</li>
-
-<li>credits : the number of credits to use</li>
-</ul>
-
 <p>
-The <i>direction</i> is one of two values: <i>extract</i> means endpoint will send
-payload data and <i>inject</i> means the endpoint expects to receive payload
-data.
+The <i>direction</i> is one of two values: <i>extract</i> means the endpoint will
+<b>send</b> payload data and <i>inject</i> means the endpoint expects to <b>receive</b>
+payload data.
 </p>
 
 <p>
 The server receives the client's <code>BOT</code> and in forming its reply <code>BOT</code>
-shall reverse the <i>direction</i> field and may adjust<sup><a id="fnr.1" class="footref" href="#fn.1">1</a></sup> the
-number of credits downward.  The client receives the reply and shall
-accept the number of credits.
+shall reverse the <i>direction</i> field and may adjust the number of credits
+downward.  The client receives the reply and shall accept the number
+of credits as the total in play for transmission phase.  
+</p>
+
+<p>
+Note, choice of this number requires some trial.  Increasing it will,
+to a point, reduce latency effects that will degrading throughput.
+Increasing it will also increase memory usage in the endpoints as well
+as latency to perform any synchronization, such as at shutdown.
 </p>
 
 <p>
@@ -384,22 +372,20 @@ immediately respond with end-of-transmission (<code>EOT</code>) if the request i
 rejected.
 </p>
 
-
 <p>
-The <i>transfer</i> state is then entered.  It will proceed in one of the two
-possible flow <i>direction</i> and these two variants are a mirror symmetry
-of each other (with respect to exchange of client and server).  If the
-client <code>BOT</code> specifies the <i>extract</i> direction then the client side is
-<i>sender</i> of payload messages, else it is the server side.  The end which
-is not the <i>sender</i> is the <i>recver</i>.  These describe the direction of <code>DAT</code>
-messages and <code>PAY</code> messages are sent in the opposite direction (<i>sender</i>
-receives <code>PAY</code>).  Like <code>BOT</code>, <code>EOT</code> travel both directions.
+<b>Transfer</b> phase of the protocol has a mirror symmetry under exchange of
+flow <i>direction</i>.  If the client <code>BOT</code> specifies the <i>extract</i> direction
+then the client side is <i>sender</i> of payload messages, else it is the
+server side.  The end which is not the <i>sender</i> is the <i>recver</i>.  These
+terms describe the direction of <code>DAT</code> messages and <code>PAY</code> messages are sent
+in the opposite direction (<i>sender</i> receives <code>PAY</code>).  Like <code>BOT</code>, <code>EOT</code> travel
+both directions.
 </p>
 
 <p>
-Regardless of the <i>direction</i> the <i>transfer</i> starts out by the <i>recver</i>
-sending a number of credits in a <code>PAY</code> message and decrementing the
-number of held credits by an equal amount.  The <i>recver</i> may send
+Regardless of the <i>direction</i> the <i>transfer</i> phase starts out by the
+<i>recver</i> sending a number of credits in a <code>PAY</code> message and decrementing
+the number of held credits by an equal amount.  The <i>recver</i> may send
 subsequent <code>PAY</code> messages anytime it posses credit and may send any
 amount up to and including the amount currently held.  A <i>recver</i> credit
 is replenished one unit for every <code>DAT</code> message received.
@@ -436,17 +422,17 @@ the other end is still online or not.
 </div>
 </div>
 
-<div id="outline-container-org3dac784" class="outline-2">
-<h2 id="org3dac784"><span class="section-number-2">3</span> Flow messages</h2>
-<div class="outline-text-2" id="text-3">
+<div id="outline-container-org08b53a8" class="outline-2">
+<h2 id="org08b53a8"><span class="section-number-2">2</span> Flow messages</h2>
+<div class="outline-text-2" id="text-2">
 <p>
 ZIO data flow introduces a new ZIO message of type <code>FLOW</code>.  This message
-type has no meaningful "level" and so it is set to undefined (0).  The
-payload frames of a <code>FLOW</code> message are unused by the ZIO <i>data flow</i>
-protocol and are available for application use.  The protocol is
-implemented using the <code>label</code> field of the ZIO message prefix header.
-This field shall hold a string representing a JSON object which is
-here called the <i>flow object</i>.  
+type has no meaningful "level" and so it is set to
+<code>zio::level::undefined</code> (0).  The payload frames of a <code>FLOW</code> message are
+unused by the ZIO <i>data flow</i> protocol and are available for application
+use.  The protocol is implemented using the <code>label</code> field of the ZIO
+message prefix header.  This field shall hold a string representing a
+JSON object which is here called the <i>flow object</i>.
 </p>
 
 <p>
@@ -461,8 +447,7 @@ described:
 
 <dl class="org-dl">
 <dt><code>BOT</code></dt><dd>begin-of-transmission, client sends with <code>direction</code> set to
-<code>extract</code> or <code>inject</code>, server sends with <code>credits</code> set to an integer.  <code>BOT</code>
-explicitly extends initial credit.</dd>
+<code>extract</code> or <code>inject</code>, server sends with <code>credits</code> set to an integer.</dd>
 
 <dt><code>EOT</code></dt><dd>end-of-transmission, either side may send, receiver should
 echo back.  No associated attributes.</dd>
@@ -481,9 +466,9 @@ and is free to fill the payload frame or frames of any <code>FLOW</code> message
 </div>
 </div>
 
-<div id="outline-container-orgbf27944" class="outline-2">
-<h2 id="orgbf27944"><span class="section-number-2">4</span> Flow API</h2>
-<div class="outline-text-2" id="text-4">
+<div id="outline-container-org24b9827" class="outline-2">
+<h2 id="org24b9827"><span class="section-number-2">3</span> Flow API</h2>
+<div class="outline-text-2" id="text-3">
 <p>
 ZIO provides an API to simply participating in a ZIO <i>data flow
 protocol</i>.  The central API class is <code>zio::flow::Flow</code> which may be used
@@ -500,23 +485,29 @@ application which owns it.
 </div>
 
 <p>
-A <code>Flow</code> is created on a <code>port</code> by an application.  The <code>port</code> should
-already be online.  A <code>Flow</code> is created with a <code>BOT</code> which is then sent
-out the port and the <code>Flow</code> will wait for a <code>BOT</code> (or <code>EOT</code>) response.
-Based on the <code>BOT</code> <i>direction</i> it will enter either <i>sender</i> or <i>recver</i> mode.
-As described above, the <code>BOT</code> direction is from the point of view of the
-source of the <code>BOT</code> message and so for example a <code>Flow</code> will be <i>sender</i> if
-the <code>BOT</code> indicates the other endpoint wants direction <i>inject</i>.
+A <code>zio::flow::Flow</code> is created on a <code>port</code> by an application.  The <code>port</code>
+should be brought online prior to any method calls.  If the <code>Flow</code>
+object implements a client-side the application must first call
+<code>send_bot()</code> and then <code>recv_bot()</code>.  If the object implements directly a
+server-side then these two shall be reversed.
 </p>
 
 <p>
-Depending on the mode, the application may then call synchronous the
-methods <code>put()</code> (<i>sender</i> mode) or <code>get()</code> (<i>recver</i> mode).  Proper mode
-operation may be asserted.  During their calls, asynchronous
-communication with the port proceeds and both may <code>recv()</code> messages from
-the port.  If a <code>recv()</code> returns and <code>EOT</code> (instead of the expected <code>PAY</code> or
-<code>DAT</code>) these methods return <code>false</code>.  The application should check this
-return and call <code>eot()</code>, possibly with a zero timeout, to issue a reply.
+Based on the <code>BOT</code> <i>direction</i>, the object will be either in <i>sender</i> or
+<i>recver</i> mode.  The application may call <code>is_sender()</code> to determine which
+(although the app should also know this from providing the initial <code>BOT</code>).  
+The sequence for each mode are included in the diagram.
+</p>
+
+<p>
+After the <code>BOT</code> handshake and depending on mode he application may then
+call the synchronous methods <code>put()</code> (<i>sender</i> mode) or <code>get()</code> (<i>recver</i>
+mode) in order to exchange <code>DAT</code> messages.  Proper mode operation may be
+asserted.  During their calls, asynchronous communication with the
+port proceeds and both may <code>recv()</code> messages from the port.  If a <code>recv()</code>
+returns and <code>EOT</code> (instead of the expected <code>PAY</code> or <code>DAT</code>) these methods
+return <code>false</code>.  The application should check this return and call
+<code>eot()</code>, possibly with a zero timeout, to issue a reply.
 </p>
 
 <p>
@@ -527,13 +518,36 @@ sockets.  If an <code>EOT</code> reply is received, this method returns <code>tr
 number of <code>PAY</code> (if <i>sender</i>) or <code>DAT</code> (if <i>recver</i>) messages may arrive
 before the reply-<code>EOT</code> and they shall be discarded.
 </p>
+</div>
+</div>
+
+<div id="outline-container-org909ef8b" class="outline-2">
+<h2 id="org909ef8b"><span class="section-number-2">4</span> Simple Flow Server</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+A <i>data flow server</i> may also be implemented using the <code>zio::flow::Flow</code>
+class by simply using a SERVER socket for its port and calling
+<code>recv_bot()</code> prior to <code>send_bot()</code> in opposition to the diagram above.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org8b464c3" class="outline-2">
+<h2 id="org8b464c3"><span class="section-number-2">5</span> Flow Broker</h2>
+<div class="outline-text-2" id="text-5">
+<p>
+A simple flow server will break if more than one client attempts to
+enter the conversation.  The ZeroMQ SERVER feature "routing ID" must
+be used to isolate each conversation inside the server logic.
+</p>
 
 <p>
-The <code>Flow</code> class is designed to be used both as the core of a ZIO flow
-client and also as a client <i>handler</i> inside a multi-client ZIO flow
-server.  In order to achieve this symmetry, the server implementation
-must perform a minor sleight-of-hand.  This is illustrated in the
-following UML sequence diagram.
+ZIO provides a broker micro-framework to help simply creating
+multi-client servers.  It is called a broker as it works by moderating
+message traffic between remote clients and local client handlers.
+These handlers are provided by the application and may be implemented
+with <code>zio::flow::Flow</code>.  An illustration of how this broker works is
+illustrated in the Following UML sequence diagram.
 </p>
 
 
@@ -577,9 +591,9 @@ all implementations can reuse the server and the <code>Flow</code> code.
 </div>
 </div>
 
-<div id="outline-container-orgc1fceb4" class="outline-2">
-<h2 id="orgc1fceb4"><span class="section-number-2">5</span> Extending Flow API</h2>
-<div class="outline-text-2" id="text-5">
+<div id="outline-container-org8af1cd6" class="outline-2">
+<h2 id="org8af1cd6"><span class="section-number-2">6</span> Extending Flow API</h2>
+<div class="outline-text-2" id="text-6">
 <p>
 As described in the section above on Flow messages, the payload and
 header leable object attributes are in <code>FLOW</code> messages are available for
@@ -588,18 +602,6 @@ the application to use.  In particular, the <code>BOT</code>, <code>DAT</code> a
 </p>
 </div>
 </div>
-<div id="footnotes">
-<h2 class="footnotes">Footnotes: </h2>
-<div id="text-footnotes">
-
-<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1">1</a></sup> <div class="footpara"><p class="footpara">
-The number credits likely will be selected to limit
-memory usage on the server as it may be servicing multiple clients on
-multiple remote hosts.
-</p></div></div>
-
-
 </div>
-</div></div>
 </body>
 </html>

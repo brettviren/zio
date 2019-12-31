@@ -1,5 +1,4 @@
 #include "zio/node.hpp"
-#include "zio/senders.hpp"
 
 static
 std::string get_hostname()
