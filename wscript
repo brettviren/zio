@@ -25,7 +25,6 @@ def build(bld):
     rpath = [bld.env["PREFIX"] + '/lib', bld.path.find_or_declare(bld.out_dir)]
     rpath += [bld.env["LIBPATH_%s"%u][0] for u in uses]
     rpath = list(set(rpath))
-    print ('\n'.join([str(p) for p in rpath]))
              
     sources = bld.path.ant_glob('src/*.cpp');
     bld.shlib(features='cxx', includes='inc', rpath=rpath,

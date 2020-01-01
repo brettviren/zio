@@ -7,41 +7,44 @@ using namespace std;
 
 int main()
 {
+    zsys_init();
 
     zio::Node snode("server", 1);
     snode.set_verbose();
     auto sport = snode.port("recver", ZMQ_SERVER);
-    sport->bind("inproc://testflow");
+    // C/S can't do inproc!
+    //sport->bind("inproc://testflow");
+    sport->bind("tcp://127.0.0.1:5678");
     snode.online();
 
-    zio::Node cnode("client", 1);
+    zio::Node cnode("client", 2);
     cnode.set_verbose();
-    auto cport = cnode.port("client", ZMQ_CLIENT);
-    cport->connect("inproc://testflow");
+    auto cport = cnode.port("sender", ZMQ_CLIENT);
+    //cport->connect("inproc://testflow");
+    cport->connect("tcp://127.0.0.1:5678");
     cnode.online();
 
-
-    cerr << "create flows" << endl;
+    zsys_debug("create flows");
 
     zio::flow::Flow sflow(sport);
     zio::flow::Flow cflow(cport);
 
-    zio::Message msg;
-    msg.set_format("FLOW");
+    zio::Message msg("FLOW");
 
     zio::json fobj = {{"flow","BOT"},{"credits",2},{"direction","extract"}};
     msg.set_label(fobj.dump());
 
     bool ok;
 
-    cerr << "cflow send BOT" << endl;
+    zsys_debug("cflow send BOT");
     cflow.send_bot(msg);
 
-    cerr << "sflow recv BOT" << endl;
+    zsys_debug("sflow recv BOT");
     ok = sflow.recv_bot(msg);
     assert(ok);
+    zsys_debug("sflow recv'ed");
     auto rid = msg.routing_id();
-    cerr << "cflow msg.label: " << msg.label() << " rid: " << rid <<  endl;
+    zsys_debug("sflow msg.label: %s, rid: %d", msg.label().c_str(), rid);
     assert(rid);
 
 

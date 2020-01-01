@@ -7,11 +7,14 @@ using namespace std;
 
 int main()
 {
+    zsys_init();
+
     // this test generally pretends to be the guts of a node.
 
     // create many ports
     zio::Port port("name1", ZMQ_PUB, "127.0.0.1");
-    port.bind();
+    port.bind("127.0.0.1",0);
+    //port.bind("tcp://127.0.0.1:5678");
     // port.connect("name2", "portA");
 
     // bind all ports first, collecting their headers

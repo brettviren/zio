@@ -18,7 +18,7 @@ int main()
     f = zframe_recv(s);
     assert(f);
     assert (zframe_routing_id(f) != 0);
-    assert (zsock_routing_id(s) != 0);    
+    //assert (zsock_routing_id(s) != 0);    
 
     zsock_destroy(&c);
     zsock_destroy(&s);

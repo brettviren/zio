@@ -15,6 +15,7 @@ zio::flow::Flow::~Flow()
 
 void zio::flow::Flow::send_bot(zio::Message& bot)
 {
+    zsys_debug("[flow %s]: send_bot", m_port->name().c_str());
     auto lobj = zio::json::parse(bot.label());
     lobj["flow"] = "BOT";
     bot.set_label(lobj.dump());
@@ -22,9 +23,11 @@ void zio::flow::Flow::send_bot(zio::Message& bot)
 }
 bool zio::flow::Flow::recv_bot(zio::Message& bot, int timeout)
 {
+    zsys_debug("[flow %s]: recv_bot", m_port->name().c_str());
     bool ok = m_port->recv(bot, timeout);
     if (!ok) {
-        zsys_warning("[flow %s]: timeout receiving BOT", m_port->name().c_str());
+        zsys_warning("[flow %s]: timeout receiving BOT",
+                     m_port->name().c_str());
         return false;
     }
     auto lobj = zio::json::parse(bot.label());

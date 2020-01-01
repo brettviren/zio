@@ -4,15 +4,6 @@
 #include <algorithm>
 #include <string>
 
-struct DirectBinder {
-    zio::socket_t& sock;
-    std::string address;
-    std::string operator()() {
-        sock.bind(address);
-        return address;
-    }
-};
-
 static
 std::string make_tcp_address(std::string hostname, int port)
 {
@@ -25,14 +16,39 @@ std::string make_tcp_address(std::string hostname, int port)
     return ss.str();
 }
 
+struct DirectBinder {
+    zio::socket_t& sock;
+    std::string address;
+    std::string operator()() {
+        sock.bind(address);
+        zsys_debug("DirectBinder %s", address.c_str());
+        return address;
+    }
+};
+
+
 struct HostPortBinder {
     zio::socket_t& sock;
     std::string hostname;
     int tcpportnum{0};
     std::string operator()() {
-        std::string address = make_tcp_address(hostname, tcpportnum);
-        sock.bind(address);
-        return address;
+        if (tcpportnum != 0) {
+            std::string address = make_tcp_address(hostname, tcpportnum);
+            sock.bind(address);
+            return address;
+        }
+        for (int port = 49152; port < 65535; ++port) {
+            std::string address = make_tcp_address(hostname, port);
+            try {
+                sock.bind(address);
+                return address;
+            }
+            catch (zio::error_t& e) {
+                zsys_debug("failed to bind(%s)", address.c_str());
+                continue;
+            }
+        }
+        throw std::runtime_error("exaused ephemeral ports");
     }
 };
 
@@ -202,23 +218,33 @@ static bool needs_codec(int stype)
 
 void zio::Port::send(zio::Message& msg)
 {
+    zsys_debug("[port %s] send %s %s",
+               m_name.c_str(), msg.format().c_str(), msg.label().c_str());
     msg.set_coord(m_origin);
     if (needs_codec(zio::sock_type(m_sock))) {
         zio::message_t spmsg = msg.encode();
-        m_sock.send(spmsg, zio::send_flags::none);
+        zsys_debug("[port %s] send single-part %ld",
+                   m_name.c_str(), spmsg.size());
+        auto rc = m_sock.send(spmsg, zio::send_flags::none);
+        assert(rc);
         return;
     }
     zio::multipart_t mpmsg = msg.toparts();
+    zsys_debug("[port %s] send multi-part %d",
+               m_name.c_str(), mpmsg.size());
     mpmsg.send(m_sock);
 }
 
 bool zio::Port::recv(Message& msg, int timeout)
 {
+    zsys_debug("[port %s] recv %s polling for %d",
+               m_name.c_str(), msg.format().c_str(), timeout);
     zio::pollitem_t items[] = {{m_sock, 0, ZMQ_POLLIN, 0}};
     int item = zio::poll(&items[0], 1, timeout);
     if (!item) return false;
 
     if (needs_codec(zio::sock_type(m_sock))) {
+        zsys_debug("[port %s] recving encoded", m_name.c_str());
         zio::message_t spmsg;
         auto res = m_sock.recv(spmsg);
         if (!res) return false;
@@ -226,6 +252,7 @@ bool zio::Port::recv(Message& msg, int timeout)
         return true;
     }
 
+    zsys_debug("[port %s] recving multipart", m_name.c_str());
     zio::multipart_t mpmsg;
     bool ok = mpmsg.recv(m_sock);
     if (!ok) return false;

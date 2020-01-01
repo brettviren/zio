@@ -9,10 +9,12 @@ void test_owoa(bool backwards)
     std::vector<zsock_t*> clients;
     for (int ind=0; ind<nclients; ++ind) {
         zsock_t* c = zsock_new(ZMQ_CLIENT);
+        //zsock_t* c = zsock_new(ZMQ_PUSH);
         assert(c);
         clients.push_back(c);
     }
     zsock_t* s = zsock_new(ZMQ_SERVER);
+    //zsock_t* s = zsock_new(ZMQ_PULL);
     assert(s);
 
     const char* mode[] = {"forward","backward"};
@@ -20,13 +22,18 @@ void test_owoa(bool backwards)
                nclients, mode[backwards]);
 
     const int base_port = 5670;
-    //const char * addr = "tcp://127.0.0.1:%d";
-    const char * addr = "ipc://test_cs%d.ipc";
+    const char * addr = "tcp://127.0.0.1:%d";
+    //const char * addr = "ipc://test_cs%d.ipc";
+    //const char * addr = "inproc://test_cs%d";
     if (backwards) {            // bind clients, connect server
         for (int ind=0; ind<nclients; ++ind) {
             auto c = clients[ind];
             const int port = base_port + ind;
             const int p = zsock_bind(c, addr, port);
+            if (p<0) {
+                zsys_error("backwards failed bind %s port %d",
+                           addr, port);
+            }
             assert (p >= 0);
             int rc = zsock_connect(s, addr, port);
             assert (rc >= 0);
@@ -35,6 +42,10 @@ void test_owoa(bool backwards)
     else {                      // bind server, connect clients
         const int port = base_port;
         const int p = zsock_bind(s, addr, port);
+        if (p<0) {
+            zsys_error("forwards failed bind %s port %d",
+                       addr, port);
+        }
         assert(p >= 0);
         for (auto c : clients) {
             int rc = zsock_connect(c, addr, port);

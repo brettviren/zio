@@ -30,7 +30,8 @@ int main()
     const std::string hw = "Hello World!";
 
     cerr << "sending " << hw << endl;
-    auto ses = c.send(zio::buffer(hw.data(), hw.size()));
+    zio::message_t smsg(hw.data(), hw.size());
+    auto ses = c.send(smsg, zio::send_flags::none);
     assert (ses);
     assert (*ses == hw.size());
     assert (ses.value() == hw.size());
