@@ -26,12 +26,17 @@ int main()
 
     zsys_debug("create flows");
 
+    // flow normally acts as a client but can act as a server
     zio::flow::Flow sflow(sport);
     zio::flow::Flow cflow(cport);
 
     zio::Message msg("FLOW");
 
-    zio::json fobj = {{"flow","BOT"},{"credits",2},{"direction","extract"}};
+    const int credits_in_play = 2;
+
+    zio::json fobj = {{"flow","BOT"},
+                      {"credits",credits_in_play},
+                      {"direction","extract"}};
     msg.set_label(fobj.dump());
 
     bool ok;
@@ -68,6 +73,14 @@ int main()
 
     assert (cflow.is_sender());
 
+    // at this point deadlock could occur because this test is
+    // synchronous between both client and server.  We must manually
+    // prime the pump.  Internally the server's get() would do this.
+    credits = sflow.flush_pay();
+    assert (credits == credits_in_play);
+    assert (credits_in_play == sflow.total_credits());
+    assert (0 == sflow.credits());
+    
     cerr <<"cflow send DAT\n";
     zio::json lobj{{"flow","DAT"}};
     msg.set_label(lobj.dump());
@@ -75,8 +88,9 @@ int main()
     assert(ok);
     assert(cflow.total_credits() - cflow.credits() == 1);
 
-    cerr <<"sflow recv DAT\n";
-    assert(sflow.total_credits() == sflow.credits());
+    zsys_debug("sflow recv DAT, credits %d/%d",
+               sflow.credits(), sflow.total_credits());
+    assert(0 == sflow.credits());
     ok = sflow.get(msg);
     assert(ok);
     assert(sflow.credits() == 1);    

@@ -221,10 +221,11 @@ void zio::Port::send(zio::Message& msg)
     zsys_debug("[port %s] send %s %s",
                m_name.c_str(), msg.format().c_str(), msg.label().c_str());
     msg.set_coord(m_origin);
-    if (needs_codec(zio::sock_type(m_sock))) {
+    int stype = zio::sock_type(m_sock);
+    if (needs_codec(stype)) {
         zio::message_t spmsg = msg.encode();
-        zsys_debug("[port %s] send single-part %ld",
-                   m_name.c_str(), spmsg.size());
+        zsys_debug("[port %s] send single-part %ld rid:%d",
+                   m_name.c_str(), spmsg.size(), spmsg.routing_id());
         auto rc = m_sock.send(spmsg, zio::send_flags::none);
         assert(rc);
         return;
@@ -237,17 +238,19 @@ void zio::Port::send(zio::Message& msg)
 
 bool zio::Port::recv(Message& msg, int timeout)
 {
-    zsys_debug("[port %s] recv %s polling for %d",
-               m_name.c_str(), msg.format().c_str(), timeout);
+    zsys_debug("[port %s] polling for %d",
+               m_name.c_str(), timeout);
     zio::pollitem_t items[] = {{m_sock, 0, ZMQ_POLLIN, 0}};
     int item = zio::poll(&items[0], 1, timeout);
     if (!item) return false;
 
-    if (needs_codec(zio::sock_type(m_sock))) {
-        zsys_debug("[port %s] recving encoded", m_name.c_str());
+    int stype = zio::sock_type(m_sock);
+    if (needs_codec(stype)) {
         zio::message_t spmsg;
         auto res = m_sock.recv(spmsg);
         if (!res) return false;
+        zsys_debug("[port %s] recv single-part %ld rid:%d",
+                   m_name.c_str(), spmsg.size(), spmsg.routing_id());
         msg.decode(spmsg);
         return true;
     }

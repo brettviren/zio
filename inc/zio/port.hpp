@@ -104,7 +104,6 @@ namespace zio {
         std::vector< std::pair<nodename_t, portname_t> > m_connect_nodeports;
         
         bool m_verbose{false};
-
     };
 
     // The context can't be copied and ports like to be shared.

@@ -51,6 +51,17 @@ namespace zio {
             bool put(Message& dat);
             
             /*!
+              @brief recv any waiting PAY messages
+
+              A sender will slurp prior to a send of a DAT but the
+              application may call this at any time after BOT.  Number
+              of credits slurped is returned.  A -1 indicates EOT,
+              which if app calls should respond.  A -2 indicates
+              protocol error.
+            */
+            int slurp_pay(int timeout);
+
+            /*!
               @brief get a payload message from the flow
 
               Return false immediately if an EOT was received instead.
@@ -59,6 +70,15 @@ namespace zio {
               in milliseconds to wait for a FLOW message.
             */
             bool get(Message& dat, int timeout=-1);
+
+            /*!
+              @brief send any accumulated credit as a PAY
+
+              A recver will flush pay prior to any get but the
+              application may do this at any time after BOT.  Number
+              of credits sent is returned.  This does not block.
+            */
+            int flush_pay();
 
             /*!
               @brief send EOT to other end and wait for reply
@@ -80,6 +100,12 @@ namespace zio {
             portptr_t m_port;
             int m_credits, m_total_credits;
             bool m_sender;      // false if we are recver
+
+            // A Flow can use a SERVER socket.  The BOT in recv() sets
+            // this.  It will be set on the message prior to any
+            // subsequent send()
+            Message::routing_id_t m_rid;
+
         };
 
     }
