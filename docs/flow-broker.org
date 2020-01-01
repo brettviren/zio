@@ -1,0 +1,37 @@
+#+title: Flow Broker
+
+The simple flow server described in [[file:flow.org][flow]] will break if more than one
+client attempts to enter the conversation.  One solution is to
+insinuate a broker pattern between multiple front-end (remote) clients
+and back-end handlers.  One architecture for such a brokeris
+illustrated in the following UML sequence diagram depicting
+communication with a single flow client.
+
+[[file:flow-broker.png]]
+
+The left side is "toward" remote clients and the /front-end port/ (FE
+port) represents a broker's SERVER socket.  It accepts
+begin-of-transmission from a remote client (~BOT-rem~), reverses its
+/direction/ and passes the result to an application-provided factory
+along with the address of the broker's internal /back-end port/ (BE
+port), which is another SERVER socket.
+
+The broker then *waits* on the BE port for the ~BOT-loc~ to return.  The
+initialization of and response by the handler thus should be prompt.
+When ~BOT-loc~ is received the broker associates the ZeroMQ SERVER
+routing ID of both local and remote endpoints for future exchange.
+The broker completes the ~BOT~ exchange.  Subsequent flow messages that
+are received by the broker are marshaled via the routing ID
+association.
+
+This ~BOT~ juggling allows for handlers to be implemented using
+~zio::flow::Flow~ objects.  That is, the factory might create a handler
+with a ~Flow~ object.  The CLIENT port connected to the BE SERVER port
+and the ~BOT-loc~ would both be given to a ~Flow~ object for the handler
+implementation to use. 
+
+The factory is called by the broker and thus any handler must run in
+its own thread or deadlock is certain.  Since the broker does a hard
+wait for the ~BOT-loc~ reply, the factory and handler must promptly
+return.
+

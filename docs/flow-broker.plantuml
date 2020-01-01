@@ -1,0 +1,41 @@
+@startuml
+!pragma teoz true
+
+title ZIO Flow Broker Sequence
+participant "FE port" as feport
+participant "broker" as broker
+participant "BE port" as beport
+participant "handler" as app
+participant "factory" as factory
+
+broker -> feport : recv(wait)
+
+{festart} feport -> broker : BOT-rem
+broker -> factory : BOT-loc, BE port addr
+factory -> app : spawn handler
+activate app
+        {bestart} app -> beport : BOT-loc
+        & beport -> broker : BOT-loc
+        & broker -> feport : BOT-loc
+
+        broker -> beport : BOT-rem
+        & beport -> app  : BOT-rem
+        
+        {feend} feport -> broker : PAY/DAT/EOT
+        note left
+                FE flow
+        end note
+
+        app -> beport : PAY/DAT/EOT
+        {beend} beport -> broker : PAY/DAT/EOT
+        note right
+                BE flow
+        end note
+
+deactivate app
+
+{bestart} <-> {beend}
+
+{festart} <-> {feend}
+
+@enduml

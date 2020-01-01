@@ -172,52 +172,9 @@ before the reply-~EOT~ and they shall be discarded.
 A /data flow server/ may also be implemented using the ~zio::flow::Flow~
 class by simply using a SERVER socket for its port and calling
 ~recv_bot()~ prior to ~send_bot()~ in opposition to the diagram above.
+The conversation must still start with the client ~Flow~ and the simple
+server ~Flow~ can only interact with that one client.  
 
-* Flow Broker
-
-A simple flow server will break if more than one client attempts to
-enter the conversation.  The ZeroMQ SERVER feature "routing ID" must
-be used to isolate each conversation inside the server logic.
-
-ZIO provides a broker micro-framework to help simply creating
-multi-client servers.  It is called a broker as it works by moderating
-message traffic between remote clients and local client handlers.
-These handlers are provided by the application and may be implemented
-with ~zio::flow::Flow~.  An illustration of how this broker works is
-illustrated in the Following UML sequence diagram.
-
-[[file:flow-server-credit.png]]
-
-In the illustration, the server listens on its own server port (a
-SERVER socket) for ~FLOW~ messages coming from (remote) Flow clients.
-When a ~BOT~ is received from new client the broker will modify it to
-hold the ZeroMQ routing ID (~cid~ in the diagram) and pass it to an
-application-provided /factory/.  ................
-
-
-This handler executes as an actor (ZeroMQ ~zactor_t~).
-Internally, it operates exactly like shown in the ZIO Flow API
-Sequence diagram except the ~zio::flow::Flow~ is constructed around a
-~port~ that wraps the PAIR socket of the actor pipe.  The other end of
-that pipe is held by the factory.
-
-This is the first sleight-of-hand the server must do.  The second is
-in handling the ~BOT~ messages.  The /direction/ of the ~BOT~ from the
-remote client must be reversed prior to being used in constructing the
-handler as it tells the handler the direction it should operate in.
-This reversed direction is labeled in the diagram as ~BOT'~.  The
-handler is following the Flow API sequence diagramed above so simply
-sends out this ~BOT'~ as if it were a remote client.  To uphold that
-fiction, the server must reverse yet again and send the final ~BOT'~.
-
-Thus, the flow server code acts as a proxy between a remote client and
-its handler.  The server is templated on the factory and so it is the
-factory which ultimately determins the specific behavior of the
-server.  The constructed handlers are also application dependent code
-but may use ~zio::flow::Flow~ exactly as a client would.  This means
-that the cartesian product of (server, client) $\times$ (/sender/,
-/recver/) does not have to result in four separate implementations and
-all implementations can reuse the server and the ~Flow~ code.
 
 * Extending Flow API
 
