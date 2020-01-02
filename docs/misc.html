@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2019-12-30 Mon 09:55 -->
+<!-- 2020-01-02 Thu 16:37 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Notes</title>
@@ -239,25 +239,26 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgf880beb">1. Thread safety</a></li>
-<li><a href="#org5316222">2. Socket buffering</a></li>
-<li><a href="#org695b0dc">3. A potential Catch 22 with Discovery and Ephemeral Ports</a></li>
+<li><a href="#org5e6d227">1. Thread safety</a></li>
+<li><a href="#orga58e688">2. Socket buffering</a></li>
+<li><a href="#orgfaad66d">3. A potential Catch 22 with Discovery and Ephemeral Ports</a></li>
 </ul>
 </div>
 </div>
 <div class="nav">
 <ul class="org-ul">
 <li><a href="index.html">Main Page</a></li>
+<li><a href="install.html">Installation</a></li>
 <li><a href="tutorial.html">Tutorial</a></li>
 <li><a href="howtos.html">How-to guides</a></li>
-<li><a href="whytos.html">Why-to descriptions</a></li>
+<li><a href="whytos.html">Design documents</a></li>
 <li><a href="api.html">API Reference</a></li>
 </ul>
 
 </div>
 
-<div id="outline-container-orgf880beb" class="outline-2">
-<h2 id="orgf880beb"><span class="section-number-2">1</span> Thread safety</h2>
+<div id="outline-container-org5e6d227" class="outline-2">
+<h2 id="org5e6d227"><span class="section-number-2">1</span> Thread safety</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 Only recent "draft" sockets (CLIENT/SERVER and RADIO/DISH) are
@@ -274,8 +275,8 @@ any other thread.
 </div>
 </div>
 
-<div id="outline-container-org5316222" class="outline-2">
-<h2 id="org5316222"><span class="section-number-2">2</span> Socket buffering</h2>
+<div id="outline-container-orga58e688" class="outline-2">
+<h2 id="orga58e688"><span class="section-number-2">2</span> Socket buffering</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 Early termination can cause loss of messages that have been sent out a
@@ -286,8 +287,8 @@ transmission.
 </div>
 </div>
 
-<div id="outline-container-org695b0dc" class="outline-2">
-<h2 id="org695b0dc"><span class="section-number-2">3</span> A potential Catch 22 with Discovery and Ephemeral Ports</h2>
+<div id="outline-container-orgfaad66d" class="outline-2">
+<h2 id="orgfaad66d"><span class="section-number-2">3</span> A potential Catch 22 with Discovery and Ephemeral Ports</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 Discovery involves broadcasting headers to the network which advertise

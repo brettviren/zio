@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-01-02 Thu 10:59 -->
+<!-- 2020-01-02 Thu 16:37 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Flow Broker</title>
@@ -161,19 +161,6 @@
   .footdef  { margin-bottom: 1em; }
   .figure { padding: 1em; }
   .figure p { text-align: center; }
-  .equation-container {
-    display: table;
-    text-align: center;
-    width: 100%;
-  }
-  .equation {
-    vertical-align: middle;
-  }
-  .equation-label {
-    display: table-cell;
-    text-align: right;
-    vertical-align: middle;
-  }
   .inlinetask {
     padding: 10px;
     border: 2px solid gray;
@@ -268,9 +255,10 @@ for the JavaScript code in this tag.
 <div class="nav">
 <ul class="org-ul">
 <li><a href="index.html">Main Page</a></li>
+<li><a href="install.html">Installation</a></li>
 <li><a href="tutorial.html">Tutorial</a></li>
 <li><a href="howtos.html">How-to guides</a></li>
-<li><a href="whytos.html">Why-to descriptions</a></li>
+<li><a href="whytos.html">Design documents</a></li>
 <li><a href="api.html">API Reference</a></li>
 </ul>
 
@@ -285,8 +273,8 @@ the handling mechanism and this document describes one possible
 solution which is here called a <i>flow broker</i>.
 </p>
 
-<div id="outline-container-orgfa0004a" class="outline-2">
-<h2 id="architecture"><span class="section-number-2">1</span> Architecture</h2>
+<div id="outline-container-orgce23d13" class="outline-2">
+<h2 id="architecture"><a id="orgce23d13"></a><span class="section-number-2">1</span> Architecture</h2>
 <div class="outline-text-2" id="text-architecture">
 <p>
 The basic idea is to abstract the communication into <i>front end</i> (FE)
@@ -352,8 +340,8 @@ marshaled between FE and BE based on the association of routing IDs.
 </div>
 </div>
 
-<div id="outline-container-orgd25696d" class="outline-2">
-<h2 id="addressing"><span class="section-number-2">2</span> Addressing</h2>
+<div id="outline-container-org17f9ae8" class="outline-2">
+<h2 id="addressing"><a id="org17f9ae8"></a><span class="section-number-2">2</span> Addressing</h2>
 <div class="outline-text-2" id="text-addressing">
 <p>
 The creation of the FE and BE SERVER ports is outside the scope of the
@@ -363,8 +351,8 @@ broker and any application-provided handlers.  The choice of which to
 </div>
 </div>
 
-<div id="outline-container-orgb7e7b0c" class="outline-2">
-<h2 id="complexity"><span class="section-number-2">3</span> Broker Complexity</h2>
+<div id="outline-container-orgbcb3ccc" class="outline-2">
+<h2 id="complexity"><a id="orgbcb3ccc"></a><span class="section-number-2">3</span> Broker Complexity</h2>
 <div class="outline-text-2" id="text-complexity">
 <p>
 The complexity of the broker appears somewhat high while one might say
@@ -374,8 +362,8 @@ section outlines what this means.
 </p>
 </div>
 
-<div id="outline-container-org77e8d48" class="outline-3">
-<h3 id="mirror"><span class="section-number-3">3.1</span> Broker as mirror</h3>
+<div id="outline-container-org6d3ee33" class="outline-3">
+<h3 id="mirror"><a id="org6d3ee33"></a><span class="section-number-3">3.1</span> Broker as mirror</h3>
 <div class="outline-text-3" id="text-mirror">
 <p>
 The broker provides a mirror that allows remote clients and local
@@ -386,8 +374,8 @@ handler.
 </div>
 </div>
 
-<div id="outline-container-org9ea6848" class="outline-3">
-<h3 id="simplicity"><span class="section-number-3">3.2</span> Handler simplicity</h3>
+<div id="outline-container-orgf81b25b" class="outline-3">
+<h3 id="simplicity"><a id="orgf81b25b"></a><span class="section-number-3">3.2</span> Handler simplicity</h3>
 <div class="outline-text-3" id="text-simplicity">
 <p>
 Because a handler may be implemented in terms of a client it may use
@@ -398,8 +386,8 @@ invented to implement client handlers.
 </div>
 </div>
 
-<div id="outline-container-orgb0e374c" class="outline-3">
-<h3 id="central"><span class="section-number-3">3.3</span> Centralization</h3>
+<div id="outline-container-org6e8c5ec" class="outline-3">
+<h3 id="central"><a id="org6e8c5ec"></a><span class="section-number-3">3.3</span> Centralization</h3>
 <div class="outline-text-3" id="text-central">
 <p>
 Brokers are naturally centralizing.  This can be advantageous.
@@ -422,8 +410,8 @@ created if the handlers all reside in a common executable.
 </div>
 </div>
 
-<div id="outline-container-org5aee010" class="outline-2">
-<h2 id="lockstep"><span class="section-number-2">4</span> Handler Synchronicity</h2>
+<div id="outline-container-orgaeae9ba" class="outline-2">
+<h2 id="lockstep"><a id="orgaeae9ba"></a><span class="section-number-2">4</span> Handler Synchronicity</h2>
 <div class="outline-text-2" id="text-lockstep">
 <p>
 The broker operates asynchronously from its local client handlers.
@@ -456,10 +444,24 @@ safe to write to the file.
 This arrangement is illustrated in the following connection diagram.
 </p>
 
+<div class="org-src-container">
+<pre class="src src-dot">digraph conn {
+rankdir=LR
+node[shape=box]
+flow1[label=<span style="font-style: italic;">"app"</span>];flow2[label=<span style="font-style: italic;">"app"</span>];flow3[label=<span style="font-style: italic;">"app"</span>]
+writer
+node[shape=circle,fixed=true,width=1]
+c1[label=<span style="font-style: italic;">"CLIENT"</span>];c2[label=<span style="font-style: italic;">"CLIENT"</span>];c3[label=<span style="font-style: italic;">"CLIENT"</span>]
+push1[label=<span style="font-style: italic;">"PUSH"</span>];push2[label=<span style="font-style: italic;">"PUSH"</span>];push3[label=<span style="font-style: italic;">"PUSH"</span>]
+pull[label=<span style="font-style: italic;">"PULL"</span>]
+node[shape=Mcircle]
+file
 
-<div class="figure">
-<p><img src="flow-broker-file.png" alt="flow-broker-file.png" />
-</p>
+c1-&gt;flow1-&gt;push1-&gt;pull-&gt;writer-&gt;file
+c2-&gt;flow2-&gt;push2-&gt;pull
+c3-&gt;flow3-&gt;push3-&gt;pull
+}
+</pre>
 </div>
 
 

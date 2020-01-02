@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2019-12-30 Mon 09:55 -->
+<!-- 2020-01-02 Thu 16:39 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>ZIO design discussion</title>
@@ -161,6 +161,19 @@
   .footdef  { margin-bottom: 1em; }
   .figure { padding: 1em; }
   .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
   .inlinetask {
     padding: 10px;
     border: 2px solid gray;
@@ -238,18 +251,28 @@ for the JavaScript code in this tag.
 <div class="nav">
 <ul class="org-ul">
 <li><a href="index.html">Main Page</a></li>
+<li><a href="install.html">Installation</a></li>
 <li><a href="tutorial.html">Tutorial</a></li>
 <li><a href="howtos.html">How-to guides</a></li>
-<li><a href="whytos.html">Why-to descriptions</a></li>
+<li><a href="whytos.html">Design documents</a></li>
 <li><a href="api.html">API Reference</a></li>
 </ul>
 
 </div>
 
-
 <p>
-t.b.d.
+During the course of development, a number of design documents are
+written to help solidify thoughts. 
 </p>
+
+<ul class="org-ul">
+<li>A <a href="node.html">node</a> collects <a href="port.html">ports</a> to implement a network of ZIO applications as a ported graph.</li>
+<li>A <a href="peer.html">peer</a> provides distributed discovery and presence</li>
+<li>A <a href="messages.html">message</a> schema is used for all ZIO messages.</li>
+<li>An <a href="outbox.html">outbox</a> gives "logger" type interface to emit free text strings or structured metrics</li>
+<li>A protocol called <a href="flow.html">flow</a> provides simpler message transfer than using ports directly</li>
+<li>A <a href="flow-broker.html">broker</a> can be constructed for richer flows</li>
+</ul>
 </div>
 </body>
 </html>

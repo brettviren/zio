@@ -1,7 +1,8 @@
 #+BEGIN_nav
 - [[file:index.org][Main Page]]
+- [[file:install.org][Installation]]
 - [[file:tutorial.org][Tutorial]]
 - [[file:howtos.org][How-to guides]]
-- [[file:whytos.org][Why-to descriptions]]
+- [[file:whytos.org][Design documents]]
 - [[file:api.org][API Reference]]
 #+END_nav

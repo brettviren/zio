@@ -2,5 +2,12 @@
 #+setupfile: setup.org
 #+include: nav.org
 
+During the course of development, a number of design documents are
+written to help solidify thoughts. 
 
-t.b.d.
+- A [[file:node.org][node]] collects [[file:port.org][ports]] to implement a network of ZIO applications as a ported graph.
+- A [[file:peer.org][peer]] provides distributed discovery and presence
+- A [[file:messages.org][message]] schema is used for all ZIO messages.
+- An [[file:outbox.org][outbox]] gives "logger" type interface to emit free text strings or structured metrics
+- A protocol called [[file:flow.org][flow]] provides simpler message transfer than using ports directly 
+- A [[file:flow-broker.org][broker]] can be constructed for richer flows

@@ -4,19 +4,8 @@ ZIO provides a high-level interface to ZeroMQ, Zyre and some patterns
 described in the [[http://zguide.zeromq.org/][zguide]].  It also provides a /ported graph/ model for
 constructing a network topology.
 
-* Documentation
+Documentation is at https://brettviren.github.io/zio or browsing the files under [[./docs/]].
 
-See https://brettviren.github.io/zio or files under [[./docs/]].
+The ZIO project licensed under LGPLv3 + exception as specified in [[file:COPYING][COPYING]].
 
-* Install
 
-The usual [[https://waf.io/][Waf]] way
-
-#+begin_example
-  $ ./waf configure --prefix=/path/to/install
-  $ [./waf build --alltests -j1]
-  $ ./waf install [--notests]
-#+end_example
-
-Note, some tests require open ports in host local firewall in order to
-succeed.

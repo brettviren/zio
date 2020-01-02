@@ -1,0 +1,47 @@
+#+title: ZIO Installation
+#+setupfile: setup.org
+#+include: nav.org
+
+* Install ZIO
+
+ZIO installs in the usual [[https://waf.io][Waf]] way.
+
+#+begin_example
+  $ ./waf configure --prefix=/path/to/install
+  $ ./waf install
+#+end_example
+
+To build, these software dependencies will be located via [[https://www.freedesktop.org/wiki/Software/pkg-config/][pkg-config]].
+
+- [[https://github.com/zeromq/libzmq][libzmq]]
+- [[https://github.com/zeromq/czmq][CZMQ]]
+- [[https://github.com/zeromq/zyre][Zyre]]
+
+In addition, ZIO uses [[https://github.com/zeromq/cppzmq][cppzmq]] and [[https://github.com/nlohmann/json][nlohmann/json]] and includes copies of
+these header-only packages.
+
+* Tests
+
+The default install target will compile and execute units tests.  To
+avoid running these tests you may add ~--notests~ as:
+
+#+begin_example
+  $ ./waf install --notests
+#+end_example
+
+Or, to force their running:
+
+#+begin_export 
+  $ ./waf --alltests
+#+end_export
+
+* Documentation
+
+The generated documentation committed to the repository.  With a
+suitable environment (need Emacs and a recent [[https://plantuml.com/][plantuml]]) one can
+rebuild it:
+
+#+begin_example
+  $ cd docs
+  $ make
+#+end_example

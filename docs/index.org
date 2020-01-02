@@ -25,13 +25,3 @@ Some of the features ZIO provides include:
 - some message processing batteries included ([[file:batteries.org][batteries]]).
 
 See the navigation links for entry to more documentation.
-
-This package installs in the usual [[https://waf.io][Waf]] way.
-
-
-#+begin_example
-  $ ./waf configure --prefix=/path/to/install
-  $ ./waf build 
-  $ ./waf install
-#+end_example
-
