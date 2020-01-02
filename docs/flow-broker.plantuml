@@ -11,11 +11,11 @@ participant "factory" as factory
 broker -> feport : recv(wait)
 
 {festart} feport -> broker : BOT-rem
-broker -> factory : BOT-loc, BE port addr
+broker -> factory : BOT-loc+cid
 factory -> app : spawn handler
 activate app
-        {bestart} app -> beport : BOT-loc
-        & beport -> broker : BOT-loc
+        {bestart} app -> beport : BOT-loc+cid
+        & beport -> broker : BOT-loc+cid
         & broker -> feport : BOT-loc
 
         broker -> beport : BOT-rem

@@ -1,0 +1,480 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2020-01-02 Thu 10:59 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Flow Broker</title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="Brett Viren" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { width: 90%; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="org.css"/>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2019 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="org-div-home-and-up">
+ <a accesskey="h" href=""> UP </a>
+ |
+ <a accesskey="H" href="index.html"> HOME </a>
+</div><div id="content">
+<h1 class="title">Flow Broker</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#architecture">1. Architecture</a></li>
+<li><a href="#addressing">2. Addressing</a></li>
+<li><a href="#complexity">3. Broker Complexity</a>
+<ul>
+<li><a href="#mirror">3.1. Broker as mirror</a></li>
+<li><a href="#simplicity">3.2. Handler simplicity</a></li>
+<li><a href="#central">3.3. Centralization</a></li>
+</ul>
+</li>
+<li><a href="#lockstep">4. Handler Synchronicity</a></li>
+</ul>
+</div>
+</div>
+<div class="nav">
+<ul class="org-ul">
+<li><a href="index.html">Main Page</a></li>
+<li><a href="tutorial.html">Tutorial</a></li>
+<li><a href="howtos.html">How-to guides</a></li>
+<li><a href="whytos.html">Why-to descriptions</a></li>
+<li><a href="api.html">API Reference</a></li>
+</ul>
+
+</div>
+
+<p>
+The simple flow server described in <a href="flow.html">flow</a> will break if more than one
+client attempts to enter the conversation.  That document also
+describes how to use multiple <code>zio::flow::Flow</code> instances to handle
+per-client transmissions.  The application is of course free to define
+the handling mechanism and this document describes one possible
+solution which is here called a <i>flow broker</i>.
+</p>
+
+<div id="outline-container-orgfa0004a" class="outline-2">
+<h2 id="architecture"><span class="section-number-2">1</span> Architecture</h2>
+<div class="outline-text-2" id="text-architecture">
+<p>
+The basic idea is to abstract the communication into <i>front end</i> (FE)
+which talks to remote clients and <i>back end</i> (BE) which talks to "local
+clients" where all clients can be considered to be implemented using a
+<code>zio::flow::Flow</code> (and each with a CLIENT socket).
+</p>
+
+<p>
+The <i>broker</i> then provides two SERVER sockets, one to service the FE and
+one to service the BE.  A broker implementation is parameterized on a
+<i>factory</i> object which, given a <b>BOT</b> message, can construct some handler
+that acts as a local or BE client.  The following UML sequence diagram
+illustrates this architecture with one FE and one BE client.
+</p>
+
+
+
+
+<div class="figure">
+<p><img src="flow-broker.png" alt="flow-broker.png" />
+</p>
+</div>
+
+
+
+
+<p>
+The left side is "toward" the remote client.  It accepts a <b>BOT</b> from
+the remote client (labeled <b>BOT-rem</b> in the sequence diagram),
+reverses the value of its <i>flow object</i> <code>.direction</code> attribute,
+extends the <i>flow object</i> with a <code>.cid</code> attribute before passes the
+result (<b>BOT-loc</b>) to the application-provided <i>factory</i>.  The factory
+should return without delay and the broker continues processing.
+</p>
+
+<p>
+The <i>factory</i> is expected to spawn a handler which is configured based
+on the <b>BOT-loc</b>.  The original <b>BOT-rem</b> is not replied to until the
+broker receives a response from its handler.  This response must
+either be the original <b>BOT-loc</b> or an <b>EOT</b>.  In both cases the
+response must include the <code>.cid</code> attribute.  
+</p>
+
+<p>
+Not illustrated but when an <b>EOT</b> is returned, the <code>.cid</code> attribute is
+stripped and (per <i>flow protocol</i>) the result is returned to the BE
+client and it is forwarded to the associated FE client (using the
+<code>.cid</code> value for the routing ID).  A response from the FE client is
+anticipated.
+</p>
+
+<p>
+In the nominal situation (illustrated) the BE client handler returns
+the original <b>BOT-loc</b>.  The broker associates the FE routing ID held
+in the <code>.cid</code> with the just discovered BE routing ID.  It then
+forwards the <b>BOT-loc</b> to the FE client and then reverses its <i>flow
+object</i> <code>.direction</code> before returning it to the BE client handler.
+Two <i>flow protocol</i> transmissions are thus initiated with the broker
+in the middle.  Subsequent <b>DAT</b>, <b>PAY</b> or <b>EOT</b> messages are simply
+marshaled between FE and BE based on the association of routing IDs.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgd25696d" class="outline-2">
+<h2 id="addressing"><span class="section-number-2">2</span> Addressing</h2>
+<div class="outline-text-2" id="text-addressing">
+<p>
+The creation of the FE and BE SERVER ports is outside the scope of the
+broker and any application-provided handlers.  The choice of which to
+<code>bind()</code> or <code>connect()</code> is made by the application.  
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgb7e7b0c" class="outline-2">
+<h2 id="complexity"><span class="section-number-2">3</span> Broker Complexity</h2>
+<div class="outline-text-2" id="text-complexity">
+<p>
+The complexity of the broker appears somewhat high while one might say
+it does not actually "do" anything.  However, the broker is absorbing
+complexity that may otherwise have to be expressed elsewhere.  This
+section outlines what this means.
+</p>
+</div>
+
+<div id="outline-container-org77e8d48" class="outline-3">
+<h3 id="mirror"><span class="section-number-3">3.1</span> Broker as mirror</h3>
+<div class="outline-text-3" id="text-mirror">
+<p>
+The broker provides a mirror that allows remote clients and local
+client handlers to be implemented with a high degree of symmetry.  A
+class providing the remote client may be used as-is in a local client
+handler.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org9ea6848" class="outline-3">
+<h3 id="simplicity"><span class="section-number-3">3.2</span> Handler simplicity</h3>
+<div class="outline-text-3" id="text-simplicity">
+<p>
+Because a handler may be implemented in terms of a client it may use
+the <code>zio::flow::Flow</code> API (see <a href="flow.html">flow</a>).  Without the extra BE SERVER
+socket and its added complexity a new protocol would need to be
+invented to implement client handlers.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgb0e374c" class="outline-3">
+<h3 id="central"><span class="section-number-3">3.3</span> Centralization</h3>
+<div class="outline-text-3" id="text-central">
+<p>
+Brokers are naturally centralizing.  This can be advantageous.
+Without a broker, a developer may instead create one simple flow
+server (as described in <a href="flow.html">flow</a>) for each remote client to converse.  The
+software operator must then know to execute one such simple client per
+each remote.  ZIO <a href="peer.html">peering</a> can help ameliorate bringing together these
+pairs, but any execute-on-demand pattern would need to be invented by
+the developer.
+</p>
+
+<p>
+The centralization also helps when the resource managed is shared
+between the local client handlers.  For example, if multiple handlers
+write to a common file some mechanism is likely required to assure
+this writing is thread safe.  Such a mechanism is more naturally
+created if the handlers all reside in a common executable.
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org5aee010" class="outline-2">
+<h2 id="lockstep"><span class="section-number-2">4</span> Handler Synchronicity</h2>
+<div class="outline-text-2" id="text-lockstep">
+<p>
+The broker operates asynchronously from its local client handlers.
+That is, communication with FE and BE does not cease because some
+handler might want it to.  The asynchronicity that the BE handlers
+enjoy must be explicitly defeated in order to synchronize writes to
+the common file.  Writing a stream of messages to a common file is one
+example where a handler may need others to wait while it performs its
+operation.
+</p>
+
+<p>
+A modified broker could be developed which assures BE handlers never
+operate simultaneously.  It would do this by waiting for a response
+after any message sent to the BE port.  This would then require the BE
+<i>data flow protocol</i> to operate with exactly 1 credit and for the broker
+to wait for a <code>recv()</code> on the BE port after any <code>send()</code>.  This wait will
+also block servicing the FE port.
+</p>
+
+<p>
+A simpler and better performing pattern would be to implement handlers
+that multiplex messages between their CLIENT sockets to a common,
+shared socket, eg via PUSH/PULL.  The code in this "back-back-end"
+would see a single stream of <b>DAT</b> messages which are then naturally
+safe to write to the file.
+</p>
+
+<p>
+This arrangement is illustrated in the following connection diagram.
+</p>
+
+
+<div class="figure">
+<p><img src="flow-broker-file.png" alt="flow-broker-file.png" />
+</p>
+</div>
+
+
+
+
+<p>
+The "app" box represents an application provided class utilizing an
+instance of <code>zio::flow::Flow</code> which provides the CLIENT socket.  The
+"app" also provides a PUSH.  Together they make a handler front-end.
+They all send to a shared handler back-end "writer" which multiplexes
+their messages via its PULL socket into a single stream and safely
+writes them to file.
+</p>
+</div>
+</div>
+</div>
+</body>
+</html>
