@@ -29,9 +29,10 @@ int main(int argc, char*argv[])
     {
         zio::Peer peer2("peer2",{{"Color","yellow"},{"Pet","dog"}}, verbose);
         auto pids1 = peer2.waitfor("peer1");
-        assert(pids1.size() == 1);
+        /// don't assert on this as "waf --alltests" makes parallel peers 
+        //assert(pids1.size() == 1);
         auto pids2 = peer1.waitfor("peer2");
-        assert(pids2.size() == 1);
+        //assert(pids2.size() == 1);
         uuid2 = pids2[0];
         assert(uuid2.size());
         bool found = peer1.isknown(uuid2);
