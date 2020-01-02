@@ -14,12 +14,35 @@ zio::flow::Flow::~Flow()
 }
 
 
+bool zio::flow::Flow::parse_label(Message& msg, zio::json& lobj)
+{
+    std::string label = msg.label();
+    if (label.empty()) {
+        return true;
+    }
+    try {
+        lobj = zio::json::parse(label);
+    }
+    catch (zio::json::exception& e) {
+        zsys_warning("[flow %s]: %s",
+                     m_port->name().c_str(), e.what());
+        zsys_warning("[flow %s]: %s",
+                     m_port->name().c_str(), label.c_str());
+        return false;
+    }
+    return true;
+}
+
+
 void zio::flow::Flow::send_bot(zio::Message& bot)
 {
     zsys_debug("[flow %s]: send_bot", m_port->name().c_str());
-    auto lobj = zio::json::parse(bot.label());
-    lobj["flow"] = "BOT";
-    bot.set_label(lobj.dump());
+    zio::json fobj;
+    if (!parse_label(bot, fobj)) {
+        throw std::runtime_error("bad message label for flow::send_bot()");
+    }
+    fobj["flow"] = "BOT";
+    bot.set_label(fobj.dump());
     if (m_rid) { bot.set_routing_id(m_rid); }
     m_port->send(bot);
 }
@@ -32,16 +55,23 @@ bool zio::flow::Flow::recv_bot(zio::Message& bot, int timeout)
                      m_port->name().c_str());
         return false;
     }
-    auto lobj = zio::json::parse(bot.label());
-    std::string flowtype = lobj["flow"];
+    std::string label = bot.label();
+    zsys_debug("[flow %s]: label: %s",
+               m_port->name().c_str(), label.c_str());
+
+    zio::json fobj;
+    if (!parse_label(bot, fobj)) {
+        throw std::runtime_error("bad message label for flow::recv_bot()");
+    }
+    std::string flowtype = fobj["flow"];
     if (flowtype != "BOT") {
         zsys_warning("[flow %s]: did not get BOT, got %s",
                      m_port->name().c_str(), flowtype.c_str());
         return false;
     }
-    m_total_credits = lobj["credits"];
-    // here, lobj is from the point of view of the OTHER end
-    std::string dir = lobj["direction"];
+    m_total_credits = fobj["credits"];
+    // here, fobj is from the point of view of the OTHER end
+    std::string dir = fobj["direction"];
     if (dir == "extract") { 
         m_sender = false;       // we are receiver
         m_credits = m_total_credits;
@@ -73,10 +103,13 @@ int zio::flow::Flow::slurp_pay(int timeout)
     if (!ok) {              // timeout
         return 0;
     }
-    auto obj = zio::json::parse(msg.label());
-    std::string flowtype = obj["flow"];
+    zio::json fobj;
+    if (!parse_label(msg, fobj)) {
+        return 0;
+    }
+    std::string flowtype = fobj["flow"];
     if (flowtype == "PAY") {
-        int credit = obj["credit"];
+        int credit = fobj["credit"];
         zsys_debug("[flow %s] recv PAY %d credits (rid:%u)",
                    m_port->name().c_str(), credit, m_rid);
         return credit;
@@ -99,7 +132,7 @@ bool zio::flow::Flow::put(zio::Message& dat)
         m_credits += c;
     }
     if (m_credits == 0) {
-        // not credits, we really have to wait until we get some PAY
+        // no credits, we really have to wait until we get some PAY
         int c = slurp_pay(-1);
         if (c < 0) {
             return false;
@@ -107,9 +140,14 @@ bool zio::flow::Flow::put(zio::Message& dat)
         assert (c>0);
         m_credits = c;
     }
-    auto obj = zio::json::parse(dat.label());
-    obj["flow"] = "DAT";
-    dat.set_label(obj.dump());
+
+    zio::json fobj;
+    if (!parse_label(dat, fobj)) {
+        throw std::runtime_error("bad message label for Flow::put()");
+    }
+
+    fobj["flow"] = "DAT";
+    dat.set_label(fobj.dump());
     if (m_rid) { dat.set_routing_id(m_rid); }
     m_port->send(dat);
     --m_credits;
@@ -141,8 +179,11 @@ bool zio::flow::Flow::get(zio::Message& dat, int timeout)
 
     bool ok = m_port->recv(dat, timeout);
     if (!ok) { return false; }
-    auto lobj = zio::json::parse(dat.label());
-    if (lobj["flow"] != "DAT") {
+    zio::json fobj;
+    if (!parse_label(dat, fobj)) {
+        throw std::runtime_error("bad message label for Flow::get()");
+    }
+    if (fobj["flow"] != "DAT") {
         return false;
     }
     ++m_credits;
@@ -151,9 +192,12 @@ bool zio::flow::Flow::get(zio::Message& dat, int timeout)
 
 bool zio::flow::Flow::eot(Message& msg, int timeout)
 {
-    auto obj = zio::json::parse(msg.label());
-    obj["flow"] = "EOT";
-    msg.set_label(obj.dump());
+    zio::json fobj;
+    if (!parse_label(msg, fobj)) {
+        throw std::runtime_error("bad message label for Flow::eot()");
+    }
+    fobj["flow"] = "EOT";
+    msg.set_label(fobj.dump());
 
     if (m_rid) { msg.set_routing_id(m_rid); }
     m_port->send(msg);
@@ -162,8 +206,10 @@ bool zio::flow::Flow::eot(Message& msg, int timeout)
         if (!ok) {              // timeout
             return false;
         }
-        auto lobj = zio::json::parse(msg.label());
-        std::string flowtype = lobj["flow"];
+        if (!parse_label(msg, fobj)) {
+            throw std::runtime_error("bad message label for Flow::eot()");
+        }
+        std::string flowtype = fobj["flow"];
         if (flowtype == "EOT") {
             return true;
         }
