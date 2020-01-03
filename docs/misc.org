@@ -2,6 +2,11 @@
 #+setupfile: setup.org
 #+include: nav.org
 
+These notes are for myself no architectural problems and maybe
+solutions that I (bv) encountered.  They leave unstated various
+assumptions about how some parts of ZIO or other systems work.  They
+may be both too terse or too verbose to be useful to others.
+
 * Thread safety
 
 Only recent "draft" sockets (CLIENT/SERVER and RADIO/DISH) are
@@ -19,11 +24,12 @@ any other thread.
 
 Early termination can cause loss of messages that have been sent out a
 socket but not yet received by the remote.  The holder of a socket
-arrange to keep that socket alive in some manner that assures
+must arrange to keep that socket alive in some manner that assures
 transmission.
 
-* A potential Catch 22 with Discovery and Ephemeral Ports
+* Going online with discovery
 
+A potential Catch 22 with discovery and ephemeral ports can exist.
 Discovery involves broadcasting headers to the network which advertise
 the endpoints a peer has or will bind.  Other peers may receive these
 advertisements and then connect based on matching peer name and header
@@ -53,3 +59,183 @@ After advertisement (peer initialization) is complete then the final
 two steps are asynchronous.  The peer must decide either to wait for
 all expected peers to be discovered (and connections made) or to allow
 connections to be completed later.  
+
+
+* Interoperability
+
+One target for application of ZIO is the Wire-Cell Toolkit.  The
+features in mind are:
+
+- WCT graph data extraction/injection.
+
+- Connecting WCT graphs which are co-executing on different computers.
+
+- Offload work to non-WCT code such as Python-based GPU access.
+
+The WCT execution context may be single-threaded (~Pgraph~) or
+thread-pool (~TbbFlow~) based.  The model is that a WCT component is
+executed in an external "loop" and is expected to return promptly and
+with a Boolean hint saying if output data was produced.  The execution
+engine will use that hint to determine if and when the component may
+be executed in the future.  Eg, a source component that returns
+~false~ is assumed to be depleted and may not enjoy a subsequent
+execution.
+
+Each of features in the execution context reality are considered in
+the following subsections but they all share a risk of deadlock due to
+a common pattern: imposed synchronicity on a partially asynchronous
+system.  What this means is that if system *A* has $N_a$ components of
+which at most $T_a$ may execute concurrently and system *B* imposes
+synchronization on $N > T_a$ of system *A* components then system *A*
+(and likely system *B*) may deadlock.  If a system *may* deadlock then
+eventually it will.
+
+ZIO may impose synchronization in one or more of the following ways:
+
+- A ZeroMQ socket has a buffer with a high-water-mark (HWM).  When
+  reached the socket will either block any new messages from entering
+  or it will drop those new messages.  The block causes
+  synchronization and the drop mode (in WCT application) is usually
+  not acceptable.  HWM are limited by system memory and default to
+  1000 messages.
+
+- ZIO data flow protocol uses credit-based flow control.  This is like
+  a HWM that is shared by both endpoints.  The number of credits to
+  safely use is limited by the minimum of the available memory of both
+  endpoints.  
+
+- ZIO data flow is initiated with a semi-synchronous two-way exchange
+  of *BOT* messages.  The ZIO flow protocol demands the client send
+  and receive a *BOT* and the server receive and send a *BOT* before
+  transmission of payload begins.  Both ends can do other things while
+  waiting for the *BOT* exchange to complete but when one end is a WCT
+  component, it can not relinquish execution without either risking a
+  busy loop or never executing again.
+
+
+
+
+** Data extraction/injection
+
+Mixing ZIO and WCT thus faces a risk of deadlock.  Consider a simple
+case where two WCT components are ZIO nodes each with a port
+communicating with the ZIO {{{doc(flow)}}} protocol and where the
+server needs to collect all *BOT* messages before responding with its
+own *BOT* messages.  This case may arise in a server that writes to a
+stream-based file format (eg Ogg) where a header block must be written
+to file for each flow prior to writing any payload.  If the
+single-thread WCT graph execution engine is used then any wait on a
+~recv()~ following a ~send()~ of a *BOT* will deadlock.  When the
+thread-pool engine is used, if there are more flow senders than
+threads the operation will also deadlock.  
+
+As of now, a natural maximum number of threads for ~TbbFlow~ for PDSP
+is 6, one per APA.  When the sigproc and simulation refactoring is
+complete, this number may be multiplied by the number of planes per
+APA that can be treated separately (3 or 4).  In DUNE, instead of 6
+APA there are 150.  When run in the context of a "grid" job, we may
+use more threads than cores allocated by the batch job but we must not
+use more than that many cores.  TBB (to my knowledge) does not have a
+way to limit CPU% other than limiting number of threads.  Allocating 6
+or 18 or 600 cores progressively reduces the slots available to
+receive the job.  Thus to allocate enough threads to avoid deadlock
+will practically prohibit the job from running.
+
+Thus, ZIO and WCT can not, in general, interoperate in a way that
+causes synchronization across WCT components.
+
+One weak workaround is for the flow receiver to respond to *BOT*
+immediately and to buffer subsequent *DAT* payload until all *BOT*
+messages have been received.  Then, per flow headers can be written,
+buffered *DAT* can be written and from then on subsequent *DAT*
+streamed to file.  This "catchup" phase following the final *BOT* will
+delay servicing fresh flow messages.  If that delay is long enough to
+eat up all credit the WCT flow senders will temporarily wait.  If all
+flow senders do not send and receive their *BOT* before others eat up
+credit then deadlock occurs.
+
+Another workaround is to dispense with ZIO flow protocol and use
+spray-and-pray PUB/SUB or PUSH/PULL *and* receiver buffering to get an
+initial message from each stream prior to writing its payload.  This
+is less weak but still has weakness.  Consider some components are
+faster than others.  They can exhaust the HWMs of their sockets and
+either block on send (PUSH) or drop messages (PUB).  The first case
+can lead to deadlock in the same way as the credit exhaustion or the
+original cross-component sync can.  As each sender hits HWM and waits
+it monopolizes a thread from the pool.  If enough senders reach this
+state before all can send *BOT* then deadlock.  The second case of
+dropping data won't lead to deadlock.  But, for a file I/O
+application, its not acceptable either.
+
+One strong workaround is to pre-configure the receiver with the
+information needed for the file stream "headers".  At some level this
+preconfiguration is required in any case as the receiver needs to know
+how many streams to expect.  This allows the server not to require
+synchronization across all clients for the *BOT* exchange.
+
+A rather kludgey workaround comes from recognizing that this need to
+get "introduced" to all streams before writing any payload data is the
+source of the problem.  Using or coercing a file format to not require
+this sync point erases the problem.  For example, writing headers and
+payload to different files and then post-processing these two into one
+file may solve the problem, at some additional I/O expense.  For
+example, it may be possible to simply ~cat~ these two files (eg, if
+they are in Ogg format).  Identifying a ROOT ~TTree~ to each stream
+may allow initiating a new tree when its associated *BOT* first
+arrives.
+
+Another strong workaround is to build the WCT graph to provide the
+needed synchronization.  The downstream component of the sync point
+can then implement a single-threaded file I/O context directly.  This
+is of course possible but WCT design causes some development
+annoyances: WCT graph edges, ports and thus nodes are strongly typed.
+One does not connect up WCT graph nodes willy-nilly.  It takes effort
+to develop a node with any novel set of port types and number.  For
+example, ~IFaninNode~ is templated on a single input type, its
+port-multiplicity number and a single output type.  It can not handle
+accepting mixed input of, say, an ~IDepo~ and an ~IFrame~ as needed to
+save intermediates of a simulation.  On the other hand, an ~IJoinNode~
+may accept mixed input types as specific by a fixed tuple.  So, for
+example, one might output data to file from a WCT PDSP simulation with
+a 6-way frame fanin which feeds to a join accepting ~<IFrame,IDepo>~
+tuple.  So far, no mixed-type ~IJoinNodes~ have been used in WCT.
+
+
+
+** Connecting co-executing WCT graphs
+
+The deadlock risk here is essentially the same as the one described
+for extraction/injection above.  It can be less obviously expressed
+and in some cases two WCT graphs may co-execute without risk of
+deadlock.  
+
+Consider two graphs connected by a single pair of WCT/ZIO components
+with a one-way data flow.  Even if both graphs use the single-threaded
+engine, no deadlock will occur.  The upstream node is a simple sink of
+data from its WCT graph and the downstream node a simple source.
+
+If the two graphs connect via a two pairs of parallel ZIO flow,
+deadlock may occur.  If the downstream graph structure directly or
+*indirectly* causes synchronization across the two nodes receiving
+flow and the upstream graph uses only a single thread, deadlock will
+occur.
+
+The connectivity between the two graphs can be increased but as long
+as synchronicity is required, deadlock is a risk.
+
+** Work offloading 
+
+The model here is that a WCT graph has a component which performs a
+task by giving it to an "external" element instead of performing it
+directly.  For example, a WCT 2D deconvolution component may send its
+input data across ZIO to an implementation based on PyTorch which uses
+a GPU to accelerate the work.  When complete the result is sent back
+to the WCT component.
+
+This uses a fully synchronous protocol between the WCT component and
+ZIO.  The larger WCT graph will simply wait as if the WCT component
+was executing directly.  If the "external" element receives input
+asynchronously from multiple WCT components (as it likely should for
+performance reasons) it must not attempt to synchronize across them or
+the same type of deadlock may occur.
+

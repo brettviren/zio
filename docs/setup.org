@@ -4,6 +4,4 @@
 #+link: zgit https://github.com/zeromq/%s
 #+HTML_HEAD: <link rel="stylesheet" type="text/css" href="org.css"/>
 #+HTML_LINK_HOME: index.html
-
-
-
+#+macro: doc [[file:$1.org][$1]]

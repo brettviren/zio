@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-01-02 Thu 16:37 -->
+<!-- 2020-01-03 Fri 16:34 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>ZIO data flow</title>
@@ -283,8 +283,8 @@ restrictions or limitations) are described in the section of the
 ZeroMQ guide covering <a href="http://zguide.zeromq.org/page:all#toc211">credit-based flow control</a>.
 </p>
 
-<div id="outline-container-org6d929cc" class="outline-2">
-<h2 id="protocol"><a id="org6d929cc"></a><span class="section-number-2">1</span> Flow protocol</h2>
+<div id="outline-container-org6675609" class="outline-2">
+<h2 id="protocol"><a id="org6675609"></a><span class="section-number-2">1</span> Flow protocol</h2>
 <div class="outline-text-2" id="text-protocol">
 <p>
 The ZIO <i>data flow protocol</i> is partly illustrated in the UML sequence
@@ -382,8 +382,8 @@ the other end is still online or not.
 </div>
 
 
-<div id="outline-container-org6c96768" class="outline-2">
-<h2 id="messages"><a id="org6c96768"></a><span class="section-number-2">2</span> Flow messages</h2>
+<div id="outline-container-org3b5b70e" class="outline-2">
+<h2 id="messages"><a id="org3b5b70e"></a><span class="section-number-2">2</span> Flow messages</h2>
 <div class="outline-text-2" id="text-messages">
 <p>
 ZIO data flow introduces a new ZIO message of type <b>FLOW</b>.  This message
@@ -427,8 +427,8 @@ and is free to fill the payload frame or frames of any <b>FLOW</b> message.
 </div>
 </div>
 
-<div id="outline-container-orgeca9138" class="outline-2">
-<h2 id="api"><a id="orgeca9138"></a><span class="section-number-2">3</span> Flow API</h2>
+<div id="outline-container-org2a2f682" class="outline-2">
+<h2 id="api"><a id="org2a2f682"></a><span class="section-number-2">3</span> Flow API</h2>
 <div class="outline-text-2" id="text-api">
 <p>
 ZIO provides an API to simplify developing software that participates
@@ -490,8 +490,8 @@ simply discarded.
 </div>
 
 
-<div id="outline-container-org977750c" class="outline-2">
-<h2 id="server"><a id="org977750c"></a><span class="section-number-2">4</span> Simple Flow Server</h2>
+<div id="outline-container-org1a8628c" class="outline-2">
+<h2 id="server"><a id="org1a8628c"></a><span class="section-number-2">4</span> Simple Flow Server</h2>
 <div class="outline-text-2" id="text-server">
 <p>
 A <i>data flow server</i> may be directly implemented using an instance of
@@ -514,8 +514,8 @@ handler with each handler using a distinct <code>Flow</code> instance.
 </div>
 
 
-<div id="outline-container-org4ba8c2a" class="outline-2">
-<h2 id="extending"><a id="org4ba8c2a"></a><span class="section-number-2">5</span> Extending Flow API</h2>
+<div id="outline-container-org0918daa" class="outline-2">
+<h2 id="extending"><a id="org0918daa"></a><span class="section-number-2">5</span> Extending Flow API</h2>
 <div class="outline-text-2" id="text-extending">
 <p>
 As mentioned above, the <i>flow object</i> stored in the header prefix

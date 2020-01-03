@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-01-02 Thu 16:37 -->
+<!-- 2020-01-03 Fri 16:34 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Flow Broker</title>
@@ -273,8 +273,8 @@ the handling mechanism and this document describes one possible
 solution which is here called a <i>flow broker</i>.
 </p>
 
-<div id="outline-container-orgce23d13" class="outline-2">
-<h2 id="architecture"><a id="orgce23d13"></a><span class="section-number-2">1</span> Architecture</h2>
+<div id="outline-container-org55b5cbc" class="outline-2">
+<h2 id="architecture"><a id="org55b5cbc"></a><span class="section-number-2">1</span> Architecture</h2>
 <div class="outline-text-2" id="text-architecture">
 <p>
 The basic idea is to abstract the communication into <i>front end</i> (FE)
@@ -340,8 +340,8 @@ marshaled between FE and BE based on the association of routing IDs.
 </div>
 </div>
 
-<div id="outline-container-org17f9ae8" class="outline-2">
-<h2 id="addressing"><a id="org17f9ae8"></a><span class="section-number-2">2</span> Addressing</h2>
+<div id="outline-container-org458a35b" class="outline-2">
+<h2 id="addressing"><a id="org458a35b"></a><span class="section-number-2">2</span> Addressing</h2>
 <div class="outline-text-2" id="text-addressing">
 <p>
 The creation of the FE and BE SERVER ports is outside the scope of the
@@ -351,8 +351,8 @@ broker and any application-provided handlers.  The choice of which to
 </div>
 </div>
 
-<div id="outline-container-orgbcb3ccc" class="outline-2">
-<h2 id="complexity"><a id="orgbcb3ccc"></a><span class="section-number-2">3</span> Broker Complexity</h2>
+<div id="outline-container-orgf60a624" class="outline-2">
+<h2 id="complexity"><a id="orgf60a624"></a><span class="section-number-2">3</span> Broker Complexity</h2>
 <div class="outline-text-2" id="text-complexity">
 <p>
 The complexity of the broker appears somewhat high while one might say
@@ -362,8 +362,8 @@ section outlines what this means.
 </p>
 </div>
 
-<div id="outline-container-org6d3ee33" class="outline-3">
-<h3 id="mirror"><a id="org6d3ee33"></a><span class="section-number-3">3.1</span> Broker as mirror</h3>
+<div id="outline-container-org6eb9944" class="outline-3">
+<h3 id="mirror"><a id="org6eb9944"></a><span class="section-number-3">3.1</span> Broker as mirror</h3>
 <div class="outline-text-3" id="text-mirror">
 <p>
 The broker provides a mirror that allows remote clients and local
@@ -374,8 +374,8 @@ handler.
 </div>
 </div>
 
-<div id="outline-container-orgf81b25b" class="outline-3">
-<h3 id="simplicity"><a id="orgf81b25b"></a><span class="section-number-3">3.2</span> Handler simplicity</h3>
+<div id="outline-container-org4397bf2" class="outline-3">
+<h3 id="simplicity"><a id="org4397bf2"></a><span class="section-number-3">3.2</span> Handler simplicity</h3>
 <div class="outline-text-3" id="text-simplicity">
 <p>
 Because a handler may be implemented in terms of a client it may use
@@ -386,8 +386,8 @@ invented to implement client handlers.
 </div>
 </div>
 
-<div id="outline-container-org6e8c5ec" class="outline-3">
-<h3 id="central"><a id="org6e8c5ec"></a><span class="section-number-3">3.3</span> Centralization</h3>
+<div id="outline-container-orgd58443a" class="outline-3">
+<h3 id="central"><a id="orgd58443a"></a><span class="section-number-3">3.3</span> Centralization</h3>
 <div class="outline-text-3" id="text-central">
 <p>
 Brokers are naturally centralizing.  This can be advantageous.
@@ -410,8 +410,8 @@ created if the handlers all reside in a common executable.
 </div>
 </div>
 
-<div id="outline-container-orgaeae9ba" class="outline-2">
-<h2 id="lockstep"><a id="orgaeae9ba"></a><span class="section-number-2">4</span> Handler Synchronicity</h2>
+<div id="outline-container-orge990b3d" class="outline-2">
+<h2 id="lockstep"><a id="orge990b3d"></a><span class="section-number-2">4</span> Handler Synchronicity</h2>
 <div class="outline-text-2" id="text-lockstep">
 <p>
 The broker operates asynchronously from its local client handlers.
