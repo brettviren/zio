@@ -1,0 +1,262 @@
+.TH "inc/zio/zmq.hpp" 3 "Fri Jan 3 2020" "ZIO" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+inc/zio/zmq.hpp
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <zmq\&.h>\fP
+.br
+\fC#include <cassert>\fP
+.br
+\fC#include <cstring>\fP
+.br
+\fC#include <algorithm>\fP
+.br
+\fC#include <exception>\fP
+.br
+\fC#include <iomanip>\fP
+.br
+\fC#include <sstream>\fP
+.br
+\fC#include <string>\fP
+.br
+\fC#include <vector>\fP
+.br
+
+.SS "Classes"
+
+.in +1c
+.ti -1c
+.RI "struct \fBzmq_event_t\fP"
+.br
+.ti -1c
+.RI "class \fBzmq::error_t\fP"
+.br
+.ti -1c
+.RI "class \fBzmq::message_t\fP"
+.br
+.ti -1c
+.RI "class \fBzmq::context_t\fP"
+.br
+.ti -1c
+.RI "class \fBzmq::detail::socket_base\fP"
+.br
+.ti -1c
+.RI "struct \fBzmq::from_handle_t\fP"
+.br
+.ti -1c
+.RI "struct \fBzmq::from_handle_t::_private\fP"
+.br
+.ti -1c
+.RI "class \fBzmq::socket_ref\fP"
+.br
+.ti -1c
+.RI "class \fBzmq::socket_t\fP"
+.br
+.ti -1c
+.RI "class \fBzmq::monitor_t\fP"
+.br
+.in -1c
+.SS "Namespaces"
+
+.in +1c
+.ti -1c
+.RI " \fBzmq\fP"
+.br
+.ti -1c
+.RI " \fBzmq::detail\fP"
+.br
+.in -1c
+.SS "Macros"
+
+.in +1c
+.ti -1c
+.RI "#define \fBZMQ_NODISCARD\fP"
+.br
+.ti -1c
+.RI "#define \fBZMQ_NOTHROW\fP   throw()"
+.br
+.ti -1c
+.RI "#define \fBZMQ_EXPLICIT\fP"
+.br
+.ti -1c
+.RI "#define \fBZMQ_OVERRIDE\fP"
+.br
+.ti -1c
+.RI "#define \fBZMQ_NULLPTR\fP   0"
+.br
+.ti -1c
+.RI "#define \fBZMQ_CONSTEXPR_FN\fP"
+.br
+.ti -1c
+.RI "#define \fBZMQ_CONSTEXPR_VAR\fP   const"
+.br
+.ti -1c
+.RI "#define \fBCPPZMQ_VERSION_MAJOR\fP   4"
+.br
+.ti -1c
+.RI "#define \fBCPPZMQ_VERSION_MINOR\fP   6"
+.br
+.ti -1c
+.RI "#define \fBCPPZMQ_VERSION_PATCH\fP   0"
+.br
+.ti -1c
+.RI "#define \fBCPPZMQ_VERSION\fP"
+.br
+.ti -1c
+.RI "#define \fBZMQ_DELETED_FUNCTION\fP"
+.br
+.ti -1c
+.RI "#define \fBZMQ_NEW_MONITOR_EVENT_LAYOUT\fP"
+.br
+.ti -1c
+.RI "#define \fBZMQ_HAS_PROXY_STEERABLE\fP"
+.br
+.ti -1c
+.RI "#define \fBZMQ_ASSERT\fP(expression)   assert(expression)"
+.br
+.in -1c
+.SS "Typedefs"
+
+.in +1c
+.ti -1c
+.RI "typedef zmq_free_fn \fBzmq::free_fn\fP"
+.br
+.ti -1c
+.RI "typedef zmq_pollitem_t \fBzmq::pollitem_t\fP"
+.br
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "int \fBzmq::poll\fP (zmq_pollitem_t *items_, size_t nitems_, long timeout_=\-1)"
+.br
+.ti -1c
+.RI "int \fBzmq::poll\fP (zmq_pollitem_t const *items_, size_t nitems_, long timeout_=\-1)"
+.br
+.ti -1c
+.RI "void \fBzmq::version\fP (int *major_, int *minor_, int *patch_)"
+.br
+.ti -1c
+.RI "void \fBzmq::swap\fP (message_t &a, message_t &b) \fBZMQ_NOTHROW\fP"
+.br
+.ti -1c
+.RI "void \fBzmq::swap\fP (context_t &a, context_t &b) \fBZMQ_NOTHROW\fP"
+.br
+.ti -1c
+.RI "bool \fBzmq::operator==\fP (socket_ref a, socket_ref b) \fBZMQ_NOTHROW\fP"
+.br
+.ti -1c
+.RI "bool \fBzmq::operator!=\fP (socket_ref a, socket_ref b) \fBZMQ_NOTHROW\fP"
+.br
+.ti -1c
+.RI "bool \fBzmq::operator<\fP (socket_ref a, socket_ref b) \fBZMQ_NOTHROW\fP"
+.br
+.ti -1c
+.RI "bool \fBzmq::operator>\fP (socket_ref a, socket_ref b) \fBZMQ_NOTHROW\fP"
+.br
+.ti -1c
+.RI "bool \fBzmq::operator<=\fP (socket_ref a, socket_ref b) \fBZMQ_NOTHROW\fP"
+.br
+.ti -1c
+.RI "bool \fBzmq::operator>=\fP (socket_ref a, socket_ref b) \fBZMQ_NOTHROW\fP"
+.br
+.ti -1c
+.RI "void \fBzmq::swap\fP (socket_t &a, socket_t &b) \fBZMQ_NOTHROW\fP"
+.br
+.ti -1c
+.RI "void \fBzmq::proxy\fP (void *frontend, void *backend, void *capture)"
+.br
+.ti -1c
+.RI "void \fBzmq::proxy\fP (socket_ref frontend, socket_ref backend, socket_ref capture=socket_ref())"
+.br
+.ti -1c
+.RI "void \fBzmq::proxy_steerable\fP (void *frontend, void *backend, void *capture, void *control)"
+.br
+.ti -1c
+.RI "void \fBzmq::proxy_steerable\fP (socket_ref frontend, socket_ref backend, socket_ref capture, socket_ref control)"
+.br
+.ti -1c
+.RI "std::ostream & \fBzmq::operator<<\fP (std::ostream &os, const message_t &msg)"
+.br
+.in -1c
+.SS "Variables"
+
+.in +1c
+.ti -1c
+.RI "\fBZMQ_CONSTEXPR_VAR\fP from_handle_t \fBzmq::from_handle\fP = from_handle_t(from_handle_t::_private())"
+.br
+.in -1c
+.SH "Macro Definition Documentation"
+.PP 
+.SS "#define CPPZMQ_VERSION"
+\fBValue:\fP
+.PP
+.nf
+ZMQ_MAKE_VERSION(CPPZMQ_VERSION_MAJOR, CPPZMQ_VERSION_MINOR,                    \
+                     CPPZMQ_VERSION_PATCH)
+.fi
+.PP
+Definition at line 108 of file zmq\&.hpp\&.
+.SS "#define CPPZMQ_VERSION_MAJOR   4"
+
+.PP
+Definition at line 104 of file zmq\&.hpp\&.
+.SS "#define CPPZMQ_VERSION_MINOR   6"
+
+.PP
+Definition at line 105 of file zmq\&.hpp\&.
+.SS "#define CPPZMQ_VERSION_PATCH   0"
+
+.PP
+Definition at line 106 of file zmq\&.hpp\&.
+.SS "#define ZMQ_ASSERT(expression)   assert(expression)"
+
+.PP
+Definition at line 178 of file zmq\&.hpp\&.
+.SS "#define ZMQ_CONSTEXPR_FN"
+
+.PP
+Definition at line 68 of file zmq\&.hpp\&.
+.SS "#define ZMQ_CONSTEXPR_VAR   const"
+
+.PP
+Definition at line 69 of file zmq\&.hpp\&.
+.SS "#define ZMQ_DELETED_FUNCTION"
+
+.PP
+Definition at line 134 of file zmq\&.hpp\&.
+.SS "#define ZMQ_EXPLICIT"
+
+.PP
+Definition at line 65 of file zmq\&.hpp\&.
+.SS "#define ZMQ_HAS_PROXY_STEERABLE"
+
+.PP
+Definition at line 160 of file zmq\&.hpp\&.
+.SS "#define ZMQ_NEW_MONITOR_EVENT_LAYOUT"
+
+.PP
+Definition at line 156 of file zmq\&.hpp\&.
+.SS "#define ZMQ_NODISCARD"
+
+.PP
+Definition at line 53 of file zmq\&.hpp\&.
+.SS "#define ZMQ_NOTHROW   throw()"
+
+.PP
+Definition at line 64 of file zmq\&.hpp\&.
+.SS "#define ZMQ_NULLPTR   0"
+
+.PP
+Definition at line 67 of file zmq\&.hpp\&.
+.SS "#define ZMQ_OVERRIDE"
+
+.PP
+Definition at line 66 of file zmq\&.hpp\&.
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for ZIO from the source code\&.

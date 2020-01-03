@@ -1,0 +1,235 @@
+.TH "zmq::message_t" 3 "Fri Jan 3 2020" "ZIO" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+zmq::message_t
+.SH SYNOPSIS
+.br
+.PP
+.PP
+\fC#include <zmq\&.hpp>\fP
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "\fBmessage_t\fP () \fBZMQ_NOTHROW\fP"
+.br
+.ti -1c
+.RI "\fBmessage_t\fP (size_t size_)"
+.br
+.ti -1c
+.RI "template<class ForwardIter > \fBmessage_t\fP (ForwardIter first, ForwardIter last)"
+.br
+.ti -1c
+.RI "\fBmessage_t\fP (const void *data_, size_t size_)"
+.br
+.ti -1c
+.RI "\fBmessage_t\fP (void *data_, size_t size_, \fBfree_fn\fP *ffn_, void *hint_=\fBZMQ_NULLPTR\fP)"
+.br
+.ti -1c
+.RI "\fB~message_t\fP () \fBZMQ_NOTHROW\fP"
+.br
+.ti -1c
+.RI "void \fBrebuild\fP ()"
+.br
+.ti -1c
+.RI "void \fBrebuild\fP (size_t size_)"
+.br
+.ti -1c
+.RI "void \fBrebuild\fP (const void *data_, size_t size_)"
+.br
+.ti -1c
+.RI "void \fBrebuild\fP (void *data_, size_t size_, \fBfree_fn\fP *ffn_, void *hint_=\fBZMQ_NULLPTR\fP)"
+.br
+.ti -1c
+.RI "void \fBmove\fP (\fBmessage_t\fP const *msg_)"
+.br
+.ti -1c
+.RI "void \fBmove\fP (\fBmessage_t\fP &msg_)"
+.br
+.ti -1c
+.RI "void \fBcopy\fP (\fBmessage_t\fP const *msg_)"
+.br
+.ti -1c
+.RI "void \fBcopy\fP (\fBmessage_t\fP &msg_)"
+.br
+.ti -1c
+.RI "bool \fBmore\fP () const \fBZMQ_NOTHROW\fP"
+.br
+.ti -1c
+.RI "void * \fBdata\fP () \fBZMQ_NOTHROW\fP"
+.br
+.ti -1c
+.RI "const void * \fBdata\fP () const \fBZMQ_NOTHROW\fP"
+.br
+.ti -1c
+.RI "size_t \fBsize\fP () const \fBZMQ_NOTHROW\fP"
+.br
+.ti -1c
+.RI "\fBZMQ_NODISCARD\fP bool \fBempty\fP () const \fBZMQ_NOTHROW\fP"
+.br
+.ti -1c
+.RI "template<typename T > T * \fBdata\fP () \fBZMQ_NOTHROW\fP"
+.br
+.ti -1c
+.RI "template<typename T > T const  * \fBdata\fP () const \fBZMQ_NOTHROW\fP"
+.br
+.ti -1c
+.RI "bool \fBequal\fP (const \fBmessage_t\fP *other) const \fBZMQ_NOTHROW\fP"
+.br
+.ti -1c
+.RI "bool \fBoperator==\fP (const \fBmessage_t\fP &other) const \fBZMQ_NOTHROW\fP"
+.br
+.ti -1c
+.RI "bool \fBoperator!=\fP (const \fBmessage_t\fP &other) const \fBZMQ_NOTHROW\fP"
+.br
+.ti -1c
+.RI "int \fBget\fP (int property_)"
+.br
+.ti -1c
+.RI "const char * \fBgets\fP (const char *property_)"
+.br
+.ti -1c
+.RI "std::string \fBstr\fP () const"
+.br
+.ti -1c
+.RI "void \fBswap\fP (\fBmessage_t\fP &other) \fBZMQ_NOTHROW\fP"
+.br
+.ti -1c
+.RI "\fBZMQ_NODISCARD\fP zmq_msg_t * \fBhandle\fP () \fBZMQ_NOTHROW\fP"
+.br
+.ti -1c
+.RI "\fBZMQ_NODISCARD\fP const zmq_msg_t * \fBhandle\fP () const \fBZMQ_NOTHROW\fP"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+Definition at line 316 of file zmq\&.hpp\&.
+.SH "Constructor & Destructor Documentation"
+.PP 
+.SS "zmq::message_t::message_t ()\fC [inline]\fP"
+
+.PP
+Definition at line 319 of file zmq\&.hpp\&.
+.SS "zmq::message_t::message_t (size_t size_)\fC [inline]\fP, \fC [explicit]\fP"
+
+.PP
+Definition at line 325 of file zmq\&.hpp\&.
+.SS "template<class ForwardIter > zmq::message_t::message_t (ForwardIter first, ForwardIter last)\fC [inline]\fP"
+
+.PP
+Definition at line 332 of file zmq\&.hpp\&.
+.SS "zmq::message_t::message_t (const void * data_, size_t size_)\fC [inline]\fP"
+
+.PP
+Definition at line 345 of file zmq\&.hpp\&.
+.SS "zmq::message_t::message_t (void * data_, size_t size_, \fBfree_fn\fP * ffn_, void * hint_ = \fC\fBZMQ_NULLPTR\fP\fP)\fC [inline]\fP"
+
+.PP
+Definition at line 353 of file zmq\&.hpp\&.
+.SS "zmq::message_t::~message_t ()\fC [inline]\fP"
+
+.PP
+Definition at line 386 of file zmq\&.hpp\&.
+.SH "Member Function Documentation"
+.PP 
+.SS "void zmq::message_t::copy (\fBmessage_t\fP const * msg_)\fC [inline]\fP"
+
+.PP
+Definition at line 448 of file zmq\&.hpp\&.
+.SS "void zmq::message_t::copy (\fBmessage_t\fP & msg_)\fC [inline]\fP"
+
+.PP
+Definition at line 455 of file zmq\&.hpp\&.
+.SS "void* zmq::message_t::data ()\fC [inline]\fP"
+
+.PP
+Definition at line 468 of file zmq\&.hpp\&.
+.SS "const void* zmq::message_t::data () const\fC [inline]\fP"
+
+.PP
+Definition at line 470 of file zmq\&.hpp\&.
+.SS "template<typename T > T* zmq::message_t::data ()\fC [inline]\fP"
+
+.PP
+Definition at line 485 of file zmq\&.hpp\&.
+.SS "template<typename T > T const* zmq::message_t::data () const\fC [inline]\fP"
+
+.PP
+Definition at line 487 of file zmq\&.hpp\&.
+.SS "\fBZMQ_NODISCARD\fP bool zmq::message_t::empty () const\fC [inline]\fP"
+
+.PP
+Definition at line 480 of file zmq\&.hpp\&.
+.SS "bool zmq::message_t::equal (const \fBmessage_t\fP * other) const\fC [inline]\fP"
+
+.PP
+Definition at line 493 of file zmq\&.hpp\&.
+.SS "int zmq::message_t::get (int property_)\fC [inline]\fP"
+
+.PP
+Definition at line 510 of file zmq\&.hpp\&.
+.SS "const char* zmq::message_t::gets (const char * property_)\fC [inline]\fP"
+
+.PP
+Definition at line 520 of file zmq\&.hpp\&.
+.SS "\fBZMQ_NODISCARD\fP zmq_msg_t* zmq::message_t::handle ()\fC [inline]\fP"
+
+.PP
+Definition at line 600 of file zmq\&.hpp\&.
+.SS "\fBZMQ_NODISCARD\fP const zmq_msg_t* zmq::message_t::handle () const\fC [inline]\fP"
+
+.PP
+Definition at line 601 of file zmq\&.hpp\&.
+.SS "bool zmq::message_t::more () const\fC [inline]\fP"
+
+.PP
+Definition at line 462 of file zmq\&.hpp\&.
+.SS "void zmq::message_t::move (\fBmessage_t\fP const * msg_)\fC [inline]\fP"
+
+.PP
+Definition at line 433 of file zmq\&.hpp\&.
+.SS "void zmq::message_t::move (\fBmessage_t\fP & msg_)\fC [inline]\fP"
+
+.PP
+Definition at line 440 of file zmq\&.hpp\&.
+.SS "bool zmq::message_t::operator!= (const \fBmessage_t\fP & other) const\fC [inline]\fP"
+
+.PP
+Definition at line 504 of file zmq\&.hpp\&.
+.SS "bool zmq::message_t::operator== (const \fBmessage_t\fP & other) const\fC [inline]\fP"
+
+.PP
+Definition at line 498 of file zmq\&.hpp\&.
+.SS "void zmq::message_t::rebuild ()\fC [inline]\fP"
+
+.PP
+Definition at line 392 of file zmq\&.hpp\&.
+.SS "void zmq::message_t::rebuild (size_t size_)\fC [inline]\fP"
+
+.PP
+Definition at line 401 of file zmq\&.hpp\&.
+.SS "void zmq::message_t::rebuild (const void * data_, size_t size_)\fC [inline]\fP"
+
+.PP
+Definition at line 411 of file zmq\&.hpp\&.
+.SS "void zmq::message_t::rebuild (void * data_, size_t size_, \fBfree_fn\fP * ffn_, void * hint_ = \fC\fBZMQ_NULLPTR\fP\fP)\fC [inline]\fP"
+
+.PP
+Definition at line 422 of file zmq\&.hpp\&.
+.SS "size_t zmq::message_t::size () const\fC [inline]\fP"
+
+.PP
+Definition at line 475 of file zmq\&.hpp\&.
+.SS "std::string zmq::message_t::str () const\fC [inline]\fP"
+Dump content to string\&. Ascii chars are readable, the rest is printed as hex\&. Probably ridiculously slow\&. 
+.PP
+Definition at line 558 of file zmq\&.hpp\&.
+.SS "void zmq::message_t::swap (\fBmessage_t\fP & other)\fC [inline]\fP"
+
+.PP
+Definition at line 594 of file zmq\&.hpp\&.
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for ZIO from the source code\&.

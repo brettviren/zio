@@ -1,0 +1,242 @@
+.TH "zio::Message" 3 "Fri Jan 3 2020" "ZIO" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+zio::Message \- a ZIO message  
+
+.SH SYNOPSIS
+.br
+.PP
+.PP
+\fC#include <message\&.hpp>\fP
+.SS "Public Types"
+
+.in +1c
+.ti -1c
+.RI "typedef \fBHeader\fP \fBheader_t\fP"
+.br
+.ti -1c
+.RI "typedef uint32_t \fBrouting_id_t\fP"
+.br
+.in -1c
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "\fBMessage\fP ()"
+.br
+.ti -1c
+.RI "\fBMessage\fP (const std::string &form, \fBlevel::MessageLevel\fP lvl=\fBlevel::undefined\fP)"
+.br
+.ti -1c
+.RI "\fBMessage\fP (const \fBheader_t\fP h)"
+.br
+.ti -1c
+.RI "\fBMessage\fP (const \fBheader_t\fP h, multipart_t &&pl)"
+.br
+.ti -1c
+.RI "\fBlevel::MessageLevel\fP \fBlevel\fP () const"
+.br
+.ti -1c
+.RI "void \fBset_level\fP (\fBlevel::MessageLevel\fP \fBlevel\fP)"
+.br
+.ti -1c
+.RI "std::string \fBformat\fP () const"
+.br
+.ti -1c
+.RI "void \fBset_format\fP (const std::string &form)"
+.br
+.ti -1c
+.RI "std::string \fBlabel\fP () const"
+.br
+.ti -1c
+.RI "void \fBset_label\fP (const std::string &\fBlabel\fP)"
+.br
+.ti -1c
+.RI "const \fBPrefixHeader\fP & \fBprefix\fP () const"
+.br
+.ti -1c
+.RI "const \fBCoordHeader\fP & \fBcoord\fP () const"
+.br
+.ti -1c
+.RI "\fBorigin_t\fP \fBorigin\fP () const"
+.br
+.ti -1c
+.RI "\fBgranule_t\fP \fBgranule\fP () const"
+.br
+.ti -1c
+.RI "\fBseqno_t\fP \fBseqno\fP () const"
+.br
+.ti -1c
+.RI "void \fBset_coord\fP (\fBorigin_t\fP \fBorigin\fP=0, \fBgranule_t\fP gran=0)"
+.br
+.ti -1c
+.RI "\fBmessage_t\fP \fBencode\fP () const"
+.br
+.ti -1c
+.RI "void \fBdecode\fP (const \fBmessage_t\fP &dat)"
+.br
+.ti -1c
+.RI "void \fBfromparts\fP (const multipart_t &allparts)"
+.br
+.RI "Set self from multipart\&. Nullifyies routing ID\&. "
+.ti -1c
+.RI "multipart_t \fBtoparts\fP () const"
+.br
+.RI "Serialize self to multipart\&. "
+.ti -1c
+.RI "const multipart_t & \fBpayload\fP () const"
+.br
+.RI "Access payload(s) "
+.ti -1c
+.RI "void \fBclear_payload\fP ()"
+.br
+.ti -1c
+.RI "void \fBadd\fP (\fBmessage_t\fP &&spmsg)"
+.br
+.ti -1c
+.RI "\fBrouting_id_t\fP \fBrouting_id\fP () const"
+.br
+.RI "Return routing ID if we have one\&. "
+.ti -1c
+.RI "void \fBset_routing_id\fP (\fBrouting_id_t\fP rid)"
+.br
+.RI "Set routing ID\&. "
+.in -1c
+.SH "Detailed Description"
+.PP 
+a ZIO message 
+
+This adds semantic methods over a zio::multipart_t message\&.
+.PP
+First part holds the prefix header, second the coord header\&. Optional following parts are payload\&. 
+.PP
+Definition at line 58 of file message\&.hpp\&.
+.SH "Member Typedef Documentation"
+.PP 
+.SS "typedef \fBHeader\fP \fBzio::Message::header_t\fP"
+
+.PP
+Definition at line 60 of file message\&.hpp\&.
+.SS "typedef uint32_t \fBzio::Message::routing_id_t\fP"
+
+.PP
+Definition at line 61 of file message\&.hpp\&.
+.SH "Constructor & Destructor Documentation"
+.PP 
+.SS "zio::Message::Message ()"
+
+.PP
+Definition at line 38 of file message\&.cpp\&.
+.SS "zio::Message::Message (const std::string & form, \fBlevel::MessageLevel\fP lvl = \fC\fBlevel::undefined\fP\fP)"
+
+.PP
+Definition at line 56 of file message\&.cpp\&.
+.SS "zio::Message::Message (const \fBheader_t\fP h)"
+
+.PP
+Definition at line 50 of file message\&.cpp\&.
+.SS "zio::Message::Message (const \fBheader_t\fP h, multipart_t && pl)"
+
+.PP
+Definition at line 43 of file message\&.cpp\&.
+.SH "Member Function Documentation"
+.PP 
+.SS "void zio::Message::add (\fBmessage_t\fP && spmsg)\fC [inline]\fP"
+
+.PP
+Definition at line 102 of file message\&.hpp\&.
+.SS "void zio::Message::clear_payload ()\fC [inline]\fP"
+
+.PP
+Definition at line 101 of file message\&.hpp\&.
+.SS "const \fBCoordHeader\fP& zio::Message::coord () const\fC [inline]\fP"
+
+.PP
+Definition at line 76 of file message\&.hpp\&.
+.SS "void zio::Message::decode (const \fBmessage_t\fP & dat)"
+Set self based on encoded single-part message\&. If it has a routing ID, it will be kept\&. 
+.PP
+Definition at line 120 of file message\&.cpp\&.
+.SS "\fBzio::message_t\fP zio::Message::encode () const"
+Encode self to single-part message\&. If self has a routing ID, it will be set on the produced message\&. 
+.PP
+Definition at line 99 of file message\&.cpp\&.
+.SS "std::string zio::Message::format () const"
+
+.PP
+Definition at line 74 of file message\&.cpp\&.
+.SS "void zio::Message::fromparts (const multipart_t & allparts)"
+
+.PP
+Set self from multipart\&. Nullifyies routing ID\&. 
+.PP
+Definition at line 153 of file message\&.cpp\&.
+.SS "\fBgranule_t\fP zio::Message::granule () const\fC [inline]\fP"
+
+.PP
+Definition at line 78 of file message\&.hpp\&.
+.SS "std::string zio::Message::label () const"
+
+.PP
+Definition at line 82 of file message\&.cpp\&.
+.SS "\fBzio::level::MessageLevel\fP zio::Message::level () const"
+
+.PP
+Definition at line 62 of file message\&.cpp\&.
+.SS "\fBorigin_t\fP zio::Message::origin () const\fC [inline]\fP"
+
+.PP
+Definition at line 77 of file message\&.hpp\&.
+.SS "const multipart_t& zio::Message::payload () const\fC [inline]\fP"
+
+.PP
+Access payload(s) 
+.PP
+Definition at line 100 of file message\&.hpp\&.
+.SS "const \fBPrefixHeader\fP& zio::Message::prefix () const\fC [inline]\fP"
+
+.PP
+Definition at line 75 of file message\&.hpp\&.
+.SS "\fBrouting_id_t\fP zio::Message::routing_id () const\fC [inline]\fP"
+
+.PP
+Return routing ID if we have one\&. 
+.PP
+Definition at line 105 of file message\&.hpp\&.
+.SS "\fBseqno_t\fP zio::Message::seqno () const\fC [inline]\fP"
+
+.PP
+Definition at line 79 of file message\&.hpp\&.
+.SS "void zio::Message::set_coord (\fBorigin_t\fP origin = \fC0\fP, \fBgranule_t\fP gran = \fC0\fP)"
+Prepare for sending, advance seqno automatically, set granule (if 0 use time), origin (if 0, leave as is)\&. 
+.PP
+Definition at line 86 of file message\&.cpp\&.
+.SS "void zio::Message::set_format (const std::string & form)"
+
+.PP
+Definition at line 77 of file message\&.cpp\&.
+.SS "void zio::Message::set_label (const std::string & label)"
+
+.PP
+Definition at line 70 of file message\&.cpp\&.
+.SS "void zio::Message::set_level (\fBlevel::MessageLevel\fP level)"
+
+.PP
+Definition at line 66 of file message\&.cpp\&.
+.SS "void zio::Message::set_routing_id (\fBrouting_id_t\fP rid)\fC [inline]\fP"
+
+.PP
+Set routing ID\&. 
+.PP
+Definition at line 108 of file message\&.hpp\&.
+.SS "zio::multipart_t zio::Message::toparts () const"
+
+.PP
+Serialize self to multipart\&. 
+.PP
+Definition at line 140 of file message\&.cpp\&.
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for ZIO from the source code\&.

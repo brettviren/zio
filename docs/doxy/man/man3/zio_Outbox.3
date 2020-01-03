@@ -1,0 +1,140 @@
+.TH "zio::Outbox< NATIVE >" 3 "Fri Jan 3 2020" "ZIO" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+zio::Outbox< NATIVE > \- output objects of a fixed native type with levels expressed as methods\&.  
+
+.SH SYNOPSIS
+.br
+.PP
+.PP
+\fC#include <outbox\&.hpp>\fP
+.SS "Public Types"
+
+.in +1c
+.ti -1c
+.RI "typedef NATIVE \fBnative_type\fP"
+.br
+.ti -1c
+.RI "typedef std::function< void(\fBzio::level::MessageLevel\fP lvl, const \fBnative_type\fP &)> \fBsender_type\fP"
+.br
+.in -1c
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "\fBOutbox\fP (const \fBsender_type\fP &\fBsender\fP)"
+.br
+.ti -1c
+.RI "virtual \fB~Outbox\fP ()"
+.br
+.ti -1c
+.RI "void \fBoperator()\fP (\fBlevel::MessageLevel\fP lvl, const \fBnative_type\fP &nat)"
+.br
+.ti -1c
+.RI "virtual void \fBsend\fP (\fBlevel::MessageLevel\fP lvl, const \fBnative_type\fP &nat)"
+.br
+.ti -1c
+.RI "void \fBtrace\fP (const \fBnative_type\fP &nat)"
+.br
+.ti -1c
+.RI "void \fBverbose\fP (const \fBnative_type\fP &nat)"
+.br
+.ti -1c
+.RI "void \fBdebug\fP (const \fBnative_type\fP &nat)"
+.br
+.ti -1c
+.RI "void \fBinfo\fP (const \fBnative_type\fP &nat)"
+.br
+.ti -1c
+.RI "void \fBsummary\fP (const \fBnative_type\fP &nat)"
+.br
+.ti -1c
+.RI "void \fBwarning\fP (const \fBnative_type\fP &nat)"
+.br
+.ti -1c
+.RI "void \fBerror\fP (const \fBnative_type\fP &nat)"
+.br
+.ti -1c
+.RI "void \fBfatal\fP (const \fBnative_type\fP &nat)"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+
+.SS "template<typename NATIVE>
+.br
+class zio::Outbox< NATIVE >"
+output objects of a fixed native type with levels expressed as methods\&. 
+
+An \fBOutbox\fP provides a 'logger' like object to simplfy use in code to send out messages of a fixed type\&.
+.PP
+It is templated on a native type and given a functional object to handle actual sending\&. This object should convert from native type to \fBMessage\fP\&. 
+.PP
+Definition at line 22 of file outbox\&.hpp\&.
+.SH "Member Typedef Documentation"
+.PP 
+.SS "template<typename NATIVE > typedef NATIVE \fBzio::Outbox\fP< NATIVE >::\fBnative_type\fP"
+
+.PP
+Definition at line 24 of file outbox\&.hpp\&.
+.SS "template<typename NATIVE > typedef std::function<void(\fBzio::level::MessageLevel\fP lvl, const \fBnative_type\fP&)> \fBzio::Outbox\fP< NATIVE >::\fBsender_type\fP"
+
+.PP
+Definition at line 26 of file outbox\&.hpp\&.
+.SH "Constructor & Destructor Documentation"
+.PP 
+.SS "template<typename NATIVE > \fBzio::Outbox\fP< NATIVE >::\fBOutbox\fP (const \fBsender_type\fP & sender)\fC [inline]\fP, \fC [explicit]\fP"
+
+.PP
+Definition at line 28 of file outbox\&.hpp\&.
+.SS "template<typename NATIVE > virtual \fBzio::Outbox\fP< NATIVE >::~\fBOutbox\fP ()\fC [inline]\fP, \fC [virtual]\fP"
+
+.PP
+Definition at line 29 of file outbox\&.hpp\&.
+.SH "Member Function Documentation"
+.PP 
+.SS "template<typename NATIVE > void \fBzio::Outbox\fP< NATIVE >::debug (const \fBnative_type\fP & nat)\fC [inline]\fP"
+
+.PP
+Definition at line 43 of file outbox\&.hpp\&.
+.SS "template<typename NATIVE > void \fBzio::Outbox\fP< NATIVE >::error (const \fBnative_type\fP & nat)\fC [inline]\fP"
+
+.PP
+Definition at line 51 of file outbox\&.hpp\&.
+.SS "template<typename NATIVE > void \fBzio::Outbox\fP< NATIVE >::fatal (const \fBnative_type\fP & nat)\fC [inline]\fP"
+
+.PP
+Definition at line 53 of file outbox\&.hpp\&.
+.SS "template<typename NATIVE > void \fBzio::Outbox\fP< NATIVE >::info (const \fBnative_type\fP & nat)\fC [inline]\fP"
+
+.PP
+Definition at line 45 of file outbox\&.hpp\&.
+.SS "template<typename NATIVE > void \fBzio::Outbox\fP< NATIVE >::operator() (\fBlevel::MessageLevel\fP lvl, const \fBnative_type\fP & nat)\fC [inline]\fP"
+
+.PP
+Definition at line 31 of file outbox\&.hpp\&.
+.SS "template<typename NATIVE > virtual void \fBzio::Outbox\fP< NATIVE >::send (\fBlevel::MessageLevel\fP lvl, const \fBnative_type\fP & nat)\fC [inline]\fP, \fC [virtual]\fP"
+
+.PP
+Definition at line 34 of file outbox\&.hpp\&.
+.SS "template<typename NATIVE > void \fBzio::Outbox\fP< NATIVE >::summary (const \fBnative_type\fP & nat)\fC [inline]\fP"
+
+.PP
+Definition at line 47 of file outbox\&.hpp\&.
+.SS "template<typename NATIVE > void \fBzio::Outbox\fP< NATIVE >::trace (const \fBnative_type\fP & nat)\fC [inline]\fP"
+
+.PP
+Definition at line 39 of file outbox\&.hpp\&.
+.SS "template<typename NATIVE > void \fBzio::Outbox\fP< NATIVE >::verbose (const \fBnative_type\fP & nat)\fC [inline]\fP"
+
+.PP
+Definition at line 41 of file outbox\&.hpp\&.
+.SS "template<typename NATIVE > void \fBzio::Outbox\fP< NATIVE >::warning (const \fBnative_type\fP & nat)\fC [inline]\fP"
+
+.PP
+Definition at line 49 of file outbox\&.hpp\&.
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for ZIO from the source code\&.

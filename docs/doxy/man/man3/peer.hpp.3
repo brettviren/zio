@@ -1,0 +1,67 @@
+.TH "inc/zio/peer.hpp" 3 "Fri Jan 3 2020" "ZIO" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+inc/zio/peer.hpp
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <zyre\&.h>\fP
+.br
+\fC#include <map>\fP
+.br
+\fC#include <string>\fP
+.br
+\fC#include <vector>\fP
+.br
+
+.SS "Classes"
+
+.in +1c
+.ti -1c
+.RI "struct \fBzio::peer_info_t\fP"
+.br
+.ti -1c
+.RI "class \fBzio::Peer\fP"
+.br
+.RI "\fBPeer\fP at the network to discover peers and advertise self\&. "
+.in -1c
+.SS "Namespaces"
+
+.in +1c
+.ti -1c
+.RI " \fBzio\fP"
+.br
+.RI "implementation of ZIO data flow protocol endpoints "
+.in -1c
+.SS "Typedefs"
+
+.in +1c
+.ti -1c
+.RI "typedef std::string \fBzio::nickname_t\fP"
+.br
+.RI "A peer asserts a nickname\&. "
+.ti -1c
+.RI "typedef std::string \fBzio::uuid_t\fP"
+.br
+.RI "Uniquely identify a peer\&. "
+.ti -1c
+.RI "typedef std::string \fBzio::header_key_t\fP"
+.br
+.RI "A 'header' is on in a set of key/value pairs asserted by a peer\&. "
+.ti -1c
+.RI "typedef std::string \fBzio::header_value_t\fP"
+.br
+.ti -1c
+.RI "typedef std::pair< header_key_t, header_value_t > \fBzio::header_t\fP"
+.br
+.ti -1c
+.RI "typedef std::map< header_key_t, header_value_t > \fBzio::headerset_t\fP"
+.br
+.ti -1c
+.RI "typedef std::map< uuid_t, peer_info_t > \fBzio::peerset_t\fP"
+.br
+.in -1c
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for ZIO from the source code\&.

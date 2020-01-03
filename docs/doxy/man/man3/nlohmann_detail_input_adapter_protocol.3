@@ -1,0 +1,47 @@
+.TH "nlohmann::detail::input_adapter_protocol" 3 "Fri Jan 3 2020" "ZIO" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+nlohmann::detail::input_adapter_protocol \- abstract input adapter interface  
+
+.SH SYNOPSIS
+.br
+.PP
+.PP
+\fC#include <json\&.hpp>\fP
+.PP
+Inherited by \fBnlohmann::detail::file_input_adapter\fP, \fBnlohmann::detail::input_buffer_adapter\fP, \fBnlohmann::detail::input_stream_adapter\fP, and \fBnlohmann::detail::wide_string_input_adapter< WideStringType >\fP\&.
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "virtual std::char_traits< char >::int_type \fBget_character\fP ()=0"
+.br
+.RI "get a character [0,255] or std::char_traits<char>::eof()\&. "
+.ti -1c
+.RI "virtual \fB~input_adapter_protocol\fP ()=default"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+abstract input adapter interface 
+
+Produces a stream of std::char_traits<char>::int_type characters from a std::istream, a buffer, or some other input type\&. Accepts the return of exactly one non-EOF character for future input\&. The int_type characters returned consist of all valid char values as positive values (typically unsigned char), plus an EOF value outside that range, specified by the value of the function std::char_traits<char>::eof()\&. This value is typically -1, but could be any arbitrary value which is not a valid char value\&. 
+.PP
+Definition at line 3904 of file json\&.hpp\&.
+.SH "Constructor & Destructor Documentation"
+.PP 
+.SS "virtual nlohmann::detail::input_adapter_protocol::~input_adapter_protocol ()\fC [virtual]\fP, \fC [default]\fP"
+
+.SH "Member Function Documentation"
+.PP 
+.SS "virtual std::char_traits<char>::int_type nlohmann::detail::input_adapter_protocol::get_character ()\fC [pure virtual]\fP"
+
+.PP
+get a character [0,255] or std::char_traits<char>::eof()\&. 
+.PP
+Implemented in \fBnlohmann::detail::wide_string_input_adapter< WideStringType >\fP, \fBnlohmann::detail::input_buffer_adapter\fP, \fBnlohmann::detail::input_stream_adapter\fP, and \fBnlohmann::detail::file_input_adapter\fP\&.
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for ZIO from the source code\&.

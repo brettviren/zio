@@ -1,0 +1,50 @@
+.TH "nlohmann::detail::external_constructor< value_t::object >" 3 "Fri Jan 3 2020" "ZIO" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+nlohmann::detail::external_constructor< value_t::object >
+.SH SYNOPSIS
+.br
+.PP
+.PP
+\fC#include <json\&.hpp>\fP
+.SS "Static Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "template<typename BasicJsonType > static \fBvoid\fP \fBconstruct\fP (BasicJsonType &j, const typename BasicJsonType::object_t &obj)"
+.br
+.ti -1c
+.RI "template<typename BasicJsonType > static \fBvoid\fP \fBconstruct\fP (BasicJsonType &j, typename BasicJsonType::object_t &&obj)"
+.br
+.ti -1c
+.RI "template<typename BasicJsonType , typename CompatibleObjectType , enable_if_t< not std::is_same< CompatibleObjectType, typename BasicJsonType::object_t >::value, int >  = 0> static \fBvoid\fP \fBconstruct\fP (BasicJsonType &j, const CompatibleObjectType &obj)"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+
+.SS "template<>
+.br
+struct nlohmann::detail::external_constructor< value_t::object >"
+
+.PP
+Definition at line 3610 of file json\&.hpp\&.
+.SH "Member Function Documentation"
+.PP 
+.SS "template<typename BasicJsonType > static \fBvoid\fP \fBnlohmann::detail::external_constructor\fP< \fBvalue_t::object\fP >::construct (BasicJsonType & j, const typename BasicJsonType::object_t & obj)\fC [inline]\fP, \fC [static]\fP"
+
+.PP
+Definition at line 3613 of file json\&.hpp\&.
+.SS "template<typename BasicJsonType > static \fBvoid\fP \fBnlohmann::detail::external_constructor\fP< \fBvalue_t::object\fP >::construct (BasicJsonType & j, typename BasicJsonType::object_t && obj)\fC [inline]\fP, \fC [static]\fP"
+
+.PP
+Definition at line 3621 of file json\&.hpp\&.
+.SS "template<typename BasicJsonType , typename CompatibleObjectType , enable_if_t< not std::is_same< CompatibleObjectType, typename BasicJsonType::object_t >::value, int >  = 0> static \fBvoid\fP \fBnlohmann::detail::external_constructor\fP< \fBvalue_t::object\fP >::construct (BasicJsonType & j, const CompatibleObjectType & obj)\fC [inline]\fP, \fC [static]\fP"
+
+.PP
+Definition at line 3630 of file json\&.hpp\&.
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for ZIO from the source code\&.

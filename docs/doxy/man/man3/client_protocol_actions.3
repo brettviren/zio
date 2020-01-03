@@ -1,0 +1,56 @@
+.TH "client_protocol::actions" 3 "Fri Jan 3 2020" "ZIO" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+client_protocol::actions
+.SH SYNOPSIS
+.br
+.PP
+.SS "Public Attributes"
+
+.in +1c
+.ti -1c
+.RI "std::function< void()> \fBconnect\fP"
+.br
+.ti -1c
+.RI "std::function< void(bool initiator)> \fBdisconnect\fP"
+.br
+.ti -1c
+.RI "std::function< void()> \fBstart_stream\fP"
+.br
+.ti -1c
+.RI "std::function< void()> \fBsend_handshake\fP"
+.br
+.ti -1c
+.RI "std::function< void()> \fBwait_retry\fP"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+Definition at line 46 of file test_hsm\&.cpp\&.
+.SH "Member Data Documentation"
+.PP 
+.SS "std::function<void()> client_protocol::actions::connect"
+
+.PP
+Definition at line 48 of file test_hsm\&.cpp\&.
+.SS "std::function<void(bool initiator)> client_protocol::actions::disconnect"
+
+.PP
+Definition at line 49 of file test_hsm\&.cpp\&.
+.SS "std::function<void()> client_protocol::actions::send_handshake"
+
+.PP
+Definition at line 52 of file test_hsm\&.cpp\&.
+.SS "std::function<void()> client_protocol::actions::start_stream"
+
+.PP
+Definition at line 51 of file test_hsm\&.cpp\&.
+.SS "std::function<void()> client_protocol::actions::wait_retry"
+
+.PP
+Definition at line 53 of file test_hsm\&.cpp\&.
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for ZIO from the source code\&.

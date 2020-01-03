@@ -1,0 +1,44 @@
+.TH "zio::message_error" 3 "Fri Jan 3 2020" "ZIO" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+zio::message_error \- exception indicating message error  
+
+.SH SYNOPSIS
+.br
+.PP
+.PP
+\fC#include <exceptions\&.hpp>\fP
+.PP
+Inherits \fBzio::exception\fP\&.
+.SS "Static Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "static \fBmessage_error\fP \fBcreate\fP (int id_, const char *errmsg, const char *extra=NULL)"
+.br
+.in -1c
+.SS "Additional Inherited Members"
+.SH "Detailed Description"
+.PP 
+exception indicating message error 
+
+This exception is thrown when some error occurs related to the fromation of a zio message\&. See also \fBsocket_error\fP\&.
+.PP
+IDs:
+.IP "1." 4
+\&.\&.\&. 
+.PP
+
+.PP
+Definition at line 76 of file exceptions\&.hpp\&.
+.SH "Member Function Documentation"
+.PP 
+.SS "static \fBmessage_error\fP zio::message_error::create (int id_, const char * errmsg, const char * extra = \fCNULL\fP)\fC [inline]\fP, \fC [static]\fP"
+
+.PP
+Definition at line 78 of file exceptions\&.hpp\&.
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for ZIO from the source code\&.

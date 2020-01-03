@@ -1,0 +1,619 @@
+.TH "nlohmann::json_pointer< BasicJsonType >" 3 "Fri Jan 3 2020" "ZIO" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+nlohmann::json_pointer< BasicJsonType > \- JSON Pointer\&.  
+
+.SH SYNOPSIS
+.br
+.PP
+.PP
+\fC#include <json\&.hpp>\fP
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "\fBjson_pointer\fP (const std::string &s='')"
+.br
+.RI "create JSON pointer "
+.ti -1c
+.RI "std::string \fBto_string\fP () const"
+.br
+.RI "return a string representation of the JSON pointer "
+.ti -1c
+.RI "\fBoperator std::string\fP () const"
+.br
+.RI "return a string representation of the JSON pointer "
+.ti -1c
+.RI "\fBjson_pointer\fP & \fBoperator/=\fP (const \fBjson_pointer\fP &ptr)"
+.br
+.RI "append another JSON pointer at the end of this JSON pointer "
+.ti -1c
+.RI "\fBjson_pointer\fP & \fBoperator/=\fP (std::string token)"
+.br
+.RI "append an unescaped reference token at the end of this JSON pointer "
+.ti -1c
+.RI "\fBjson_pointer\fP & \fBoperator/=\fP (std::size_t array_index)"
+.br
+.RI "append an array index at the end of this JSON pointer "
+.ti -1c
+.RI "\fBjson_pointer\fP \fBparent_pointer\fP () const"
+.br
+.RI "returns the parent of this JSON pointer "
+.ti -1c
+.RI "void \fBpop_back\fP ()"
+.br
+.RI "remove last reference token "
+.ti -1c
+.RI "const std::string & \fBback\fP () const"
+.br
+.RI "return last reference token "
+.ti -1c
+.RI "void \fBpush_back\fP (const std::string &token)"
+.br
+.RI "append an unescaped token at the end of the reference pointer "
+.ti -1c
+.RI "void \fBpush_back\fP (std::string &&token)"
+.br
+.RI "append an unescaped token at the end of the reference pointer "
+.ti -1c
+.RI "bool \fBempty\fP () const noexcept"
+.br
+.RI "return whether pointer points to the root document "
+.in -1c
+.SS "Friends"
+
+.in +1c
+.ti -1c
+.RI "class \fBbasic_json\fP"
+.br
+.ti -1c
+.RI "\fBjson_pointer\fP \fBoperator/\fP (const \fBjson_pointer\fP &lhs, const \fBjson_pointer\fP &rhs)"
+.br
+.RI "create a new JSON pointer by appending the right JSON pointer at the end of the left JSON pointer "
+.ti -1c
+.RI "\fBjson_pointer\fP \fBoperator/\fP (const \fBjson_pointer\fP &ptr, std::string token)"
+.br
+.RI "create a new JSON pointer by appending the unescaped token at the end of the JSON pointer "
+.ti -1c
+.RI "\fBjson_pointer\fP \fBoperator/\fP (const \fBjson_pointer\fP &ptr, std::size_t array_index)"
+.br
+.RI "create a new JSON pointer by appending the array-index-token at the end of the JSON pointer "
+.ti -1c
+.RI "bool \fBoperator==\fP (\fBjson_pointer\fP const &lhs, \fBjson_pointer\fP const &rhs) noexcept"
+.br
+.RI "compares two JSON pointers for equality "
+.ti -1c
+.RI "bool \fBoperator!=\fP (\fBjson_pointer\fP const &lhs, \fBjson_pointer\fP const &rhs) noexcept"
+.br
+.RI "compares two JSON pointers for inequality "
+.in -1c
+.SH "Detailed Description"
+.PP 
+
+.SS "template<typename BasicJsonType>
+.br
+class nlohmann::json_pointer< BasicJsonType >"
+JSON Pointer\&. 
+
+A JSON pointer defines a string syntax for identifying a specific value within a JSON document\&. It can be used with functions \fCat\fP and \fCoperator[]\fP\&. Furthermore, JSON pointers are the base for JSON patches\&.
+.PP
+\fBSee also:\fP
+.RS 4
+\fCRFC 6901\fP
+.RE
+.PP
+\fBSince:\fP
+.RS 4
+version 2\&.0\&.0 
+.RE
+.PP
+
+.PP
+Definition at line 2435 of file json\&.hpp\&.
+.SH "Constructor & Destructor Documentation"
+.PP 
+.SS "template<typename BasicJsonType > \fBnlohmann::json_pointer\fP< BasicJsonType >::\fBjson_pointer\fP (const std::string & s = \fC''\fP)\fC [inline]\fP, \fC [explicit]\fP"
+
+.PP
+create JSON pointer Create a JSON pointer according to the syntax described in \fCSection 3 of RFC6901\fP\&.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIs\fP string representing the JSON pointer; if omitted, the empty string is assumed which references the whole JSON value
+.RE
+.PP
+\fBExceptions:\fP
+.RS 4
+\fIparse_error\&.107\fP if the given JSON pointer \fIs\fP is nonempty and does not begin with a slash (\fC/\fP); see example below
+.br
+\fIparse_error\&.108\fP if a tilde (\fC~\fP) in the given JSON pointer \fIs\fP is not followed by \fC0\fP (representing \fC~\fP) or \fC1\fP (representing \fC/\fP); see example below
+.RE
+.PP
+{The example shows the construction several valid JSON pointers as well as the exceptional behavior\&.,\fBjson_pointer\fP}
+.PP
+\fBSince:\fP
+.RS 4
+version 2\&.0\&.0 
+.RE
+.PP
+
+.PP
+Definition at line 10120 of file json\&.hpp\&.
+.SH "Member Function Documentation"
+.PP 
+.SS "template<typename BasicJsonType > const std::string& \fBnlohmann::json_pointer\fP< BasicJsonType >::back () const\fC [inline]\fP"
+
+.PP
+return last reference token 
+.PP
+\fBPrecondition:\fP
+.RS 4
+not \fC\fBempty()\fP\fP 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+last reference token
+.RE
+.PP
+{The example shows the usage of \fCback\fP\&.,json_pointer__back}
+.PP
+Constant\&.
+.PP
+\fBExceptions:\fP
+.RS 4
+\fIout_of_range\&.405\fP if JSON pointer has no parent
+.RE
+.PP
+\fBSince:\fP
+.RS 4
+version 3\&.6\&.0 
+.RE
+.PP
+
+.PP
+Definition at line 10344 of file json\&.hpp\&.
+.SS "template<typename BasicJsonType > bool \fBnlohmann::json_pointer\fP< BasicJsonType >::empty () const\fC [inline]\fP, \fC [noexcept]\fP"
+
+.PP
+return whether pointer points to the root document 
+.PP
+\fBReturns:\fP
+.RS 4
+true iff the JSON pointer points to the root document
+.RE
+.PP
+Constant\&.
+.PP
+No-throw guarantee: this function never throws exceptions\&.
+.PP
+{The example shows the result of \fCempty\fP for different JSON Pointers\&.,json_pointer__empty}
+.PP
+\fBSince:\fP
+.RS 4
+version 3\&.6\&.0 
+.RE
+.PP
+
+.PP
+Definition at line 10391 of file json\&.hpp\&.
+.SS "template<typename BasicJsonType > \fBnlohmann::json_pointer\fP< BasicJsonType >::operator std::string () const\fC [inline]\fP"
+
+.PP
+return a string representation of the JSON pointer 
+.PP
+\fBInvariant:\fP
+.RS 4
+For each JSON pointer \fCptr\fP, it holds: 
+.PP
+.nf
+ptr == json_pointer(ptr\&.to_string());
+
+.fi
+.PP
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+a string representation of the JSON pointer
+.RE
+.PP
+{The example shows the result of \fCto_string\fP\&.,json_pointer__to_string}
+.PP
+\fBSince:\fP
+.RS 4
+version 2\&.0\&.0 
+.RE
+.PP
+
+.PP
+Definition at line 10149 of file json\&.hpp\&.
+.SS "template<typename BasicJsonType > \fBjson_pointer\fP& \fBnlohmann::json_pointer\fP< BasicJsonType >::operator/= (const \fBjson_pointer\fP< BasicJsonType > & ptr)\fC [inline]\fP"
+
+.PP
+append another JSON pointer at the end of this JSON pointer 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIptr\fP JSON pointer to append 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+JSON pointer with \fIptr\fP appended
+.RE
+.PP
+{The example shows the usage of \fCoperator/=\fP\&.,json_pointer__operator_add}
+.PP
+Linear in the length of \fIptr\fP\&.
+.PP
+\fBSee also:\fP
+.RS 4
+\fBoperator/=(std::string)\fP to append a reference token 
+.PP
+\fBoperator/=(std::size_t)\fP to append an array index 
+.PP
+\fBoperator/(const json_pointer&, const json_pointer&)\fP for a binary operator
+.RE
+.PP
+\fBSince:\fP
+.RS 4
+version 3\&.6\&.0 
+.RE
+.PP
+
+.PP
+Definition at line 10170 of file json\&.hpp\&.
+.SS "template<typename BasicJsonType > \fBjson_pointer\fP& \fBnlohmann::json_pointer\fP< BasicJsonType >::operator/= (std::string token)\fC [inline]\fP"
+
+.PP
+append an unescaped reference token at the end of this JSON pointer 
+.PP
+\fBParameters:\fP
+.RS 4
+\fItoken\fP reference token to append 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+JSON pointer with \fItoken\fP appended without escaping \fItoken\fP 
+.RE
+.PP
+{The example shows the usage of \fCoperator/=\fP\&.,json_pointer__operator_add}
+.PP
+Amortized constant\&.
+.PP
+\fBSee also:\fP
+.RS 4
+\fBoperator/=(const json_pointer&)\fP to append a JSON pointer 
+.PP
+\fBoperator/=(std::size_t)\fP to append an array index 
+.PP
+\fBoperator/(const json_pointer&, std::size_t)\fP for a binary operator
+.RE
+.PP
+\fBSince:\fP
+.RS 4
+version 3\&.6\&.0 
+.RE
+.PP
+
+.PP
+Definition at line 10194 of file json\&.hpp\&.
+.SS "template<typename BasicJsonType > \fBjson_pointer\fP& \fBnlohmann::json_pointer\fP< BasicJsonType >::operator/= (std::size_t array_index)\fC [inline]\fP"
+
+.PP
+append an array index at the end of this JSON pointer 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIarray_index\fP array index to append 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+JSON pointer with \fIarray_index\fP appended
+.RE
+.PP
+{The example shows the usage of \fCoperator/=\fP\&.,json_pointer__operator_add}
+.PP
+Amortized constant\&.
+.PP
+\fBSee also:\fP
+.RS 4
+\fBoperator/=(const json_pointer&)\fP to append a JSON pointer 
+.PP
+\fBoperator/=(std::string)\fP to append a reference token 
+.PP
+\fBoperator/(const json_pointer&, std::string)\fP for a binary operator
+.RE
+.PP
+\fBSince:\fP
+.RS 4
+version 3\&.6\&.0 
+.RE
+.PP
+
+.PP
+Definition at line 10216 of file json\&.hpp\&.
+.SS "template<typename BasicJsonType > \fBjson_pointer\fP \fBnlohmann::json_pointer\fP< BasicJsonType >::parent_pointer () const\fC [inline]\fP"
+
+.PP
+returns the parent of this JSON pointer 
+.PP
+\fBReturns:\fP
+.RS 4
+parent of this JSON pointer; in case this JSON pointer is the root, the root itself is returned
+.RE
+.PP
+Linear in the length of the JSON pointer\&.
+.PP
+{The example shows the result of \fCparent_pointer\fP for different JSON Pointers\&.,json_pointer__parent_pointer}
+.PP
+\fBSince:\fP
+.RS 4
+version 3\&.6\&.0 
+.RE
+.PP
+
+.PP
+Definition at line 10295 of file json\&.hpp\&.
+.SS "template<typename BasicJsonType > void \fBnlohmann::json_pointer\fP< BasicJsonType >::pop_back ()\fC [inline]\fP"
+
+.PP
+remove last reference token 
+.PP
+\fBPrecondition:\fP
+.RS 4
+not \fC\fBempty()\fP\fP
+.RE
+.PP
+{The example shows the usage of \fCpop_back\fP\&.,json_pointer__pop_back}
+.PP
+Constant\&.
+.PP
+\fBExceptions:\fP
+.RS 4
+\fIout_of_range\&.405\fP if JSON pointer has no parent
+.RE
+.PP
+\fBSince:\fP
+.RS 4
+version 3\&.6\&.0 
+.RE
+.PP
+
+.PP
+Definition at line 10320 of file json\&.hpp\&.
+.SS "template<typename BasicJsonType > void \fBnlohmann::json_pointer\fP< BasicJsonType >::push_back (const std::string & token)\fC [inline]\fP"
+
+.PP
+append an unescaped token at the end of the reference pointer 
+.PP
+\fBParameters:\fP
+.RS 4
+\fItoken\fP token to add
+.RE
+.PP
+Amortized constant\&.
+.PP
+{The example shows the result of \fCpush_back\fP for different JSON Pointers\&.,json_pointer__push_back}
+.PP
+\fBSince:\fP
+.RS 4
+version 3\&.6\&.0 
+.RE
+.PP
+
+.PP
+Definition at line 10366 of file json\&.hpp\&.
+.SS "template<typename BasicJsonType > void \fBnlohmann::json_pointer\fP< BasicJsonType >::push_back (std::string && token)\fC [inline]\fP"
+
+.PP
+append an unescaped token at the end of the reference pointer 
+.PP
+\fBParameters:\fP
+.RS 4
+\fItoken\fP token to add
+.RE
+.PP
+Amortized constant\&.
+.PP
+{The example shows the result of \fCpush_back\fP for different JSON Pointers\&.,json_pointer__push_back}
+.PP
+\fBSince:\fP
+.RS 4
+version 3\&.6\&.0 
+.RE
+.PP
+
+.PP
+Definition at line 10372 of file json\&.hpp\&.
+.SS "template<typename BasicJsonType > std::string \fBnlohmann::json_pointer\fP< BasicJsonType >::to_string () const\fC [inline]\fP"
+
+.PP
+return a string representation of the JSON pointer 
+.PP
+\fBInvariant:\fP
+.RS 4
+For each JSON pointer \fCptr\fP, it holds: 
+.PP
+.nf
+ptr == json_pointer(ptr\&.to_string());
+
+.fi
+.PP
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+a string representation of the JSON pointer
+.RE
+.PP
+{The example shows the result of \fCto_string\fP\&.,json_pointer__to_string}
+.PP
+\fBSince:\fP
+.RS 4
+version 2\&.0\&.0 
+.RE
+.PP
+
+.PP
+Definition at line 10138 of file json\&.hpp\&.
+.SH "Friends And Related Function Documentation"
+.PP 
+.SS "template<typename BasicJsonType > friend class \fBbasic_json\fP\fC [friend]\fP"
+
+.PP
+Definition at line 10096 of file json\&.hpp\&.
+.SS "template<typename BasicJsonType > bool operator!= (\fBjson_pointer\fP< BasicJsonType > const & lhs, \fBjson_pointer\fP< BasicJsonType > const & rhs)\fC [friend]\fP"
+
+.PP
+compares two JSON pointers for inequality 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIlhs\fP JSON pointer to compare 
+.br
+\fIrhs\fP JSON pointer to compare 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+whether \fIlhs\fP is not equal \fIrhs\fP 
+.RE
+.PP
+Linear in the length of the JSON pointer
+.PP
+No-throw guarantee: this function never throws exceptions\&. 
+.PP
+Definition at line 11076 of file json\&.hpp\&.
+.SS "template<typename BasicJsonType > \fBjson_pointer\fP operator/ (const \fBjson_pointer\fP< BasicJsonType > & lhs, const \fBjson_pointer\fP< BasicJsonType > & rhs)\fC [friend]\fP"
+
+.PP
+create a new JSON pointer by appending the right JSON pointer at the end of the left JSON pointer 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIlhs\fP JSON pointer 
+.br
+\fIrhs\fP JSON pointer 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+a new JSON pointer with \fIrhs\fP appended to \fIlhs\fP 
+.RE
+.PP
+{The example shows the usage of \fCoperator/\fP\&.,json_pointer__operator_add_binary}
+.PP
+Linear in the length of \fIlhs\fP and \fIrhs\fP\&.
+.PP
+\fBSee also:\fP
+.RS 4
+\fBoperator/=(const json_pointer&)\fP to append a JSON pointer
+.RE
+.PP
+\fBSince:\fP
+.RS 4
+version 3\&.6\&.0 
+.RE
+.PP
+
+.PP
+Definition at line 10236 of file json\&.hpp\&.
+.SS "template<typename BasicJsonType > \fBjson_pointer\fP operator/ (const \fBjson_pointer\fP< BasicJsonType > & ptr, std::string token)\fC [friend]\fP"
+
+.PP
+create a new JSON pointer by appending the unescaped token at the end of the JSON pointer 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIptr\fP JSON pointer 
+.br
+\fItoken\fP reference token 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+a new JSON pointer with unescaped \fItoken\fP appended to \fIptr\fP 
+.RE
+.PP
+{The example shows the usage of \fCoperator/\fP\&.,json_pointer__operator_add_binary}
+.PP
+Linear in the length of \fIptr\fP\&.
+.PP
+\fBSee also:\fP
+.RS 4
+\fBoperator/=(std::string)\fP to append a reference token
+.RE
+.PP
+\fBSince:\fP
+.RS 4
+version 3\&.6\&.0 
+.RE
+.PP
+
+.PP
+Definition at line 10257 of file json\&.hpp\&.
+.SS "template<typename BasicJsonType > \fBjson_pointer\fP operator/ (const \fBjson_pointer\fP< BasicJsonType > & ptr, std::size_t array_index)\fC [friend]\fP"
+
+.PP
+create a new JSON pointer by appending the array-index-token at the end of the JSON pointer 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIptr\fP JSON pointer 
+.br
+\fIarray_index\fP array index 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+a new JSON pointer with \fIarray_index\fP appended to \fIptr\fP 
+.RE
+.PP
+{The example shows the usage of \fCoperator/\fP\&.,json_pointer__operator_add_binary}
+.PP
+Linear in the length of \fIptr\fP\&.
+.PP
+\fBSee also:\fP
+.RS 4
+\fBoperator/=(std::size_t)\fP to append an array index
+.RE
+.PP
+\fBSince:\fP
+.RS 4
+version 3\&.6\&.0 
+.RE
+.PP
+
+.PP
+Definition at line 10277 of file json\&.hpp\&.
+.SS "template<typename BasicJsonType > bool operator== (\fBjson_pointer\fP< BasicJsonType > const & lhs, \fBjson_pointer\fP< BasicJsonType > const & rhs)\fC [friend]\fP"
+
+.PP
+compares two JSON pointers for equality 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIlhs\fP JSON pointer to compare 
+.br
+\fIrhs\fP JSON pointer to compare 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+whether \fIlhs\fP is equal to \fIrhs\fP 
+.RE
+.PP
+Linear in the length of the JSON pointer
+.PP
+No-throw guarantee: this function never throws exceptions\&. 
+.PP
+Definition at line 11059 of file json\&.hpp\&.
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for ZIO from the source code\&.

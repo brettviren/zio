@@ -1,0 +1,97 @@
+.TH "zmq::socket_t" 3 "Fri Jan 3 2020" "ZIO" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+zmq::socket_t
+.SH SYNOPSIS
+.br
+.PP
+.PP
+\fC#include <zmq\&.hpp>\fP
+.PP
+Inherits \fBzmq::detail::socket_base\fP\&.
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "\fBsocket_t\fP () \fBZMQ_NOTHROW\fP"
+.br
+.ti -1c
+.RI "\fBsocket_t\fP (\fBcontext_t\fP &context_, int type_)"
+.br
+.ti -1c
+.RI "\fB~socket_t\fP () \fBZMQ_NOTHROW\fP"
+.br
+.ti -1c
+.RI "\fBoperator void *\fP () \fBZMQ_NOTHROW\fP"
+.br
+.ti -1c
+.RI "\fBoperator void const *\fP () const \fBZMQ_NOTHROW\fP"
+.br
+.ti -1c
+.RI "void \fBclose\fP () \fBZMQ_NOTHROW\fP"
+.br
+.ti -1c
+.RI "void \fBswap\fP (\fBsocket_t\fP &other) \fBZMQ_NOTHROW\fP"
+.br
+.ti -1c
+.RI "\fBoperator socket_ref\fP () \fBZMQ_NOTHROW\fP"
+.br
+.in -1c
+.SS "Friends"
+
+.in +1c
+.ti -1c
+.RI "class \fBmonitor_t\fP"
+.br
+.in -1c
+.SS "Additional Inherited Members"
+.SH "Detailed Description"
+.PP 
+Definition at line 1536 of file zmq\&.hpp\&.
+.SH "Constructor & Destructor Documentation"
+.PP 
+.SS "zmq::socket_t::socket_t ()\fC [inline]\fP"
+
+.PP
+Definition at line 1541 of file zmq\&.hpp\&.
+.SS "zmq::socket_t::socket_t (\fBcontext_t\fP & context_, int type_)\fC [inline]\fP"
+
+.PP
+Definition at line 1547 of file zmq\&.hpp\&.
+.SS "zmq::socket_t::~socket_t ()\fC [inline]\fP"
+
+.PP
+Definition at line 1576 of file zmq\&.hpp\&.
+.SH "Member Function Documentation"
+.PP 
+.SS "void zmq::socket_t::close ()\fC [inline]\fP"
+
+.PP
+Definition at line 1582 of file zmq\&.hpp\&.
+.SS "zmq::socket_t::operator \fBsocket_ref\fP ()\fC [inline]\fP"
+
+.PP
+Definition at line 1598 of file zmq\&.hpp\&.
+.SS "zmq::socket_t::operator void * ()\fC [inline]\fP"
+
+.PP
+Definition at line 1578 of file zmq\&.hpp\&.
+.SS "zmq::socket_t::operator void const * () const\fC [inline]\fP"
+
+.PP
+Definition at line 1580 of file zmq\&.hpp\&.
+.SS "void zmq::socket_t::swap (\fBsocket_t\fP & other)\fC [inline]\fP"
+
+.PP
+Definition at line 1592 of file zmq\&.hpp\&.
+.SH "Friends And Related Function Documentation"
+.PP 
+.SS "friend class \fBmonitor_t\fP\fC [friend]\fP"
+
+.PP
+Definition at line 1538 of file zmq\&.hpp\&.
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for ZIO from the source code\&.

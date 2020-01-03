@@ -1,0 +1,196 @@
+.TH "zio::Port" 3 "Fri Jan 3 2020" "ZIO" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+zio::Port \- a port holds a socket in the context of a node  
+
+.SH SYNOPSIS
+.br
+.PP
+.PP
+\fC#include <port\&.hpp>\fP
+.SS "Public Types"
+
+.in +1c
+.ti -1c
+.RI "typedef std::string \fBaddress_t\fP"
+.br
+.ti -1c
+.RI "typedef std::string \fBnodename_t\fP"
+.br
+.ti -1c
+.RI "typedef std::string \fBportname_t\fP"
+.br
+.in -1c
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "\fBPort\fP (const std::string &\fBname\fP, int stype, const std::string &hostname='127\&.0\&.0\&.1')"
+.br
+.ti -1c
+.RI "\fB~Port\fP ()"
+.br
+.ti -1c
+.RI "void \fBset_origin\fP (\fBorigin_t\fP origin)"
+.br
+.ti -1c
+.RI "void \fBset_verbose\fP (bool verbose=true)"
+.br
+.ti -1c
+.RI "const std::string & \fBname\fP () const"
+.br
+.ti -1c
+.RI "void \fBbind\fP ()"
+.br
+.ti -1c
+.RI "void \fBbind\fP (const std::string &hostname, int tcpportnum)"
+.br
+.ti -1c
+.RI "void \fBbind\fP (const \fBaddress_t\fP &address)"
+.br
+.ti -1c
+.RI "void \fBconnect\fP (const \fBaddress_t\fP &address)"
+.br
+.ti -1c
+.RI "void \fBconnect\fP (const \fBnodename_t\fP &node, const \fBportname_t\fP &port)"
+.br
+.ti -1c
+.RI "void \fBsubscribe\fP (const std::string &prefix='')"
+.br
+.ti -1c
+.RI "void \fBset_header\fP (const std::string &leafname, const std::string &value)"
+.br
+.ti -1c
+.RI "\fBheaderset_t\fP \fBdo_binds\fP ()"
+.br
+.ti -1c
+.RI "void \fBonline\fP (\fBPeer\fP &peer)"
+.br
+.ti -1c
+.RI "void \fBoffline\fP ()"
+.br
+.RI "For node\&. Disconnect, unbind\&. "
+.ti -1c
+.RI "void \fBsend\fP (\fBMessage\fP &msg)"
+.br
+.RI "Send a message\&. Note, msg is modified to set coords\&. "
+.ti -1c
+.RI "bool \fBrecv\fP (\fBMessage\fP &msg, int \fBtimeout\fP=\-1)"
+.br
+.RI "Recieve a message, return false if timeout\&. "
+.ti -1c
+.RI "\fBzio::socket_t\fP & \fBsocket\fP ()"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+a port holds a socket in the context of a node 
+
+A port provides an identity (name) for the socket in the context of a node to the network (via a peer) and to the application (via a method)\&.
+.PP
+It provides direct and discovery-based \fBbind()\fP and \fBconnect()\fP\&.
+.PP
+Finally, using its \fBsend()\fP and \fBrecv()\fP their messages will adhere to the ZIO conventions\&. 
+.PP
+Definition at line 27 of file port\&.hpp\&.
+.SH "Member Typedef Documentation"
+.PP 
+.SS "typedef std::string \fBzio::Port::address_t\fP"
+
+.PP
+Definition at line 29 of file port\&.hpp\&.
+.SS "typedef std::string \fBzio::Port::nodename_t\fP"
+
+.PP
+Definition at line 30 of file port\&.hpp\&.
+.SS "typedef std::string \fBzio::Port::portname_t\fP"
+
+.PP
+Definition at line 31 of file port\&.hpp\&.
+.SH "Constructor & Destructor Documentation"
+.PP 
+.SS "zio::Port::Port (const std::string & name, int stype, const std::string & hostname = \fC'127\&.0\&.0\&.1'\fP)"
+
+.PP
+Definition at line 55 of file port\&.cpp\&.
+.SS "zio::Port::~Port ()"
+
+.PP
+Definition at line 60 of file port\&.cpp\&.
+.SH "Member Function Documentation"
+.PP 
+.SS "void zio::Port::bind ()"
+
+.PP
+Definition at line 68 of file port\&.cpp\&.
+.SS "void zio::Port::bind (const std::string & hostname, int tcpportnum)"
+
+.PP
+Definition at line 74 of file port\&.cpp\&.
+.SS "void zio::Port::bind (const \fBaddress_t\fP & address)"
+
+.PP
+Definition at line 82 of file port\&.cpp\&.
+.SS "void zio::Port::connect (const \fBaddress_t\fP & address)"
+
+.PP
+Definition at line 89 of file port\&.cpp\&.
+.SS "void zio::Port::connect (const \fBnodename_t\fP & node, const \fBportname_t\fP & port)"
+
+.PP
+Definition at line 94 of file port\&.cpp\&.
+.SS "\fBzio::headerset_t\fP zio::Port::do_binds ()"
+For node\&. Do any requested binds, return all corresponding port headers\&. 
+.PP
+Definition at line 112 of file port\&.cpp\&.
+.SS "const std::string& zio::Port::name () const\fC [inline]\fP"
+
+.PP
+Definition at line 42 of file port\&.hpp\&.
+.SS "void zio::Port::offline ()"
+
+.PP
+For node\&. Disconnect, unbind\&. 
+.PP
+Definition at line 194 of file port\&.cpp\&.
+.SS "void zio::Port::online (\fBzio::Peer\fP & peer)"
+For node\&. Go online, making any connections, using peer to resolve if needed\&. 
+.PP
+Definition at line 136 of file port\&.cpp\&.
+.SS "bool zio::Port::recv (\fBMessage\fP & msg, int timeout = \fC\-1\fP)"
+
+.PP
+Recieve a message, return false if timeout\&. 
+.PP
+Definition at line 239 of file port\&.cpp\&.
+.SS "void zio::Port::send (\fBzio::Message\fP & msg)"
+
+.PP
+Send a message\&. Note, msg is modified to set coords\&. 
+.PP
+Definition at line 219 of file port\&.cpp\&.
+.SS "void zio::Port::set_header (const std::string & leafname, const std::string & value)"
+
+.PP
+Definition at line 106 of file port\&.cpp\&.
+.SS "void zio::Port::set_origin (\fBorigin_t\fP origin)\fC [inline]\fP"
+
+.PP
+Definition at line 38 of file port\&.hpp\&.
+.SS "void zio::Port::set_verbose (bool verbose = \fCtrue\fP)\fC [inline]\fP"
+
+.PP
+Definition at line 40 of file port\&.hpp\&.
+.SS "\fBzio::socket_t\fP& zio::Port::socket ()\fC [inline]\fP"
+
+.PP
+Definition at line 88 of file port\&.hpp\&.
+.SS "void zio::Port::subscribe (const std::string & prefix = \fC''\fP)"
+
+.PP
+Definition at line 99 of file port\&.cpp\&.
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for ZIO from the source code\&.

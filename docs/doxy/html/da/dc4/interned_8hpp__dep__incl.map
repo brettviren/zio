@@ -1,0 +1,20 @@
+<map id="inc/zio/interned.hpp" name="inc/zio/interned.hpp">
+<area shape="rect" id="node2" href="$d5/d8c/message_8hpp.html" title="inc/zio/message.hpp" alt="" coords="246,80,389,107"/>
+<area shape="rect" id="node7" href="$d1/d42/port_8hpp.html" title="inc/zio/port.hpp" alt="" coords="501,155,612,181"/>
+<area shape="rect" id="node14" href="$d6/d24/zio_8hpp.html" title="inc/zio/zio.hpp" alt="" coords="594,80,700,107"/>
+<area shape="rect" id="node16" href="$dc/d2a/interned_8cpp.html" title="src/interned.cpp" alt="" coords="724,80,839,107"/>
+<area shape="rect" id="node17" href="$d6/d0f/test__errors_8cpp.html" title="test/test_errors.cpp" alt="" coords="864,80,998,107"/>
+<area shape="rect" id="node18" href="$d2/dd5/test__peer__link_8cpp.html" title="test/test_peer_link.cpp" alt="" coords="1023,80,1178,107"/>
+<area shape="rect" id="node19" href="$d9/dea/test__socket_8cpp.html" title="test/test_socket.cpp" alt="" coords="1202,80,1343,107"/>
+<area shape="rect" id="node3" href="$d5/d21/flow_8hpp.html" title="inc/zio/flow.hpp" alt="" coords="200,229,313,256"/>
+<area shape="rect" id="node6" href="$d7/d20/outbox_8hpp.html" title="inc/zio/outbox.hpp" alt="" coords="23,155,151,181"/>
+<area shape="rect" id="node12" href="$d8/d6a/message_8cpp.html" title="src/message.cpp" alt="" coords="175,155,298,181"/>
+<area shape="rect" id="node13" href="$df/da8/test__message_8cpp.html" title="test/test_message.cpp" alt="" coords="322,155,476,181"/>
+<area shape="rect" id="node4" href="$d5/d89/flow_8cpp.html" title="src/flow.cpp" alt="" coords="144,304,238,331"/>
+<area shape="rect" id="node5" href="$da/dca/test__flow_8cpp.html" title="test/test_flow.cpp" alt="" coords="262,304,389,331"/>
+<area shape="rect" id="node8" href="$d3/d09/node_8hpp.html" title="inc/zio/node.hpp" alt="" coords="370,229,487,256"/>
+<area shape="rect" id="node10" href="$da/d24/port_8cpp.html" title="src/port.cpp" alt="" coords="511,229,602,256"/>
+<area shape="rect" id="node11" href="$dd/db9/test__port_8cpp.html" title="test/test_port.cpp" alt="" coords="626,229,750,256"/>
+<area shape="rect" id="node9" href="$d7/d70/node_8cpp.html" title="src/node.cpp" alt="" coords="413,304,510,331"/>
+<area shape="rect" id="node15" href="$db/d6d/test__cppzmq_8cpp.html" title="test/test_cppzmq.cpp" alt="" coords="636,155,784,181"/>
+</map>

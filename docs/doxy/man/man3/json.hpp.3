@@ -1,0 +1,1815 @@
+.TH "/home/bviren/dev/zio/inc/zio/json.hpp" 3 "Fri Jan 3 2020" "ZIO" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+/home/bviren/dev/zio/inc/zio/json.hpp
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <algorithm>\fP
+.br
+\fC#include <cassert>\fP
+.br
+\fC#include <ciso646>\fP
+.br
+\fC#include <cstddef>\fP
+.br
+\fC#include <functional>\fP
+.br
+\fC#include <initializer_list>\fP
+.br
+\fC#include <iosfwd>\fP
+.br
+\fC#include <iterator>\fP
+.br
+\fC#include <memory>\fP
+.br
+\fC#include <numeric>\fP
+.br
+\fC#include <string>\fP
+.br
+\fC#include <utility>\fP
+.br
+\fC#include <vector>\fP
+.br
+\fC#include <array>\fP
+.br
+\fC#include <forward_list>\fP
+.br
+\fC#include <map>\fP
+.br
+\fC#include <tuple>\fP
+.br
+\fC#include <type_traits>\fP
+.br
+\fC#include <unordered_map>\fP
+.br
+\fC#include <valarray>\fP
+.br
+\fC#include <exception>\fP
+.br
+\fC#include <stdexcept>\fP
+.br
+\fC#include <cstdlib>\fP
+.br
+\fC#include <limits>\fP
+.br
+\fC#include <cstdint>\fP
+.br
+\fC#include <cmath>\fP
+.br
+\fC#include <cstdio>\fP
+.br
+\fC#include <cstring>\fP
+.br
+\fC#include <istream>\fP
+.br
+\fC#include <clocale>\fP
+.br
+\fC#include <cctype>\fP
+.br
+\fC#include <ios>\fP
+.br
+\fC#include <ostream>\fP
+.br
+
+.SS "Classes"
+
+.in +1c
+.ti -1c
+.RI "struct \fBnlohmann::detail::position_t\fP"
+.br
+.RI "struct to capture the start position of the current token "
+.ti -1c
+.RI "class \fBnlohmann::detail::exception\fP"
+.br
+.RI "general exception of the \fBbasic_json\fP class "
+.ti -1c
+.RI "class \fBnlohmann::detail::parse_error\fP"
+.br
+.RI "exception indicating a parse error "
+.ti -1c
+.RI "class \fBnlohmann::detail::invalid_iterator\fP"
+.br
+.RI "exception indicating errors with iterators "
+.ti -1c
+.RI "class \fBnlohmann::detail::type_error\fP"
+.br
+.RI "exception indicating executing a member function with a wrong type "
+.ti -1c
+.RI "class \fBnlohmann::detail::out_of_range\fP"
+.br
+.RI "exception indicating access out of the defined range "
+.ti -1c
+.RI "class \fBnlohmann::detail::other_error\fP"
+.br
+.RI "exception indicating other library errors "
+.ti -1c
+.RI "struct \fBnlohmann::detail::index_sequence< Ints >\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::merge_and_renumber< Sequence1, Sequence2 >\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::merge_and_renumber< index_sequence< I1\&.\&.\&. >, index_sequence< I2\&.\&.\&. > >\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::make_index_sequence< N >\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::make_index_sequence< 0 >\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::make_index_sequence< 1 >\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::priority_tag< N >\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::priority_tag< 0 >\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::static_const< T >\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::make_void< Ts >\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::iterator_types< It, typename >\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::iterator_types< It, void_t< typename It::difference_type, typename It::value_type, typename It::pointer, typename It::reference, typename It::iterator_category > >\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::iterator_traits< T, typename >\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::iterator_traits< T, enable_if_t< !std::is_pointer< T >::value > >\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::iterator_traits< T *, enable_if_t< std::is_object< T >::value > >\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::nonesuch\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::detector< Default, AlwaysVoid, Op, Args >\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::detector< Default, void_t< Op< Args\&.\&.\&. > >, Op, Args\&.\&.\&. >\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::adl_serializer< typename, typename >\fP"
+.br
+.RI "default JSONSerializer template argument "
+.ti -1c
+.RI "class \fBnlohmann::basic_json< ObjectType, ArrayType, StringType, BooleanType, NumberIntegerType, NumberUnsignedType, NumberFloatType, AllocatorType, JSONSerializer >\fP"
+.br
+.RI "a class to store JSON values "
+.ti -1c
+.RI "class \fBnlohmann::json_pointer< BasicJsonType >\fP"
+.br
+.RI "JSON Pointer\&. "
+.ti -1c
+.RI "struct \fBnlohmann::detail::is_basic_json< typename >\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::is_basic_json< NLOHMANN_BASIC_JSON_TPL >\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::has_from_json< BasicJsonType, T, typename >\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::has_from_json< BasicJsonType, T, enable_if_t< not is_basic_json< T >::value > >\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::has_non_default_from_json< BasicJsonType, T, typename >\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::has_non_default_from_json< BasicJsonType, T, enable_if_t< not is_basic_json< T >::value > >\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::has_to_json< BasicJsonType, T, typename >\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::has_to_json< BasicJsonType, T, enable_if_t< not is_basic_json< T >::value > >\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::is_iterator_traits< T, typename >\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::is_iterator_traits< iterator_traits< T > >\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::is_complete_type< T, typename >\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::is_complete_type< T, decltype(void(sizeof(T)))>\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::is_compatible_object_type_impl< BasicJsonType, CompatibleObjectType, typename >\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::is_compatible_object_type_impl< BasicJsonType, CompatibleObjectType, enable_if_t< is_detected< mapped_type_t, CompatibleObjectType >::value and is_detected< key_type_t, CompatibleObjectType >::value > >\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::is_compatible_object_type< BasicJsonType, CompatibleObjectType >\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::is_constructible_object_type_impl< BasicJsonType, ConstructibleObjectType, typename >\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::is_constructible_object_type_impl< BasicJsonType, ConstructibleObjectType, enable_if_t< is_detected< mapped_type_t, ConstructibleObjectType >::value and is_detected< key_type_t, ConstructibleObjectType >::value > >\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::is_constructible_object_type< BasicJsonType, ConstructibleObjectType >\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::is_compatible_string_type_impl< BasicJsonType, CompatibleStringType, typename >\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::is_compatible_string_type_impl< BasicJsonType, CompatibleStringType, enable_if_t< is_detected_exact< typename BasicJsonType::string_t::value_type, value_type_t, CompatibleStringType >::value > >\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::is_compatible_string_type< BasicJsonType, ConstructibleStringType >\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::is_constructible_string_type_impl< BasicJsonType, ConstructibleStringType, typename >\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::is_constructible_string_type_impl< BasicJsonType, ConstructibleStringType, enable_if_t< is_detected_exact< typename BasicJsonType::string_t::value_type, value_type_t, ConstructibleStringType >::value > >\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::is_constructible_string_type< BasicJsonType, ConstructibleStringType >\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::is_compatible_array_type_impl< BasicJsonType, CompatibleArrayType, typename >\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::is_compatible_array_type_impl< BasicJsonType, CompatibleArrayType, enable_if_t< is_detected< value_type_t, CompatibleArrayType >::value and is_detected< iterator_t, CompatibleArrayType >::value and not is_iterator_traits< iterator_traits< CompatibleArrayType > >::value > >\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::is_compatible_array_type< BasicJsonType, CompatibleArrayType >\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::is_constructible_array_type_impl< BasicJsonType, ConstructibleArrayType, typename >\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::is_constructible_array_type_impl< BasicJsonType, ConstructibleArrayType, enable_if_t< std::is_same< ConstructibleArrayType, typename BasicJsonType::value_type >::value > >\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::is_constructible_array_type_impl< BasicJsonType, ConstructibleArrayType, enable_if_t< not std::is_same< ConstructibleArrayType, typename BasicJsonType::value_type >::value and std::is_default_constructible< ConstructibleArrayType >::value and(std::is_move_assignable< ConstructibleArrayType >::value or std::is_copy_assignable< ConstructibleArrayType >::value) andis_detected< value_type_t, ConstructibleArrayType >::value andis_detected< iterator_t, ConstructibleArrayType >::value andis_complete_type< detected_t< value_type_t, ConstructibleArrayType > >::value > >\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::is_constructible_array_type< BasicJsonType, ConstructibleArrayType >\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::is_compatible_integer_type_impl< RealIntegerType, CompatibleNumberIntegerType, typename >\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::is_compatible_integer_type_impl< RealIntegerType, CompatibleNumberIntegerType, enable_if_t< std::is_integral< RealIntegerType >::value and std::is_integral< CompatibleNumberIntegerType >::value and not std::is_same< bool, CompatibleNumberIntegerType >::value > >\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::is_compatible_integer_type< RealIntegerType, CompatibleNumberIntegerType >\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::is_compatible_type_impl< BasicJsonType, CompatibleType, typename >\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::is_compatible_type_impl< BasicJsonType, CompatibleType, enable_if_t< is_complete_type< CompatibleType >::value > >\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::is_compatible_type< BasicJsonType, CompatibleType >\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::conjunction<\&.\&.\&. >\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::conjunction< B1 >\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::conjunction< B1, Bn\&.\&.\&. >\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::is_constructible_tuple< T1, T2 >\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::is_constructible_tuple< T1, std::tuple< Args\&.\&.\&. > >\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::from_json_fn\fP"
+.br
+.ti -1c
+.RI "class \fBnlohmann::detail::iteration_proxy_value< IteratorType >\fP"
+.br
+.ti -1c
+.RI "class \fBnlohmann::detail::iteration_proxy< IteratorType >\fP"
+.br
+.RI "proxy class for the items() function "
+.ti -1c
+.RI "class \fBstd::tuple_size<::nlohmann::detail::iteration_proxy_value< IteratorType > >\fP"
+.br
+.ti -1c
+.RI "class \fBstd::tuple_element< N, ::nlohmann::detail::iteration_proxy_value< IteratorType > >\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::external_constructor< value_t >\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::external_constructor< value_t::boolean >\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::external_constructor< value_t::string >\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::external_constructor< value_t::number_float >\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::external_constructor< value_t::number_unsigned >\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::external_constructor< value_t::number_integer >\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::external_constructor< value_t::array >\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::external_constructor< value_t::object >\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::to_json_fn\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::adl_serializer< typename, typename >\fP"
+.br
+.RI "default JSONSerializer template argument "
+.ti -1c
+.RI "struct \fBnlohmann::detail::input_adapter_protocol\fP"
+.br
+.RI "abstract input adapter interface "
+.ti -1c
+.RI "class \fBnlohmann::detail::file_input_adapter\fP"
+.br
+.ti -1c
+.RI "class \fBnlohmann::detail::input_stream_adapter\fP"
+.br
+.ti -1c
+.RI "class \fBnlohmann::detail::input_buffer_adapter\fP"
+.br
+.RI "input adapter for buffer input "
+.ti -1c
+.RI "struct \fBnlohmann::detail::wide_string_input_helper< WideStringType, T >\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::wide_string_input_helper< WideStringType, 2 >\fP"
+.br
+.ti -1c
+.RI "class \fBnlohmann::detail::wide_string_input_adapter< WideStringType >\fP"
+.br
+.ti -1c
+.RI "class \fBnlohmann::detail::input_adapter\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::json_sax< BasicJsonType >\fP"
+.br
+.RI "SAX interface\&. "
+.ti -1c
+.RI "class \fBnlohmann::detail::json_sax_dom_parser< BasicJsonType >\fP"
+.br
+.RI "SAX implementation to create a JSON value from SAX events\&. "
+.ti -1c
+.RI "class \fBnlohmann::detail::json_sax_dom_callback_parser< BasicJsonType >\fP"
+.br
+.ti -1c
+.RI "class \fBnlohmann::detail::json_sax_acceptor< BasicJsonType >\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::is_sax< SAX, BasicJsonType >\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::is_sax_static_asserts< SAX, BasicJsonType >\fP"
+.br
+.ti -1c
+.RI "class \fBnlohmann::detail::binary_reader< BasicJsonType, SAX >\fP"
+.br
+.RI "deserialization of CBOR, MessagePack, and UBJSON values "
+.ti -1c
+.RI "class \fBnlohmann::detail::lexer< BasicJsonType >\fP"
+.br
+.RI "lexical analysis "
+.ti -1c
+.RI "class \fBnlohmann::detail::parser< BasicJsonType >\fP"
+.br
+.RI "syntax analysis "
+.ti -1c
+.RI "class \fBnlohmann::detail::primitive_iterator_t\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::internal_iterator< BasicJsonType >\fP"
+.br
+.RI "an iterator value "
+.ti -1c
+.RI "class \fBnlohmann::detail::iteration_proxy< IteratorType >\fP"
+.br
+.RI "proxy class for the items() function "
+.ti -1c
+.RI "class \fBnlohmann::detail::iteration_proxy_value< IteratorType >\fP"
+.br
+.ti -1c
+.RI "class \fBnlohmann::detail::iter_impl< BasicJsonType >\fP"
+.br
+.RI "a template for a bidirectional iterator for the \fBbasic_json\fP class This class implements a both iterators (iterator and const_iterator) for the \fBbasic_json\fP class\&. "
+.ti -1c
+.RI "class \fBnlohmann::detail::json_reverse_iterator< Base >\fP"
+.br
+.RI "a template for a reverse iterator class "
+.ti -1c
+.RI "class \fBnlohmann::json_pointer< BasicJsonType >\fP"
+.br
+.RI "JSON Pointer\&. "
+.ti -1c
+.RI "class \fBnlohmann::detail::json_ref< BasicJsonType >\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::output_adapter_protocol< CharType >\fP"
+.br
+.RI "abstract output adapter interface "
+.ti -1c
+.RI "class \fBnlohmann::detail::output_vector_adapter< CharType >\fP"
+.br
+.RI "output adapter for byte vectors "
+.ti -1c
+.RI "class \fBnlohmann::detail::output_stream_adapter< CharType >\fP"
+.br
+.RI "output adapter for output streams "
+.ti -1c
+.RI "class \fBnlohmann::detail::output_string_adapter< CharType, StringType >\fP"
+.br
+.RI "output adapter for basic_string "
+.ti -1c
+.RI "class \fBnlohmann::detail::output_adapter< CharType, StringType >\fP"
+.br
+.ti -1c
+.RI "class \fBnlohmann::detail::binary_writer< BasicJsonType, CharType >\fP"
+.br
+.RI "serialization to CBOR and MessagePack values "
+.ti -1c
+.RI "struct \fBnlohmann::detail::dtoa_impl::diyfp\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::dtoa_impl::boundaries\fP"
+.br
+.ti -1c
+.RI "struct \fBnlohmann::detail::dtoa_impl::cached_power\fP"
+.br
+.ti -1c
+.RI "class \fBnlohmann::detail::serializer< BasicJsonType >\fP"
+.br
+.ti -1c
+.RI "class \fBnlohmann::basic_json< ObjectType, ArrayType, StringType, BooleanType, NumberIntegerType, NumberUnsignedType, NumberFloatType, AllocatorType, JSONSerializer >\fP"
+.br
+.RI "a class to store JSON values "
+.ti -1c
+.RI "struct \fBstd::hash< nlohmann::json >\fP"
+.br
+.RI "hash value for JSON objects "
+.ti -1c
+.RI "struct \fBstd::less<::nlohmann::detail::value_t >\fP"
+.br
+.in -1c
+.SS "Namespaces"
+
+.in +1c
+.ti -1c
+.RI " \fBnlohmann\fP"
+.br
+.RI "namespace for Niels Lohmann "
+.ti -1c
+.RI " \fBnlohmann::detail\fP"
+.br
+.RI "detail namespace with internal helper functions "
+.ti -1c
+.RI " \fBstd\fP"
+.br
+.ti -1c
+.RI " \fBnlohmann::detail::dtoa_impl\fP"
+.br
+.RI "implements the Grisu2 algorithm for binary to decimal floating-point conversion\&. "
+.in -1c
+.SS "Macros"
+
+.in +1c
+.ti -1c
+.RI "#define \fBNLOHMANN_JSON_VERSION_MAJOR\fP   3"
+.br
+.ti -1c
+.RI "#define \fBNLOHMANN_JSON_VERSION_MINOR\fP   7"
+.br
+.ti -1c
+.RI "#define \fBNLOHMANN_JSON_VERSION_PATCH\fP   3"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_VERSION\fP   11"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_STRINGIFY_EX\fP(x)   #x"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_STRINGIFY\fP(x)   \fBJSON_HEDLEY_STRINGIFY_EX\fP(x)"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_CONCAT_EX\fP(a,  b)   a##b"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_CONCAT\fP(a,  b)   \fBJSON_HEDLEY_CONCAT_EX\fP(a,b)"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_VERSION_ENCODE\fP(major,  minor,  revision)   (((major) * 1000000) + ((minor) * 1000) + (revision))"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_VERSION_DECODE_MAJOR\fP(version)   ((version) / 1000000)"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_VERSION_DECODE_MINOR\fP(version)   (((version) % 1000000) / 1000)"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_VERSION_DECODE_REVISION\fP(version)   ((version) % 1000)"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_GNUC_VERSION_CHECK\fP(major,  minor,  patch)   (0)"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_MSVC_VERSION_CHECK\fP(major,  minor,  patch)   (0)"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_INTEL_VERSION_CHECK\fP(major,  minor,  patch)   (0)"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_PGI_VERSION_CHECK\fP(major,  minor,  patch)   (0)"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_SUNPRO_VERSION_CHECK\fP(major,  minor,  patch)   (0)"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_EMSCRIPTEN_VERSION_CHECK\fP(major,  minor,  patch)   (0)"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_ARM_VERSION_CHECK\fP(major,  minor,  patch)   (0)"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_IBM_VERSION_CHECK\fP(major,  minor,  patch)   (0)"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_TI_VERSION_CHECK\fP(major,  minor,  patch)   (0)"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_CRAY_VERSION_CHECK\fP(major,  minor,  patch)   (0)"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_IAR_VERSION_CHECK\fP(major,  minor,  patch)   (0)"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_TINYC_VERSION_CHECK\fP(major,  minor,  patch)   (0)"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_DMC_VERSION_CHECK\fP(major,  minor,  patch)   (0)"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_COMPCERT_VERSION_CHECK\fP(major,  minor,  patch)   (0)"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_PELLES_VERSION_CHECK\fP(major,  minor,  patch)   (0)"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_GCC_VERSION_CHECK\fP(major,  minor,  patch)   (0)"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_HAS_ATTRIBUTE\fP(attribute)   (0)"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_GNUC_HAS_ATTRIBUTE\fP(attribute,  major,  minor,  patch)   \fBJSON_HEDLEY_GNUC_VERSION_CHECK\fP(major,minor,patch)"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_GCC_HAS_ATTRIBUTE\fP(attribute,  major,  minor,  patch)   \fBJSON_HEDLEY_GCC_VERSION_CHECK\fP(major,minor,patch)"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_HAS_CPP_ATTRIBUTE\fP(attribute)   (0)"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_HAS_CPP_ATTRIBUTE_NS\fP(ns,  attribute)   (0)"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_GNUC_HAS_CPP_ATTRIBUTE\fP(attribute,  major,  minor,  patch)   \fBJSON_HEDLEY_GNUC_VERSION_CHECK\fP(major,minor,patch)"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_GCC_HAS_CPP_ATTRIBUTE\fP(attribute,  major,  minor,  patch)   \fBJSON_HEDLEY_GCC_VERSION_CHECK\fP(major,minor,patch)"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_HAS_BUILTIN\fP(builtin)   (0)"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_GNUC_HAS_BUILTIN\fP(builtin,  major,  minor,  patch)   \fBJSON_HEDLEY_GNUC_VERSION_CHECK\fP(major,minor,patch)"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_GCC_HAS_BUILTIN\fP(builtin,  major,  minor,  patch)   \fBJSON_HEDLEY_GCC_VERSION_CHECK\fP(major,minor,patch)"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_HAS_FEATURE\fP(feature)   (0)"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_GNUC_HAS_FEATURE\fP(feature,  major,  minor,  patch)   \fBJSON_HEDLEY_GNUC_VERSION_CHECK\fP(major,minor,patch)"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_GCC_HAS_FEATURE\fP(feature,  major,  minor,  patch)   \fBJSON_HEDLEY_GCC_VERSION_CHECK\fP(major,minor,patch)"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_HAS_EXTENSION\fP(extension)   (0)"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_GNUC_HAS_EXTENSION\fP(extension,  major,  minor,  patch)   \fBJSON_HEDLEY_GNUC_VERSION_CHECK\fP(major,minor,patch)"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_GCC_HAS_EXTENSION\fP(extension,  major,  minor,  patch)   \fBJSON_HEDLEY_GCC_VERSION_CHECK\fP(major,minor,patch)"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_HAS_DECLSPEC_ATTRIBUTE\fP(attribute)   (0)"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_GNUC_HAS_DECLSPEC_ATTRIBUTE\fP(attribute,  major,  minor,  patch)   \fBJSON_HEDLEY_GNUC_VERSION_CHECK\fP(major,minor,patch)"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_GCC_HAS_DECLSPEC_ATTRIBUTE\fP(attribute,  major,  minor,  patch)   \fBJSON_HEDLEY_GCC_VERSION_CHECK\fP(major,minor,patch)"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_HAS_WARNING\fP(warning)   (0)"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_GNUC_HAS_WARNING\fP(warning,  major,  minor,  patch)   \fBJSON_HEDLEY_GNUC_VERSION_CHECK\fP(major,minor,patch)"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_GCC_HAS_WARNING\fP(warning,  major,  minor,  patch)   \fBJSON_HEDLEY_GCC_VERSION_CHECK\fP(major,minor,patch)"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_DIAGNOSTIC_DISABLE_CPP98_COMPAT_WRAP_\fP(x)   x"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_PRAGMA\fP(value)"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_DIAGNOSTIC_PUSH\fP"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_DIAGNOSTIC_POP\fP"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED\fP"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_DIAGNOSTIC_DISABLE_UNKNOWN_PRAGMAS\fP"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_DIAGNOSTIC_DISABLE_UNKNOWN_CPP_ATTRIBUTES\fP"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_DIAGNOSTIC_DISABLE_CAST_QUAL\fP"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_DEPRECATED\fP(since)"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_DEPRECATED_FOR\fP(since,  replacement)"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_UNAVAILABLE\fP(available_since)"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_WARN_UNUSED_RESULT\fP"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_SENTINEL\fP(position)"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_NO_RETURN\fP"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_NO_ESCAPE\fP"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_UNREACHABLE\fP()"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_UNREACHABLE_RETURN\fP(value)   return value"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_ASSUME\fP(expr)   ((void) (expr))"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_NON_NULL\fP(\&.\&.\&.)"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_PRINTF_FORMAT\fP(string_idx,  first_to_check)"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_CONSTEXPR\fP"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_PREDICT\fP(expr,  expected,  probability)   (((void) (expected)), !!(expr))"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_PREDICT_TRUE\fP(expr,  probability)   (!!(expr))"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_PREDICT_FALSE\fP(expr,  probability)   (!!(expr))"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_LIKELY\fP(expr)   (!!(expr))"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_UNLIKELY\fP(expr)   (!!(expr))"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_UNPREDICTABLE\fP(expr)   \fBJSON_HEDLEY_PREDICT\fP(expr, 1, 0\&.5)"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_MALLOC\fP"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_PURE\fP"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_CONST\fP   \fBJSON_HEDLEY_PURE\fP"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_RESTRICT\fP"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_INLINE\fP"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_ALWAYS_INLINE\fP   \fBJSON_HEDLEY_INLINE\fP"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_NEVER_INLINE\fP"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_PRIVATE\fP"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_PUBLIC\fP"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_IMPORT\fP   extern"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_NO_THROW\fP"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_FALL_THROUGH\fP"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_RETURNS_NON_NULL\fP"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_ARRAY_PARAM\fP(name)"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_IS_CONSTANT\fP(expr)   (0)"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_REQUIRE_CONSTEXPR\fP(expr)   (expr)"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_BEGIN_C_DECLS\fP"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_END_C_DECLS\fP"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_C_DECL\fP"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_STATIC_ASSERT\fP(expr,  message)"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_CONST_CAST\fP(T,  expr)   ((T) (expr))"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_REINTERPRET_CAST\fP(T,  expr)   (*((T*) &(expr)))"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_STATIC_CAST\fP(T,  expr)   ((T) (expr))"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_CPP_CAST\fP(T,  expr)   (expr)"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_NULL\fP   ((void*) 0)"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_MESSAGE\fP(msg)"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_WARNING\fP(msg)   \fBJSON_HEDLEY_MESSAGE\fP(msg)"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_REQUIRE\fP(expr)"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_REQUIRE_MSG\fP(expr,  msg)"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_FLAGS_CAST\fP(T,  expr)   \fBJSON_HEDLEY_STATIC_CAST\fP(T, expr)"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_EMPTY_BASES\fP"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_GCC_NOT_CLANG_VERSION_CHECK\fP(major,  minor,  patch)   \fBJSON_HEDLEY_GCC_VERSION_CHECK\fP(major,minor,patch)"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_CLANG_HAS_ATTRIBUTE\fP(attribute)   \fBJSON_HEDLEY_HAS_ATTRIBUTE\fP(attribute)"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_CLANG_HAS_CPP_ATTRIBUTE\fP(attribute)   \fBJSON_HEDLEY_HAS_CPP_ATTRIBUTE\fP(attribute)"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_CLANG_HAS_BUILTIN\fP(builtin)   \fBJSON_HEDLEY_HAS_BUILTIN\fP(builtin)"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_CLANG_HAS_FEATURE\fP(feature)   \fBJSON_HEDLEY_HAS_FEATURE\fP(feature)"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_CLANG_HAS_EXTENSION\fP(extension)   \fBJSON_HEDLEY_HAS_EXTENSION\fP(extension)"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_CLANG_HAS_DECLSPEC_ATTRIBUTE\fP(attribute)   \fBJSON_HEDLEY_HAS_DECLSPEC_ATTRIBUTE\fP(attribute)"
+.br
+.ti -1c
+.RI "#define \fBJSON_HEDLEY_CLANG_HAS_WARNING\fP(warning)   \fBJSON_HEDLEY_HAS_WARNING\fP(warning)"
+.br
+.ti -1c
+.RI "#define \fBJSON_THROW\fP(exception)   std::abort()"
+.br
+.ti -1c
+.RI "#define \fBJSON_TRY\fP   if(true)"
+.br
+.ti -1c
+.RI "#define \fBJSON_CATCH\fP(exception)   if(false)"
+.br
+.ti -1c
+.RI "#define \fBJSON_INTERNAL_CATCH\fP(exception)   if(false)"
+.br
+.ti -1c
+.RI "#define \fBNLOHMANN_JSON_SERIALIZE_ENUM\fP(ENUM_TYPE, \&.\&.\&.)"
+.br
+.RI "macro to briefly define a mapping between an enum and JSON "
+.ti -1c
+.RI "#define \fBNLOHMANN_BASIC_JSON_TPL_DECLARATION\fP"
+.br
+.ti -1c
+.RI "#define \fBNLOHMANN_BASIC_JSON_TPL\fP"
+.br
+.ti -1c
+.RI "#define \fBINCLUDE_NLOHMANN_JSON_FWD_HPP_\fP"
+.br
+.in -1c
+.SS "Typedefs"
+
+.in +1c
+.ti -1c
+.RI "template<bool B, typename T  = void> using \fBnlohmann::detail::enable_if_t\fP = typename std::enable_if< B, T >::type"
+.br
+.ti -1c
+.RI "template<typename T > using \fBnlohmann::detail::uncvref_t\fP = typename std::remove_cv< typename std::remove_reference< T >::type >::type"
+.br
+.ti -1c
+.RI "template<typename\&.\&.\&. Ts> using \fBnlohmann::detail::index_sequence_for\fP = make_index_sequence< sizeof\&.\&.\&.(Ts)>"
+.br
+.ti -1c
+.RI "template<typename \&.\&.\&. Ts> using \fBnlohmann::detail::void_t\fP = typename make_void< Ts\&.\&.\&. >::type"
+.br
+.ti -1c
+.RI "template<template< class\&.\&.\&. > class Op, class\&.\&.\&. Args> using \fBnlohmann::detail::is_detected\fP = typename detector< nonesuch, void, Op, Args\&.\&.\&. >::value_t"
+.br
+.ti -1c
+.RI "template<template< class\&.\&.\&. > class Op, class\&.\&.\&. Args> using \fBnlohmann::detail::detected_t\fP = typename detector< nonesuch, void, Op, Args\&.\&.\&. >::type"
+.br
+.ti -1c
+.RI "template<class Default , template< class\&.\&.\&. > class Op, class\&.\&.\&. Args> using \fBnlohmann::detail::detected_or\fP = detector< Default, void, Op, Args\&.\&.\&. >"
+.br
+.ti -1c
+.RI "template<class Default , template< class\&.\&.\&. > class Op, class\&.\&.\&. Args> using \fBnlohmann::detail::detected_or_t\fP = typename detected_or< Default, Op, Args\&.\&.\&. >::type"
+.br
+.ti -1c
+.RI "template<class Expected , template< class\&.\&.\&. > class Op, class\&.\&.\&. Args> using \fBnlohmann::detail::is_detected_exact\fP = std::is_same< Expected, detected_t< Op, Args\&.\&.\&. > >"
+.br
+.ti -1c
+.RI "template<class To , template< class\&.\&.\&. > class Op, class\&.\&.\&. Args> using \fBnlohmann::detail::is_detected_convertible\fP = std::is_convertible< detected_t< Op, Args\&.\&.\&. >, To >"
+.br
+.ti -1c
+.RI "using \fBnlohmann::json\fP = basic_json<>"
+.br
+.RI "default JSON class "
+.ti -1c
+.RI "template<typename T > using \fBnlohmann::detail::mapped_type_t\fP = typename T::mapped_type"
+.br
+.ti -1c
+.RI "template<typename T > using \fBnlohmann::detail::key_type_t\fP = typename T::key_type"
+.br
+.ti -1c
+.RI "template<typename T > using \fBnlohmann::detail::value_type_t\fP = typename T::value_type"
+.br
+.ti -1c
+.RI "template<typename T > using \fBnlohmann::detail::difference_type_t\fP = typename T::difference_type"
+.br
+.ti -1c
+.RI "template<typename T > using \fBnlohmann::detail::pointer_t\fP = typename T::pointer"
+.br
+.ti -1c
+.RI "template<typename T > using \fBnlohmann::detail::reference_t\fP = typename T::reference"
+.br
+.ti -1c
+.RI "template<typename T > using \fBnlohmann::detail::iterator_category_t\fP = typename T::iterator_category"
+.br
+.ti -1c
+.RI "template<typename T > using \fBnlohmann::detail::iterator_t\fP = typename T::iterator"
+.br
+.ti -1c
+.RI "template<typename T , typename\&.\&.\&. Args> using \fBnlohmann::detail::to_json_function\fP = decltype(T::to_json(std::declval< Args >()\&.\&.\&.))"
+.br
+.ti -1c
+.RI "template<typename T , typename\&.\&.\&. Args> using \fBnlohmann::detail::from_json_function\fP = decltype(T::from_json(std::declval< Args >()\&.\&.\&.))"
+.br
+.ti -1c
+.RI "template<typename T , typename U > using \fBnlohmann::detail::get_template_function\fP = decltype(std::declval< T >()\&.template get< U >())"
+.br
+.ti -1c
+.RI "using \fBnlohmann::detail::input_adapter_t\fP = std::shared_ptr< input_adapter_protocol >"
+.br
+.RI "a type to simplify interfaces "
+.ti -1c
+.RI "template<typename T > using \fBnlohmann::detail::null_function_t\fP = decltype(std::declval< T & >()\&.null())"
+.br
+.ti -1c
+.RI "template<typename T > using \fBnlohmann::detail::boolean_function_t\fP = decltype(std::declval< T & >()\&.boolean(std::declval< bool >()))"
+.br
+.ti -1c
+.RI "template<typename T , typename Integer > using \fBnlohmann::detail::number_integer_function_t\fP = decltype(std::declval< T & >()\&.number_integer(std::declval< Integer >()))"
+.br
+.ti -1c
+.RI "template<typename T , typename Unsigned > using \fBnlohmann::detail::number_unsigned_function_t\fP = decltype(std::declval< T & >()\&.number_unsigned(std::declval< Unsigned >()))"
+.br
+.ti -1c
+.RI "template<typename T , typename Float , typename String > using \fBnlohmann::detail::number_float_function_t\fP = decltype(std::declval< T & >()\&.number_float(std::declval< Float >(), std::declval< const String & >()))"
+.br
+.ti -1c
+.RI "template<typename T , typename String > using \fBnlohmann::detail::string_function_t\fP = decltype(std::declval< T & >()\&.string(std::declval< String & >()))"
+.br
+.ti -1c
+.RI "template<typename T > using \fBnlohmann::detail::start_object_function_t\fP = decltype(std::declval< T & >()\&.start_object(std::declval< std::size_t >()))"
+.br
+.ti -1c
+.RI "template<typename T , typename String > using \fBnlohmann::detail::key_function_t\fP = decltype(std::declval< T & >()\&.key(std::declval< String & >()))"
+.br
+.ti -1c
+.RI "template<typename T > using \fBnlohmann::detail::end_object_function_t\fP = decltype(std::declval< T & >()\&.end_object())"
+.br
+.ti -1c
+.RI "template<typename T > using \fBnlohmann::detail::start_array_function_t\fP = decltype(std::declval< T & >()\&.start_array(std::declval< std::size_t >()))"
+.br
+.ti -1c
+.RI "template<typename T > using \fBnlohmann::detail::end_array_function_t\fP = decltype(std::declval< T & >()\&.end_array())"
+.br
+.ti -1c
+.RI "template<typename T , typename Exception > using \fBnlohmann::detail::parse_error_function_t\fP = decltype(std::declval< T & >()\&.parse_error(std::declval< std::size_t >(), std::declval< const std::string & >(), std::declval< const Exception & >()))"
+.br
+.ti -1c
+.RI "template<typename CharType > using \fBnlohmann::detail::output_adapter_t\fP = std::shared_ptr< output_adapter_protocol< CharType > >"
+.br
+.RI "a type to simplify interfaces "
+.in -1c
+.SS "Enumerations"
+
+.in +1c
+.ti -1c
+.RI "enum \fBnlohmann::detail::value_t\fP : std::uint8_t { \fBnlohmann::detail::value_t::null\fP, \fBnlohmann::detail::value_t::object\fP, \fBnlohmann::detail::value_t::array\fP, \fBnlohmann::detail::value_t::string\fP, \fBnlohmann::detail::value_t::boolean\fP, \fBnlohmann::detail::value_t::number_integer\fP, \fBnlohmann::detail::value_t::number_unsigned\fP, \fBnlohmann::detail::value_t::number_float\fP, \fBnlohmann::detail::value_t::discarded\fP }
+.RI "the JSON type enumeration ""
+.br
+.ti -1c
+.RI "enum \fBnlohmann::detail::input_format_t\fP { \fBnlohmann::detail::input_format_t::json\fP, \fBnlohmann::detail::input_format_t::cbor\fP, \fBnlohmann::detail::input_format_t::msgpack\fP, \fBnlohmann::detail::input_format_t::ubjson\fP, \fBnlohmann::detail::input_format_t::bson\fP }
+.RI "the supported input formats ""
+.br
+.ti -1c
+.RI "enum \fBnlohmann::detail::error_handler_t\fP { \fBnlohmann::detail::error_handler_t::strict\fP, \fBnlohmann::detail::error_handler_t::replace\fP, \fBnlohmann::detail::error_handler_t::ignore\fP }
+.RI "how to treat decoding errors ""
+.br
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "bool \fBnlohmann::detail::operator<\fP (const value_t lhs, const value_t rhs) noexcept"
+.br
+.RI "comparison operator for JSON types "
+.ti -1c
+.RI "template<typename BasicJsonType > void \fBnlohmann::detail::from_json\fP (const BasicJsonType &j, typename std::nullptr_t &n)"
+.br
+.ti -1c
+.RI "template<typename BasicJsonType , typename ArithmeticType , enable_if_t< std::is_arithmetic< ArithmeticType >::value and not std::is_same< ArithmeticType, typename BasicJsonType::boolean_t >::value, int >  = 0> void \fBnlohmann::detail::get_arithmetic_value\fP (const BasicJsonType &j, ArithmeticType &val)"
+.br
+.ti -1c
+.RI "template<typename BasicJsonType > void \fBnlohmann::detail::from_json\fP (const BasicJsonType &j, typename BasicJsonType::boolean_t &b)"
+.br
+.ti -1c
+.RI "template<typename BasicJsonType > void \fBnlohmann::detail::from_json\fP (const BasicJsonType &j, typename BasicJsonType::string_t &s)"
+.br
+.ti -1c
+.RI "template<typename BasicJsonType , typename ConstructibleStringType , enable_if_t< is_constructible_string_type< BasicJsonType, ConstructibleStringType >::value and not std::is_same< typename BasicJsonType::string_t, ConstructibleStringType >::value, int >  = 0> void \fBnlohmann::detail::from_json\fP (const BasicJsonType &j, ConstructibleStringType &s)"
+.br
+.ti -1c
+.RI "template<typename BasicJsonType > void \fBnlohmann::detail::from_json\fP (const BasicJsonType &j, typename BasicJsonType::number_float_t &val)"
+.br
+.ti -1c
+.RI "template<typename BasicJsonType > void \fBnlohmann::detail::from_json\fP (const BasicJsonType &j, typename BasicJsonType::number_unsigned_t &val)"
+.br
+.ti -1c
+.RI "template<typename BasicJsonType > void \fBnlohmann::detail::from_json\fP (const BasicJsonType &j, typename BasicJsonType::number_integer_t &val)"
+.br
+.ti -1c
+.RI "template<typename BasicJsonType , typename EnumType , enable_if_t< std::is_enum< EnumType >::value, int >  = 0> void \fBnlohmann::detail::from_json\fP (const BasicJsonType &j, EnumType &e)"
+.br
+.ti -1c
+.RI "template<typename BasicJsonType , typename T , typename Allocator , enable_if_t< std::is_convertible< BasicJsonType, T >::value, int >  = 0> void \fBnlohmann::detail::from_json\fP (const BasicJsonType &j, std::forward_list< T, Allocator > &l)"
+.br
+.ti -1c
+.RI "template<typename BasicJsonType , typename T , enable_if_t< std::is_convertible< BasicJsonType, T >::value, int >  = 0> void \fBnlohmann::detail::from_json\fP (const BasicJsonType &j, std::valarray< T > &l)"
+.br
+.ti -1c
+.RI "template<typename BasicJsonType , typename T , std::size_t N> auto \fBnlohmann::detail::from_json\fP (const BasicJsonType &j, T(&arr)[N]) \-> decltype(j\&.template get< T >(), void())"
+.br
+.ti -1c
+.RI "template<typename BasicJsonType > void \fBnlohmann::detail::from_json_array_impl\fP (const BasicJsonType &j, typename BasicJsonType::array_t &arr, priority_tag< 3 >)"
+.br
+.ti -1c
+.RI "template<typename BasicJsonType , typename T , std::size_t N> auto \fBnlohmann::detail::from_json_array_impl\fP (const BasicJsonType &j, std::array< T, N > &arr, priority_tag< 2 >) \-> decltype(j\&.template get< T >(), void())"
+.br
+.ti -1c
+.RI "template<typename BasicJsonType , typename ConstructibleArrayType > auto \fBnlohmann::detail::from_json_array_impl\fP (const BasicJsonType &j, ConstructibleArrayType &arr, priority_tag< 1 >) \-> decltype(arr\&.reserve(std::declval< typename ConstructibleArrayType::size_type >()), j\&.template get< typename ConstructibleArrayType::value_type >(), void())"
+.br
+.ti -1c
+.RI "template<typename BasicJsonType , typename ConstructibleArrayType > void \fBnlohmann::detail::from_json_array_impl\fP (const BasicJsonType &j, ConstructibleArrayType &arr, priority_tag< 0 >)"
+.br
+.ti -1c
+.RI "template<typename BasicJsonType , typename ConstructibleArrayType , enable_if_t< is_constructible_array_type< BasicJsonType, ConstructibleArrayType >::value and not is_constructible_object_type< BasicJsonType, ConstructibleArrayType >::value and not is_constructible_string_type< BasicJsonType, ConstructibleArrayType >::value and not is_basic_json< ConstructibleArrayType >::value, int >  = 0> auto \fBnlohmann::detail::from_json\fP (const BasicJsonType &j, ConstructibleArrayType &arr) \-> decltype(from_json_array_impl(j, arr, priority_tag< 3 >"
+.br
+.ti -1c
+.RI "j template \fBnlohmann::detail::get< typename ConstructibleArrayType::value_type >\fP ()"
+.br
+.ti -1c
+.RI "j template \fBnlohmann::detail::void\fP ())"
+.br
+.ti -1c
+.RI "template<typename BasicJsonType , typename ConstructibleObjectType , enable_if_t< is_constructible_object_type< BasicJsonType, ConstructibleObjectType >::value, int >  = 0> void \fBnlohmann::detail::from_json\fP (const BasicJsonType &j, ConstructibleObjectType &obj)"
+.br
+.ti -1c
+.RI "template<typename BasicJsonType , typename ArithmeticType , enable_if_t< std::is_arithmetic< ArithmeticType >::value and not std::is_same< ArithmeticType, typename BasicJsonType::number_unsigned_t >::value and not std::is_same< ArithmeticType, typename BasicJsonType::number_integer_t >::value and not std::is_same< ArithmeticType, typename BasicJsonType::number_float_t >::value and not std::is_same< ArithmeticType, typename BasicJsonType::boolean_t >::value, int >  = 0> void \fBnlohmann::detail::from_json\fP (const BasicJsonType &j, ArithmeticType &val)"
+.br
+.ti -1c
+.RI "template<typename BasicJsonType , typename A1 , typename A2 > void \fBnlohmann::detail::from_json\fP (const BasicJsonType &j, std::pair< A1, A2 > &p)"
+.br
+.ti -1c
+.RI "template<typename BasicJsonType , typename Tuple , std::size_t\&.\&.\&. Idx> void \fBnlohmann::detail::from_json_tuple_impl\fP (const BasicJsonType &j, Tuple &t, index_sequence< Idx\&.\&.\&. >)"
+.br
+.ti -1c
+.RI "template<typename BasicJsonType , typename\&.\&.\&. Args> void \fBnlohmann::detail::from_json\fP (const BasicJsonType &j, std::tuple< Args\&.\&.\&. > &t)"
+.br
+.ti -1c
+.RI "template<typename BasicJsonType , typename Key , typename Value , typename Compare , typename Allocator , typename  = enable_if_t<not std::is_constructible<                                     typename BasicJsonType::string_t, Key>::value>> void \fBnlohmann::detail::from_json\fP (const BasicJsonType &j, std::map< Key, Value, Compare, Allocator > &m)"
+.br
+.ti -1c
+.RI "template<typename BasicJsonType , typename Key , typename Value , typename Hash , typename KeyEqual , typename Allocator , typename  = enable_if_t<not std::is_constructible<                                     typename BasicJsonType::string_t, Key>::value>> void \fBnlohmann::detail::from_json\fP (const BasicJsonType &j, std::unordered_map< Key, Value, Hash, KeyEqual, Allocator > &m)"
+.br
+.ti -1c
+.RI "template<typename string_type > void \fBnlohmann::detail::int_to_string\fP (string_type &target, std::size_t value)"
+.br
+.ti -1c
+.RI "template<std::size_t N, typename IteratorType , enable_if_t< N==0, int >  = 0> auto \fBnlohmann::detail::get\fP (const \fBnlohmann::detail::iteration_proxy_value\fP< IteratorType > &i) \-> decltype(i\&.key())"
+.br
+.ti -1c
+.RI "template<typename BasicJsonType , typename T , enable_if_t< std::is_same< T, typename BasicJsonType::boolean_t >::value, int >  = 0> void \fBnlohmann::detail::to_json\fP (BasicJsonType &j, T b) noexcept"
+.br
+.ti -1c
+.RI "template<typename BasicJsonType , typename CompatibleString , enable_if_t< std::is_constructible< typename BasicJsonType::string_t, CompatibleString >::value, int >  = 0> void \fBnlohmann::detail::to_json\fP (BasicJsonType &j, const CompatibleString &s)"
+.br
+.ti -1c
+.RI "template<typename BasicJsonType > void \fBnlohmann::detail::to_json\fP (BasicJsonType &j, typename BasicJsonType::string_t &&s)"
+.br
+.ti -1c
+.RI "template<typename BasicJsonType , typename FloatType , enable_if_t< std::is_floating_point< FloatType >::value, int >  = 0> void \fBnlohmann::detail::to_json\fP (BasicJsonType &j, FloatType val) noexcept"
+.br
+.ti -1c
+.RI "template<typename BasicJsonType , typename CompatibleNumberUnsignedType , enable_if_t< is_compatible_integer_type< typename BasicJsonType::number_unsigned_t, CompatibleNumberUnsignedType >::value, int >  = 0> void \fBnlohmann::detail::to_json\fP (BasicJsonType &j, CompatibleNumberUnsignedType val) noexcept"
+.br
+.ti -1c
+.RI "template<typename BasicJsonType , typename CompatibleNumberIntegerType , enable_if_t< is_compatible_integer_type< typename BasicJsonType::number_integer_t, CompatibleNumberIntegerType >::value, int >  = 0> void \fBnlohmann::detail::to_json\fP (BasicJsonType &j, CompatibleNumberIntegerType val) noexcept"
+.br
+.ti -1c
+.RI "template<typename BasicJsonType , typename EnumType , enable_if_t< std::is_enum< EnumType >::value, int >  = 0> void \fBnlohmann::detail::to_json\fP (BasicJsonType &j, EnumType e) noexcept"
+.br
+.ti -1c
+.RI "template<typename BasicJsonType > void \fBnlohmann::detail::to_json\fP (BasicJsonType &j, const std::vector< bool > &e)"
+.br
+.ti -1c
+.RI "template<typename BasicJsonType , typename CompatibleArrayType , enable_if_t< is_compatible_array_type< BasicJsonType, CompatibleArrayType >::value and not is_compatible_object_type< BasicJsonType, CompatibleArrayType >::value and not is_compatible_string_type< BasicJsonType, CompatibleArrayType >::value and not is_basic_json< CompatibleArrayType >::value, int >  = 0> void \fBnlohmann::detail::to_json\fP (BasicJsonType &j, const CompatibleArrayType &arr)"
+.br
+.ti -1c
+.RI "template<typename BasicJsonType , typename T , enable_if_t< std::is_convertible< T, BasicJsonType >::value, int >  = 0> void \fBnlohmann::detail::to_json\fP (BasicJsonType &j, const std::valarray< T > &arr)"
+.br
+.ti -1c
+.RI "template<typename BasicJsonType > void \fBnlohmann::detail::to_json\fP (BasicJsonType &j, typename BasicJsonType::array_t &&arr)"
+.br
+.ti -1c
+.RI "template<typename BasicJsonType , typename CompatibleObjectType , enable_if_t< is_compatible_object_type< BasicJsonType, CompatibleObjectType >::value and not is_basic_json< CompatibleObjectType >::value, int >  = 0> void \fBnlohmann::detail::to_json\fP (BasicJsonType &j, const CompatibleObjectType &obj)"
+.br
+.ti -1c
+.RI "template<typename BasicJsonType > void \fBnlohmann::detail::to_json\fP (BasicJsonType &j, typename BasicJsonType::object_t &&obj)"
+.br
+.ti -1c
+.RI "template<typename BasicJsonType , typename T , std::size_t N, enable_if_t< not std::is_constructible< typename BasicJsonType::string_t, const T(&)[N]>::value, int >  = 0> void \fBnlohmann::detail::to_json\fP (BasicJsonType &j, const T(&arr)[N])"
+.br
+.ti -1c
+.RI "template<typename BasicJsonType , typename T1 , typename T2 , enable_if_t< std::is_constructible< BasicJsonType, T1 >::value &&std::is_constructible< BasicJsonType, T2 >::value, int >  = 0> void \fBnlohmann::detail::to_json\fP (BasicJsonType &j, const std::pair< T1, T2 > &p)"
+.br
+.ti -1c
+.RI "template<typename BasicJsonType , typename T , enable_if_t< std::is_same< T, iteration_proxy_value< typename BasicJsonType::iterator >>::value, int >  = 0> void \fBnlohmann::detail::to_json\fP (BasicJsonType &j, const T &b)"
+.br
+.ti -1c
+.RI "template<typename BasicJsonType , typename Tuple , std::size_t\&.\&.\&. Idx> void \fBnlohmann::detail::to_json_tuple_impl\fP (BasicJsonType &j, const Tuple &t, index_sequence< Idx\&.\&.\&. >)"
+.br
+.ti -1c
+.RI "template<typename Target , typename Source > Target \fBnlohmann::detail::dtoa_impl::reinterpret_bits\fP (const Source source)"
+.br
+.ti -1c
+.RI "template<typename FloatType > boundaries \fBnlohmann::detail::dtoa_impl::compute_boundaries\fP (FloatType value)"
+.br
+.ti -1c
+.RI "cached_power \fBnlohmann::detail::dtoa_impl::get_cached_power_for_binary_exponent\fP (int e)"
+.br
+.ti -1c
+.RI "int \fBnlohmann::detail::dtoa_impl::find_largest_pow10\fP (const std::uint32_t n, std::uint32_t &pow10)"
+.br
+.ti -1c
+.RI "void \fBnlohmann::detail::dtoa_impl::grisu2_round\fP (char *buf, int len, std::uint64_t dist, std::uint64_t delta, std::uint64_t rest, std::uint64_t ten_k)"
+.br
+.ti -1c
+.RI "void \fBnlohmann::detail::dtoa_impl::grisu2_digit_gen\fP (char *buffer, int &length, int &decimal_exponent, diyfp M_minus, diyfp w, diyfp M_plus)"
+.br
+.ti -1c
+.RI "void \fBnlohmann::detail::dtoa_impl::grisu2\fP (char *buf, int &len, int &decimal_exponent, diyfp m_minus, diyfp v, diyfp m_plus)"
+.br
+.ti -1c
+.RI "template<typename FloatType > void \fBnlohmann::detail::dtoa_impl::grisu2\fP (char *buf, int &len, int &decimal_exponent, FloatType value)"
+.br
+.ti -1c
+.RI "\fBJSON_HEDLEY_RETURNS_NON_NULL\fP char * \fBnlohmann::detail::dtoa_impl::append_exponent\fP (char *buf, int e)"
+.br
+.RI "appends a decimal representation of e to buf "
+.ti -1c
+.RI "\fBJSON_HEDLEY_RETURNS_NON_NULL\fP char * \fBnlohmann::detail::dtoa_impl::format_buffer\fP (char *buf, int len, int decimal_exponent, int min_exp, int max_exp)"
+.br
+.RI "prettify v = buf * 10^decimal_exponent "
+.ti -1c
+.RI "template<typename FloatType > \fBJSON_HEDLEY_RETURNS_NON_NULL\fP char * \fBnlohmann::detail::to_chars\fP (char *first, const char *last, FloatType value)"
+.br
+.RI "generates a decimal representation of the floating-point number value in [first, last)\&. "
+.ti -1c
+.RI "\fBNLOHMANN_BASIC_JSON_TPL_DECLARATION\fP std::string \fBnlohmann::to_string\fP (const \fBNLOHMANN_BASIC_JSON_TPL\fP &j)"
+.br
+.RI "user-defined to_string function for JSON values "
+.ti -1c
+.RI "template<> void \fBstd::swap< nlohmann::json >\fP (\fBnlohmann::json\fP &j1, \fBnlohmann::json\fP &j2) noexcept(is_nothrow_move_constructible< \fBnlohmann::json\fP >::value and is_nothrow_move_assignable< \fBnlohmann::json\fP >::value)"
+.br
+.RI "exchanges the values of two JSON objects "
+.ti -1c
+.RI "\fBnlohmann::json\fP \fBoperator'' _json\fP (const char *s, std::size_t n)"
+.br
+.RI "user-defined string literal for JSON values "
+.ti -1c
+.RI "\fBnlohmann::json::json_pointer\fP \fBoperator'' _json_pointer\fP (const char *s, std::size_t n)"
+.br
+.RI "user-defined string literal for JSON pointer "
+.in -1c
+.SS "Variables"
+
+.in +1c
+.ti -1c
+.RI "constexpr int \fBnlohmann::detail::dtoa_impl::kAlpha\fP = \-60"
+.br
+.ti -1c
+.RI "constexpr int \fBnlohmann::detail::dtoa_impl::kGamma\fP = \-32"
+.br
+.in -1c
+.SH "Macro Definition Documentation"
+.PP 
+.SS "#define INCLUDE_NLOHMANN_JSON_FWD_HPP_"
+
+.PP
+Definition at line 2386 of file json\&.hpp\&.
+.SS "#define JSON_CATCH(exception)   if(false)"
+
+.PP
+Definition at line 1756 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_ALWAYS_INLINE   \fBJSON_HEDLEY_INLINE\fP"
+
+.PP
+Definition at line 1257 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_ARM_VERSION_CHECK(major, minor, patch)   (0)"
+
+.PP
+Definition at line 300 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_ARRAY_PARAM(name)"
+
+.PP
+Definition at line 1376 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_ASSUME(expr)   ((void) (expr))"
+
+.PP
+Definition at line 1005 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_BEGIN_C_DECLS"
+
+.PP
+Definition at line 1473 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_C_DECL"
+
+.PP
+Definition at line 1475 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_CLANG_HAS_ATTRIBUTE(attribute)   \fBJSON_HEDLEY_HAS_ATTRIBUTE\fP(attribute)"
+
+.PP
+Definition at line 1675 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_CLANG_HAS_BUILTIN(builtin)   \fBJSON_HEDLEY_HAS_BUILTIN\fP(builtin)"
+
+.PP
+Definition at line 1685 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_CLANG_HAS_CPP_ATTRIBUTE(attribute)   \fBJSON_HEDLEY_HAS_CPP_ATTRIBUTE\fP(attribute)"
+
+.PP
+Definition at line 1680 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_CLANG_HAS_DECLSPEC_ATTRIBUTE(attribute)   \fBJSON_HEDLEY_HAS_DECLSPEC_ATTRIBUTE\fP(attribute)"
+
+.PP
+Definition at line 1700 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_CLANG_HAS_EXTENSION(extension)   \fBJSON_HEDLEY_HAS_EXTENSION\fP(extension)"
+
+.PP
+Definition at line 1695 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_CLANG_HAS_FEATURE(feature)   \fBJSON_HEDLEY_HAS_FEATURE\fP(feature)"
+
+.PP
+Definition at line 1690 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_CLANG_HAS_WARNING(warning)   \fBJSON_HEDLEY_HAS_WARNING\fP(warning)"
+
+.PP
+Definition at line 1705 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_COMPCERT_VERSION_CHECK(major, minor, patch)   (0)"
+
+.PP
+Definition at line 424 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_CONCAT(a, b)   \fBJSON_HEDLEY_CONCAT_EX\fP(a,b)"
+
+.PP
+Definition at line 149 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_CONCAT_EX(a, b)   a##b"
+
+.PP
+Definition at line 144 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_CONST   \fBJSON_HEDLEY_PURE\fP"
+
+.PP
+Definition at line 1191 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_CONST_CAST(T, expr)   ((T) (expr))"
+
+.PP
+Definition at line 1515 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_CONSTEXPR"
+
+.PP
+Definition at line 1067 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_CPP_CAST(T, expr)   (expr)"
+
+.PP
+Definition at line 1542 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_CRAY_VERSION_CHECK(major, minor, patch)   (0)"
+
+.PP
+Definition at line 356 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_DEPRECATED(since)"
+
+.PP
+Definition at line 860 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_DEPRECATED_FOR(since, replacement)"
+
+.PP
+Definition at line 861 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_DIAGNOSTIC_DISABLE_CAST_QUAL"
+
+.PP
+Definition at line 818 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_DIAGNOSTIC_DISABLE_CPP98_COMPAT_WRAP_(x)   x"
+
+.PP
+Definition at line 684 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED"
+
+.PP
+Definition at line 763 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_DIAGNOSTIC_DISABLE_UNKNOWN_CPP_ATTRIBUTES"
+
+.PP
+Definition at line 805 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_DIAGNOSTIC_DISABLE_UNKNOWN_PRAGMAS"
+
+.PP
+Definition at line 784 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_DIAGNOSTIC_POP"
+
+.PP
+Definition at line 736 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_DIAGNOSTIC_PUSH"
+
+.PP
+Definition at line 735 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_DMC_VERSION_CHECK(major, minor, patch)   (0)"
+
+.PP
+Definition at line 408 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_EMPTY_BASES"
+
+.PP
+Definition at line 1658 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_EMSCRIPTEN_VERSION_CHECK(major, minor, patch)   (0)"
+
+.PP
+Definition at line 282 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_END_C_DECLS"
+
+.PP
+Definition at line 1474 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_FALL_THROUGH"
+
+.PP
+Definition at line 1349 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_FLAGS_CAST(T, expr)   \fBJSON_HEDLEY_STATIC_CAST\fP(T, expr)"
+
+.PP
+Definition at line 1649 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_GCC_HAS_ATTRIBUTE(attribute, major, minor, patch)   \fBJSON_HEDLEY_GCC_VERSION_CHECK\fP(major,minor,patch)"
+
+.PP
+Definition at line 490 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_GCC_HAS_BUILTIN(builtin, major, minor, patch)   \fBJSON_HEDLEY_GCC_VERSION_CHECK\fP(major,minor,patch)"
+
+.PP
+Definition at line 561 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_GCC_HAS_CPP_ATTRIBUTE(attribute, major, minor, patch)   \fBJSON_HEDLEY_GCC_VERSION_CHECK\fP(major,minor,patch)"
+
+.PP
+Definition at line 534 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_GCC_HAS_DECLSPEC_ATTRIBUTE(attribute, major, minor, patch)   \fBJSON_HEDLEY_GCC_VERSION_CHECK\fP(major,minor,patch)"
+
+.PP
+Definition at line 642 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_GCC_HAS_EXTENSION(extension, major, minor, patch)   \fBJSON_HEDLEY_GCC_VERSION_CHECK\fP(major,minor,patch)"
+
+.PP
+Definition at line 615 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_GCC_HAS_FEATURE(feature, major, minor, patch)   \fBJSON_HEDLEY_GCC_VERSION_CHECK\fP(major,minor,patch)"
+
+.PP
+Definition at line 588 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_GCC_HAS_WARNING(warning, major, minor, patch)   \fBJSON_HEDLEY_GCC_VERSION_CHECK\fP(major,minor,patch)"
+
+.PP
+Definition at line 669 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_GCC_NOT_CLANG_VERSION_CHECK(major, minor, patch)   \fBJSON_HEDLEY_GCC_VERSION_CHECK\fP(major,minor,patch)"
+
+.PP
+Definition at line 1669 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_GCC_VERSION_CHECK(major, minor, patch)   (0)"
+
+.PP
+Definition at line 463 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_GNUC_HAS_ATTRIBUTE(attribute, major, minor, patch)   \fBJSON_HEDLEY_GNUC_VERSION_CHECK\fP(major,minor,patch)"
+
+.PP
+Definition at line 481 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_GNUC_HAS_BUILTIN(builtin, major, minor, patch)   \fBJSON_HEDLEY_GNUC_VERSION_CHECK\fP(major,minor,patch)"
+
+.PP
+Definition at line 552 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_GNUC_HAS_CPP_ATTRIBUTE(attribute, major, minor, patch)   \fBJSON_HEDLEY_GNUC_VERSION_CHECK\fP(major,minor,patch)"
+
+.PP
+Definition at line 525 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_GNUC_HAS_DECLSPEC_ATTRIBUTE(attribute, major, minor, patch)   \fBJSON_HEDLEY_GNUC_VERSION_CHECK\fP(major,minor,patch)"
+
+.PP
+Definition at line 633 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_GNUC_HAS_EXTENSION(extension, major, minor, patch)   \fBJSON_HEDLEY_GNUC_VERSION_CHECK\fP(major,minor,patch)"
+
+.PP
+Definition at line 606 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_GNUC_HAS_FEATURE(feature, major, minor, patch)   \fBJSON_HEDLEY_GNUC_VERSION_CHECK\fP(major,minor,patch)"
+
+.PP
+Definition at line 579 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_GNUC_HAS_WARNING(warning, major, minor, patch)   \fBJSON_HEDLEY_GNUC_VERSION_CHECK\fP(major,minor,patch)"
+
+.PP
+Definition at line 660 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_GNUC_VERSION_CHECK(major, minor, patch)   (0)"
+
+.PP
+Definition at line 186 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_HAS_ATTRIBUTE(attribute)   (0)"
+
+.PP
+Definition at line 472 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_HAS_BUILTIN(builtin)   (0)"
+
+.PP
+Definition at line 543 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_HAS_CPP_ATTRIBUTE(attribute)   (0)"
+
+.PP
+Definition at line 502 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_HAS_CPP_ATTRIBUTE_NS(ns, attribute)   (0)"
+
+.PP
+Definition at line 509 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_HAS_DECLSPEC_ATTRIBUTE(attribute)   (0)"
+
+.PP
+Definition at line 624 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_HAS_EXTENSION(extension)   (0)"
+
+.PP
+Definition at line 597 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_HAS_FEATURE(feature)   (0)"
+
+.PP
+Definition at line 570 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_HAS_WARNING(warning)   (0)"
+
+.PP
+Definition at line 651 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_IAR_VERSION_CHECK(major, minor, patch)   (0)"
+
+.PP
+Definition at line 376 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_IBM_VERSION_CHECK(major, minor, patch)   (0)"
+
+.PP
+Definition at line 320 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_IMPORT   extern"
+
+.PP
+Definition at line 1318 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_INLINE"
+
+.PP
+Definition at line 1234 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_INTEL_VERSION_CHECK(major, minor, patch)   (0)"
+
+.PP
+Definition at line 228 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_IS_CONSTANT(expr)   (0)"
+
+.PP
+Definition at line 1454 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_LIKELY(expr)   (!!(expr))"
+
+.PP
+Definition at line 1123 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_MALLOC"
+
+.PP
+Definition at line 1148 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_MESSAGE(msg)"
+
+.PP
+Definition at line 1582 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_MSVC_VERSION_CHECK(major, minor, patch)   (0)"
+
+.PP
+Definition at line 204 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_NEVER_INLINE"
+
+.PP
+Definition at line 1286 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_NO_ESCAPE"
+
+.PP
+Definition at line 949 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_NO_RETURN"
+
+.PP
+Definition at line 940 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_NO_THROW"
+
+.PP
+Definition at line 1334 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_NON_NULL( \&.\&.\&.)"
+
+.PP
+Definition at line 1032 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_NULL   ((void*) 0)"
+
+.PP
+Definition at line 1559 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_PELLES_VERSION_CHECK(major, minor, patch)   (0)"
+
+.PP
+Definition at line 440 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_PGI_VERSION_CHECK(major, minor, patch)   (0)"
+
+.PP
+Definition at line 244 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_PRAGMA(value)"
+
+.PP
+Definition at line 704 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_PREDICT(expr, expected, probability)   (((void) (expected)), !!(expr))"
+
+.PP
+Definition at line 1120 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_PREDICT_FALSE(expr, probability)   (!!(expr))"
+
+.PP
+Definition at line 1122 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_PREDICT_TRUE(expr, probability)   (!!(expr))"
+
+.PP
+Definition at line 1121 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_PRINTF_FORMAT(string_idx, first_to_check)"
+
+.PP
+Definition at line 1055 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_PRIVATE"
+
+.PP
+Definition at line 1315 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_PUBLIC"
+
+.PP
+Definition at line 1316 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_PURE"
+
+.PP
+Definition at line 1170 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_REINTERPRET_CAST(T, expr)   (*((T*) &(expr)))"
+
+.PP
+Definition at line 1524 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_REQUIRE(expr)"
+
+.PP
+Definition at line 1627 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_REQUIRE_CONSTEXPR(expr)   (expr)"
+
+.PP
+Definition at line 1456 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_REQUIRE_MSG(expr, msg)"
+
+.PP
+Definition at line 1628 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_RESTRICT"
+
+.PP
+Definition at line 1214 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_RETURNS_NON_NULL"
+
+.PP
+Definition at line 1362 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_SENTINEL(position)"
+
+.PP
+Definition at line 906 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_STATIC_ASSERT(expr, message)"
+
+.PP
+Definition at line 1496 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_STATIC_CAST(T, expr)   ((T) (expr))"
+
+.PP
+Definition at line 1533 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_STRINGIFY(x)   \fBJSON_HEDLEY_STRINGIFY_EX\fP(x)"
+
+.PP
+Definition at line 139 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_STRINGIFY_EX(x)   #x"
+
+.PP
+Definition at line 134 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_SUNPRO_VERSION_CHECK(major, minor, patch)   (0)"
+
+.PP
+Definition at line 266 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_TI_VERSION_CHECK(major, minor, patch)   (0)"
+
+.PP
+Definition at line 336 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_TINYC_VERSION_CHECK(major, minor, patch)   (0)"
+
+.PP
+Definition at line 392 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_UNAVAILABLE(available_since)"
+
+.PP
+Definition at line 873 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_UNLIKELY(expr)   (!!(expr))"
+
+.PP
+Definition at line 1124 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_UNPREDICTABLE(expr)   \fBJSON_HEDLEY_PREDICT\fP(expr, 1, 0\&.5)"
+
+.PP
+Definition at line 1127 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_UNREACHABLE()"
+
+.PP
+Definition at line 976 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_UNREACHABLE_RETURN(value)   return value"
+
+.PP
+Definition at line 977 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_VERSION   11"
+
+.PP
+Definition at line 129 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_VERSION_DECODE_MAJOR(version)   ((version) / 1000000)"
+
+.PP
+Definition at line 159 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_VERSION_DECODE_MINOR(version)   (((version) % 1000000) / 1000)"
+
+.PP
+Definition at line 164 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_VERSION_DECODE_REVISION(version)   ((version) % 1000)"
+
+.PP
+Definition at line 169 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_VERSION_ENCODE(major, minor, revision)   (((major) * 1000000) + ((minor) * 1000) + (revision))"
+
+.PP
+Definition at line 154 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_WARN_UNUSED_RESULT"
+
+.PP
+Definition at line 893 of file json\&.hpp\&.
+.SS "#define JSON_HEDLEY_WARNING(msg)   \fBJSON_HEDLEY_MESSAGE\fP(msg)"
+
+.PP
+Definition at line 1601 of file json\&.hpp\&.
+.SS "#define JSON_INTERNAL_CATCH(exception)   if(false)"
+
+.PP
+Definition at line 1757 of file json\&.hpp\&.
+.SS "#define JSON_THROW(exception)   std::abort()"
+
+.PP
+Definition at line 1754 of file json\&.hpp\&.
+.SS "#define JSON_TRY   if(true)"
+
+.PP
+Definition at line 1755 of file json\&.hpp\&.
+.SS "#define NLOHMANN_BASIC_JSON_TPL"
+\fBValue:\fP
+.PP
+.nf
+basic_json<ObjectType, ArrayType, StringType, BooleanType,             \
+    NumberIntegerType, NumberUnsignedType, NumberFloatType,                \
+    AllocatorType, JSONSerializer>
+.fi
+.PP
+Definition at line 1822 of file json\&.hpp\&.
+.SS "#define NLOHMANN_BASIC_JSON_TPL_DECLARATION"
+\fBValue:\fP
+.PP
+.nf
+template<template<typename, typename, typename\&.\&.\&.> class ObjectType,   \
+             template<typename, typename\&.\&.\&.> class ArrayType,              \
+             class StringType, class BooleanType, class NumberIntegerType, \
+             class NumberUnsignedType, class NumberFloatType,              \
+             template<typename> class AllocatorType,                       \
+             template<typename, typename = void> class JSONSerializer>
+.fi
+.PP
+Definition at line 1814 of file json\&.hpp\&.
+.SS "#define NLOHMANN_JSON_SERIALIZE_ENUM(ENUM_TYPE,  \&.\&.\&.)"
+\fBValue:\fP
+.PP
+.nf
+template<typename BasicJsonType>                                                            \
+    inline void to_json(BasicJsonType& j, const ENUM_TYPE& e)                                   \
+    {                                                                                           \
+        static_assert(std::is_enum<ENUM_TYPE>::value, #ENUM_TYPE " must be an enum!");          \
+        static const std::pair<ENUM_TYPE, BasicJsonType> m[] = __VA_ARGS__;                     \
+        auto it = std::find_if(std::begin(m), std::end(m),                                      \
+                               [e](const std::pair<ENUM_TYPE, BasicJsonType>& ej_pair) -> bool  \
+        {                                                                                       \
+            return ej_pair\&.first == e;                                                          \
+        });                                                                                     \
+        j = ((it != std::end(m)) ? it : std::begin(m))->second;                                 \
+    }                                                                                           \
+    template<typename BasicJsonType>                                                            \
+    inline void from_json(const BasicJsonType& j, ENUM_TYPE& e)                                 \
+    {                                                                                           \
+        static_assert(std::is_enum<ENUM_TYPE>::value, #ENUM_TYPE " must be an enum!");          \
+        static const std::pair<ENUM_TYPE, BasicJsonType> m[] = __VA_ARGS__;                     \
+        auto it = std::find_if(std::begin(m), std::end(m),                                      \
+                               [&j](const std::pair<ENUM_TYPE, BasicJsonType>& ej_pair) -> bool \
+        {                                                                                       \
+            return ej_pair\&.second == j;                                                         \
+        });                                                                                     \
+        e = ((it != std::end(m)) ? it : std::begin(m))->first;                                  \
+    }
+.fi
+.PP
+macro to briefly define a mapping between an enum and JSON 
+.PP
+\fBSince:\fP
+.RS 4
+version 3\&.4\&.0 
+.RE
+.PP
+
+.PP
+Definition at line 1785 of file json\&.hpp\&.
+.SS "#define NLOHMANN_JSON_VERSION_MAJOR   3"
+
+.PP
+Definition at line 33 of file json\&.hpp\&.
+.SS "#define NLOHMANN_JSON_VERSION_MINOR   7"
+
+.PP
+Definition at line 34 of file json\&.hpp\&.
+.SS "#define NLOHMANN_JSON_VERSION_PATCH   3"
+
+.PP
+Definition at line 35 of file json\&.hpp\&.
+.SH "Function Documentation"
+.PP 
+.SS "\fBnlohmann::json\fP operator'' _json (const char * s, std::size_t n)\fC [inline]\fP"
+
+.PP
+user-defined string literal for JSON values This operator implements a user-defined string literal for JSON objects\&. It can be used by adding \fC'_json'\fP to a string literal and returns a JSON object if no parse error occurred\&.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIs\fP a string representation of a JSON object 
+.br
+\fIn\fP the length of string \fIs\fP 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+a JSON object
+.RE
+.PP
+\fBSince:\fP
+.RS 4
+version 1\&.0\&.0 
+.RE
+.PP
+
+.PP
+Definition at line 22698 of file json\&.hpp\&.
+.SS "\fBnlohmann::json::json_pointer\fP operator'' _json_pointer (const char * s, std::size_t n)\fC [inline]\fP"
+
+.PP
+user-defined string literal for JSON pointer This operator implements a user-defined string literal for JSON Pointers\&. It can be used by adding \fC'_json_pointer'\fP to a string literal and returns a JSON pointer object if no parse error occurred\&.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIs\fP a string representation of a JSON Pointer 
+.br
+\fIn\fP the length of string \fIs\fP 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+a JSON pointer object
+.RE
+.PP
+\fBSince:\fP
+.RS 4
+version 2\&.0\&.0 
+.RE
+.PP
+
+.PP
+Definition at line 22717 of file json\&.hpp\&.
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for ZIO from the source code\&.

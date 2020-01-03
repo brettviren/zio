@@ -1,0 +1,62 @@
+.TH "nlohmann::detail::invalid_iterator" 3 "Fri Jan 3 2020" "ZIO" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+nlohmann::detail::invalid_iterator \- exception indicating errors with iterators  
+
+.SH SYNOPSIS
+.br
+.PP
+.PP
+\fC#include <json\&.hpp>\fP
+.PP
+Inherits \fBnlohmann::detail::exception\fP\&.
+.SS "Static Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "static \fBinvalid_iterator\fP \fBcreate\fP (int id_, const \fBstd::string\fP &what_arg)"
+.br
+.in -1c
+.SS "Additional Inherited Members"
+.SH "Detailed Description"
+.PP 
+exception indicating errors with iterators 
+
+This exception is thrown if iterators passed to a library function do not match the expected semantics\&.
+.PP
+Exceptions have ids 2xx\&.
+.PP
+name / id example message description  json\&.exception\&.invalid_iterator\&.201 iterators are not compatible The iterators passed to constructor \fBbasic_json(InputIT first, InputIT last)\fP are not compatible, meaning they do not belong to the same container\&. Therefore, the range (\fIfirst\fP, \fIlast\fP) is invalid\&. json\&.exception\&.invalid_iterator\&.202 iterator does not fit current value In an erase or insert function, the passed iterator \fIpos\fP does not belong to the JSON value for which the function was called\&. It hence does not define a valid position for the deletion/insertion\&. json\&.exception\&.invalid_iterator\&.203 iterators do not fit current value Either iterator passed to function \fBerase(IteratorType first, IteratorType last)\fP does not belong to the JSON value from which values shall be erased\&. It hence does not define a valid range to delete values from\&. json\&.exception\&.invalid_iterator\&.204 iterators out of range When an iterator range for a primitive type (number, boolean, or string) is passed to a constructor or an erase function, this range has to be exactly (\fBbegin()\fP, \fBend()\fP), because this is the only way the single stored value is expressed\&. All other ranges are invalid\&. json\&.exception\&.invalid_iterator\&.205 iterator out of range When an iterator for a primitive type (number, boolean, or string) is passed to an erase function, the iterator has to be the \fBbegin()\fP iterator, because it is the only way to address the stored value\&. All other iterators are invalid\&. json\&.exception\&.invalid_iterator\&.206 cannot construct with iterators from null The iterators passed to constructor \fBbasic_json(InputIT first, InputIT last)\fP belong to a JSON null value and hence to not define a valid range\&. json\&.exception\&.invalid_iterator\&.207 cannot use key() for non-object iterators The key() member function can only be used on iterators belonging to a JSON object, because other types do not have a concept of a key\&. json\&.exception\&.invalid_iterator\&.208 cannot use operator[] for object iterators The operator[] to specify a concrete offset cannot be used on iterators belonging to a JSON object, because JSON objects are unordered\&. json\&.exception\&.invalid_iterator\&.209 cannot use offsets with object iterators The offset operators (+, -, +=, -=) cannot be used on iterators belonging to a JSON object, because JSON objects are unordered\&. json\&.exception\&.invalid_iterator\&.210 iterators do not fit The iterator range passed to the insert function are not compatible, meaning they do not belong to the same container\&. Therefore, the range (\fIfirst\fP, \fIlast\fP) is invalid\&. json\&.exception\&.invalid_iterator\&.211 passed iterators may not belong to container The iterator range passed to the insert function must not be a subrange of the container to insert to\&. json\&.exception\&.invalid_iterator\&.212 cannot compare iterators of different containers When two iterators are compared, they must belong to the same container\&. json\&.exception\&.invalid_iterator\&.213 cannot compare order of object iterators The order of object iterators cannot be compared, because JSON objects are unordered\&. json\&.exception\&.invalid_iterator\&.214 cannot get value Cannot get value for iterator: Either the iterator belongs to a null value or it is an iterator to a primitive type (number, boolean, or string), but the iterator is different to \fBbegin()\fP\&. {The following code shows how an \fC\fBinvalid_iterator\fP\fP exception can be caught\&.,\fBinvalid_iterator\fP}
+.PP
+\fBSee also:\fP
+.RS 4
+- \fBexception\fP for the base class of the library exceptions 
+.PP
+- \fBparse_error\fP for exceptions indicating a parse error 
+.PP
+- \fBtype_error\fP for exceptions indicating executing a member function with a wrong type 
+.PP
+- \fBout_of_range\fP for exceptions indicating access out of the defined range 
+.PP
+- \fBother_error\fP for exceptions indicating other library errors
+.RE
+.PP
+\fBSince:\fP
+.RS 4
+version 3\&.0\&.0 
+.RE
+.PP
+
+.PP
+Definition at line 2021 of file json\&.hpp\&.
+.SH "Member Function Documentation"
+.PP 
+.SS "static \fBinvalid_iterator\fP nlohmann::detail::invalid_iterator::create (int id_, const \fBstd::string\fP & what_arg)\fC [inline]\fP, \fC [static]\fP"
+
+.PP
+Definition at line 2024 of file json\&.hpp\&.
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for ZIO from the source code\&.

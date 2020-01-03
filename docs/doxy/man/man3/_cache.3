@@ -1,0 +1,409 @@
+.TH "_cache" 3 "Fri Jan 3 2020" "ZIO" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+_cache
+.SH SYNOPSIS
+.br
+.PP
+.SS "Variables"
+
+.in +1c
+.ti -1c
+.RI "list \fBAR\fP = ['/usr/bin/ar']"
+.br
+.ti -1c
+.RI "list \fBARFLAGS\fP = ['rcs']"
+.br
+.ti -1c
+.RI "string \fBBINDIR\fP = '/home/bviren/opt/zio/bin'"
+.br
+.ti -1c
+.RI "tuple \fBCC_VERSION\fP = ('7', '4', '0')"
+.br
+.ti -1c
+.RI "string \fBCOMPILER_CXX\fP = 'g++'"
+.br
+.ti -1c
+.RI "string \fBCPPPATH_ST\fP = '\-I%s'"
+.br
+.ti -1c
+.RI "list \fBCXX\fP = ['/usr/bin/g++']"
+.br
+.ti -1c
+.RI "list \fBCXXFLAGS\fP = ['\-std=c++17', '\-g', '\-O2']"
+.br
+.ti -1c
+.RI "list \fBCXXFLAGS_MACBUNDLE\fP = ['\-fPIC']"
+.br
+.ti -1c
+.RI "list \fBCXXFLAGS_cxxshlib\fP = ['\-fPIC']"
+.br
+.ti -1c
+.RI "list \fBCXXLNK_SRC_F\fP = []"
+.br
+.ti -1c
+.RI "list \fBCXXLNK_TGT_F\fP = ['\-o']"
+.br
+.ti -1c
+.RI "string \fBCXX_NAME\fP = 'gcc'"
+.br
+.ti -1c
+.RI "list \fBCXX_SRC_F\fP = []"
+.br
+.ti -1c
+.RI "list \fBCXX_TGT_F\fP = ['\-c', '\-o']"
+.br
+.ti -1c
+.RI "list \fBDEFINES\fP = ['\fBHAVE_ZMQ\fP=1', '\fBHAVE_CZMQ\fP=1', '\fBHAVE_ZYRE\fP=1']"
+.br
+.ti -1c
+.RI "list \fBDEFINES_CZMQ\fP = ['CZMQ_BUILD_DRAFT_API=1', 'ZMQ_BUILD_DRAFT_API=1']"
+.br
+.ti -1c
+.RI "string \fBDEFINES_ST\fP = '\-D%s'"
+.br
+.ti -1c
+.RI "list \fBDEFINES_ZMQ\fP = ['ZMQ_BUILD_DRAFT_API=1']"
+.br
+.ti -1c
+.RI "list \fBDEFINES_ZYRE\fP = ['ZYRE_BUILD_DRAFT_API=1', 'CZMQ_BUILD_DRAFT_API=1', 'ZMQ_BUILD_DRAFT_API=1']"
+.br
+.ti -1c
+.RI "dictionary \fBDEFINE_COMMENTS\fP = {'\fBHAVE_ZYRE\fP': '', '\fBHAVE_CZMQ\fP': '', '\fBHAVE_ZMQ\fP': ''}"
+.br
+.ti -1c
+.RI "string \fBDEST_BINFMT\fP = 'elf'"
+.br
+.ti -1c
+.RI "string \fBDEST_CPU\fP = 'x86_64'"
+.br
+.ti -1c
+.RI "string \fBDEST_OS\fP = 'linux'"
+.br
+.ti -1c
+.RI "int \fBHAVE_CZMQ\fP = 1"
+.br
+.ti -1c
+.RI "int \fBHAVE_ZMQ\fP = 1"
+.br
+.ti -1c
+.RI "int \fBHAVE_ZYRE\fP = 1"
+.br
+.ti -1c
+.RI "list \fBINCLUDES_CZMQ\fP = ['/home/bviren/opt/zmq/include', '/usr/include/uuid', '/usr/include/x86_64\-linux\-gnu']"
+.br
+.ti -1c
+.RI "list \fBINCLUDES_ZMQ\fP = ['/home/bviren/opt/zmq/include']"
+.br
+.ti -1c
+.RI "list \fBINCLUDES_ZYRE\fP = ['/home/bviren/opt/zmq/include', '/usr/include/uuid', '/usr/include/x86_64\-linux\-gnu']"
+.br
+.ti -1c
+.RI "string \fBLIBDIR\fP = '/home/bviren/opt/zio/lib'"
+.br
+.ti -1c
+.RI "list \fBLIBPATH_CZMQ\fP = ['/home/bviren/opt/zmq/lib']"
+.br
+.ti -1c
+.RI "string \fBLIBPATH_ST\fP = '\-L%s'"
+.br
+.ti -1c
+.RI "list \fBLIBPATH_ZMQ\fP = ['/home/bviren/opt/zmq/lib']"
+.br
+.ti -1c
+.RI "list \fBLIBPATH_ZYRE\fP = ['/home/bviren/opt/zmq/lib']"
+.br
+.ti -1c
+.RI "list \fBLIB_CZMQ\fP = ['czmq']"
+.br
+.ti -1c
+.RI "string \fBLIB_ST\fP = '\-l%s'"
+.br
+.ti -1c
+.RI "list \fBLIB_ZMQ\fP = ['zmq']"
+.br
+.ti -1c
+.RI "list \fBLIB_ZYRE\fP = ['zyre']"
+.br
+.ti -1c
+.RI "list \fBLINKFLAGS_MACBUNDLE\fP = ['\-bundle', '\-undefined', 'dynamic_lookup']"
+.br
+.ti -1c
+.RI "list \fBLINKFLAGS_cxxshlib\fP = ['\-shared']"
+.br
+.ti -1c
+.RI "list \fBLINKFLAGS_cxxstlib\fP = ['\-Wl,\-Bstatic']"
+.br
+.ti -1c
+.RI "list \fBLINK_CXX\fP = ['/usr/bin/g++']"
+.br
+.ti -1c
+.RI "list \fBPKGCONFIG\fP = ['/usr/bin/pkg\-config']"
+.br
+.ti -1c
+.RI "string \fBPREFIX\fP = '/home/bviren/opt/zio'"
+.br
+.ti -1c
+.RI "string \fBRPATH_ST\fP = '\-Wl,\-rpath,%s'"
+.br
+.ti -1c
+.RI "string \fBSHLIB_MARKER\fP = '\-Wl,\-Bdynamic'"
+.br
+.ti -1c
+.RI "string \fBSONAME_ST\fP = '\-Wl,\-h,%s'"
+.br
+.ti -1c
+.RI "string \fBSTLIBPATH_ST\fP = '\-L%s'"
+.br
+.ti -1c
+.RI "string \fBSTLIB_MARKER\fP = '\-Wl,\-Bstatic'"
+.br
+.ti -1c
+.RI "string \fBSTLIB_ST\fP = '\-l%s'"
+.br
+.ti -1c
+.RI "string \fBcxxprogram_PATTERN\fP = '%s'"
+.br
+.ti -1c
+.RI "string \fBcxxshlib_PATTERN\fP = 'lib%s\&.so'"
+.br
+.ti -1c
+.RI "string \fBcxxstlib_PATTERN\fP = 'lib%s\&.a'"
+.br
+.ti -1c
+.RI "list \fBdefine_key\fP = ['\fBHAVE_ZMQ\fP', '\fBHAVE_CZMQ\fP', '\fBHAVE_ZYRE\fP']"
+.br
+.ti -1c
+.RI "string \fBmacbundle_PATTERN\fP = '%s\&.bundle'"
+.br
+.in -1c
+.SH "Variable Documentation"
+.PP 
+.SS "list _cache\&.AR = ['/usr/bin/ar']"
+
+.PP
+Definition at line 1 of file _cache\&.py\&.
+.SS "list _cache\&.ARFLAGS = ['rcs']"
+
+.PP
+Definition at line 2 of file _cache\&.py\&.
+.SS "string _cache\&.BINDIR = '/home/bviren/opt/zio/bin'"
+
+.PP
+Definition at line 3 of file _cache\&.py\&.
+.SS "tuple _cache\&.CC_VERSION = ('7', '4', '0')"
+
+.PP
+Definition at line 4 of file _cache\&.py\&.
+.SS "string _cache\&.COMPILER_CXX = 'g++'"
+
+.PP
+Definition at line 5 of file _cache\&.py\&.
+.SS "string _cache\&.CPPPATH_ST = '\-I%s'"
+
+.PP
+Definition at line 6 of file _cache\&.py\&.
+.SS "list _cache\&.CXX = ['/usr/bin/g++']"
+
+.PP
+Definition at line 7 of file _cache\&.py\&.
+.SS "string _cache\&.CXX_NAME = 'gcc'"
+
+.PP
+Definition at line 13 of file _cache\&.py\&.
+.SS "list _cache\&.CXX_SRC_F = []"
+
+.PP
+Definition at line 14 of file _cache\&.py\&.
+.SS "list _cache\&.CXX_TGT_F = ['\-c', '\-o']"
+
+.PP
+Definition at line 15 of file _cache\&.py\&.
+.SS "list _cache\&.CXXFLAGS = ['\-std=c++17', '\-g', '\-O2']"
+
+.PP
+Definition at line 8 of file _cache\&.py\&.
+.SS "list _cache\&.CXXFLAGS_cxxshlib = ['\-fPIC']"
+
+.PP
+Definition at line 10 of file _cache\&.py\&.
+.SS "list _cache\&.CXXFLAGS_MACBUNDLE = ['\-fPIC']"
+
+.PP
+Definition at line 9 of file _cache\&.py\&.
+.SS "list _cache\&.CXXLNK_SRC_F = []"
+
+.PP
+Definition at line 11 of file _cache\&.py\&.
+.SS "list _cache\&.CXXLNK_TGT_F = ['\-o']"
+
+.PP
+Definition at line 12 of file _cache\&.py\&.
+.SS "string _cache\&.cxxprogram_PATTERN = '%s'"
+
+.PP
+Definition at line 52 of file _cache\&.py\&.
+.SS "string _cache\&.cxxshlib_PATTERN = 'lib%s\&.so'"
+
+.PP
+Definition at line 53 of file _cache\&.py\&.
+.SS "string _cache\&.cxxstlib_PATTERN = 'lib%s\&.a'"
+
+.PP
+Definition at line 54 of file _cache\&.py\&.
+.SS "dictionary _cache\&.DEFINE_COMMENTS = {'\fBHAVE_ZYRE\fP': '', '\fBHAVE_CZMQ\fP': '', '\fBHAVE_ZMQ\fP': ''}"
+
+.PP
+Definition at line 21 of file _cache\&.py\&.
+.SS "list _cache\&.define_key = ['\fBHAVE_ZMQ\fP', '\fBHAVE_CZMQ\fP', '\fBHAVE_ZYRE\fP']"
+
+.PP
+Definition at line 55 of file _cache\&.py\&.
+.SS "list _cache\&.DEFINES = ['\fBHAVE_ZMQ\fP=1', '\fBHAVE_CZMQ\fP=1', '\fBHAVE_ZYRE\fP=1']"
+
+.PP
+Definition at line 16 of file _cache\&.py\&.
+.SS "list _cache\&.DEFINES_CZMQ = ['CZMQ_BUILD_DRAFT_API=1', 'ZMQ_BUILD_DRAFT_API=1']"
+
+.PP
+Definition at line 17 of file _cache\&.py\&.
+.SS "string _cache\&.DEFINES_ST = '\-D%s'"
+
+.PP
+Definition at line 18 of file _cache\&.py\&.
+.SS "list _cache\&.DEFINES_ZMQ = ['ZMQ_BUILD_DRAFT_API=1']"
+
+.PP
+Definition at line 19 of file _cache\&.py\&.
+.SS "list _cache\&.DEFINES_ZYRE = ['ZYRE_BUILD_DRAFT_API=1', 'CZMQ_BUILD_DRAFT_API=1', 'ZMQ_BUILD_DRAFT_API=1']"
+
+.PP
+Definition at line 20 of file _cache\&.py\&.
+.SS "string _cache\&.DEST_BINFMT = 'elf'"
+
+.PP
+Definition at line 22 of file _cache\&.py\&.
+.SS "string _cache\&.DEST_CPU = 'x86_64'"
+
+.PP
+Definition at line 23 of file _cache\&.py\&.
+.SS "string _cache\&.DEST_OS = 'linux'"
+
+.PP
+Definition at line 24 of file _cache\&.py\&.
+.SS "int _cache\&.HAVE_CZMQ = 1"
+
+.PP
+Definition at line 25 of file _cache\&.py\&.
+.SS "int _cache\&.HAVE_ZMQ = 1"
+
+.PP
+Definition at line 26 of file _cache\&.py\&.
+.SS "int _cache\&.HAVE_ZYRE = 1"
+
+.PP
+Definition at line 27 of file _cache\&.py\&.
+.SS "list _cache\&.INCLUDES_CZMQ = ['/home/bviren/opt/zmq/include', '/usr/include/uuid', '/usr/include/x86_64\-linux\-gnu']"
+
+.PP
+Definition at line 28 of file _cache\&.py\&.
+.SS "list _cache\&.INCLUDES_ZMQ = ['/home/bviren/opt/zmq/include']"
+
+.PP
+Definition at line 29 of file _cache\&.py\&.
+.SS "list _cache\&.INCLUDES_ZYRE = ['/home/bviren/opt/zmq/include', '/usr/include/uuid', '/usr/include/x86_64\-linux\-gnu']"
+
+.PP
+Definition at line 30 of file _cache\&.py\&.
+.SS "list _cache\&.LIB_CZMQ = ['czmq']"
+
+.PP
+Definition at line 36 of file _cache\&.py\&.
+.SS "string _cache\&.LIB_ST = '\-l%s'"
+
+.PP
+Definition at line 37 of file _cache\&.py\&.
+.SS "list _cache\&.LIB_ZMQ = ['zmq']"
+
+.PP
+Definition at line 38 of file _cache\&.py\&.
+.SS "list _cache\&.LIB_ZYRE = ['zyre']"
+
+.PP
+Definition at line 39 of file _cache\&.py\&.
+.SS "string _cache\&.LIBDIR = '/home/bviren/opt/zio/lib'"
+
+.PP
+Definition at line 31 of file _cache\&.py\&.
+.SS "list _cache\&.LIBPATH_CZMQ = ['/home/bviren/opt/zmq/lib']"
+
+.PP
+Definition at line 32 of file _cache\&.py\&.
+.SS "string _cache\&.LIBPATH_ST = '\-L%s'"
+
+.PP
+Definition at line 33 of file _cache\&.py\&.
+.SS "list _cache\&.LIBPATH_ZMQ = ['/home/bviren/opt/zmq/lib']"
+
+.PP
+Definition at line 34 of file _cache\&.py\&.
+.SS "list _cache\&.LIBPATH_ZYRE = ['/home/bviren/opt/zmq/lib']"
+
+.PP
+Definition at line 35 of file _cache\&.py\&.
+.SS "list _cache\&.LINK_CXX = ['/usr/bin/g++']"
+
+.PP
+Definition at line 43 of file _cache\&.py\&.
+.SS "list _cache\&.LINKFLAGS_cxxshlib = ['\-shared']"
+
+.PP
+Definition at line 41 of file _cache\&.py\&.
+.SS "list _cache\&.LINKFLAGS_cxxstlib = ['\-Wl,\-Bstatic']"
+
+.PP
+Definition at line 42 of file _cache\&.py\&.
+.SS "list _cache\&.LINKFLAGS_MACBUNDLE = ['\-bundle', '\-undefined', 'dynamic_lookup']"
+
+.PP
+Definition at line 40 of file _cache\&.py\&.
+.SS "string _cache\&.macbundle_PATTERN = '%s\&.bundle'"
+
+.PP
+Definition at line 56 of file _cache\&.py\&.
+.SS "list _cache\&.PKGCONFIG = ['/usr/bin/pkg\-config']"
+
+.PP
+Definition at line 44 of file _cache\&.py\&.
+.SS "string _cache\&.PREFIX = '/home/bviren/opt/zio'"
+
+.PP
+Definition at line 45 of file _cache\&.py\&.
+.SS "string _cache\&.RPATH_ST = '\-Wl,\-rpath,%s'"
+
+.PP
+Definition at line 46 of file _cache\&.py\&.
+.SS "string _cache\&.SHLIB_MARKER = '\-Wl,\-Bdynamic'"
+
+.PP
+Definition at line 47 of file _cache\&.py\&.
+.SS "string _cache\&.SONAME_ST = '\-Wl,\-h,%s'"
+
+.PP
+Definition at line 48 of file _cache\&.py\&.
+.SS "string _cache\&.STLIB_MARKER = '\-Wl,\-Bstatic'"
+
+.PP
+Definition at line 50 of file _cache\&.py\&.
+.SS "string _cache\&.STLIB_ST = '\-l%s'"
+
+.PP
+Definition at line 51 of file _cache\&.py\&.
+.SS "string _cache\&.STLIBPATH_ST = '\-L%s'"
+
+.PP
+Definition at line 49 of file _cache\&.py\&.
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for ZIO from the source code\&.

@@ -1,0 +1,104 @@
+.TH "test/test_hsm.cpp" 3 "Fri Jan 3 2020" "ZIO" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+test/test_hsm.cpp
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <vector>\fP
+.br
+\fC#include <string>\fP
+.br
+\fC#include <iostream>\fP
+.br
+\fC#include <cassert>\fP
+.br
+\fC#include <functional>\fP
+.br
+\fC#include 'sml\&.hpp'\fP
+.br
+
+.SS "Classes"
+
+.in +1c
+.ti -1c
+.RI "struct \fBclient_protocol\fP"
+.br
+.ti -1c
+.RI "struct \fBclient_protocol::ev_connect\fP"
+.br
+.ti -1c
+.RI "struct \fBclient_protocol::ev_disconnect\fP"
+.br
+.ti -1c
+.RI "struct \fBclient_protocol::ev_error\fP"
+.br
+.ti -1c
+.RI "struct \fBclient_protocol::ev_connected\fP"
+.br
+.ti -1c
+.RI "struct \fBclient_protocol::ev_handshake_ack\fP"
+.br
+.ti -1c
+.RI "struct \fBclient_protocol::ev_disconnected\fP"
+.br
+.ti -1c
+.RI "struct \fBclient_protocol::ev_fin\fP"
+.br
+.ti -1c
+.RI "struct \fBclient_protocol::ev_retry\fP"
+.br
+.ti -1c
+.RI "struct \fBclient_protocol::ev_payload\fP"
+.br
+.ti -1c
+.RI "struct \fBclient_protocol::events\fP"
+.br
+.ti -1c
+.RI "struct \fBclient_protocol::actions\fP"
+.br
+.ti -1c
+.RI "struct \fBclient_protocol::connected\fP"
+.br
+.ti -1c
+.RI "struct \fBclient_protocol::protocol\fP"
+.br
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "template<class T > void \fBdump_transition\fP () noexcept"
+.br
+.ti -1c
+.RI "template<template< class\&.\&.\&. > class T, class\&.\&.\&. Ts> void \fBdump_transitions\fP (const T< Ts\&.\&.\&. > &) noexcept"
+.br
+.ti -1c
+.RI "template<class SM > void \fBdump\fP (const SM &) noexcept"
+.br
+.ti -1c
+.RI "int \fBmain\fP ()"
+.br
+.in -1c
+.SH "Function Documentation"
+.PP 
+.SS "template<class SM > void dump (const SM &)\fC [noexcept]\fP"
+
+.PP
+Definition at line 179 of file test_hsm\&.cpp\&.
+.SS "template<class T > void dump_transition ()\fC [noexcept]\fP"
+
+.PP
+Definition at line 134 of file test_hsm\&.cpp\&.
+.SS "template<template< class\&.\&.\&. > class T, class\&.\&.\&. Ts> void dump_transitions (const T< Ts\&.\&.\&. > &)\fC [noexcept]\fP"
+
+.PP
+Definition at line 173 of file test_hsm\&.cpp\&.
+.SS "int main (void)"
+
+.PP
+Definition at line 185 of file test_hsm\&.cpp\&.
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for ZIO from the source code\&.

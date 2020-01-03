@@ -1,0 +1,80 @@
+.TH "test/test_sml.cpp" 3 "Fri Jan 3 2020" "ZIO" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+test/test_sml.cpp
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <iostream>\fP
+.br
+\fC#include <cassert>\fP
+.br
+\fC#include 'sml\&.hpp'\fP
+.br
+
+.SS "Classes"
+
+.in +1c
+.ti -1c
+.RI "struct \fBsender\fP"
+.br
+.ti -1c
+.RI "struct \fBack\fP"
+.br
+.ti -1c
+.RI "struct \fBfin\fP"
+.br
+.ti -1c
+.RI "struct \fBrelease\fP"
+.br
+.ti -1c
+.RI "struct \fBtimeout\fP"
+.br
+.ti -1c
+.RI "struct \fBtcp_release\fP"
+.br
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "int \fBmain\fP ()"
+.br
+.in -1c
+.SS "Variables"
+
+.in +1c
+.ti -1c
+.RI "constexpr auto \fBis_valid\fP = [](const auto& event) { return event\&.valid; }"
+.br
+.ti -1c
+.RI "constexpr auto \fBsend_fin\fP = [](\fBsender\fP& s) { s\&.send(\fBfin\fP{0}); }"
+.br
+.ti -1c
+.RI "constexpr auto \fBsend_ack\fP = [](const auto& event, \fBsender\fP& s) { s\&.send(event); }"
+.br
+.in -1c
+.SH "Function Documentation"
+.PP 
+.SS "int main (void)"
+
+.PP
+Definition at line 49 of file test_sml\&.cpp\&.
+.SH "Variable Documentation"
+.PP 
+.SS "constexpr auto is_valid = [](const auto& event) { return event\&.valid; }"
+
+.PP
+Definition at line 22 of file test_sml\&.cpp\&.
+.SS "constexpr auto send_ack = [](const auto& event, \fBsender\fP& s) { s\&.send(event); }"
+
+.PP
+Definition at line 27 of file test_sml\&.cpp\&.
+.SS "constexpr auto send_fin = [](\fBsender\fP& s) { s\&.send(\fBfin\fP{0}); }"
+
+.PP
+Definition at line 26 of file test_sml\&.cpp\&.
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for ZIO from the source code\&.

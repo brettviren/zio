@@ -1,0 +1,208 @@
+.TH "zmq::detail::socket_base" 3 "Fri Jan 3 2020" "ZIO" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+zmq::detail::socket_base
+.SH SYNOPSIS
+.br
+.PP
+.PP
+\fC#include <zmq\&.hpp>\fP
+.PP
+Inherited by \fBzmq::socket_ref\fP, and \fBzmq::socket_t\fP\&.
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "\fBsocket_base\fP () \fBZMQ_NOTHROW\fP"
+.br
+.ti -1c
+.RI "\fBZMQ_EXPLICIT\fP \fBsocket_base\fP (void *\fBhandle\fP) \fBZMQ_NOTHROW\fP"
+.br
+.ti -1c
+.RI "template<typename T > void \fBsetsockopt\fP (int option_, T const &optval)"
+.br
+.ti -1c
+.RI "void \fBsetsockopt\fP (int option_, const void *optval_, size_t optvallen_)"
+.br
+.ti -1c
+.RI "void \fBgetsockopt\fP (int option_, void *optval_, size_t *optvallen_) const"
+.br
+.ti -1c
+.RI "template<typename T > T \fBgetsockopt\fP (int option_) const"
+.br
+.ti -1c
+.RI "void \fBbind\fP (std::string const &addr)"
+.br
+.ti -1c
+.RI "void \fBbind\fP (const char *addr_)"
+.br
+.ti -1c
+.RI "void \fBunbind\fP (std::string const &addr)"
+.br
+.ti -1c
+.RI "void \fBunbind\fP (const char *addr_)"
+.br
+.ti -1c
+.RI "void \fBconnect\fP (std::string const &addr)"
+.br
+.ti -1c
+.RI "void \fBconnect\fP (const char *addr_)"
+.br
+.ti -1c
+.RI "void \fBdisconnect\fP (std::string const &addr)"
+.br
+.ti -1c
+.RI "void \fBdisconnect\fP (const char *addr_)"
+.br
+.ti -1c
+.RI "bool \fBconnected\fP () const \fBZMQ_NOTHROW\fP"
+.br
+.ti -1c
+.RI "size_t \fBsend\fP (const void *buf_, size_t len_, int flags_=0)"
+.br
+.ti -1c
+.RI "bool \fBsend\fP (\fBmessage_t\fP &msg_, int flags_=0)"
+.br
+.ti -1c
+.RI "template<typename T > bool \fBsend\fP (T first, T last, int flags_=0)"
+.br
+.ti -1c
+.RI "size_t \fBrecv\fP (void *buf_, size_t len_, int flags_=0)"
+.br
+.ti -1c
+.RI "bool \fBrecv\fP (\fBmessage_t\fP *msg_, int flags_=0)"
+.br
+.ti -1c
+.RI "\fBZMQ_NODISCARD\fP void * \fBhandle\fP () \fBZMQ_NOTHROW\fP"
+.br
+.ti -1c
+.RI "\fBZMQ_NODISCARD\fP const void * \fBhandle\fP () const \fBZMQ_NOTHROW\fP"
+.br
+.ti -1c
+.RI "\fBZMQ_EXPLICIT\fP \fBoperator bool\fP () const \fBZMQ_NOTHROW\fP"
+.br
+.ti -1c
+.RI "\fBZMQ_EXPLICIT\fP \fBoperator bool\fP () \fBZMQ_NOTHROW\fP"
+.br
+.in -1c
+.SS "Protected Attributes"
+
+.in +1c
+.ti -1c
+.RI "void * \fB_handle\fP"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+Definition at line 1185 of file zmq\&.hpp\&.
+.SH "Constructor & Destructor Documentation"
+.PP 
+.SS "zmq::detail::socket_base::socket_base ()\fC [inline]\fP"
+
+.PP
+Definition at line 1188 of file zmq\&.hpp\&.
+.SS "\fBZMQ_EXPLICIT\fP zmq::detail::socket_base::socket_base (void * handle)\fC [inline]\fP"
+
+.PP
+Definition at line 1189 of file zmq\&.hpp\&.
+.SH "Member Function Documentation"
+.PP 
+.SS "void zmq::detail::socket_base::bind (std::string const & addr)\fC [inline]\fP"
+
+.PP
+Definition at line 1218 of file zmq\&.hpp\&.
+.SS "void zmq::detail::socket_base::bind (const char * addr_)\fC [inline]\fP"
+
+.PP
+Definition at line 1220 of file zmq\&.hpp\&.
+.SS "void zmq::detail::socket_base::connect (std::string const & addr)\fC [inline]\fP"
+
+.PP
+Definition at line 1236 of file zmq\&.hpp\&.
+.SS "void zmq::detail::socket_base::connect (const char * addr_)\fC [inline]\fP"
+
+.PP
+Definition at line 1238 of file zmq\&.hpp\&.
+.SS "bool zmq::detail::socket_base::connected () const\fC [inline]\fP"
+
+.PP
+Definition at line 1254 of file zmq\&.hpp\&.
+.SS "void zmq::detail::socket_base::disconnect (std::string const & addr)\fC [inline]\fP"
+
+.PP
+Definition at line 1245 of file zmq\&.hpp\&.
+.SS "void zmq::detail::socket_base::disconnect (const char * addr_)\fC [inline]\fP"
+
+.PP
+Definition at line 1247 of file zmq\&.hpp\&.
+.SS "void zmq::detail::socket_base::getsockopt (int option_, void * optval_, size_t * optvallen_) const\fC [inline]\fP"
+
+.PP
+Definition at line 1203 of file zmq\&.hpp\&.
+.SS "template<typename T > T zmq::detail::socket_base::getsockopt (int option_) const\fC [inline]\fP"
+
+.PP
+Definition at line 1210 of file zmq\&.hpp\&.
+.SS "\fBZMQ_NODISCARD\fP void* zmq::detail::socket_base::handle ()\fC [inline]\fP"
+
+.PP
+Definition at line 1413 of file zmq\&.hpp\&.
+.SS "\fBZMQ_NODISCARD\fP const void* zmq::detail::socket_base::handle () const\fC [inline]\fP"
+
+.PP
+Definition at line 1414 of file zmq\&.hpp\&.
+.SS "\fBZMQ_EXPLICIT\fP zmq::detail::socket_base::operator bool () const\fC [inline]\fP"
+
+.PP
+Definition at line 1416 of file zmq\&.hpp\&.
+.SS "\fBZMQ_EXPLICIT\fP zmq::detail::socket_base::operator bool ()\fC [inline]\fP"
+
+.PP
+Definition at line 1419 of file zmq\&.hpp\&.
+.SS "size_t zmq::detail::socket_base::recv (void * buf_, size_t len_, int flags_ = \fC0\fP)\fC [inline]\fP"
+
+.PP
+Definition at line 1344 of file zmq\&.hpp\&.
+.SS "bool zmq::detail::socket_base::recv (\fBmessage_t\fP * msg_, int flags_ = \fC0\fP)\fC [inline]\fP"
+
+.PP
+Definition at line 1357 of file zmq\&.hpp\&.
+.SS "size_t zmq::detail::socket_base::send (const void * buf_, size_t len_, int flags_ = \fC0\fP)\fC [inline]\fP"
+
+.PP
+Definition at line 1259 of file zmq\&.hpp\&.
+.SS "bool zmq::detail::socket_base::send (\fBmessage_t\fP & msg_, int flags_ = \fC0\fP)\fC [inline]\fP"
+
+.PP
+Definition at line 1272 of file zmq\&.hpp\&.
+.SS "template<typename T > bool zmq::detail::socket_base::send (T first, T last, int flags_ = \fC0\fP)\fC [inline]\fP"
+
+.PP
+Definition at line 1287 of file zmq\&.hpp\&.
+.SS "template<typename T > void zmq::detail::socket_base::setsockopt (int option_, T const & optval)\fC [inline]\fP"
+
+.PP
+Definition at line 1191 of file zmq\&.hpp\&.
+.SS "void zmq::detail::socket_base::setsockopt (int option_, const void * optval_, size_t optvallen_)\fC [inline]\fP"
+
+.PP
+Definition at line 1196 of file zmq\&.hpp\&.
+.SS "void zmq::detail::socket_base::unbind (std::string const & addr)\fC [inline]\fP"
+
+.PP
+Definition at line 1227 of file zmq\&.hpp\&.
+.SS "void zmq::detail::socket_base::unbind (const char * addr_)\fC [inline]\fP"
+
+.PP
+Definition at line 1229 of file zmq\&.hpp\&.
+.SH "Member Data Documentation"
+.PP 
+.SS "void* zmq::detail::socket_base::_handle\fC [protected]\fP"
+
+.PP
+Definition at line 1422 of file zmq\&.hpp\&.
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for ZIO from the source code\&.

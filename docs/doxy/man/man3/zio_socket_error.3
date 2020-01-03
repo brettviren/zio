@@ -1,0 +1,48 @@
+.TH "zio::socket_error" 3 "Fri Jan 3 2020" "ZIO" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+zio::socket_error \- exception indicating a socket error  
+
+.SH SYNOPSIS
+.br
+.PP
+.PP
+\fC#include <exceptions\&.hpp>\fP
+.PP
+Inherits \fBzio::exception\fP\&.
+.SS "Static Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "static \fBsocket_error\fP \fBcreate\fP (int id_, const char *errmsg, const char *extra=NULL)"
+.br
+.RI "Create a socket error with all data and optional extra message\&. "
+.ti -1c
+.RI "static \fBsocket_error\fP \fBcreate\fP (const char *extra=NULL)"
+.br
+.in -1c
+.SS "Additional Inherited Members"
+.SH "Detailed Description"
+.PP 
+exception indicating a socket error 
+
+This exception is thrown when the underlying socket operations indicate an error\&. The ID is set to the errno\&. 
+.PP
+Definition at line 42 of file exceptions\&.hpp\&.
+.SH "Member Function Documentation"
+.PP 
+.SS "static \fBsocket_error\fP zio::socket_error::create (int id_, const char * errmsg, const char * extra = \fCNULL\fP)\fC [inline]\fP, \fC [static]\fP"
+
+.PP
+Create a socket error with all data and optional extra message\&. 
+.PP
+Definition at line 46 of file exceptions\&.hpp\&.
+.SS "static \fBsocket_error\fP zio::socket_error::create (const char * extra = \fCNULL\fP)\fC [inline]\fP, \fC [static]\fP"
+Create a socket error with implicit use of errno/strerr and optional extra message\&. 
+.PP
+Definition at line 57 of file exceptions\&.hpp\&.
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for ZIO from the source code\&.

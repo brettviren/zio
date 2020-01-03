@@ -1,0 +1,117 @@
+.TH "flow_protocol" 3 "Fri Jan 3 2020" "ZIO" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+flow_protocol
+.SH SYNOPSIS
+.br
+.PP
+.SS "Classes"
+
+.in +1c
+.ti -1c
+.RI "struct \fBactioncbs\fP"
+.br
+.ti -1c
+.RI "struct \fBev_bot\fP"
+.br
+.ti -1c
+.RI "struct \fBev_dat\fP"
+.br
+.ti -1c
+.RI "struct \fBev_eot\fP"
+.br
+.ti -1c
+.RI "struct \fBev_error\fP"
+.br
+.ti -1c
+.RI "struct \fBev_msg\fP"
+.br
+.ti -1c
+.RI "struct \fBev_pay\fP"
+.br
+.ti -1c
+.RI "struct \fBev_recving\fP"
+.br
+.ti -1c
+.RI "struct \fBev_sending\fP"
+.br
+.ti -1c
+.RI "struct \fBeventcbs\fP"
+.br
+.ti -1c
+.RI "struct \fBprotocol\fP"
+.br
+.in -1c
+.SS "Public Types"
+
+.in +1c
+.ti -1c
+.RI "enum \fBFlowDirection\fP { \fBundefined\fP, \fBextract\fP, \fBinject\fP }"
+.br
+.ti -1c
+.RI "typedef int \fBendpoint_t\fP"
+.br
+.ti -1c
+.RI "typedef int \fBdirection_t\fP"
+.br
+.ti -1c
+.RI "typedef int \fBcredits_t\fP"
+.br
+.ti -1c
+.RI "typedef \fBev_bot\fP \fBev_checksr\fP"
+.br
+.in -1c
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "auto \fBoperator()\fP ()"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+Definition at line 9 of file test_flowsm\&.cpp\&.
+.SH "Member Typedef Documentation"
+.PP 
+.SS "typedef int \fBflow_protocol::credits_t\fP"
+
+.PP
+Definition at line 14 of file test_flowsm\&.cpp\&.
+.SS "typedef int \fBflow_protocol::direction_t\fP"
+
+.PP
+Definition at line 13 of file test_flowsm\&.cpp\&.
+.SS "typedef int \fBflow_protocol::endpoint_t\fP"
+
+.PP
+Definition at line 11 of file test_flowsm\&.cpp\&.
+.SS "typedef \fBev_bot\fP \fBflow_protocol::ev_checksr\fP"
+
+.PP
+Definition at line 32 of file test_flowsm\&.cpp\&.
+.SH "Member Enumeration Documentation"
+.PP 
+.SS "enum \fBflow_protocol::FlowDirection\fP"
+
+.PP
+\fBEnumerator\fP
+.in +1c
+.TP
+\fB\fIundefined \fP\fP
+.TP
+\fB\fIextract \fP\fP
+.TP
+\fB\fIinject \fP\fP
+.PP
+Definition at line 12 of file test_flowsm\&.cpp\&.
+.SH "Member Function Documentation"
+.PP 
+.SS "auto flow_protocol::operator() ()\fC [inline]\fP"
+
+.PP
+Definition at line 129 of file test_flowsm\&.cpp\&.
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for ZIO from the source code\&.

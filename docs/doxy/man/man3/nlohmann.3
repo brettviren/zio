@@ -1,0 +1,108 @@
+.TH "nlohmann" 3 "Fri Jan 3 2020" "ZIO" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+nlohmann \- namespace for Niels Lohmann  
+
+.SH SYNOPSIS
+.br
+.PP
+.SS "Namespaces"
+
+.in +1c
+.ti -1c
+.RI " \fBdetail\fP"
+.br
+.RI "detail namespace with internal helper functions "
+.in -1c
+.SS "Classes"
+
+.in +1c
+.ti -1c
+.RI "struct \fBadl_serializer\fP"
+.br
+.RI "default JSONSerializer template argument "
+.ti -1c
+.RI "class \fBbasic_json\fP"
+.br
+.RI "a class to store JSON values "
+.ti -1c
+.RI "class \fBjson_pointer\fP"
+.br
+.RI "JSON Pointer\&. "
+.ti -1c
+.RI "struct \fBjson_sax\fP"
+.br
+.RI "SAX interface\&. "
+.in -1c
+.SS "Typedefs"
+
+.in +1c
+.ti -1c
+.RI "using \fBjson\fP = \fBbasic_json\fP<>"
+.br
+.RI "default JSON class "
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "\fBNLOHMANN_BASIC_JSON_TPL_DECLARATION\fP std::string \fBto_string\fP (const \fBNLOHMANN_BASIC_JSON_TPL\fP &j)"
+.br
+.RI "user-defined to_string function for JSON values "
+.in -1c
+.SH "Detailed Description"
+.PP 
+namespace for Niels Lohmann 
+
+namespace to hold default \fCto_json\fP function
+.PP
+\fBSee also:\fP
+.RS 4
+https://github.com/nlohmann 
+.RE
+.PP
+\fBSince:\fP
+.RS 4
+version 1\&.0\&.0 
+.RE
+.PP
+
+.SH "Typedef Documentation"
+.PP 
+.SS "using \fBnlohmann::json\fP = typedef \fBbasic_json\fP<>"
+
+.PP
+default JSON class This type is the default specialization of the \fBbasic_json\fP class which uses the standard template types\&.
+.PP
+\fBSince:\fP
+.RS 4
+version 1\&.0\&.0 
+.RE
+.PP
+
+.PP
+Definition at line 2445 of file json\&.hpp\&.
+.SH "Function Documentation"
+.PP 
+.SS "\fBNLOHMANN_BASIC_JSON_TPL_DECLARATION\fP std::string nlohmann::to_string (const \fBNLOHMANN_BASIC_JSON_TPL\fP & j)"
+
+.PP
+user-defined to_string function for JSON values This function implements a user-defined to_string for JSON objects\&.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIj\fP a JSON object 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+a std::string object 
+.RE
+.PP
+
+.PP
+Definition at line 22620 of file json\&.hpp\&.
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for ZIO from the source code\&.
