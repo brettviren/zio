@@ -2,5 +2,6 @@
 #+setupfile: setup.org
 #+include: nav.org
 
-t.b.d.
+- [[file:doxy/html/index.html][Doxygen pages]]
+- [[file:doxy/man/][man pages]]
 
