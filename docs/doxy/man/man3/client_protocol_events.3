@@ -1,0 +1,49 @@
+.TH "client_protocol::events" 3 "Fri Jan 3 2020" "ZIO" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+client_protocol::events
+.SH SYNOPSIS
+.br
+.PP
+.SS "Public Attributes"
+
+.in +1c
+.ti -1c
+.RI "std::function< void()> \fBestablished\fP"
+.br
+.ti -1c
+.RI "std::function< void()> \fBdisconnected\fP"
+.br
+.ti -1c
+.RI "std::function< void()> \fBerror\fP"
+.br
+.ti -1c
+.RI "std::function< void(\fBconst_buffer\fP)> \fBpayload\fP"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+Definition at line 38 of file test_hsm\&.cpp\&.
+.SH "Member Data Documentation"
+.PP 
+.SS "std::function<void()> client_protocol::events::disconnected"
+
+.PP
+Definition at line 41 of file test_hsm\&.cpp\&.
+.SS "std::function<void()> client_protocol::events::error"
+
+.PP
+Definition at line 42 of file test_hsm\&.cpp\&.
+.SS "std::function<void()> client_protocol::events::established"
+
+.PP
+Definition at line 40 of file test_hsm\&.cpp\&.
+.SS "std::function<void(\fBconst_buffer\fP)> client_protocol::events::payload"
+
+.PP
+Definition at line 43 of file test_hsm\&.cpp\&.
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for ZIO from the source code\&.

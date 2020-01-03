@@ -1,0 +1,73 @@
+.TH "inc/zio/message.hpp" 3 "Fri Jan 3 2020" "ZIO" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+inc/zio/message.hpp
+.SH SYNOPSIS
+.br
+.PP
+\fC#include 'zio/interned\&.hpp'\fP
+.br
+\fC#include <vector>\fP
+.br
+\fC#include <string>\fP
+.br
+
+.SS "Classes"
+
+.in +1c
+.ti -1c
+.RI "struct \fBzio::PrefixHeader\fP"
+.br
+.ti -1c
+.RI "struct \fBzio::CoordHeader\fP"
+.br
+.ti -1c
+.RI "struct \fBzio::Header\fP"
+.br
+.ti -1c
+.RI "class \fBzio::Message\fP"
+.br
+.RI "a ZIO message "
+.in -1c
+.SS "Namespaces"
+
+.in +1c
+.ti -1c
+.RI " \fBzio\fP"
+.br
+.RI "implementation of ZIO data flow protocol endpoints "
+.ti -1c
+.RI " \fBzio::level\fP"
+.br
+.in -1c
+.SS "Typedefs"
+
+.in +1c
+.ti -1c
+.RI "typedef uint64_t \fBzio::origin_t\fP"
+.br
+.ti -1c
+.RI "typedef uint64_t \fBzio::granule_t\fP"
+.br
+.ti -1c
+.RI "typedef uint64_t \fBzio::seqno_t\fP"
+.br
+.in -1c
+.SS "Enumerations"
+
+.in +1c
+.ti -1c
+.RI "enum \fBzio::level::MessageLevel\fP { \fBzio::level::undefined\fP =0, \fBzio::level::trace\fP, \fBzio::level::verbose\fP, \fBzio::level::debug\fP, \fBzio::level::info\fP, \fBzio::level::summary\fP, \fBzio::level::warning\fP, \fBzio::level::error\fP, \fBzio::level::fatal\fP }"
+.br
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "const char * \fBzio::level::name\fP (MessageLevel lvl)"
+.br
+.in -1c
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for ZIO from the source code\&.

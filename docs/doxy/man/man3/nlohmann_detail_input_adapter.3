@@ -1,0 +1,130 @@
+.TH "nlohmann::detail::input_adapter" 3 "Fri Jan 3 2020" "ZIO" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+nlohmann::detail::input_adapter
+.SH SYNOPSIS
+.br
+.PP
+.PP
+\fC#include <json\&.hpp>\fP
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "\fBinput_adapter\fP (std::FILE *file)"
+.br
+.ti -1c
+.RI "\fBinput_adapter\fP (std::istream &i)"
+.br
+.RI "input adapter for input stream "
+.ti -1c
+.RI "\fBinput_adapter\fP (std::istream &&i)"
+.br
+.RI "input adapter for input stream "
+.ti -1c
+.RI "\fBinput_adapter\fP (const std::wstring &ws)"
+.br
+.ti -1c
+.RI "\fBinput_adapter\fP (const std::u16string &ws)"
+.br
+.ti -1c
+.RI "\fBinput_adapter\fP (const std::u32string &ws)"
+.br
+.ti -1c
+.RI "template<typename CharT , typename std::enable_if< std::is_pointer< CharT >::value and std::is_integral< typename std::remove_pointer< CharT >::type >::value and sizeof(typename std::remove_pointer< CharT >::type)==1, int >::type  = 0> \fBinput_adapter\fP (CharT b, std::size_t l)"
+.br
+.RI "input adapter for buffer "
+.ti -1c
+.RI "template<typename CharT , typename std::enable_if< std::is_pointer< CharT >::value and std::is_integral< typename std::remove_pointer< CharT >::type >::value and sizeof(typename std::remove_pointer< CharT >::type)==1, int >::type  = 0> \fBinput_adapter\fP (CharT b)"
+.br
+.RI "input adapter for string literal "
+.ti -1c
+.RI "template<class IteratorType , typename std::enable_if< std::is_same< typename iterator_traits< IteratorType >::iterator_category, std::random_access_iterator_tag >::value, int >::type  = 0> \fBinput_adapter\fP (IteratorType first, IteratorType last)"
+.br
+.RI "input adapter for iterator range with contiguous storage "
+.ti -1c
+.RI "template<class T , std::size_t N> \fBinput_adapter\fP (T(&\fBarray\fP)[N])"
+.br
+.RI "input adapter for array "
+.ti -1c
+.RI "template<class ContiguousContainer , typename std::enable_if< not std::is_pointer< ContiguousContainer >::value and std::is_base_of< std::random_access_iterator_tag, typename iterator_traits< decltype(std::begin(std::declval< ContiguousContainer const >()))>::iterator_category >::value, int >::type  = 0> \fBinput_adapter\fP (const ContiguousContainer &c)"
+.br
+.RI "input adapter for contiguous container "
+.ti -1c
+.RI "\fBoperator input_adapter_t\fP ()"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+Definition at line 4197 of file json\&.hpp\&.
+.SH "Constructor & Destructor Documentation"
+.PP 
+.SS "nlohmann::detail::input_adapter::input_adapter (std::FILE * file)\fC [inline]\fP"
+
+.PP
+Definition at line 4202 of file json\&.hpp\&.
+.SS "nlohmann::detail::input_adapter::input_adapter (std::istream & i)\fC [inline]\fP"
+
+.PP
+input adapter for input stream 
+.PP
+Definition at line 4205 of file json\&.hpp\&.
+.SS "nlohmann::detail::input_adapter::input_adapter (std::istream && i)\fC [inline]\fP"
+
+.PP
+input adapter for input stream 
+.PP
+Definition at line 4209 of file json\&.hpp\&.
+.SS "nlohmann::detail::input_adapter::input_adapter (const std::wstring & ws)\fC [inline]\fP"
+
+.PP
+Definition at line 4212 of file json\&.hpp\&.
+.SS "nlohmann::detail::input_adapter::input_adapter (const std::u16string & ws)\fC [inline]\fP"
+
+.PP
+Definition at line 4215 of file json\&.hpp\&.
+.SS "nlohmann::detail::input_adapter::input_adapter (const std::u32string & ws)\fC [inline]\fP"
+
+.PP
+Definition at line 4218 of file json\&.hpp\&.
+.SS "template<typename CharT , typename std::enable_if< std::is_pointer< CharT >::value and std::is_integral< typename std::remove_pointer< CharT >::type >::value and sizeof(typename std::remove_pointer< CharT >::type)==1, int >::type  = 0> nlohmann::detail::input_adapter::input_adapter (CharT b, std::size_t l)\fC [inline]\fP"
+
+.PP
+input adapter for buffer 
+.PP
+Definition at line 4228 of file json\&.hpp\&.
+.SS "template<typename CharT , typename std::enable_if< std::is_pointer< CharT >::value and std::is_integral< typename std::remove_pointer< CharT >::type >::value and sizeof(typename std::remove_pointer< CharT >::type)==1, int >::type  = 0> nlohmann::detail::input_adapter::input_adapter (CharT b)\fC [inline]\fP"
+
+.PP
+input adapter for string literal 
+.PP
+Definition at line 4240 of file json\&.hpp\&.
+.SS "template<class IteratorType , typename std::enable_if< std::is_same< typename iterator_traits< IteratorType >::iterator_category, std::random_access_iterator_tag >::value, int >::type  = 0> nlohmann::detail::input_adapter::input_adapter (IteratorType first, IteratorType last)\fC [inline]\fP"
+
+.PP
+input adapter for iterator range with contiguous storage 
+.PP
+Definition at line 4249 of file json\&.hpp\&.
+.SS "template<class T , std::size_t N> nlohmann::detail::input_adapter::input_adapter (T(&) array[N])\fC [inline]\fP"
+
+.PP
+input adapter for array 
+.PP
+Definition at line 4284 of file json\&.hpp\&.
+.SS "template<class ContiguousContainer , typename std::enable_if< not std::is_pointer< ContiguousContainer >::value and std::is_base_of< std::random_access_iterator_tag, typename iterator_traits< decltype(std::begin(std::declval< ContiguousContainer const >()))>::iterator_category >::value, int >::type  = 0> nlohmann::detail::input_adapter::input_adapter (const ContiguousContainer & c)\fC [inline]\fP"
+
+.PP
+input adapter for contiguous container 
+.PP
+Definition at line 4292 of file json\&.hpp\&.
+.SH "Member Function Documentation"
+.PP 
+.SS "nlohmann::detail::input_adapter::operator \fBinput_adapter_t\fP ()\fC [inline]\fP"
+
+.PP
+Definition at line 4295 of file json\&.hpp\&.
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for ZIO from the source code\&.

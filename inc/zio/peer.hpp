@@ -1,10 +1,3 @@
-/** 
-
-    A C++ class interface adding peer info caching and a "wait for
-    peer to show up" method to ZeroMQ's Zyre.
-
- */
-
 #ifndef ZIO_PEER_HPP_SEEN
 #define ZIO_PEER_HPP_SEEN
 
@@ -42,7 +35,12 @@ namespace zio {
 
     typedef std::map<uuid_t, peer_info_t> peerset_t;
 
-    /// Peer at the network to discover peers and advertise self.
+    /*!
+      @brief Peer at the network to discover peers and advertise self.
+
+      This is a C++ interface to ZeroMQ's Zyre which adds some memory
+      of peers seen and ways to iterate on their Zyre headers.
+    */
     class Peer {
     public:
         /// A timeout in milliseconds
@@ -55,37 +53,44 @@ namespace zio {
              const headerset_t& headers={}, bool verbose=false);
 
 
+        /// Turn on verbose debugging of the underlying Zyre actor.
         void set_verbose(bool verbose=true);
 
+        /// Get our nickname.
         const nickname_t nickname() { return m_nick; }
 
-        /// Poll network for updates, timeout in msec.  Return true if
-        /// an even was from the nework processed.  Use timeout=-1 to
-        /// wait until an event if received.
+        /// @brief Poll the network for updates, timeout in msec.
+        ///
+        /// Return true if an even was from the nework processed.  Use
+        /// timeout=-1 to wait until an event if received.
         bool poll(timeout_t timeout = 0);
 
         /// Continually poll until all queued zyre messages are processed.
         void drain();
 
-        /// Wait for a peer of a given nickname to be discovered.
+        /// @brief Wait for a peer of a given nickname to be discovered.
+        /// 
         /// Return UUID if found, empty string if timeout occurs.
-        std::vector<uuid_t> waitfor(const nickname_t& nickname, timeout_t timeout = -1);
+        /// Note, multiple peers may share the same nickname.
+        std::vector<uuid_t> waitfor(const nickname_t& nickname,
+                                    timeout_t timeout = -1);
 
-        /// Wait until a specific peer has left the network, or if is
-        /// already gone, return immediately or in any case no longer
-        /// than the timeout.
+        /// @brief Wait until a specific peer has left the network.
+        ///
+        /// If it is already gone, return immediately or in any case
+        /// no longer than the timeout.
         void waituntil(const uuid_t& uuid, timeout_t timeout = -1);
 
-        /// Return known peers as map from UUID to nickname.  This
-        /// will return new values on subsequent calls as peers enter
-        /// and exit the network.
+        /// @brief Return known peers as map from UUID to nickname.
+        ///
+        /// This will return new values on subsequent calls as peers
+        /// enter and exit the network.
         const peerset_t& peers();
 
         /// Return info about peer.  If unknown, return default structure.
         peer_info_t peer_info(const uuid_t& uuid);
 
-        /// Return true if peer has been seen ENTER the network and
-        /// not yet seen to EXIT.
+        /// Return true if peer has been seen ENTER the network and not yet seen to EXIT.
         bool isknown(const uuid_t& uuid);
 
         /// Return all UUIDs with matching nickname.

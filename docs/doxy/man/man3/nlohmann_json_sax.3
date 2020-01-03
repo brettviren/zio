@@ -1,0 +1,336 @@
+.TH "nlohmann::json_sax< BasicJsonType >" 3 "Fri Jan 3 2020" "ZIO" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+nlohmann::json_sax< BasicJsonType > \- SAX interface\&.  
+
+.SH SYNOPSIS
+.br
+.PP
+.PP
+\fC#include <json\&.hpp>\fP
+.SS "Public Types"
+
+.in +1c
+.ti -1c
+.RI "using \fBnumber_integer_t\fP = typename BasicJsonType::number_integer_t"
+.br
+.RI "type for (signed) integers "
+.ti -1c
+.RI "using \fBnumber_unsigned_t\fP = typename BasicJsonType::number_unsigned_t"
+.br
+.RI "type for unsigned integers "
+.ti -1c
+.RI "using \fBnumber_float_t\fP = typename BasicJsonType::number_float_t"
+.br
+.RI "type for floating-point numbers "
+.ti -1c
+.RI "using \fBstring_t\fP = typename BasicJsonType::string_t"
+.br
+.RI "type for strings "
+.in -1c
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "virtual bool \fBnull\fP ()=0"
+.br
+.RI "a null value was read "
+.ti -1c
+.RI "virtual bool \fBboolean\fP (bool val)=0"
+.br
+.RI "a boolean value was read "
+.ti -1c
+.RI "virtual bool \fBnumber_integer\fP (\fBnumber_integer_t\fP val)=0"
+.br
+.RI "an integer number was read "
+.ti -1c
+.RI "virtual bool \fBnumber_unsigned\fP (\fBnumber_unsigned_t\fP val)=0"
+.br
+.RI "an unsigned integer number was read "
+.ti -1c
+.RI "virtual bool \fBnumber_float\fP (\fBnumber_float_t\fP val, const \fBstring_t\fP &s)=0"
+.br
+.RI "an floating-point number was read "
+.ti -1c
+.RI "virtual bool \fBstring\fP (\fBstring_t\fP &val)=0"
+.br
+.RI "a string was read "
+.ti -1c
+.RI "virtual bool \fBstart_object\fP (std::size_t elements)=0"
+.br
+.RI "the beginning of an object was read "
+.ti -1c
+.RI "virtual bool \fBkey\fP (\fBstring_t\fP &val)=0"
+.br
+.RI "an object key was read "
+.ti -1c
+.RI "virtual bool \fBend_object\fP ()=0"
+.br
+.RI "the end of an object was read "
+.ti -1c
+.RI "virtual bool \fBstart_array\fP (std::size_t elements)=0"
+.br
+.RI "the beginning of an array was read "
+.ti -1c
+.RI "virtual bool \fBend_array\fP ()=0"
+.br
+.RI "the end of an array was read "
+.ti -1c
+.RI "virtual bool \fBparse_error\fP (std::size_t position, const std::string &last_token, const \fBdetail::exception\fP &ex)=0"
+.br
+.RI "a parse error occurred "
+.ti -1c
+.RI "virtual \fB~json_sax\fP ()=default"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+
+.SS "template<typename BasicJsonType>
+.br
+struct nlohmann::json_sax< BasicJsonType >"
+SAX interface\&. 
+
+This class describes the SAX interface used by \fBnlohmann::json::sax_parse\fP\&. Each function is called in different situations while the input is parsed\&. The boolean return value informs the parser whether to continue processing the input\&. 
+.PP
+Definition at line 4333 of file json\&.hpp\&.
+.SH "Member Typedef Documentation"
+.PP 
+.SS "template<typename BasicJsonType > using \fBnlohmann::json_sax\fP< BasicJsonType >::\fBnumber_float_t\fP =  typename BasicJsonType::number_float_t"
+
+.PP
+type for floating-point numbers 
+.PP
+Definition at line 4340 of file json\&.hpp\&.
+.SS "template<typename BasicJsonType > using \fBnlohmann::json_sax\fP< BasicJsonType >::\fBnumber_integer_t\fP =  typename BasicJsonType::number_integer_t"
+
+.PP
+type for (signed) integers 
+.PP
+Definition at line 4336 of file json\&.hpp\&.
+.SS "template<typename BasicJsonType > using \fBnlohmann::json_sax\fP< BasicJsonType >::\fBnumber_unsigned_t\fP =  typename BasicJsonType::number_unsigned_t"
+
+.PP
+type for unsigned integers 
+.PP
+Definition at line 4338 of file json\&.hpp\&.
+.SS "template<typename BasicJsonType > using \fBnlohmann::json_sax\fP< BasicJsonType >::\fBstring_t\fP =  typename BasicJsonType::string_t"
+
+.PP
+type for strings 
+.PP
+Definition at line 4342 of file json\&.hpp\&.
+.SH "Constructor & Destructor Documentation"
+.PP 
+.SS "template<typename BasicJsonType > virtual \fBnlohmann::json_sax\fP< BasicJsonType >::~\fBjson_sax\fP ()\fC [virtual]\fP, \fC [default]\fP"
+
+.SH "Member Function Documentation"
+.PP 
+.SS "template<typename BasicJsonType > virtual bool \fBnlohmann::json_sax\fP< BasicJsonType >::boolean (bool val)\fC [pure virtual]\fP"
+
+.PP
+a boolean value was read 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIval\fP boolean value 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+whether parsing should proceed 
+.RE
+.PP
+
+.SS "template<typename BasicJsonType > virtual bool \fBnlohmann::json_sax\fP< BasicJsonType >::end_array ()\fC [pure virtual]\fP"
+
+.PP
+the end of an array was read 
+.PP
+\fBReturns:\fP
+.RS 4
+whether parsing should proceed 
+.RE
+.PP
+
+.SS "template<typename BasicJsonType > virtual bool \fBnlohmann::json_sax\fP< BasicJsonType >::end_object ()\fC [pure virtual]\fP"
+
+.PP
+the end of an object was read 
+.PP
+\fBReturns:\fP
+.RS 4
+whether parsing should proceed 
+.RE
+.PP
+
+.SS "template<typename BasicJsonType > virtual bool \fBnlohmann::json_sax\fP< BasicJsonType >::key (\fBstring_t\fP & val)\fC [pure virtual]\fP"
+
+.PP
+an object key was read 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIval\fP object key 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+whether parsing should proceed 
+.RE
+.PP
+\fBNote:\fP
+.RS 4
+It is safe to move the passed string\&. 
+.RE
+.PP
+
+.SS "template<typename BasicJsonType > virtual bool \fBnlohmann::json_sax\fP< BasicJsonType >::null ()\fC [pure virtual]\fP"
+
+.PP
+a null value was read 
+.PP
+\fBReturns:\fP
+.RS 4
+whether parsing should proceed 
+.RE
+.PP
+
+.SS "template<typename BasicJsonType > virtual bool \fBnlohmann::json_sax\fP< BasicJsonType >::number_float (\fBnumber_float_t\fP val, const \fBstring_t\fP & s)\fC [pure virtual]\fP"
+
+.PP
+an floating-point number was read 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIval\fP floating-point value 
+.br
+\fIs\fP raw token value 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+whether parsing should proceed 
+.RE
+.PP
+
+.SS "template<typename BasicJsonType > virtual bool \fBnlohmann::json_sax\fP< BasicJsonType >::number_integer (\fBnumber_integer_t\fP val)\fC [pure virtual]\fP"
+
+.PP
+an integer number was read 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIval\fP integer value 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+whether parsing should proceed 
+.RE
+.PP
+
+.SS "template<typename BasicJsonType > virtual bool \fBnlohmann::json_sax\fP< BasicJsonType >::number_unsigned (\fBnumber_unsigned_t\fP val)\fC [pure virtual]\fP"
+
+.PP
+an unsigned integer number was read 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIval\fP unsigned integer value 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+whether parsing should proceed 
+.RE
+.PP
+
+.SS "template<typename BasicJsonType > virtual bool \fBnlohmann::json_sax\fP< BasicJsonType >::parse_error (std::size_t position, const std::string & last_token, const \fBdetail::exception\fP & ex)\fC [pure virtual]\fP"
+
+.PP
+a parse error occurred 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIposition\fP the position in the input where the error occurs 
+.br
+\fIlast_token\fP the last read token 
+.br
+\fIex\fP an exception object describing the error 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+whether parsing should proceed (must return false) 
+.RE
+.PP
+
+.SS "template<typename BasicJsonType > virtual bool \fBnlohmann::json_sax\fP< BasicJsonType >::start_array (std::size_t elements)\fC [pure virtual]\fP"
+
+.PP
+the beginning of an array was read 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIelements\fP number of array elements or -1 if unknown 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+whether parsing should proceed 
+.RE
+.PP
+\fBNote:\fP
+.RS 4
+binary formats may report the number of elements 
+.RE
+.PP
+
+.SS "template<typename BasicJsonType > virtual bool \fBnlohmann::json_sax\fP< BasicJsonType >::start_object (std::size_t elements)\fC [pure virtual]\fP"
+
+.PP
+the beginning of an object was read 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIelements\fP number of object elements or -1 if unknown 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+whether parsing should proceed 
+.RE
+.PP
+\fBNote:\fP
+.RS 4
+binary formats may report the number of elements 
+.RE
+.PP
+
+.SS "template<typename BasicJsonType > virtual bool \fBnlohmann::json_sax\fP< BasicJsonType >::string (\fBstring_t\fP & val)\fC [pure virtual]\fP"
+
+.PP
+a string was read 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIval\fP string value 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+whether parsing should proceed 
+.RE
+.PP
+\fBNote:\fP
+.RS 4
+It is safe to move the passed string\&. 
+.RE
+.PP
+
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for ZIO from the source code\&.

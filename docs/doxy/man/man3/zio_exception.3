@@ -1,0 +1,80 @@
+.TH "zio::exception" 3 "Fri Jan 3 2020" "ZIO" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+zio::exception \- general exception class for zio  
+
+.SH SYNOPSIS
+.br
+.PP
+.PP
+\fC#include <exceptions\&.hpp>\fP
+.PP
+Inherits exception\&.
+.PP
+Inherited by \fBzio::message_error\fP, and \fBzio::socket_error\fP\&.
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "const char * \fBwhat\fP () const noexcept override"
+.br
+.RI "returns the explanatory string "
+.in -1c
+.SS "Public Attributes"
+
+.in +1c
+.ti -1c
+.RI "const int \fBid\fP"
+.br
+.RI "the id of the exception "
+.in -1c
+.SS "Protected Member Functions"
+
+.in +1c
+.ti -1c
+.RI "\fBexception\fP (int id_, const char *what_arg)"
+.br
+.in -1c
+.SS "Static Protected Member Functions"
+
+.in +1c
+.ti -1c
+.RI "static std::string \fBname\fP (const std::string &ename, int id_)"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+general exception class for zio 
+.PP
+Definition at line 16 of file exceptions\&.hpp\&.
+.SH "Constructor & Destructor Documentation"
+.PP 
+.SS "zio::exception::exception (int id_, const char * what_arg)\fC [inline]\fP, \fC [protected]\fP"
+
+.PP
+Definition at line 27 of file exceptions\&.hpp\&.
+.SH "Member Function Documentation"
+.PP 
+.SS "static std::string zio::exception::name (const std::string & ename, int id_)\fC [inline]\fP, \fC [static]\fP, \fC [protected]\fP"
+
+.PP
+Definition at line 28 of file exceptions\&.hpp\&.
+.SS "const char* zio::exception::what () const\fC [inline]\fP, \fC [override]\fP, \fC [noexcept]\fP"
+
+.PP
+returns the explanatory string 
+.PP
+Definition at line 20 of file exceptions\&.hpp\&.
+.SH "Member Data Documentation"
+.PP 
+.SS "const int zio::exception::id"
+
+.PP
+the id of the exception 
+.PP
+Definition at line 24 of file exceptions\&.hpp\&.
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for ZIO from the source code\&.

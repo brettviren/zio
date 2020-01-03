@@ -1,0 +1,46 @@
+.TH "inc/zio/port.hpp" 3 "Fri Jan 3 2020" "ZIO" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+inc/zio/port.hpp
+.SH SYNOPSIS
+.br
+.PP
+\fC#include 'zio/peer\&.hpp'\fP
+.br
+\fC#include 'zio/message\&.hpp'\fP
+.br
+\fC#include 'zio/interned\&.hpp'\fP
+.br
+\fC#include <memory>\fP
+.br
+\fC#include <map>\fP
+.br
+
+.SS "Classes"
+
+.in +1c
+.ti -1c
+.RI "class \fBzio::Port\fP"
+.br
+.RI "A port holds a socket in the context of a \fBnode\fP\&. "
+.in -1c
+.SS "Namespaces"
+
+.in +1c
+.ti -1c
+.RI " \fBzio\fP"
+.br
+.RI "implementation of ZIO data flow protocol endpoints "
+.in -1c
+.SS "Typedefs"
+
+.in +1c
+.ti -1c
+.RI "typedef std::shared_ptr< Port > \fBzio::portptr_t\fP"
+.br
+.RI "The context can't be copied and ports like to be shared\&. "
+.in -1c
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for ZIO from the source code\&.

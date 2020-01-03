@@ -1,0 +1,7 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$de/daf/structflow__protocol_1_1ev__msg.html" title="flow_protocol::ev_msg" alt="" coords="5,81,159,108"/>
+<area shape="rect" id="node2" href="$d4/d74/structflow__protocol_1_1ev__bot.html" title="flow_protocol::ev_bot" alt="" coords="208,5,355,32"/>
+<area shape="rect" id="node3" href="$d3/d13/structflow__protocol_1_1ev__dat.html" title="flow_protocol::ev_dat" alt="" coords="208,56,355,83"/>
+<area shape="rect" id="node4" href="$da/dc4/structflow__protocol_1_1ev__eot.html" title="flow_protocol::ev_eot" alt="" coords="208,107,355,133"/>
+<area shape="rect" id="node5" href="$d0/d4f/structflow__protocol_1_1ev__pay.html" title="flow_protocol::ev_pay" alt="" coords="207,157,356,184"/>
+</map>

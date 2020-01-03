@@ -1,0 +1,221 @@
+.TH "zio" 3 "Fri Jan 3 2020" "ZIO" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+zio \- implementation of ZIO data flow protocol endpoints  
+
+.SH SYNOPSIS
+.br
+.PP
+.SS "Namespaces"
+
+.in +1c
+.ti -1c
+.RI " \fBflow\fP"
+.br
+.RI "ZIO data flow\&. "
+.ti -1c
+.RI " \fBlevel\fP"
+.br
+.in -1c
+.SS "Classes"
+
+.in +1c
+.ti -1c
+.RI "struct \fBCoordHeader\fP"
+.br
+.ti -1c
+.RI "class \fBexception\fP"
+.br
+.RI "general exception class for zio "
+.ti -1c
+.RI "struct \fBHeader\fP"
+.br
+.ti -1c
+.RI "class \fBMessage\fP"
+.br
+.RI "a ZIO message "
+.ti -1c
+.RI "class \fBmessage_error\fP"
+.br
+.RI "exception indicating message error "
+.ti -1c
+.RI "class \fBNode\fP"
+.br
+.RI "An identified vertex in a ported, directed graph\&. "
+.ti -1c
+.RI "class \fBOutbox\fP"
+.br
+.RI "output objects of a fixed native type with levels expressed as methods\&. "
+.ti -1c
+.RI "class \fBPeer\fP"
+.br
+.RI "\fBPeer\fP at the network to discover peers and advertise self\&. "
+.ti -1c
+.RI "struct \fBpeer_info_t\fP"
+.br
+.ti -1c
+.RI "class \fBPort\fP"
+.br
+.RI "A port holds a socket in the context of a \fBnode\fP\&. "
+.ti -1c
+.RI "struct \fBPrefixHeader\fP"
+.br
+.ti -1c
+.RI "class \fBsocket_error\fP"
+.br
+.RI "exception indicating a socket error "
+.in -1c
+.SS "Typedefs"
+
+.in +1c
+.ti -1c
+.RI "using \fBjson\fP = nlohmann::json"
+.br
+.ti -1c
+.RI "typedef uint64_t \fBorigin_t\fP"
+.br
+.ti -1c
+.RI "typedef uint64_t \fBgranule_t\fP"
+.br
+.ti -1c
+.RI "typedef uint64_t \fBseqno_t\fP"
+.br
+.ti -1c
+.RI "typedef \fBOutbox\fP< std::string > \fBLogger\fP"
+.br
+.RI "two special types of outboxes\&. "
+.ti -1c
+.RI "typedef \fBOutbox\fP< \fBzio::json\fP > \fBMetric\fP"
+.br
+.RI "Emit structured data\&. "
+.ti -1c
+.RI "typedef std::string \fBnickname_t\fP"
+.br
+.RI "A peer asserts a nickname\&. "
+.ti -1c
+.RI "typedef std::string \fBuuid_t\fP"
+.br
+.RI "Uniquely identify a peer\&. "
+.ti -1c
+.RI "typedef std::string \fBheader_key_t\fP"
+.br
+.RI "A 'header' is on in a set of key/value pairs asserted by a peer\&. "
+.ti -1c
+.RI "typedef std::string \fBheader_value_t\fP"
+.br
+.ti -1c
+.RI "typedef std::pair< \fBheader_key_t\fP, \fBheader_value_t\fP > \fBheader_t\fP"
+.br
+.ti -1c
+.RI "typedef std::map< \fBheader_key_t\fP, \fBheader_value_t\fP > \fBheaderset_t\fP"
+.br
+.ti -1c
+.RI "typedef std::map< \fBuuid_t\fP, \fBpeer_info_t\fP > \fBpeerset_t\fP"
+.br
+.ti -1c
+.RI "typedef std::shared_ptr< \fBPort\fP > \fBportptr_t\fP"
+.br
+.RI "The context can't be copied and ports like to be shared\&. "
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "int \fBsock_type\fP (const \fBsocket_t\fP &sock)"
+.br
+.RI "Return the ZeroMQ socket type number for the socket\&. "
+.ti -1c
+.RI "std::string \fBsock_type_name\fP (int stype)"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+implementation of ZIO data flow protocol endpoints 
+
+Functions to manage message data including send and receiving with a socket\&. 
+.SH "Typedef Documentation"
+.PP 
+.SS "typedef uint64_t \fBzio::granule_t\fP"
+
+.PP
+Definition at line 36 of file message\&.hpp\&.
+.SS "typedef std::string \fBzio::header_key_t\fP"
+
+.PP
+A 'header' is on in a set of key/value pairs asserted by a peer\&. 
+.PP
+Definition at line 17 of file peer\&.hpp\&.
+.SS "typedef std::pair<\fBheader_key_t\fP, \fBheader_value_t\fP> \fBzio::header_t\fP"
+
+.PP
+Definition at line 21 of file peer\&.hpp\&.
+.SS "typedef std::string \fBzio::header_value_t\fP"
+
+.PP
+Definition at line 18 of file peer\&.hpp\&.
+.SS "typedef std::map<\fBheader_key_t\fP, \fBheader_value_t\fP> \fBzio::headerset_t\fP"
+
+.PP
+Definition at line 22 of file peer\&.hpp\&.
+.SS "using \fBzio::json\fP = typedef nlohmann::json"
+
+.PP
+Definition at line 10 of file interned\&.hpp\&.
+.SS "typedef \fBOutbox\fP<std::string> \fBzio::Logger\fP"
+
+.PP
+two special types of outboxes\&. A text based logger to use like print()\&. 
+.PP
+Definition at line 65 of file outbox\&.hpp\&.
+.SS "typedef \fBOutbox\fP<\fBzio::json\fP> \fBzio::Metric\fP"
+
+.PP
+Emit structured data\&. 
+.PP
+Definition at line 68 of file outbox\&.hpp\&.
+.SS "typedef std::string \fBzio::nickname_t\fP"
+
+.PP
+A peer asserts a nickname\&. 
+.PP
+Definition at line 12 of file peer\&.hpp\&.
+.SS "typedef uint64_t \fBzio::origin_t\fP"
+
+.PP
+Definition at line 35 of file message\&.hpp\&.
+.SS "typedef std::map<\fBuuid_t\fP, \fBpeer_info_t\fP> \fBzio::peerset_t\fP"
+
+.PP
+Definition at line 36 of file peer\&.hpp\&.
+.SS "typedef std::shared_ptr<\fBPort\fP> \fBzio::portptr_t\fP"
+
+.PP
+The context can't be copied and ports like to be shared\&. 
+.PP
+Definition at line 148 of file port\&.hpp\&.
+.SS "typedef uint64_t \fBzio::seqno_t\fP"
+
+.PP
+Definition at line 37 of file message\&.hpp\&.
+.SS "typedef std::string \fBzio::uuid_t\fP"
+
+.PP
+Uniquely identify a peer\&. 
+.PP
+Definition at line 14 of file peer\&.hpp\&.
+.SH "Function Documentation"
+.PP 
+.SS "int zio::sock_type (const \fBsocket_t\fP & sock)"
+
+.PP
+Return the ZeroMQ socket type number for the socket\&. 
+.PP
+Definition at line 6 of file interned\&.cpp\&.
+.SS "std::string zio::sock_type_name (int stype)"
+
+.PP
+Definition at line 11 of file interned\&.cpp\&.
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for ZIO from the source code\&.

@@ -1,0 +1,63 @@
+.TH "flow_protocol::actioncbs" 3 "Fri Jan 3 2020" "ZIO" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+flow_protocol::actioncbs
+.SH SYNOPSIS
+.br
+.PP
+.SS "Public Attributes"
+
+.in +1c
+.ti -1c
+.RI "std::function< void(bool initiator)> \fBdisconnect\fP"
+.br
+.ti -1c
+.RI "std::function< void(const \fBev_bot\fP &)> \fBsend_bot\fP"
+.br
+.ti -1c
+.RI "std::function< void(const \fBev_bot\fP &)> \fBrecv_bot\fP"
+.br
+.ti -1c
+.RI "std::function< void(const \fBev_eot\fP &)> \fBeot\fP"
+.br
+.ti -1c
+.RI "std::function< void(const \fBev_dat\fP &)> \fBgot_dat\fP"
+.br
+.ti -1c
+.RI "std::function< void(const \fBev_pay\fP &)> \fBgot_pay\fP"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+Definition at line 51 of file test_flowsm\&.cpp\&.
+.SH "Member Data Documentation"
+.PP 
+.SS "std::function<void(bool initiator)> flow_protocol::actioncbs::disconnect"
+
+.PP
+Definition at line 52 of file test_flowsm\&.cpp\&.
+.SS "std::function<void(const \fBev_eot\fP&)> flow_protocol::actioncbs::eot"
+
+.PP
+Definition at line 58 of file test_flowsm\&.cpp\&.
+.SS "std::function<void(const \fBev_dat\fP&)> flow_protocol::actioncbs::got_dat"
+
+.PP
+Definition at line 59 of file test_flowsm\&.cpp\&.
+.SS "std::function<void(const \fBev_pay\fP&)> flow_protocol::actioncbs::got_pay"
+
+.PP
+Definition at line 60 of file test_flowsm\&.cpp\&.
+.SS "std::function<void(const \fBev_bot\fP&)> flow_protocol::actioncbs::recv_bot"
+
+.PP
+Definition at line 56 of file test_flowsm\&.cpp\&.
+.SS "std::function<void(const \fBev_bot\fP&)> flow_protocol::actioncbs::send_bot"
+
+.PP
+Definition at line 54 of file test_flowsm\&.cpp\&.
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for ZIO from the source code\&.

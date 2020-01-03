@@ -1,0 +1,95 @@
+.TH "zmq::context_t" 3 "Fri Jan 3 2020" "ZIO" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+zmq::context_t
+.SH SYNOPSIS
+.br
+.PP
+.PP
+\fC#include <zmq\&.hpp>\fP
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "\fBcontext_t\fP ()"
+.br
+.ti -1c
+.RI "\fBcontext_t\fP (int io_threads_, int max_sockets_=ZMQ_MAX_SOCKETS_DFLT)"
+.br
+.ti -1c
+.RI "int \fBsetctxopt\fP (int option_, int optval_)"
+.br
+.ti -1c
+.RI "int \fBgetctxopt\fP (int option_)"
+.br
+.ti -1c
+.RI "\fB~context_t\fP () \fBZMQ_NOTHROW\fP"
+.br
+.ti -1c
+.RI "void \fBclose\fP () \fBZMQ_NOTHROW\fP"
+.br
+.ti -1c
+.RI "\fBZMQ_EXPLICIT\fP \fBoperator void *\fP () \fBZMQ_NOTHROW\fP"
+.br
+.ti -1c
+.RI "\fBZMQ_EXPLICIT\fP \fBoperator void const *\fP () const \fBZMQ_NOTHROW\fP"
+.br
+.ti -1c
+.RI "\fBoperator bool\fP () const \fBZMQ_NOTHROW\fP"
+.br
+.ti -1c
+.RI "void \fBswap\fP (\fBcontext_t\fP &other) \fBZMQ_NOTHROW\fP"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+Definition at line 618 of file zmq\&.hpp\&.
+.SH "Constructor & Destructor Documentation"
+.PP 
+.SS "zmq::context_t::context_t ()\fC [inline]\fP"
+
+.PP
+Definition at line 621 of file zmq\&.hpp\&.
+.SS "zmq::context_t::context_t (int io_threads_, int max_sockets_ = \fCZMQ_MAX_SOCKETS_DFLT\fP)\fC [inline]\fP, \fC [explicit]\fP"
+
+.PP
+Definition at line 629 of file zmq\&.hpp\&.
+.SS "zmq::context_t::~context_t ()\fC [inline]\fP"
+
+.PP
+Definition at line 662 of file zmq\&.hpp\&.
+.SH "Member Function Documentation"
+.PP 
+.SS "void zmq::context_t::close ()\fC [inline]\fP"
+
+.PP
+Definition at line 664 of file zmq\&.hpp\&.
+.SS "int zmq::context_t::getctxopt (int option_)\fC [inline]\fP"
+
+.PP
+Definition at line 660 of file zmq\&.hpp\&.
+.SS "zmq::context_t::operator bool () const\fC [inline]\fP"
+
+.PP
+Definition at line 685 of file zmq\&.hpp\&.
+.SS "\fBZMQ_EXPLICIT\fP zmq::context_t::operator void * ()\fC [inline]\fP"
+
+.PP
+Definition at line 681 of file zmq\&.hpp\&.
+.SS "\fBZMQ_EXPLICIT\fP zmq::context_t::operator void const * () const\fC [inline]\fP"
+
+.PP
+Definition at line 683 of file zmq\&.hpp\&.
+.SS "int zmq::context_t::setctxopt (int option_, int optval_)\fC [inline]\fP"
+
+.PP
+Definition at line 653 of file zmq\&.hpp\&.
+.SS "void zmq::context_t::swap (\fBcontext_t\fP & other)\fC [inline]\fP"
+
+.PP
+Definition at line 687 of file zmq\&.hpp\&.
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for ZIO from the source code\&.

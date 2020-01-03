@@ -1,0 +1,111 @@
+.TH "test/test_flowsm.cpp" 3 "Fri Jan 3 2020" "ZIO" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+test/test_flowsm.cpp
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <vector>\fP
+.br
+\fC#include <string>\fP
+.br
+\fC#include <iostream>\fP
+.br
+\fC#include <cassert>\fP
+.br
+\fC#include <functional>\fP
+.br
+\fC#include <stdexcept>\fP
+.br
+\fC#include 'sml\&.hpp'\fP
+.br
+\fC#include <deque>\fP
+.br
+\fC#include <queue>\fP
+.br
+
+.SS "Classes"
+
+.in +1c
+.ti -1c
+.RI "struct \fBflow_protocol\fP"
+.br
+.ti -1c
+.RI "struct \fBflow_protocol::ev_error\fP"
+.br
+.ti -1c
+.RI "struct \fBflow_protocol::ev_msg\fP"
+.br
+.ti -1c
+.RI "struct \fBflow_protocol::ev_bot\fP"
+.br
+.ti -1c
+.RI "struct \fBflow_protocol::ev_eot\fP"
+.br
+.ti -1c
+.RI "struct \fBflow_protocol::ev_sending\fP"
+.br
+.ti -1c
+.RI "struct \fBflow_protocol::ev_recving\fP"
+.br
+.ti -1c
+.RI "struct \fBflow_protocol::ev_dat\fP"
+.br
+.ti -1c
+.RI "struct \fBflow_protocol::ev_pay\fP"
+.br
+.ti -1c
+.RI "struct \fBflow_protocol::eventcbs\fP"
+.br
+.ti -1c
+.RI "struct \fBflow_protocol::actioncbs\fP"
+.br
+.ti -1c
+.RI "struct \fBflow_protocol::protocol\fP"
+.br
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "std::ostream & \fBoperator<<\fP (std::ostream &o, const \fBflow_protocol::ev_bot\fP &bot)"
+.br
+.ti -1c
+.RI "std::ostream & \fBoperator<<\fP (std::ostream &o, const \fBflow_protocol::ev_eot\fP &eot)"
+.br
+.ti -1c
+.RI "std::ostream & \fBoperator<<\fP (std::ostream &o, const \fBflow_protocol::ev_dat\fP &dat)"
+.br
+.ti -1c
+.RI "std::ostream & \fBoperator<<\fP (std::ostream &o, const \fBflow_protocol::ev_pay\fP &pay)"
+.br
+.ti -1c
+.RI "int \fBmain\fP ()"
+.br
+.in -1c
+.SH "Function Documentation"
+.PP 
+.SS "int main (void)"
+
+.PP
+Definition at line 171 of file test_flowsm\&.cpp\&.
+.SS "std::ostream& operator<< (std::ostream & o, const \fBflow_protocol::ev_bot\fP & bot)"
+
+.PP
+Definition at line 147 of file test_flowsm\&.cpp\&.
+.SS "std::ostream& operator<< (std::ostream & o, const \fBflow_protocol::ev_eot\fP & eot)"
+
+.PP
+Definition at line 152 of file test_flowsm\&.cpp\&.
+.SS "std::ostream& operator<< (std::ostream & o, const \fBflow_protocol::ev_dat\fP & dat)"
+
+.PP
+Definition at line 157 of file test_flowsm\&.cpp\&.
+.SS "std::ostream& operator<< (std::ostream & o, const \fBflow_protocol::ev_pay\fP & pay)"
+
+.PP
+Definition at line 162 of file test_flowsm\&.cpp\&.
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for ZIO from the source code\&.

@@ -1,0 +1,44 @@
+.TH "inc/zio/outbox.hpp" 3 "Fri Jan 3 2020" "ZIO" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+inc/zio/outbox.hpp
+.SH SYNOPSIS
+.br
+.PP
+\fC#include 'zio/message\&.hpp'\fP
+.br
+\fC#include <functional>\fP
+.br
+
+.SS "Classes"
+
+.in +1c
+.ti -1c
+.RI "class \fBzio::Outbox< NATIVE >\fP"
+.br
+.RI "output objects of a fixed native type with levels expressed as methods\&. "
+.in -1c
+.SS "Namespaces"
+
+.in +1c
+.ti -1c
+.RI " \fBzio\fP"
+.br
+.RI "implementation of ZIO data flow protocol endpoints "
+.in -1c
+.SS "Typedefs"
+
+.in +1c
+.ti -1c
+.RI "typedef Outbox< std::string > \fBzio::Logger\fP"
+.br
+.RI "two special types of outboxes\&. "
+.ti -1c
+.RI "typedef Outbox< \fBzio::json\fP > \fBzio::Metric\fP"
+.br
+.RI "Emit structured data\&. "
+.in -1c
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for ZIO from the source code\&.

@@ -1,0 +1,160 @@
+.TH "zio::Node" 3 "Fri Jan 3 2020" "ZIO" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+zio::Node \- An identified vertex in a ported, directed graph\&.  
+
+.SH SYNOPSIS
+.br
+.PP
+.PP
+\fC#include <node\&.hpp>\fP
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "\fBNode\fP (\fBnickname_t\fP \fBnick\fP='', \fBorigin_t\fP \fBorigin\fP=0, const std::string &hostname='')"
+.br
+.RI "Create a node\&. "
+.ti -1c
+.RI "\fB~Node\fP ()"
+.br
+.ti -1c
+.RI "\fBnickname_t\fP \fBnick\fP () const"
+.br
+.RI "Return a previously set node nickname\&. "
+.ti -1c
+.RI "\fBorigin_t\fP \fBorigin\fP () const"
+.br
+.RI "Return a previously set node origin\&. "
+.ti -1c
+.RI "const std::vector< std::string > & \fBportnames\fP () const"
+.br
+.RI "Return names of all ports in order of their creation\&. "
+.ti -1c
+.RI "void \fBset_nick\fP (const \fBnickname_t\fP &\fBnick\fP)"
+.br
+.RI "Set the node nickname\&. "
+.ti -1c
+.RI "void \fBset_origin\fP (\fBorigin_t\fP \fBorigin\fP)"
+.br
+.RI "Set the node origin\&. "
+.ti -1c
+.RI "void \fBset_verbose\fP (bool \fBverbose\fP=true)"
+.br
+.RI "Set verbose for underlying Zyre and internal debug messages\&. "
+.ti -1c
+.RI "bool \fBverbose\fP () const"
+.br
+.ti -1c
+.RI "\fBportptr_t\fP \fBport\fP (const std::string &name, int stype)"
+.br
+.RI "Create a named port with the given socket type\&. "
+.ti -1c
+.RI "\fBportptr_t\fP \fBport\fP (const std::string &name)"
+.br
+.RI "Return a previously created port\&. "
+.ti -1c
+.RI "void \fBonline\fP (const \fBheaderset_t\fP &extra_headers={})"
+.br
+.RI "Bring the node online\&. "
+.ti -1c
+.RI "void \fBoffline\fP ()"
+.br
+.RI "Bring the node offline\&. "
+.in -1c
+.SH "Detailed Description"
+.PP 
+An identified vertex in a ported, directed graph\&. 
+
+Each port (a \fBzio::Port\fP) is named uniquely within the node and has a ZeroMQ socket which may (simultaneously) bind and connect\&.
+.PP
+Every bind is advertised for discovery by a \fBzio::Peer\fP\&.
+.PP
+Each connect may be direct which completes immediately or indirect (given based on node/port names) which waits for peer discovery to resolve\&.
+.PP
+Nodes start in 'offline' state\&. During that state, ports may be created\&. The ports also start in 'offline' state and while offline they may bind() or connect()\&. When a node is brought 'online' it brings all ports 'online' and it is then when any bind() or connect() and associated discovery are performed\&. A node and its ports may be taken subsequently 'offline' and the cycle repeated\&. 
+.PP
+Definition at line 30 of file node\&.hpp\&.
+.SH "Constructor & Destructor Documentation"
+.PP 
+.SS "zio::Node::Node (\fBnickname_t\fP nick = \fC''\fP, \fBorigin_t\fP origin = \fC0\fP, const std::string & hostname = \fC''\fP)"
+
+.PP
+Create a node\&. 
+.PP
+Definition at line 18 of file node\&.cpp\&.
+.SS "zio::Node::~Node ()"
+
+.PP
+Definition at line 30 of file node\&.cpp\&.
+.SH "Member Function Documentation"
+.PP 
+.SS "\fBnickname_t\fP zio::Node::nick () const\fC [inline]\fP"
+
+.PP
+Return a previously set node nickname\&. 
+.PP
+Definition at line 48 of file node\&.hpp\&.
+.SS "void zio::Node::offline ()"
+
+.PP
+Bring the node offline\&. 
+.PP
+Definition at line 79 of file node\&.cpp\&.
+.SS "void zio::Node::online (const \fBheaderset_t\fP & extra_headers = \fC{}\fP)"
+
+.PP
+Bring the node online\&. The extra headers are merged with those provided by this nodes \fBzio::Peer\fP\&. 
+.PP
+Definition at line 58 of file node\&.cpp\&.
+.SS "\fBorigin_t\fP zio::Node::origin () const\fC [inline]\fP"
+
+.PP
+Return a previously set node origin\&. 
+.PP
+Definition at line 50 of file node\&.hpp\&.
+.SS "\fBzio::portptr_t\fP zio::Node::port (const std::string & name, int stype)"
+
+.PP
+Create a named port with the given socket type\&. If port of given name exits, return it\&. 
+.PP
+Definition at line 36 of file node\&.cpp\&.
+.SS "\fBzio::portptr_t\fP zio::Node::port (const std::string & name)"
+
+.PP
+Return a previously created port\&. 
+.PP
+Definition at line 48 of file node\&.cpp\&.
+.SS "const std::vector<std::string>& zio::Node::portnames () const\fC [inline]\fP"
+
+.PP
+Return names of all ports in order of their creation\&. 
+.PP
+Definition at line 52 of file node\&.hpp\&.
+.SS "void zio::Node::set_nick (const \fBnickname_t\fP & nick)\fC [inline]\fP"
+
+.PP
+Set the node nickname\&. 
+.PP
+Definition at line 57 of file node\&.hpp\&.
+.SS "void zio::Node::set_origin (\fBorigin_t\fP origin)"
+
+.PP
+Set the node origin\&. 
+.PP
+Definition at line 90 of file node\&.cpp\&.
+.SS "void zio::Node::set_verbose (bool verbose = \fCtrue\fP)"
+
+.PP
+Set verbose for underlying Zyre and internal debug messages\&. 
+.PP
+Definition at line 97 of file node\&.cpp\&.
+.SS "bool zio::Node::verbose () const\fC [inline]\fP"
+
+.PP
+Definition at line 64 of file node\&.hpp\&.
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for ZIO from the source code\&.

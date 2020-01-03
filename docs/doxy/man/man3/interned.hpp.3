@@ -1,0 +1,44 @@
+.TH "inc/zio/interned.hpp" 3 "Fri Jan 3 2020" "ZIO" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+inc/zio/interned.hpp
+.SH SYNOPSIS
+.br
+.PP
+\fC#include 'zio/json\&.hpp'\fP
+.br
+\fC#include 'zio/zmq\&.hpp'\fP
+.br
+\fC#include 'zio/zmq_addon\&.hpp'\fP
+.br
+
+.SS "Namespaces"
+
+.in +1c
+.ti -1c
+.RI " \fBzio\fP"
+.br
+.RI "implementation of ZIO data flow protocol endpoints "
+.in -1c
+.SS "Typedefs"
+
+.in +1c
+.ti -1c
+.RI "using \fBzio::json\fP = nlohmann::json"
+.br
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "int \fBzio::sock_type\fP (const socket_t &sock)"
+.br
+.RI "Return the ZeroMQ socket type number for the socket\&. "
+.ti -1c
+.RI "std::string \fBzio::sock_type_name\fP (int stype)"
+.br
+.in -1c
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for ZIO from the source code\&.
