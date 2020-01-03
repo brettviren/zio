@@ -7,3 +7,6 @@ waf
 *.ipc
 
 ltximg
+venv
+*.egg-info
+__pycache__
