@@ -96,6 +96,7 @@ Classes</h2></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">exception indicating message error  <a href="../../d5/d45/classzio_1_1message__error.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../de/d36/classzio_1_1_node.html">Node</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">An identified vertex in a ported, directed graph.  <a href="../../de/d36/classzio_1_1_node.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d69/classzio_1_1_outbox.html">Outbox</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">output objects of a fixed native type with levels expressed as methods.  <a href="../../df/d69/classzio_1_1_outbox.html#details">More...</a><br /></td></tr>
@@ -106,7 +107,7 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d9/d6a/structzio_1_1peer__info__t.html">peer_info_t</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/d39/classzio_1_1_port.html">Port</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">a port holds a socket in the context of a node  <a href="../../d5/d39/classzio_1_1_port.html#details">More...</a><br /></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A port holds a socket in the context of a node.  <a href="../../d5/d39/classzio_1_1_port.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../de/d4b/structzio_1_1_prefix_header.html">PrefixHeader</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -148,6 +149,7 @@ Typedefs</h2></td></tr>
 <tr class="memitem:a4a04ba90801f925cefc889c8bc34b315"><td class="memItemLeft" align="right" valign="top">typedef std::map&lt; <a class="el" href="../../d1/dad/namespacezio.html#a7f475c595b7e8b3b54f441b01eeef306">uuid_t</a>, <a class="el" href="../../d9/d6a/structzio_1_1peer__info__t.html">peer_info_t</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/dad/namespacezio.html#a4a04ba90801f925cefc889c8bc34b315">peerset_t</a></td></tr>
 <tr class="separator:a4a04ba90801f925cefc889c8bc34b315"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8e77d4065605e5fa1a51838d769b0305"><td class="memItemLeft" align="right" valign="top">typedef std::shared_ptr&lt; <a class="el" href="../../d5/d39/classzio_1_1_port.html">Port</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/dad/namespacezio.html#a8e77d4065605e5fa1a51838d769b0305">portptr_t</a></td></tr>
+<tr class="memdesc:a8e77d4065605e5fa1a51838d769b0305"><td class="mdescLeft">&#160;</td><td class="mdescRight">The context can't be copied and ports like to be shared.  <a href="#a8e77d4065605e5fa1a51838d769b0305">More...</a><br /></td></tr>
 <tr class="separator:a8e77d4065605e5fa1a51838d769b0305"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
@@ -160,14 +162,7 @@ Functions</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>implementation of ZIO data flow protocol endpoints </p>
-<p>Functions to manage message data including send and receiving with a socket.</p>
-<p>A zio node is an identified vertex in a ported, directed graph.</p>
-<p>Each port is named uniquely within the node and has a ZeroMQ socket which may (simultaneously) bind and connect.</p>
-<p>A bind is advertised for discovery.</p>
-<p>A connect may be direct which completes immeidately or may be indirect which waits for peer discovery.</p>
-<p>Nodes start in "offline" state. During that state, ports may be created. The ports also start in "offline" state and while offline they may bind() or connect(). When a node is brought "online" it brings all ports "online" and it is then when any bind() or connect() and associated discovery are performed. A node and its ports may be taken subsequently "offline" and the cycle repeated.</p>
-<p>A C++ class interface adding peer info caching and a "wait for
-peer to show up" method to ZeroMQ's Zyre. </p>
+<p>Functions to manage message data including send and receiving with a socket. </p>
 </div><h2 class="groupheader">Typedef Documentation</h2>
 <a id="ab29a1af68f44f6c8f11243a3b9ba9fc6"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ab29a1af68f44f6c8f11243a3b9ba9fc6">&#9670;&nbsp;</a></span>granule_t</h2>
@@ -199,7 +194,7 @@ peer to show up" method to ZeroMQ's Zyre. </p>
 
 <p>A "header" is on in a set of key/value pairs asserted by a peer. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d0/d70/peer_8hpp_source.html#l00024">24</a> of file <a class="el" href="../../d0/d70/peer_8hpp_source.html">peer.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d0/d70/peer_8hpp_source.html#l00017">17</a> of file <a class="el" href="../../d0/d70/peer_8hpp_source.html">peer.hpp</a>.</p>
 
 </div>
 </div>
@@ -215,7 +210,7 @@ peer to show up" method to ZeroMQ's Zyre. </p>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d0/d70/peer_8hpp_source.html#l00028">28</a> of file <a class="el" href="../../d0/d70/peer_8hpp_source.html">peer.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d0/d70/peer_8hpp_source.html#l00021">21</a> of file <a class="el" href="../../d0/d70/peer_8hpp_source.html">peer.hpp</a>.</p>
 
 </div>
 </div>
@@ -231,7 +226,7 @@ peer to show up" method to ZeroMQ's Zyre. </p>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d0/d70/peer_8hpp_source.html#l00025">25</a> of file <a class="el" href="../../d0/d70/peer_8hpp_source.html">peer.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d0/d70/peer_8hpp_source.html#l00018">18</a> of file <a class="el" href="../../d0/d70/peer_8hpp_source.html">peer.hpp</a>.</p>
 
 </div>
 </div>
@@ -247,7 +242,7 @@ peer to show up" method to ZeroMQ's Zyre. </p>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d0/d70/peer_8hpp_source.html#l00029">29</a> of file <a class="el" href="../../d0/d70/peer_8hpp_source.html">peer.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d0/d70/peer_8hpp_source.html#l00022">22</a> of file <a class="el" href="../../d0/d70/peer_8hpp_source.html">peer.hpp</a>.</p>
 
 </div>
 </div>
@@ -318,7 +313,7 @@ peer to show up" method to ZeroMQ's Zyre. </p>
 
 <p>A peer asserts a nickname. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d0/d70/peer_8hpp_source.html#l00019">19</a> of file <a class="el" href="../../d0/d70/peer_8hpp_source.html">peer.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d0/d70/peer_8hpp_source.html#l00012">12</a> of file <a class="el" href="../../d0/d70/peer_8hpp_source.html">peer.hpp</a>.</p>
 
 </div>
 </div>
@@ -350,7 +345,7 @@ peer to show up" method to ZeroMQ's Zyre. </p>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d0/d70/peer_8hpp_source.html#l00043">43</a> of file <a class="el" href="../../d0/d70/peer_8hpp_source.html">peer.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d0/d70/peer_8hpp_source.html#l00036">36</a> of file <a class="el" href="../../d0/d70/peer_8hpp_source.html">peer.hpp</a>.</p>
 
 </div>
 </div>
@@ -366,7 +361,9 @@ peer to show up" method to ZeroMQ's Zyre. </p>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d1/d42/port_8hpp_source.html#l00110">110</a> of file <a class="el" href="../../d1/d42/port_8hpp_source.html">port.hpp</a>.</p>
+<p>The context can't be copied and ports like to be shared. </p>
+
+<p class="definition">Definition at line <a class="el" href="../../d1/d42/port_8hpp_source.html#l00148">148</a> of file <a class="el" href="../../d1/d42/port_8hpp_source.html">port.hpp</a>.</p>
 
 </div>
 </div>
@@ -400,7 +397,7 @@ peer to show up" method to ZeroMQ's Zyre. </p>
 
 <p>Uniquely identify a peer. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d0/d70/peer_8hpp_source.html#l00021">21</a> of file <a class="el" href="../../d0/d70/peer_8hpp_source.html">peer.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d0/d70/peer_8hpp_source.html#l00014">14</a> of file <a class="el" href="../../d0/d70/peer_8hpp_source.html">peer.hpp</a>.</p>
 
 </div>
 </div>

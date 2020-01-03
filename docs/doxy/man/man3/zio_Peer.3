@@ -30,12 +30,15 @@ zio::Peer \- \fBPeer\fP at the network to discover peers and advertise self\&.
 .ti -1c
 .RI "void \fBset_verbose\fP (bool verbose=true)"
 .br
+.RI "Turn on verbose debugging of the underlying Zyre actor\&. "
 .ti -1c
 .RI "const \fBnickname_t\fP \fBnickname\fP ()"
 .br
+.RI "Get our nickname\&. "
 .ti -1c
 .RI "bool \fBpoll\fP (\fBtimeout_t\fP \fBtimeout\fP=0)"
 .br
+.RI "Poll the network for updates, timeout in msec\&. "
 .ti -1c
 .RI "void \fBdrain\fP ()"
 .br
@@ -43,12 +46,15 @@ zio::Peer \- \fBPeer\fP at the network to discover peers and advertise self\&.
 .ti -1c
 .RI "std::vector< \fBuuid_t\fP > \fBwaitfor\fP (const \fBnickname_t\fP &\fBnickname\fP, \fBtimeout_t\fP \fBtimeout\fP=\-1)"
 .br
+.RI "Wait for a peer of a given nickname to be discovered\&. "
 .ti -1c
 .RI "void \fBwaituntil\fP (const \fBuuid_t\fP &uuid, \fBtimeout_t\fP \fBtimeout\fP=\-1)"
 .br
+.RI "Wait until a specific peer has left the network\&. "
 .ti -1c
 .RI "const \fBpeerset_t\fP & \fBpeers\fP ()"
 .br
+.RI "Return known peers as map from UUID to nickname\&. "
 .ti -1c
 .RI "\fBpeer_info_t\fP \fBpeer_info\fP (const \fBuuid_t\fP &uuid)"
 .br
@@ -56,6 +62,7 @@ zio::Peer \- \fBPeer\fP at the network to discover peers and advertise self\&.
 .ti -1c
 .RI "bool \fBisknown\fP (const \fBuuid_t\fP &uuid)"
 .br
+.RI "Return true if peer has been seen ENTER the network and not yet seen to EXIT\&. "
 .ti -1c
 .RI "std::vector< \fBuuid_t\fP > \fBnickmatch\fP (const \fBnickname_t\fP &nick)"
 .br
@@ -64,8 +71,10 @@ zio::Peer \- \fBPeer\fP at the network to discover peers and advertise self\&.
 .SH "Detailed Description"
 .PP 
 \fBPeer\fP at the network to discover peers and advertise self\&. 
+
+This is a C++ interface to ZeroMQ's Zyre which adds some memory of peers seen and ways to iterate on their Zyre headers\&. 
 .PP
-Definition at line 46 of file peer\&.hpp\&.
+Definition at line 44 of file peer\&.hpp\&.
 .SH "Member Typedef Documentation"
 .PP 
 .SS "typedef int \fBzio::Peer::timeout_t\fP"
@@ -73,7 +82,7 @@ Definition at line 46 of file peer\&.hpp\&.
 .PP
 A timeout in milliseconds\&. 
 .PP
-Definition at line 49 of file peer\&.hpp\&.
+Definition at line 47 of file peer\&.hpp\&.
 .SH "Constructor & Destructor Documentation"
 .PP 
 .SS "zio::Peer::~Peer ()"
@@ -95,6 +104,8 @@ Continually poll until all queued zyre messages are processed\&.
 .PP
 Definition at line 182 of file peer\&.cpp\&.
 .SS "bool zio::Peer::isknown (const \fBuuid_t\fP & uuid)"
+
+.PP
 Return true if peer has been seen ENTER the network and not yet seen to EXIT\&. 
 .PP
 Definition at line 187 of file peer\&.cpp\&.
@@ -107,6 +118,8 @@ Definition at line 139 of file peer\&.cpp\&.
 .SS "const \fBnickname_t\fP zio::Peer::nickname ()\fC [inline]\fP"
 
 .PP
+Get our nickname\&. 
+.PP
 Definition at line 60 of file peer\&.hpp\&.
 .SS "\fBzio::peer_info_t\fP zio::Peer::peer_info (const \fBuuid_t\fP & uuid)"
 
@@ -115,23 +128,33 @@ Return info about peer\&. If unknown, return default structure\&.
 .PP
 Definition at line 199 of file peer\&.cpp\&.
 .SS "const \fBzio::peerset_t\fP & zio::Peer::peers ()"
+
+.PP
 Return known peers as map from UUID to nickname\&. This will return new values on subsequent calls as peers enter and exit the network\&. 
 .PP
 Definition at line 194 of file peer\&.cpp\&.
 .SS "bool zio::Peer::poll (\fBtimeout_t\fP timeout = \fC0\fP)"
-Poll network for updates, timeout in msec\&. Return true if an even was from the nework processed\&. Use timeout=-1 to wait until an event if received\&. 
+
+.PP
+Poll the network for updates, timeout in msec\&. Return true if an even was from the nework processed\&. Use timeout=-1 to wait until an event if received\&. 
 .PP
 Definition at line 50 of file peer\&.cpp\&.
 .SS "void zio::Peer::set_verbose (bool verbose = \fCtrue\fP)"
 
 .PP
+Turn on verbose debugging of the underlying Zyre actor\&. 
+.PP
 Definition at line 211 of file peer\&.cpp\&.
 .SS "std::vector< \fBzio::uuid_t\fP > zio::Peer::waitfor (const \fBnickname_t\fP & nickname, \fBtimeout_t\fP timeout = \fC\-1\fP)"
-Wait for a peer of a given nickname to be discovered\&. Return UUID if found, empty string if timeout occurs\&. 
+
+.PP
+Wait for a peer of a given nickname to be discovered\&. Return UUID if found, empty string if timeout occurs\&. Note, multiple peers may share the same nickname\&. 
 .PP
 Definition at line 155 of file peer\&.cpp\&.
 .SS "void zio::Peer::waituntil (const \fBuuid_t\fP & uuid, \fBtimeout_t\fP timeout = \fC\-1\fP)"
-Wait until a specific peer has left the network, or if is already gone, return immediately or in any case no longer than the timeout\&. 
+
+.PP
+Wait until a specific peer has left the network\&. If it is already gone, return immediately or in any case no longer than the timeout\&. 
 
 .SH "Author"
 .PP 

@@ -9,6 +9,7 @@ var searchData=
   ['disconnect',['disconnect',['../da/d77/structflow__protocol_1_1actioncbs.html#a418c3475ee080b6c219bfc1eb1609b7e',1,'flow_protocol::actioncbs::disconnect()'],['../d9/d83/structclient__protocol_1_1actions.html#aaa70867cd02c00f57fde8c2790a8b00e',1,'client_protocol::actions::disconnect()'],['../de/db1/classzmq_1_1detail_1_1socket__base.html#a01f21e0aab723a2f1eae23c732a2b0b8',1,'zmq::detail::socket_base::disconnect(std::string const &amp;addr)'],['../de/db1/classzmq_1_1detail_1_1socket__base.html#aea931e2b556381ec5ee9a5e15b3d6c66',1,'zmq::detail::socket_base::disconnect(const char *addr_)']]],
   ['disconnected',['disconnected',['../d7/d60/structclient__protocol_1_1events.html#a58200120183ca12149a5663afcfee947',1,'client_protocol::events']]],
   ['do_5fbinds',['do_binds',['../d5/d39/classzio_1_1_port.html#a420836591e677ecbf4dacf29b72ca560',1,'zio::Port']]],
+  ['doxymain_2emd',['doxymain.md',['../db/d1e/doxymain_8md.html',1,'']]],
   ['drain',['drain',['../dc/d2b/classzio_1_1_peer.html#a29cd4db5cf6b6f861f91b329222d79cd',1,'zio::Peer']]],
   ['dump',['dump',['../d2/d74/test__hsm_8cpp.html#a65d6fdaa57d06df9ff466e1b9201aaf4',1,'test_hsm.cpp']]],
   ['dump_5fpeer',['dump_peer',['../d6/d52/test__peer_8cpp.html#aa65162d6ec8bb36c2db9799fc2f67b4e',1,'test_peer.cpp']]],

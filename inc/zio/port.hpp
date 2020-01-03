@@ -12,7 +12,7 @@
 namespace zio {
 
     /*! 
-      @brief a port holds a socket in the context of a node
+      @brief A port holds a socket in the context of a @ref node.
 
       A port provides an identity (name) for the socket in the context
       of a node to the network (via a peer) and to the application
@@ -30,61 +30,99 @@ namespace zio {
         typedef std::string nodename_t;
         typedef std::string portname_t;
 
+        /// @brief Create a port of given name and socket type.
+        ///
+        /// The hostname sets the default for ephemeral binds.
+        ///
+        /// A port is typically only constructed via a @ref zio::Node.
         Port(const std::string& name, int stype,
              const std::string& hostname = "127.0.0.1");
         ~Port();
 
-        // The owning node's origin.
+        /// Access the owning node's origin.
         void set_origin(origin_t origin) { m_origin = origin; }
 
         void set_verbose(bool verbose = true) { m_verbose = verbose; }
 
+        /// Access this port's name.
         const std::string& name() const { return m_name; }
 
-        // Register bind/connect requests
-
-        // bind to ephermeral port on interface associated with
-        // hostname
+        /// @brief Request a default bind
+        ///
+        /// This is for application to call.
         void bind();
 
-        // bind to specific TCP/IP host and port.  TCP port number 0
-        // implies ephermeral.
+        /// @brief Request a bind to a specific TCP/IP host and port.
+        ///
+        /// TCP port number 0 implies to pick some random, unused port.
+        ///
+        /// This is for application to call.
         void bind(const std::string& hostname, int tcpportnum);
 
-        // Bind to fully qualified ZeroMQ address.
+        /// @brief Request bind to fully qualified ZeroMQ address string.
+        ///
+        /// This is for application to call.
         void bind(const address_t& address);
 
-        // Directly connect to fully qualified address
+        /// @brief Request connect to fully qualified ZeroMQ address string.
+        ///
+        /// This is for application to call.
         void connect(const address_t& address);
 
-        // Indirectly connect to a named node port
+        /// @brief Request connect to abstract node/port names.
+        ///
+        /// This will resolve to a direct address by the @ref zio::Peer
+        ///
+        /// This is for application to call.
         void connect(const nodename_t& node, const portname_t& port);
 
-        // When this is a SUB then at least one subscription is
-        // required if there shall be any expectation of messages.
+        /// @brief Subscribe to a PUB topic
+        ///
+        /// This is only meaningful when the underlying socket is a
+        /// SUB and in this case at least one subscription is required
+        /// if there shall be any expectation of the app getting
+        /// messages.
+        ///
+        /// This is for application to call.
         void subscribe(const std::string& prefix = "");
 
-        // Set header "zio.port.<portname>.<leafname> = <value>
+        /// @brief Set an extra port header
+        ///
+        /// The header is of the form:
+        ///     zio.port.<portname>.<leafname> = <value>
         void set_header(const std::string& leafname, const std::string& value);
 
-        /// For node.  Do any requested binds, return all
-        /// corresponding port headers.
+        /// @brief Perform any requested binds.
+        ///
+        /// The corresponding Zyre headers for any ports that bind are
+        /// returned and should be given to the peer to announce.
+        ///
+        /// This method is intended for the @ref zio::Node to call.
         headerset_t do_binds();
 
-        /// For node.  Go online, making any connections, using peer
-        /// to resolve if needed.
+        /// @brief Make any previously requested connections.
+        ///
+        /// The peer will be used to resolve any abstract addresses.
+        ///
+        /// This method is intended for the @ref zio::Node to call
         void online(Peer& peer);
 
-        /// For node.  Disconnect, unbind.
+        /// @brief Disconnect and unbind.
+        ///
+        /// This method is intended for the @ref zio::Node to call
         void offline();
 
-        /// Send a message.  Note, msg is modified to set coords.
+        /// @brief Send a message.
+        ///
+        /// The @ref zio::Message is modified to set its coordinates.
         void send(Message& msg);
 
-        /// Recieve a message, return false if timeout
+        /// Recieve a message, return false if timeout occurred.
         bool recv(Message& msg, int timeout=-1);
 
-        // Access the underlying cppzmq socket.
+        /// @brief Access the underlying cppzmq socket.
+        ///
+        /// This access is generally not recomended.
         zio::socket_t& socket() { return m_sock; }
 
     private:
@@ -106,7 +144,7 @@ namespace zio {
         bool m_verbose{false};
     };
 
-    // The context can't be copied and ports like to be shared.
+    /// The context can't be copied and ports like to be shared.
     typedef std::shared_ptr<Port> portptr_t;
 
 }
