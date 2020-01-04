@@ -85,8 +85,9 @@ bool zio::Peer::poll(timeout_t timeout)
                 header_key_t key = static_cast<char*>(cursor);
                 header_value_t val = static_cast<char*>(vptr);
                 pi.headers[key] = val;
-                zsys_debug("[peer %s]: poll add header %s:%s",
-                           m_nick.c_str(),key.c_str(),val.c_str());
+                zsys_debug("[peer %s]: poll add %s header %s=%s",
+                           m_nick.c_str(), pi.nick.c_str(),
+                           key.c_str(), val.c_str());
                 cursor = zlist_next(keys);
             }
             m_known_peers[uuid] = pi;
@@ -162,15 +163,19 @@ std::vector<zio::uuid_t> zio::Peer::waitfor(const nickname_t& nickname,
         if (m_verbose)
             zsys_debug("[peer %s]: waitfor peer \"%s\" to come online",
                        m_nick.c_str(), nickname.c_str());
-        poll(timeout);
+        bool ok = poll(timeout);
         maybe = nickmatch(nickname);
         if (m_verbose)
             zsys_debug("[peer %s]: waitfor see \"%s\" after %ld ms, have %ld match",
                        m_nick.c_str(), nickname.c_str(),
                        zclock_usecs() / 1000 - start,
                        maybe.size());
-        if (timeout <= 0) {
+
+        if (maybe.size()) {
             break;
+        }
+        if (timeout < 0) {
+            continue;
         }
         if (zclock_usecs() / 1000 - start >= timeout) {
             break;

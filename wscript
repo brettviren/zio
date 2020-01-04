@@ -35,7 +35,17 @@ def build(bld):
     for tmain in tsources:
         bld.program(features = 'test cxx',
                     source = [tmain], target = tmain.name.replace('.cpp',''),
-                    ut_cwd = bld.path, install_path = None,
+                    ut_cwd = bld.path,
+                    install_path = None,
+                    includes = ['inc','build','test'],
+                    rpath = rpath,
+                    use = ['zio'] + uses)
+    csources = bld.path.ant_glob('test/check*.cpp')
+    for cmain in csources:
+        bld.program(features = 'cxx',
+                    source = [cmain], target = cmain.name.replace('.cpp',''),
+                    ut_cwd = bld.path,
+                    install_path = None,
                     includes = ['inc','build','test'],
                     rpath = rpath,
                     use = ['zio'] + uses)

@@ -22,9 +22,9 @@ void test_owoa(bool backwards)
                nclients, mode[backwards]);
 
     const int base_port = 5670;
-    const char * addr = "tcp://127.0.0.1:%d";
-    //const char * addr = "ipc://test_cs%d.ipc";
-    //const char * addr = "inproc://test_cs%d";
+    // const char * addr = "tcp://127.0.0.1:%d";
+    const char * addr = "ipc://test_cs%d.ipc";
+    // const char * addr = "inproc://test_cs%d";
     if (backwards) {            // bind clients, connect server
         for (int ind=0; ind<nclients; ++ind) {
             auto c = clients[ind];

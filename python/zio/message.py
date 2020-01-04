@@ -4,21 +4,117 @@ Python interface to ZIO messages
 '''
 
 import struct
+from collections import namedtuple
 
-def encode_multipart(parts):
+from enum import Enum
+class MessageLevel(Enum):
+    undefined=0
+    trace=1
+    verbose=2
+    debug=3
+    info=4
+    summary=5
+    warning=6
+    error=7
+    fatal=8
+
+class PrefixHeader:
+    '''
+    A ZIO message prefix header.
+
+    It is a triplet of (level, form, label) with a "ZIO" leading
+    magic.
+    '''
+    level = MessageLevel.undefined # zio::level::MessageLevel 
+    form=" "*4                  # up to 4 character format
+    label = ""                  # free form string
+
+    def __init__(self, *args, level=0, form=" "*4, label=""):
+        '''
+        Create a prefix header
+
+        >>> PrefixHeader(0, "FLOW", json.dumps(dict(flow="DAT")))
+        >>> PrefixHeader(form="TEXT", level=3)
+        '''
+        self.level = MessageLevel(int(level))
+        self.form="%-4s"%form
+        self.label=label
+        if not args:            
+            return
+        # (level,form,label) constructor
+        if type(args[0]) == int:
+            self.level = MessageLevel(args[0])
+            if len(args) > 1:
+                self.form="%-4s"%args[1]
+            if len(args) > 2:
+                self.label=args[2]
+            return
+        # string constructor
+        if type(args[0]) == str and len(args[0]) > 5:
+            phs = args[0]
+            if phs.startswith("ZIO"):
+                phs = phs[3:]
+            self.level(MessageLevel(int(phs[0])))
+            phs = phs[1:]
+            self.form="%-4s"%phs[:4]
+            self.label = phs[4:]
+        # bytes constructor
+        if type(args[0]) == bytes:
+            level, self.form, self.label = decode_header_prefix(args[0])
+            self.level = MessageLevel(int(level))
+
+    def __str__(self):
+        return "ZIO%d%s%s" % (self.level.value, self.form, self.label)
+    
+    def __repr__(self):
+        return "<zio.message.PrefixHeader %s>" % bytes(self)
+
+    def __bytes__(self):
+        a = b'ZIO%d' % self.level.value
+        b = bytes(self.form, 'utf-8')
+        c = bytes(self.label, 'utf-8')
+        return a + b + c
+
+class CoordHeader:
+    origin=0                    # where a message came from
+    granule=0                   # when a message came from
+    seqno=0                     # which message
+
+    def __init__(self, *args, origin=0, granule=0, seqno=0):
+        self.origin = origin
+        self.granule = granule
+        self.seqno = seqno
+        if len(args) == 0:
+            return
+        if len(args) == 3:
+            self.origin,self.granule,self.seqno = args
+            return
+        if type(args[0]) == bytes:
+            self.origin,self.granule,self.seqno = decode_header_coord(args[0])
+            return
+
+    def __bytes__(self):
+        return encode_header_coord(self.origin, self.granule, self.seqno)
+
+    def __repr__(self):
+        return "<zio.message.CoordHeader %s>" % bytes(self)
+
+
+def encode_message(parts):
     '''
     Return a binary encoded concatenation of parts in the input
-    sequence.  Result is suitable for use as a single-part message if
-    first two parts are encoded header prefix and coords,
-    respectively.  Subseqent parts can be payload of arbitrary
-    encoding.
+    sequence.  Result is suitable for use as a single-part message.
+    For ZIO messages the first two parts should be encoded header
+    prefix and coord, respectively.  Subseqent parts can be payload of
+    arbitrary encoding.
     '''
     ret = b''
     for p in parts:
-        ret += p
+        s = struct.pack('I', len(p))
+        ret += s + p
     return ret
 
-def decode_multipart(encoded):
+def decode_message(encoded):
     '''
     Unpack an encoded single-part ZIO message such as returned by
     socket.recv() on a SERVER socket.  It's the moral opposite of
@@ -26,22 +122,17 @@ def decode_multipart(encoded):
     parts.
     '''
     tot = len(encoded)
-    print ("tot",tot)
     ret = list()
     beg = 0
     while beg < tot:
         end = beg + 4
-        print("[%d:%d]" %(beg,end))
         if end >= tot:
-            print ("corrupt")
-            break
+            raise ValueError("corrupt ZIO message in size")
         size = struct.unpack('i',encoded[beg:end])[0]
         beg = end
         end = beg + size
-        print("[%d:%d]" %(beg,end))
         if end > tot:
-            print ("corrupt")
-            break
+            raise ValueError("corrupt ZIO message in data")
         ret.append(encoded[beg:end])
         beg = end
     return ret
@@ -80,7 +171,7 @@ def encode_header_coord(origin, granule, seqno):
     return struct.pack('LLL', origin, granule, seqno);
     
 
-def decode_header_coords(henc):
+def decode_header_coord(henc):
     '''
     Parse the bytes of one encoded message part into a ZIO message
     header coord.  This is ususally the second part of a multipart

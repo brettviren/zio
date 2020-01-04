@@ -129,6 +129,7 @@ void zio::Message::decode(const zio::message_t& data)
         int siz=0;
         memcpy(&siz, dat+ind, sizeof(int));
         ind += sizeof(int);
+        zsys_debug("decoding size %d", siz);
         mpmsg.addmem(dat+ind, siz);
         ind += siz;
     }

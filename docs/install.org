@@ -13,7 +13,7 @@ ZIO installs in the usual [[https://waf.io][Waf]] way.
 
 To build, these software dependencies will be located via [[https://www.freedesktop.org/wiki/Software/pkg-config/][pkg-config]].
 
-- [[https://github.com/zeromq/libzmq][libzmq]]
+- [[https://github.com/zeromq/libzmq][libzmq]] (with draft sockets built)
 - [[https://github.com/zeromq/czmq][CZMQ]]
 - [[https://github.com/zeromq/zyre][Zyre]]
 
@@ -45,3 +45,21 @@ rebuild it:
   $ cd docs
   $ make
 #+end_example
+* Python 
+
+ZIO also provides a Python package.  As draft sockets are needed some
+special installation is required to enable them and to build PyZMQ
+against the libzmq with them also enabled.
+
+#+begin_example
+  $ python3 -m venv /path/to/venv
+  $ source /path/to/venv/bin/activate
+  $ cd zio/python
+  $ pip install --pre pyzmq \
+      --install-option=--enable-drafts \
+      --install-option=--zmq=/path/to/zmq
+  $ pip install .
+#+end_example
+
+Replace ~/path/to~ with suitable paths.
+

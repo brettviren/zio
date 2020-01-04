@@ -13,15 +13,18 @@ int main()
     snode.set_verbose();
     auto sport = snode.port("recver", ZMQ_SERVER);
     // C/S can't do inproc!
-    //sport->bind("inproc://testflow");
-    sport->bind("tcp://127.0.0.1:5678");
+    /// const char* addr = "inproc://testflow";
+    // avoid testing with tcp as we tend to use the same ports in multiple tests
+    /// const char* addr = "tcp://127.0.0.1:5678";
+    // goldilocks
+    const char* addr = "ipc://testflow";
+    sport->bind(addr);
     snode.online();
 
     zio::Node cnode("client", 2);
     cnode.set_verbose();
     auto cport = cnode.port("sender", ZMQ_CLIENT);
-    //cport->connect("inproc://testflow");
-    cport->connect("tcp://127.0.0.1:5678");
+    cport->connect(addr);
     cnode.online();
 
     zsys_debug("create flows");
