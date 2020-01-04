@@ -38,7 +38,7 @@ int main()
     const int credits_in_play = 2;
 
     zio::json fobj = {{"flow","BOT"},
-                      {"credits",credits_in_play},
+                      {"credit",credits_in_play},
                       {"direction","extract"}};
     msg.set_label(fobj.dump());
 
@@ -61,7 +61,7 @@ int main()
     assert (dir == "extract");
     fobj["direction"] = "inject";
     msg.set_label(fobj.dump());
-    int credits = fobj["credits"];
+    int credits = fobj["credit"];
     cerr <<"sflow credits:"<<credits << " rid:"<< rid
          <<" stype:" << zio::sock_type(sport->socket()) << endl;
 

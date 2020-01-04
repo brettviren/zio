@@ -69,7 +69,7 @@ bool zio::flow::Flow::recv_bot(zio::Message& bot, int timeout)
                      m_port->name().c_str(), flowtype.c_str());
         return false;
     }
-    m_total_credits = fobj["credits"];
+    m_total_credits = fobj["credit"];
     // here, fobj is from the point of view of the OTHER end
     std::string dir = fobj["direction"];
     if (dir == "extract") { 
