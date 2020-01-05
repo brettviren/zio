@@ -18,6 +18,13 @@ socket_names = [
     "XPUB",
     "XSUB",
     "STREAM",
+    "SERVER",
+    "CLIENT",
+    "RADIO",
+    "DISH",
+    "GATHER",
+    "SCATTER",
+    "DGRAM",
     0
 ]
 
@@ -32,4 +39,7 @@ def needs_codec(stype):
         stype == zmq.RADIO or \
         stype == zmq.DISH
 
+def guess_hostname():
+    import socket
+    return socket.getfqdn()
         

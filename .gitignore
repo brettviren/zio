@@ -10,3 +10,8 @@ ltximg
 venv
 *.egg-info
 __pycache__
+TAGS
+_*
+junk
+*.db
+junk.*

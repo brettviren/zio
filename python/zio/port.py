@@ -1,12 +1,16 @@
 #!/usr/bin/env python3
 
 import zmq
-
-from util import socket_names, needs_codec
-from message import Message
+from zmq.error import ZMQError
+from .util import socket_names, needs_codec
+from .message import Message
 
 def bind_address(sock, addr):
-    port = sock.bind(addr)
+    try:
+        port = sock.bind(addr)
+    except ZMQError as e:
+        print(addr)
+        raise
     if addr.endswith("*"):      # this does not cover the full
         addr[:-1] += "%d"%port  # convention used by ZeroMQ address
     return addr                 # spellings.
@@ -14,12 +18,16 @@ def bind_address(sock, addr):
 ephemeral_port_range = (49152, 65535)
 
 def bind_hostport(sock, host, port):
-    if type(port) is int:
-        return bind_address("tcp://%s:%d", host, port)
-    if not port:
-        int port = sock.bind_to_random_port("tcp://%s"%host,
-                                            *ephemeral_port_range)
-        return "tcp://%s:%d" % (host, port)
+    if type(port) is int and port > 0:
+        return bind_address(sock, "tcp://%s:%d" % (host, port))
+    addr = "tcp://%s"%host
+    try:
+        port = sock.bind_to_random_port(addr,
+                                        *ephemeral_port_range)
+    except ZMQError as e:
+        print(addr)
+        raise
+    return "tcp://%s:%d" % (host, port)
             
 
 class Port:
@@ -33,7 +41,7 @@ class Port:
         self.name = name
         self._hostname = hostname
         self.ctx = zmq.Context()
-        self.sock = ctx.socket(stype)
+        self.sock = self.ctx.socket(stype)
         self.origin = 0
         self.to_bind = list()
         self.to_conn = list()
@@ -43,7 +51,7 @@ class Port:
         self.bound = list()
         self.origin = 0
         self.poller = zmq.Poller()
-        self.poller.register(port, zmq.POLLIN)
+        self.poller.register(self.sock, zmq.POLLIN)
 
     def bind(self, *spec):
         '''
@@ -95,7 +103,7 @@ class Port:
 
         The self.headers collects these.
         '''
-        for d in args + [kwargs]:
+        for d in list(args) + [kwargs]:
             for k,v in d.items():
                 key = "zio.port.%s.%s" % (self.name, k)
                 self.headers[key] = v
@@ -111,14 +119,14 @@ class Port:
         This must be called prior to any call of .online() and is
         intended to be used by a zio.Node which holds this zio.Port.
         '''
-        for spec in self.to_bind():
+        for spec in self.to_bind:
             if type(spec) is not str:
                 addr = bind_hostport(self.sock, *spec)
             else:
                 addr = bind_address(self.sock, bind_address)
             self.bound.append(addr)
-            self.add_headers("address", addr)
-        self.add_headers("socket", socket_names[self.sock.socket_type])
+            self.add_headers(address=addr)
+        self.add_headers(socket=socket_names[self.sock.socket_type])
         return self.headers;
                 
 
@@ -139,10 +147,12 @@ class Port:
             
             hostname,portname = conn
             uuids = peer.waitfor(hostname)
+            if not uuids:
+                raise RuntimeError('failed to wait for "%s"' % hostname)
             for uuid in uuids:
-                pi = peer.info[uuid]
-                key = "zio.port.%s.%s.address" % hostname, portname
-                addr = pi.headers.get(key, False):
+                pi = peer.peers[uuid]
+                key = f"zio.port.{hostname}.{portname}.address"
+                addr = pi.headers.get(key, False)
                 if not addr:
                     continue
                 sock.connect(addr)

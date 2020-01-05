@@ -2,6 +2,13 @@
 '''
 ZIO peering
 '''
+import zmq
+import pyre
+import uuid
+import json
+from collections import namedtuple
+
+PeerInfo = namedtuple("PeerInfo","uuid nick headers")
 
 class Peer:
     '''
@@ -11,7 +18,7 @@ class Peer:
     the Python Zyre.
     '''
 
-    def __init__(self, nickname, headers=None, verbose=False):
+    def __init__(self, nickname, **headers):
         '''
         Create a peer with a nickname.
 
@@ -19,10 +26,28 @@ class Peer:
         '''
 
         self.zyre = pyre.Pyre(nickname)
-        self.headers = headers or dict()
-        self.peers = dict()
-        ...
-        
+        self.peers = dict() #  by UUID
+
+        for k,v in headers.items():
+            v = str(v)
+            print (type(k),k,type(v),v)
+            self.zyre.set_header(k,v)
+        self.zyre.start()
+        self.poller = zmq.Poller()
+        self.poller.register(self.zyre.socket(), zmq.POLLIN)
+    def __del__(self):
+        self.stop()
+
+    def stop(self):
+        '''
+        Stop the peer.
+
+        This MUST be called or the application will hang.
+        '''
+        if hasattr(self, "zyre"):
+            self.zyre.stop()
+            del self.zyre
+
     def poll(self, timeout=0):
         '''
         Poll the network for an update.
@@ -31,13 +56,40 @@ class Peer:
         reception of any type of Zyre event.  Use timeout in msec to
         wait for an event.
         '''
-        ...
-        pass
+        which  = dict(self.poller.poll(timeout))
+        if not self.zyre.socket() in which:
+            return None
+        msg = self.zyre.recv()
+        print(msg)
+        if msg[0] == b'ENTER':
+            uid = uuid.UUID(bytes=msg[1])
+            nick = msg[2].decode('utf-8')
+            headers = json.loads(msg[3].decode('utf-8'))
+            self.peers[uid] = PeerInfo(uid, nick, headers)
+        if msg[0] == b'EXIT':
+            uid = uuid.UUID(bytes=msg[1])
+            del self.peers[uid]
+            pass
+
+        return True
 
     def drain(self):
         '''
         Continually poll until all queued Zyre events are processed.
         '''
+        while self.poll(0):
+            pass
+
+    def matchnick(self, nick):
+        '''
+        Return UUIDs of all peers with matching nicks
+        '''
+        ret = list()
+        for uid,pi in self.peers.items():
+            if pi.nick == nick:
+                ret.append(uid)
+        return ret;
+        
 
     def waitfor(self, nickname, timeout=-1):
         '''
@@ -46,7 +98,11 @@ class Peer:
         Return a list of UUIDs of peers discovered to have this
         nickname.
         '''
-        ...
-        return
+        self.drain()
+        got = self.matchnick(nickname)
+        if got:
+            return got
+        self.poll(timeout)
+        return self.matchnick(nickname)
 
     

@@ -23,6 +23,13 @@ std::string zio::sock_type_name(int stype)
         "XPUB",
         "XSUB",
         "STREAM",
+        "SERVER",
+        "CLIENT",
+        "RADIO",
+        "DISH",
+        "GATHER",
+        "SCATTER",
+        "DGRAM",
         0
     };
     if (stype < 0 or stype > 11) return "";

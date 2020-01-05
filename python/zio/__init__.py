@@ -19,8 +19,12 @@ in the zio:: C++ namespace.
 '''
 
 # emulate libzio's namespace/class tree 
-from message import *
-from port import *
-from node import *
-from peer import *
-import flow
+from .message import *
+from .port import *
+from .node import *
+from .peer import *
+from . import flow
+
+# bring in all of zmq
+from zmq import *
+

@@ -181,7 +181,7 @@ class Message:
         '''
         Decode to self.
         '''
-        parts = decode_message(encoded):
+        parts = decode_message(encoded)
         self.fromparts(parts)
         pass
 
