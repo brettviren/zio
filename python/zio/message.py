@@ -100,6 +100,107 @@ class CoordHeader:
         return "<zio.message.CoordHeader %s>" % bytes(self)
 
 
+class Message:
+    '''
+    A zio.Message fixes some of the message schema.
+
+    It is equivalent to a C++ zio::Message.
+
+    '''
+
+    
+    routing_id = 0
+
+
+    def __init__(self,
+                 level=0, form=" "*4, label="",
+                 prefix=None, coord=None,
+                 encoded=None, frame=None, parts=()):
+        '''
+        Default constructor
+        >>> Message()
+
+        Construct with prefix header attributes:
+        >>> Message(form="FLOW", label=json.dumps({'flow':'DAT'}))
+
+        Construct with prefix and/or coord headers
+        >>> Message(prefix=PrefixHeader(...), coord=CoordHeader(...))
+
+        Construct from encoded data
+        >>> Message(encoded=None)
+
+        Construct from a multipart message, array of encoded data
+        >>> Message(parts=[...])
+
+        Construct from a single part message frame
+        >>> Message(frame=frame)
+        
+        Header and body construction args an be mixed.  
+
+        '''
+        if prefix:
+            self.prefix = prefix
+        else:
+            self.prefix = PrefixHeader(level, form, label)
+        if coord:
+            self.coord = coord
+        else:
+            self.coord = CoordHeader()
+        if frame:
+            self.decode(frame)
+        else:
+            self.fromparts(parts)
+        return
+
+    def toframe(self):
+        '''
+        Return self as a frame.
+        '''
+        frame = zmq.frame(self.encode())
+        if self.routing_id:
+            frame.routing_id = routing_id
+        return frame
+
+    def fromframe(self, frame):
+        '''
+        Set self from a frame
+        '''
+        self.routing_id = getattr(frame, "routing_id", 0)
+        self.decode(frame.bytes)
+
+    def encode(self):
+        '''
+        Return encoded byte array of self.
+
+        It is suitable for use as the data arg to a zmq.Frame
+        '''
+        parts = self.toparts()
+        return encode_message(parts)
+
+    def decode(self, encoded):
+        '''
+        Decode to self.
+        '''
+        parts = decode_message(encoded):
+        self.fromparts(parts)
+        pass
+
+    def toparts(self):
+        '''
+        Return self as a multipart set of encoded data
+        '''
+        return [bytes(self.prefix),bytes(self.coord)] + self.payload
+
+    def fromparts(self, parts):
+        '''
+        Set self from multipart message / array of encoded data.
+        '''
+        if len(parts) < 2:
+            raise ValueError("must have at least two parts")
+        self.prefix = PrefixHeader(parts[0])
+        self.coord = CoordHeader(parts[1])
+        self.payload = parts[2:]
+
 def encode_message(parts):
     '''
     Return a binary encoded concatenation of parts in the input
