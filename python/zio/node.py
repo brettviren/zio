@@ -24,6 +24,10 @@ class Node:
         self._hostname = hostname or guess_hostname()
         self.ports = dict()     # by name
 
+    def __str__(self):
+        sp = ' '.join([str(p) for p in self.ports.values()])
+        return "[node %s]: origin:%d ports:[%s]" % (self.nick, self.origin, sp)
+
     def port(self, name, stype=None):
         '''
         Return a port.
@@ -32,9 +36,9 @@ class Node:
         create one with the given ZeroMQ socket type.
         '''
         if name in self.ports:
-            return self.port[name]
+            return self.ports[name]
         if stype is None:
-            raise ValueError('No port "%s"' % name)
+            raise KeyError('No port "%s"' % name)
         port = Port(name, stype, self._hostname)
         port.origin = self.origin
         self.ports[name] = port

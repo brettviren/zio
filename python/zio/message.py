@@ -6,6 +6,7 @@ Python interface to ZIO messages
 import struct
 from collections import namedtuple
 
+
 from enum import Enum
 class MessageLevel(Enum):
     undefined=0
@@ -18,6 +19,7 @@ class MessageLevel(Enum):
     error=7
     fatal=8
 
+from .util import byteify_list
 class PrefixHeader:
     '''
     A ZIO message prefix header.
@@ -96,6 +98,9 @@ class CoordHeader:
     def __bytes__(self):
         return encode_header_coord(self.origin, self.granule, self.seqno)
 
+    def __str__(self):
+        return "origin:0x%x,granule:%ld,seqno:%ld" %(self.origin,self.granule,self.seqno)
+
     def __repr__(self):
         return "<zio.message.CoordHeader %s>" % bytes(self)
 
@@ -110,53 +115,103 @@ class Message:
 
     
     routing_id = 0
-
+    prefix = PrefixHeader()
+    coord = CoordHeader()
+    _payload = ()
 
     def __init__(self,
-                 level=0, form=" "*4, label="",
-                 prefix=None, coord=None,
-                 encoded=None, frame=None, parts=()):
-        '''
-        Default constructor
-        >>> Message()
+                 level=None, form=None, label=None, routing_id=None,
+                 prefix=None, coord=None, payload=None,
+                 parts=None, encoded=None, frame=None):
+        '''Construct a zio.Message.
 
-        Construct with prefix header attributes:
-        >>> Message(form="FLOW", label=json.dumps({'flow':'DAT'}))
+        Construction applies arguments in reverse order.  Thus one
+        may, eg, construct a message with a frame and then override
+        the payload and label.  The ingredients may be considered
+        deconstructed as:
 
-        Construct with prefix and/or coord headers
-        >>> Message(prefix=PrefixHeader(...), coord=CoordHeader(...))
+            frame = encoding + routing_id
 
-        Construct from encoded data
-        >>> Message(encoded=None)
+            encoding = packing of parts
 
-        Construct from a multipart message, array of encoded data
-        >>> Message(parts=[...])
-
-        Construct from a single part message frame
-        >>> Message(frame=frame)
+            parts = [prefix, coord, ...payloads]
         
-        Header and body construction args an be mixed.  
+        A frame should be used when the zio.Message will be used with
+        a SERVER socket.  Or else the routing_id must be explicitly
+        set.
 
         '''
-        if prefix:
-            self.prefix = prefix
-        else:
-            self.prefix = PrefixHeader(level, form, label)
-        if coord:
-            self.coord = coord
-        else:
-            self.coord = CoordHeader()
-        if frame:
-            self.decode(frame)
-        else:
+        if frame is not None:
+            self.fromframe(frame)
+        if encoded is not None:
+            self.decode(encoded)
+        if parts is not None:
             self.fromparts(parts)
+        if payload is not None:
+            self.payload = payload
+        if coord is not None:
+            self.coord = coord
+        if prefix is not None:
+            self.prefix = prefix
+        if routing_id is not None:
+            self.routing_id = routing_id
+        if label is not None:
+            self.label = label
+        if form is not None:
+            self.form = form
+        if level is not None:
+            self.level = level
         return
+
+    @property
+    def form(self):
+        return self.prefix.form
+    @form.setter
+    def form(self, val):
+        self.prefix.form = val
+
+    @property
+    def label(self):
+        return self.prefix.label
+    @label.setter
+    def label(self, val):
+        self.prefix.label = val
+
+    @property
+    def origin(self):
+        return self.coord.origin
+    @origin.setter
+    def origin(self, val):
+        self.coord.origin = val
+
+    @property
+    def granule(self):
+        return self.coord.granule
+    @granule.setter
+    def granule(self, val):
+        self.coord.granule = val
+
+    @property
+    def seqno(self):
+        return self.coord.seqno
+    @seqno.setter
+    def seqno(self, val):
+        self.coord.seqno = val
+
+
+    @property
+    def payload(self):
+        return self._payload or list()
+
+    @payload.setter
+    def payload(self, pl):
+        self._payload = byteify_list(pl)
 
     def toframe(self):
         '''
         Return self as a frame.
         '''
-        frame = zmq.frame(self.encode())
+        frame = zmq.Frame(self.encode())
         if self.routing_id:
             frame.routing_id = routing_id
         return frame
@@ -165,7 +220,7 @@ class Message:
         '''
         Set self from a frame
         '''
-        self.routing_id = getattr(frame, "routing_id", 0)
+        self.routing_id = frame.routing_id
         self.decode(frame.bytes)
 
     def encode(self):
@@ -200,6 +255,11 @@ class Message:
         self.prefix = PrefixHeader(parts[0])
         self.coord = CoordHeader(parts[1])
         self.payload = parts[2:]
+
+    def __str__(self):
+        return "zio.Message: \"%s\" + %s + %d in payload" % \
+            (self.prefix, self.coord, len(self.payload))
+
 
 def encode_message(parts):
     '''

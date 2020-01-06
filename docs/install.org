@@ -47,9 +47,12 @@ rebuild it:
 #+end_example
 * Python 
 
-ZIO also provides a Python package.  As draft sockets are needed some
-special installation is required to enable them and to build PyZMQ
-against the libzmq with them also enabled.
+ZIO also provides a Python package.  It installs in "the usual way"
+but its dependencies need some more particular care.  It makes use of
+PyZMQ, the Python bindings to *libzmq*.  Because ZIO requires ZeroMQ
+"draft" sockets, PyZMQ needs to be installed manually in order to
+enable them as well as point to an installation of *libzmq* which
+includes them.
 
 #+begin_example
   $ python3 -m venv /path/to/venv
@@ -58,8 +61,17 @@ against the libzmq with them also enabled.
   $ pip install --pre pyzmq \
       --install-option=--enable-drafts \
       --install-option=--zmq=/path/to/zmq
-  $ pip install .
+  $ pip install -r requirements.txt
+  $ pip install [-e] .
 #+end_example
 
-Replace ~/path/to~ with suitable paths.
+In the above, replace ~/path/to~ with paths suitable for your
+environment.  Use ~-e~ option to do in-place development on the ~zio~
+Python module.
 
+The ~zio~ Python module has unit tests which can be run as:
+
+#+begin_example
+  $ cd zio/python/tests
+  $ python -m unittest 
+#+end_example

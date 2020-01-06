@@ -6,8 +6,10 @@ import zmq
 import pyre
 import uuid
 import json
+import logging
 from collections import namedtuple
 
+log = logging.getLogger(__name__)
 PeerInfo = namedtuple("PeerInfo","uuid nick headers")
 
 class Peer:
@@ -24,17 +26,16 @@ class Peer:
 
         Extra headers may be given as a dictionary.
         '''
-
         self.zyre = pyre.Pyre(nickname)
         self.peers = dict() #  by UUID
 
         for k,v in headers.items():
             v = str(v)
-            print (type(k),k,type(v),v)
             self.zyre.set_header(k,v)
         self.zyre.start()
         self.poller = zmq.Poller()
         self.poller.register(self.zyre.socket(), zmq.POLLIN)
+
     def __del__(self):
         self.stop()
 
@@ -45,6 +46,7 @@ class Peer:
         This MUST be called or the application will hang.
         '''
         if hasattr(self, "zyre"):
+            self.drain()
             self.zyre.stop()
             del self.zyre
 
@@ -60,7 +62,13 @@ class Peer:
         if not self.zyre.socket() in which:
             return None
         msg = self.zyre.recv()
-        print(msg)
+        if log.isEnabledFor(logging.DEBUG):
+            log.debug("[peer %s]: zyre message:" %(self.zyre.name(),))
+            for ind, part in enumerate(msg):
+                if len(part) < 100:
+                    log.debug("  part %d: %s" %(ind, part))
+                else:
+                    log.debug("  part %d: (long %d bytes)" %(ind, len(part)))
         if msg[0] == b'ENTER':
             uid = uuid.UUID(bytes=msg[1])
             nick = msg[2].decode('utf-8')
@@ -68,7 +76,8 @@ class Peer:
             self.peers[uid] = PeerInfo(uid, nick, headers)
         if msg[0] == b'EXIT':
             uid = uuid.UUID(bytes=msg[1])
-            del self.peers[uid]
+            if self.peers.get(uid, None):
+                del self.peers[uid]
             pass
 
         return True
@@ -102,6 +111,8 @@ class Peer:
         got = self.matchnick(nickname)
         if got:
             return got
+        log.debug("[peer %s]: wait for %s (timeout=%d)" % \
+                  (self.zyre.name(), nickname, timeout))
         self.poll(timeout)
         return self.matchnick(nickname)
 

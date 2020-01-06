@@ -10,7 +10,8 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     python_requires='>=3.3',    # how to know?
     install_requires = [
-        "pyzmq"
+        "pyzmq",
+        "pyre>=0.3.2"
     ]
 )
 

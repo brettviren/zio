@@ -25,6 +25,3 @@ from .node import *
 from .peer import *
 from . import flow
 
-# bring in all of zmq
-from zmq import *
-

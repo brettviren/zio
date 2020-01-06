@@ -53,6 +53,12 @@ class Port:
         self.poller = zmq.Poller()
         self.poller.register(self.sock, zmq.POLLIN)
 
+    def __str__(self):
+        return "[port %s]: type:%s binds:%d(todo:%d) conns:%d(todo:%d)" % \
+            (self.name, socket_names[self.sock.type],
+             len(self.bound), len(self.to_bind),
+             len(self.connected), len(self.to_conn))
+
     def bind(self, *spec):
         '''
         Request a bind.
@@ -87,7 +93,7 @@ class Port:
         This method is only meaningful if our socket is a SUB and then
         it MUST be called if messages are expected to be received.
         '''
-        if self.sock.socket_type is not zmq.SUB:
+        if self.sock.type is not zmq.SUB:
             return
         self.sock.setsockopt_string(zmq.SUBSCRIBE, prefix)
         pass
@@ -126,7 +132,8 @@ class Port:
                 addr = bind_address(self.sock, bind_address)
             self.bound.append(addr)
             self.add_headers(address=addr)
-        self.add_headers(socket=socket_names[self.sock.socket_type])
+        self.to_bind = list()
+        self.add_headers(socket=socket_names[self.sock.type])
         return self.headers;
                 
 
@@ -145,20 +152,21 @@ class Port:
                 self.connected.append(conn)
                 continue
             
-            hostname,portname = conn
-            uuids = peer.waitfor(hostname)
+            nodename,portname = conn
+            uuids = peer.waitfor(nodename)
             if not uuids:
-                raise RuntimeError('failed to wait for "%s"' % hostname)
+                raise RuntimeError('failed to wait for "%s"' % nodename)
             for uuid in uuids:
                 pi = peer.peers[uuid]
-                key = f"zio.port.{hostname}.{portname}.address"
+                key = f"zio.port.{portname}.address"
                 addr = pi.headers.get(key, False)
                 if not addr:
                     continue
-                sock.connect(addr)
+                self.sock.connect(addr)
                 self.connected.append(addr)
                 continue
             continue
+        self.to_conn = list()
         return
 
     def offline(self):
@@ -185,9 +193,12 @@ class Port:
         '''
         if self.origin:
             msg.coord.origin = self.origin
-        if needs_codec(self.socket_type):
+        if needs_codec(self.sock.type):
             data = msg.encode()
-            self.sock.send(data, routing_id = msg.routing_id)
+            if (self.sock.type == zmq.SERVER):
+                self.sock.send(data, routing_id = msg.routing_id)
+            else:
+                self.sock.send(data)
         else:
             parts = msg.toparts()
             self.sock.send_multipart(parts)
@@ -203,11 +214,15 @@ class Port:
         if not self.sock in which:
             return None
 
-        if needs_codec(self.socket_type):
-            frame = self.sock.recv(copy=False)
-            if not frame:
-                return None
-            return Message(frame=frame)
+        if needs_codec(self.sock.type):
+            if (self.sock.type == zmq.SERVER):
+                frame = self.sock.recv(copy=False)
+                if not frame:
+                    return None
+                return Message(frame=frame)
+            else:
+                data = self.sock.recv(copy=True)
+                return Message(encoded=data)
 
         parts = self.sock.recv_multipart()
         if not parts:

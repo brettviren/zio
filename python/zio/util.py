@@ -43,3 +43,10 @@ def guess_hostname():
     import socket
     return socket.getfqdn()
         
+def byteify_list(lst):
+    ret = list()
+    for el in lst:
+        if type(el) is str:
+            el = bytes(el, encoding='utf-8')
+        ret.append(el)
+    return ret
