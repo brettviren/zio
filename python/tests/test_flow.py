@@ -7,7 +7,7 @@ import time
 import unittest
 import zmq
 from zio import Node, Message, CoordHeader
-from zio.flow import Flow, flow_string
+from zio.flow import Flow, stringify, objectify
 
 
 class TestFlow(unittest.TestCase):
@@ -69,6 +69,15 @@ class TestFlow(unittest.TestCase):
         eot = self.sflow.eot(Message(), 1000)
         assert(eot)
         
+
+    def test_flow_string(self):
+        msg = Message(label='{"extra":42}')
+        msg.label = stringify('DAT', **objectify(msg))
+        fobj = objectify(msg)
+        assert(fobj["extra"] == 42)
+        assert(fobj["flow"] == "DAT")
+
+
 
     def tearDown(self):
         self.cnode.offline()

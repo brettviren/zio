@@ -115,8 +115,8 @@ class Message:
 
     
     routing_id = 0
-    prefix = PrefixHeader()
-    coord = CoordHeader()
+    prefix = None
+    coord = None
     _payload = ()
 
     def __init__(self,
@@ -141,6 +141,9 @@ class Message:
         set.
 
         '''
+        self.prefix = PrefixHeader()
+        self.coord = CoordHeader()
+
         if frame is not None:
             self.fromframe(frame)
         if encoded is not None:
@@ -169,6 +172,13 @@ class Message:
     @form.setter
     def form(self, val):
         self.prefix.form = val
+
+    @property
+    def level(self):
+        return self.prefix.level
+    @level.setter
+    def level(self, val):
+        self.prefix.level = val
 
     @property
     def label(self):

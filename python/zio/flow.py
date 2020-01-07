@@ -17,25 +17,29 @@ class Direction(Enum):
     extract=1
     inject=2
 
-def flow_object(morl):
+def objectify(morl):
     '''
     Return a flow object.
 
     The morl may be a zio.Message or a zio.Message.label
     '''
+    if not morl:
+        return dict()
     if type(morl) is bytes:
         morl = morl.decode('utf-8')
     if type(morl) is str:
         return json.loads(morl)
-    return flow_object(morl.prefix.label)
+    return objectify(morl.prefix.label)
 
-def flow_string(flowtype, **params):
+def stringify(flowtype, **params):
     '''
     Return a flow label string of given flow type and any extra
     parameters.
     '''
+    params = params or dict()
     params['flow'] = flowtype
     return json.dumps(params)
+
 
 class Flow:
     '''
@@ -66,8 +70,8 @@ class Flow:
         Client calls send_bot() first, server calls send_bot() second.
         '''
         msg.form = 'FLOW'
-        fobj = flow_object(msg)
-        msg.label = flow_string('BOT', **fobj)
+        fobj = objectify(msg)
+        msg.label = stringify('BOT', **fobj)
         msg.routing_id = self.routing_id
         self.port.send(msg)
 
@@ -83,7 +87,7 @@ class Flow:
             return None
         if msg.form != 'FLOW':
             return None
-        fobj = flow_object(msg)
+        fobj = objectify(msg)
         if fobj.get("flow",None) != "BOT":
             log.debug("malformed BOT flow: %s" % (msg,))
             return None
@@ -124,7 +128,7 @@ class Flow:
             return None
         if msg.form != 'FLOW':
             return None
-        fobj = flow_object(msg)
+        fobj = objectify(msg)
         if fobj.get("flow",None) != "PAY":
             log.debug("malformed PAY flow: %s" % (msg,))
             return None
@@ -150,7 +154,7 @@ class Flow:
             self.slurp_pay(-1)  # some credit to continue
 
         msg.form = 'FLOW'
-        msg.label = flow_string('DAT', **flow_object(msg))
+        msg.label = stringify('DAT', **objectify(msg))
         msg.routing_id = self.routing_id
         self.port.send(msg)
         self.credit -= 1
@@ -169,7 +173,7 @@ class Flow:
             return 0
         nsent = self.credit
         self.credit = 0
-        msg = Message(form='FLOW', label=flow_string('PAY', credit=nsent))
+        msg = Message(form='FLOW', label=stringify('PAY', credit=nsent))
         log.debug("send: %s" % msg)
         self.port.send(msg)
         return nsent
@@ -187,7 +191,7 @@ class Flow:
             return None
         if msg.form != 'FLOW':
             return None
-        fobj = flow_object(msg)
+        fobj = objectify(msg)
         if fobj.get('flow',None) != 'DAT':
             log.debug("malformed DAT flow: %s" % (msg,))
             return None
@@ -207,7 +211,7 @@ class Flow:
         best set to 0.
         '''
         msg.form = 'FLOW'
-        msg.label = flow_string('EOT', **flow_object(msg))
+        msg.label = stringify('EOT', **objectify(msg))
         msg.routing_id = self.routing_id
         self.port.send(msg)
         while True:
@@ -216,7 +220,7 @@ class Flow:
                 return None
             if msg.form != 'FLOW':
                 continue        # who's knocking at my door?
-            fobj = flow_object(msg)
+            fobj = objectify(msg)
             if fobj.get('flow',None) == 'EOT':
                 return msg
             continue            # try again, probably got a PAY/DAT
