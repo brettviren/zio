@@ -199,21 +199,30 @@ class Flow:
         self.flush_pay()
         return msg;
             
-
-
-    def eot(self, msg, timeout=-1):
+    def send_eot(self, msg):
         '''
-        Send EOT to other end and maybe wait for reply.
+        Send EOT message to other end.
 
-        Return EOT if recieved else None.
-
-        Note: if calling in response to a received EOT, timeout is
-        best set to 0.
+        Note, if app initiates the EOT, it should then call
+        recv_eot().  If it unexpectedly got EOT when recving another
+        then it should send EOT as a response.
         '''
         msg.form = 'FLOW'
         msg.label = stringify('EOT', **objectify(msg))
         msg.routing_id = self.routing_id
         self.port.send(msg)
+
+    def recv_eot(self, timeout=-1):
+        '''
+        Recv an EOT message.
+
+        EOT message is returned or None if timeout occurs.
+
+        If app explicitly calls send_eot() it should call recv_eot()
+        to wait for the ack from the other end.  If an app receives
+        EOT as an unepxected message while receiving PAY or DAT then
+        it should send_eot() but not expect another EOT ack.
+        '''
         while True:
             msg = self.port.recv(timeout)
             if msg is None:
@@ -225,6 +234,7 @@ class Flow:
                 return msg
             continue            # try again, probably got a PAY/DAT
         return                  # won't reach
+
 
 
     pass

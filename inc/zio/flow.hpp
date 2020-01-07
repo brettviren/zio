@@ -81,17 +81,29 @@ namespace zio {
             int flush_pay();
 
             /*!
-              @brief send EOT to other end and wait for reply
+              @brief send EOT.
+
+              If a get() or a put() was interupted by an EOT the app
+              should call send_eot() as an acknowledgement and should
+              not call recv_eot().  If app explicitly initates EOT
+              with send_eot() then the app should call recv_eot() to
+              wait for an ack from the other end.
+            */
+            void send_eot(Message& msg);
+
+            
+            /*!
+              @brief Receive an EOT
 
               Return false if no EOT was received, otherwise set msg
               to that EOT message.  Timeout is in milliseconds or less
               than zero to wait indefinitely.
 
-              Note: if calling in response to an EOT sent from the
-              other end, a subsequent EOT receipt is not expected.
-              Use timeout=0.
+              Note: an app only needs to call recv_eot() if they
+              explicitly initiated with send_eot(). 
+
             */
-            bool eot(Message& msg, int timeout=-1);
+            bool recv_eot(Message& msg, int timeout=-1);
 
             bool is_sender() const { return m_sender; }
             int credits() const { return m_credits; }

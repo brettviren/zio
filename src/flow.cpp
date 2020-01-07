@@ -190,24 +190,29 @@ bool zio::flow::Flow::get(zio::Message& dat, int timeout)
     return true;
 }
 
-bool zio::flow::Flow::eot(Message& msg, int timeout)
+void zio::flow::Flow::send_eot(Message& msg)
 {
     zio::json fobj;
     if (!parse_label(msg, fobj)) {
-        throw std::runtime_error("bad message label for Flow::eot()");
+        throw std::runtime_error("bad message label for Flow::send_eot()");
     }
     fobj["flow"] = "EOT";
     msg.set_label(fobj.dump());
 
     if (m_rid) { msg.set_routing_id(m_rid); }
     m_port->send(msg);
+}
+
+bool zio::flow::Flow::recv_eot(Message& msg, int timeout)
+{
     while (true) {
         bool ok = m_port->recv(msg, timeout);
         if (!ok) {              // timeout
             return false;
         }
+        zio::json fobj;
         if (!parse_label(msg, fobj)) {
-            throw std::runtime_error("bad message label for Flow::eot()");
+            throw std::runtime_error("bad message label for Flow::send_eot()");
         }
         std::string flowtype = fobj["flow"];
         if (flowtype == "EOT") {

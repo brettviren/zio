@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-01-03 Fri 16:34 -->
+<!-- 2020-01-07 Tue 13:52 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>ZIO Installation</title>
@@ -186,7 +186,7 @@
 @licstart  The following is the entire license notice for the
 JavaScript code in this tag.
 
-Copyright (C) 2012-2019 Free Software Foundation, Inc.
+Copyright (C) 2012-2018 Free Software Foundation, Inc.
 
 The JavaScript code in this tag is free software: you can
 redistribute it and/or modify it under the terms of the GNU
@@ -239,9 +239,10 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org79834bc">1. Install ZIO</a></li>
-<li><a href="#org9fdb0f8">2. Tests</a></li>
-<li><a href="#orgb58e217">3. Documentation</a></li>
+<li><a href="#org267e9a6">1. Install ZIO</a></li>
+<li><a href="#org85a5d17">2. Tests</a></li>
+<li><a href="#org09defac">3. Documentation</a></li>
+<li><a href="#org8adcacd">4. Python</a></li>
 </ul>
 </div>
 </div>
@@ -257,8 +258,8 @@ for the JavaScript code in this tag.
 
 </div>
 
-<div id="outline-container-org79834bc" class="outline-2">
-<h2 id="org79834bc"><span class="section-number-2">1</span> Install ZIO</h2>
+<div id="outline-container-org267e9a6" class="outline-2">
+<h2 id="org267e9a6"><span class="section-number-2">1</span> Install ZIO</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 ZIO installs in the usual <a href="https://waf.io">Waf</a> way.
@@ -274,7 +275,7 @@ To build, these software dependencies will be located via <a href="https://www.f
 </p>
 
 <ul class="org-ul">
-<li><a href="https://github.com/zeromq/libzmq">libzmq</a></li>
+<li><a href="https://github.com/zeromq/libzmq">libzmq</a> (with draft sockets built)</li>
 <li><a href="https://github.com/zeromq/czmq">CZMQ</a></li>
 <li><a href="https://github.com/zeromq/zyre">Zyre</a></li>
 </ul>
@@ -286,8 +287,8 @@ these header-only packages.
 </div>
 </div>
 
-<div id="outline-container-org9fdb0f8" class="outline-2">
-<h2 id="org9fdb0f8"><span class="section-number-2">2</span> Tests</h2>
+<div id="outline-container-org85a5d17" class="outline-2">
+<h2 id="org85a5d17"><span class="section-number-2">2</span> Tests</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 The default install target will compile and execute units tests.  To
@@ -304,8 +305,8 @@ Or, to force their running:
 </div>
 </div>
 
-<div id="outline-container-orgb58e217" class="outline-2">
-<h2 id="orgb58e217"><span class="section-number-2">3</span> Documentation</h2>
+<div id="outline-container-org09defac" class="outline-2">
+<h2 id="org09defac"><span class="section-number-2">3</span> Documentation</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 The generated documentation committed to the repository.  With a
@@ -316,6 +317,45 @@ rebuild it:
 <pre class="example">
 $ cd docs
 $ make
+</pre>
+</div>
+</div>
+<div id="outline-container-org8adcacd" class="outline-2">
+<h2 id="org8adcacd"><span class="section-number-2">4</span> Python</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+ZIO also provides a Python package.  It installs in "the usual way"
+but its dependencies need some more particular care.  It makes use of
+PyZMQ, the Python bindings to <b>libzmq</b>.  Because ZIO requires ZeroMQ
+"draft" sockets, PyZMQ needs to be installed manually in order to
+enable them as well as point to an installation of <b>libzmq</b> which
+includes them.
+</p>
+
+<pre class="example">
+$ python3 -m venv /path/to/venv
+$ source /path/to/venv/bin/activate
+$ cd zio/python
+$ pip install --pre pyzmq \
+    --install-option=--enable-drafts \
+    --install-option=--zmq=/path/to/zmq
+$ pip install -r requirements.txt
+$ pip install [-e] .
+</pre>
+
+<p>
+In the above, replace <code>/path/to</code> with paths suitable for your
+environment.  Use <code>-e</code> option to do in-place development on the <code>zio</code>
+Python module.
+</p>
+
+<p>
+The <code>zio</code> Python module has unit tests which can be run as:
+</p>
+
+<pre class="example">
+$ cd zio/python/tests
+$ python -m unittest 
 </pre>
 </div>
 </div>

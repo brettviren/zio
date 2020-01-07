@@ -64,13 +64,13 @@ int main()
     }
     if (I_quit) {
         zsys_debug("cflow send EOT");
-        ok = cflow.eot(msg,-1);
+        cflow.send_eot(msg);
+        ok = cflow.recv_eot(msg, -1);
         assert(ok);
     }
     else {
         zsys_debug("cflow recv EOT");
-        ok = cflow.eot(msg,0);
-        assert(ok);
+        cflow.send_eot(msg);
     }
     return 0;
 }

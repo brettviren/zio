@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-01-03 Fri 16:34 -->
+<!-- 2020-01-07 Tue 13:52 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>ZIO data flow</title>
@@ -186,7 +186,7 @@
 @licstart  The following is the entire license notice for the
 JavaScript code in this tag.
 
-Copyright (C) 2012-2019 Free Software Foundation, Inc.
+Copyright (C) 2012-2018 Free Software Foundation, Inc.
 
 The JavaScript code in this tag is free software: you can
 redistribute it and/or modify it under the terms of the GNU
@@ -283,8 +283,8 @@ restrictions or limitations) are described in the section of the
 ZeroMQ guide covering <a href="http://zguide.zeromq.org/page:all#toc211">credit-based flow control</a>.
 </p>
 
-<div id="outline-container-org6675609" class="outline-2">
-<h2 id="protocol"><a id="org6675609"></a><span class="section-number-2">1</span> Flow protocol</h2>
+<div id="outline-container-orgff7ef83" class="outline-2">
+<h2 id="protocol"><a id="orgff7ef83"></a><span class="section-number-2">1</span> Flow protocol</h2>
 <div class="outline-text-2" id="text-protocol">
 <p>
 The ZIO <i>data flow protocol</i> is partly illustrated in the UML sequence
@@ -382,8 +382,8 @@ the other end is still online or not.
 </div>
 
 
-<div id="outline-container-org3b5b70e" class="outline-2">
-<h2 id="messages"><a id="org3b5b70e"></a><span class="section-number-2">2</span> Flow messages</h2>
+<div id="outline-container-org06239ec" class="outline-2">
+<h2 id="messages"><a id="org06239ec"></a><span class="section-number-2">2</span> Flow messages</h2>
 <div class="outline-text-2" id="text-messages">
 <p>
 ZIO data flow introduces a new ZIO message of type <b>FLOW</b>.  This message
@@ -427,8 +427,8 @@ and is free to fill the payload frame or frames of any <b>FLOW</b> message.
 </div>
 </div>
 
-<div id="outline-container-org2a2f682" class="outline-2">
-<h2 id="api"><a id="org2a2f682"></a><span class="section-number-2">3</span> Flow API</h2>
+<div id="outline-container-orge205316" class="outline-2">
+<h2 id="api"><a id="orge205316"></a><span class="section-number-2">3</span> Flow API</h2>
 <div class="outline-text-2" id="text-api">
 <p>
 ZIO provides an API to simplify developing software that participates
@@ -473,25 +473,25 @@ they participate in asynchronous communication with the.  In
 particular, both may <code>recv()</code> messages from the port.  If a <code>recv()</code>
 returns and <b>EOT</b> (instead of the expected <b>PAY</b> or <b>DAT</b>) these
 methods return <code>false</code>.  The application should check this return and
-call <code>eot()</code>, possibly with a zero timeout, to issue a reply.
+call <code>send_eot()</code>, possibly with a zero timeout, to issue a reply.
 </p>
 
 <p>
-This interrupting <b>EOT</b> will arise because either end may call <code>eot()</code>
-at any time.  When intentionally initiated by the application, the
-timeout given to <code>eot()</code> should be non-zero.  This assures any
-messages still buffered in the sockets will be properly flushed on
-both ends.  If an <b>EOT</b> reply is received prior to the timeout, this
-method returns <code>true</code>.  A number of <b>PAY</b> (if <i>sender</i>) or <b>DAT</b> (if
-<i>recver</i>) messages may arrive before the reply-<b>EOT</b> and they shall be
-simply discarded.
+This interrupting <b>EOT</b> will arise because either end may call
+<code>send_eot()</code> at any time.  When explicitly initiating an EOT in this
+manner that side should also call <code>recv_eot()</code> to wait for the ack from
+the interrupted side.  While doing so, a number of <b>PAY</b> (if <i>sender</i>) or
+<b>DAT</b> (if <i>recver</i>) messages may arrive as credit is drained and before
+the reply-<b>EOT</b> is received.  These last messages are not required to be
+serviced for the flow protocol and may be processed or discarded by
+the application.
 </p>
 </div>
 </div>
 
 
-<div id="outline-container-org1a8628c" class="outline-2">
-<h2 id="server"><a id="org1a8628c"></a><span class="section-number-2">4</span> Simple Flow Server</h2>
+<div id="outline-container-org7ee05c7" class="outline-2">
+<h2 id="server"><a id="org7ee05c7"></a><span class="section-number-2">4</span> Simple Flow Server</h2>
 <div class="outline-text-2" id="text-server">
 <p>
 A <i>data flow server</i> may be directly implemented using an instance of
@@ -514,8 +514,8 @@ handler with each handler using a distinct <code>Flow</code> instance.
 </div>
 
 
-<div id="outline-container-org0918daa" class="outline-2">
-<h2 id="extending"><a id="org0918daa"></a><span class="section-number-2">5</span> Extending Flow API</h2>
+<div id="outline-container-orgf8d35f8" class="outline-2">
+<h2 id="extending"><a id="orgf8d35f8"></a><span class="section-number-2">5</span> Extending Flow API</h2>
 <div class="outline-text-2" id="text-extending">
 <p>
 As mentioned above, the <i>flow object</i> stored in the header prefix

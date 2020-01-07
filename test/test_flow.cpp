@@ -99,10 +99,12 @@ int main()
     assert(sflow.credits() == 1);    
     
     cerr <<"sflow send EOT\n";
-    sflow.eot(msg, 0);
+    sflow.send_eot(msg);
     cerr <<"cflow send EOT\n";
-    ok = cflow.eot(msg);
+    ok = cflow.recv_eot(msg);
     assert(ok);
+    cflow.send_eot(msg);
+    sflow.recv_eot(msg);
     cerr<<"done\n";    
     return 0;
 }

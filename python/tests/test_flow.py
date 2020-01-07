@@ -60,14 +60,18 @@ class TestFlow(unittest.TestCase):
             dat = self.cflow.get()
             assert(dat.seqno == 200+count)
         
-        # normally, when a flow explicitly sends EOT it should wait
-        # for a response, but we are in a single thread here so must
-        # use a timeout.
-        eot = self.cflow.eot(Message(), 0)
-        assert(eot is None)
-        # 
-        eot = self.sflow.eot(Message(), 1000)
-        assert(eot)
+        # normally, when a flow explicitly sends EOT the other end
+        # will recv the EOT when its trying to recv another message
+        # (PAY or DAT).  In this test things are synchronous and so we
+        # explicitly recv_eot().
+        self.cflow.send_eot(Message())
+
+        surprise = self.sflow.recv_eot(1000)
+        assert(surprise)
+        self.sflow.send_eot(Message())
+
+        expected = self.cflow.recv_eot(1000)
+        assert(expected)
         
 
     def test_flow_string(self):

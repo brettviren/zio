@@ -170,16 +170,16 @@ they participate in asynchronous communication with the.  In
 particular, both may ~recv()~ messages from the port.  If a ~recv()~
 returns and *EOT* (instead of the expected *PAY* or *DAT*) these
 methods return ~false~.  The application should check this return and
-call ~eot()~, possibly with a zero timeout, to issue a reply.
+call ~send_eot()~, possibly with a zero timeout, to issue a reply.
 
-This interrupting *EOT* will arise because either end may call ~eot()~
-at any time.  When intentionally initiated by the application, the
-timeout given to ~eot()~ should be non-zero.  This assures any
-messages still buffered in the sockets will be properly flushed on
-both ends.  If an *EOT* reply is received prior to the timeout, this
-method returns ~true~.  A number of *PAY* (if /sender/) or *DAT* (if
-/recver/) messages may arrive before the reply-*EOT* and they shall be
-simply discarded.
+This interrupting *EOT* will arise because either end may call
+~send_eot()~ at any time.  When explicitly initiating an EOT in this
+manner that side should also call ~recv_eot()~ to wait for the ack from
+the interrupted side.  While doing so, a number of *PAY* (if /sender/) or
+*DAT* (if /recver/) messages may arrive as credit is drained and before
+the reply-*EOT* is received.  These last messages are not required to be
+serviced for the flow protocol and may be processed or discarded by
+the application.
 
 
 * Simple Flow Server
