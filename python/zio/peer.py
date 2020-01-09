@@ -6,6 +6,7 @@ import zmq
 import pyre
 import uuid
 import json
+import time
 import logging
 from collections import namedtuple
 
@@ -107,13 +108,53 @@ class Peer:
         Return a list of UUIDs of peers discovered to have this
         nickname.
         '''
-        self.drain()
-        got = self.matchnick(nickname)
-        if got:
-            return got
-        log.debug("[peer %s]: wait for %s (timeout=%d)" % \
-                  (self.zyre.name(), nickname, timeout))
-        self.poll(timeout)
-        return self.matchnick(nickname)
+        t0ms = 1000*time.time()
+        while True:
+            self.drain()
+            got = self.matchnick(nickname)
+            if got:
+                return got
+            nowms = 1000*time.time()
+            if timeout >= 0:    # reduce finite timeout 
+                timeout = timeout - (nowms-t0ms)
+                if timeout < 0:
+                    return got
+            log.debug("[peer %s]: wait for %s (timeout=%d)" % \
+                      (self.zyre.name(), nickname, timeout))
+            #print(self.peers)
+            self.poll(timeout)
 
-    
+
+    def party(self, nicks, timeout=-1):
+        '''
+        Wait as set of nicks have been seen or until timeout.
+
+        Return a peer dictionary holding last seen info about peers
+        with matching nicks.
+        '''
+        until = -1
+        if timeout >= 0:
+            until = time.time() + 1e-3*timeout
+        want = set(nicks)
+        seen = dict()
+        self.drain()
+        #print ("want:", want)
+        while True:
+            for pi in self.peers.values():
+                if pi.nick in want:
+                    seen[pi.uuid] = pi
+            know = set([pi.nick for pi in seen.values()])
+            if want == know:
+                return seen
+            if until > 0:
+                timeout = int(1000*(until - time.time()))
+                if timeout <= 0:
+                    return seen
+            print ("seen:",' '.join(know))
+            #print ("peers:",self.peers)
+            self.poll(timeout)
+            
+
+            
+            
+            
