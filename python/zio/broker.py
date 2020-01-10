@@ -69,9 +69,9 @@ class FlowBroker:
         '''
         msg = self.server.recv(timeout)
         if not msg:
-            print ("broker poll timeout:",timeout)
+            #print ("broker poll timeout:",timeout)
             return None
-        print ("broker poll:",msg)
+        #print ("broker poll:",msg)
         rid = msg.routing_id
         fobj = objectify(msg)
         ftype = fobj.get("flow", None)
@@ -133,59 +133,3 @@ class FlowBroker:
 # fixme: broker doesn't handle endpoints disappearing.
 
 
-
-def dumper(ctx, pipe, flow_factory, *args):
-    '''
-    A dump handler which may be used as an actor talking to a broker's botport.
-
-    Parameters
-    ----------
-    flow_factory : a callable
-        Each call shall return an online zio.Flow.
-    '''
-    poller = zmq.Poller()
-    poller.register(pipe, zmq.POLLIN)
-    pipe.signal()               # ready
-
-    s2f = dict()                # socket to its flow
-
-    while True:
-        print ("dumper: polling")
-        for sock,_ in poller.poll(1000):
-
-            if sock == pipe:
-                print ("dumper: pipe hit")
-                data = pipe.recv()
-                if data == b'STOP':
-                    return
-                if len(data) == 0:
-                    return
-                bot = zio.Message(encoded=data)
-                fobj = objectify(bot)
-                if fobj['direction'] != 'inject':
-                    print("dumper: rejecting bot",bot)
-                    pipe.send_string('NO')
-                    continue
-                pipe.send_string('OK')
-                flow = flow_factory()
-                poller.register(flow.port.sock, zmq.POLLIN)
-                s2f[flow.port.sock] = flow
-                print ("dumper: BOT from pipe:",bot)
-                flow.send_bot(bot)
-                bot = flow.recv_bot()
-                print ("dumper: BOT from sock:",bot)
-                flow.flush_pay() # we are inject
-                print("dumper: handled pipe")
-                continue
-
-            flow = s2f[sock]
-            msg = flow.get()
-            print ("dumper: sock hit:",msg)
-            if msg is None:
-                print ("dumper: null message from get, sending EOT")
-                flow.send_eot()
-                del s2f[sock]
-                poller.unregister(sock)
-                continue
-            print ("dumper: msg: ",msg)
-    return

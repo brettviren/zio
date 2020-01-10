@@ -2,8 +2,8 @@
 import json
 import zmq
 import zio
-
-from zio.broker import FlowBroker, dumper
+from zio.flow import objectify
+from zio.broker import FlowBroker
 from pyre.zactor import ZActor
 
 server_address = "tcp://127.0.0.1:5678"
@@ -34,6 +34,67 @@ def client_actor(ctx, pipe, *args):
     print ("client done")
     pipe.recv()                 # wait for signal to exit
 
+
+def dumper(ctx, pipe, flow_factory, *args):
+    '''
+    A dump handler which may be used as an actor talking to a broker's botport.
+
+    Parameters
+    ----------
+    flow_factory : a callable
+        Each call shall return an online zio.Flow.
+    '''
+    poller = zmq.Poller()
+    poller.register(pipe, zmq.POLLIN)
+    pipe.signal()               # ready
+
+    s2f = dict()                # socket to its flow
+
+    while True:
+
+        for sock,_ in poller.poll():
+
+            if sock == pipe:
+                print ("dumper: pipe hit")
+                data = pipe.recv()
+
+                if data == b'STOP':
+                    print ("dumper: got STOP")
+                    return
+                if len(data) == 0:
+                    print ("dumper: got signal")
+                    return
+
+                bot = zio.Message(encoded=data)
+                fobj = objectify(bot)
+                if fobj['direction'] != 'inject':
+                    print("dumper: rejecting bot",bot)
+                    pipe.send_string('NO')
+                    continue
+                pipe.send_string('OK')
+                flow = flow_factory()
+                poller.register(flow.port.sock, zmq.POLLIN)
+                s2f[flow.port.sock] = flow
+                print ("dumper: BOT from pipe:",bot)
+                flow.send_bot(bot)
+                bot = flow.recv_bot()
+                print ("dumper: BOT from sock:",bot)
+                flow.flush_pay() # we are inject
+                print("dumper: handled pipe")
+                continue
+
+            flow = s2f[sock]
+            msg = flow.get()
+            print ("dumper: sock hit:",msg)
+            if msg is None:
+                print ("dumper: null message from get, sending EOT")
+                flow.send_eot()
+                del s2f[sock]
+                poller.unregister(sock)
+                continue
+            print ("dumper: msg: ",msg)
+    return
+
 def test_dumper():
     
     ctx = zmq.Context()
@@ -48,13 +109,14 @@ def test_dumper():
     broker = FlowBroker(server, actor.pipe)
 
     for count in range(10):
-        print (f"main loop poll [{count}]")
+        print (f"main: poll [{count}]")
         broker.poll(1000)      # client->handler
 
-
-
+    print (f"main: stop broker")
     broker.stop()
+    print (f"main: node offline")
     node.offline()
+    print (f"main: stop client")
     client.pipe.signal()
     
 

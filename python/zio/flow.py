@@ -83,23 +83,18 @@ class Flow:
         Returns None if EOT was received or timeout occurred.
         '''
         msg = self.port.recv(timeout)
-        print("flow recv_bot:" , msg)
         if msg is None:
-            print ("flow recv no bot")
             return None
         if msg.form != 'FLOW':
-            print ('flow recv non FLOW: "%s"' % msg.form)
             return None
         fobj = objectify(msg)
         if fobj.get("flow",None) != "BOT":
             log.debug("malformed BOT flow: %s" % (msg,))
-            print ("flow recv non BOT")
             return None
 
         credit = fobj.get("credit",None)
         if credit is None:
             log.debug("malformed BOT credit: %s" % (msg,))
-            print ("flow recv bad credit")
             return None
 
         self.total_credit = credit
@@ -161,7 +156,7 @@ class Flow:
         msg.form = 'FLOW'
         msg.label = stringify('DAT', **objectify(msg))
         msg.routing_id = self.routing_id
-        print (f"port send with credit %d: %s" % (self.credit, msg))
+        #print (f"port send with credit %d: %s" % (self.credit, msg))
         self.port.send(msg)
         self.credit -= 1
         return True
@@ -191,7 +186,7 @@ class Flow:
 
         Return None if EOT was received instead.
         '''
-        print ("flow port recv, timeout=",timeout)
+        #print ("flow port recv, timeout=",timeout)
         msg = self.port.recv(timeout)
         self.flush_pay()
         if msg is None:
