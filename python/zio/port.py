@@ -205,7 +205,7 @@ class Port:
             self.sock.send_multipart(parts)
         return
 
-    def recv(self, timeout=-1):
+    def recv(self, timeout=None):
         '''
         Receive and return a zio.Message waiting up to a timeout 
 

@@ -6,9 +6,21 @@ ZIO brokers bring together ZIO clients.
 
 import json
 from collections import namedtuple
-
+import zmq
 import zio
 from zio.flow import objectify
+
+def switch_direction(fobj):
+    fobj = dict(fobj)
+    if fobj["direction"] == 'inject':
+        fobj["direction"] = 'extract'
+    elif fobj["direction"] == 'extract':
+        fobj["direction"] = 'inject'
+    else:
+        return None
+    return fobj
+
+        
 
 class FlowBroker:
     def __init__(self, server, backend):
@@ -55,13 +67,13 @@ class FlowBroker:
 
         Return None if timeout, False if error, True if nominal
         '''
-        print ("broker poll for",timeout)
         msg = self.server.recv(timeout)
         if not msg:
+            print ("broker poll timeout:",timeout)
             return None
+        print ("broker poll:",msg)
         rid = msg.routing_id
         fobj = objectify(msg)
-        print("broker poll",rid,msg)
         ftype = fobj.get("flow", None)
         if not ftype:
             return False
@@ -72,22 +84,23 @@ class FlowBroker:
             if cid:             # BOT from handler
                 self.other[rid] = cid
                 self.other[cid] = rid
-                # fall through
-                print ("broker see handler BOT")
+                fobj = switch_direction(fobj)                
+                del fobj["cid"]
+                orig_label = msg.label
+                msg.label = json.dumps(fobj)                
+                msg.routing_id = rid
+                self.server.send(msg) # mirror back to handler
+                msg.label = orig_label
+                # fall through to send to client
+                
             else:               # BOT from client
-                fobj["cid"] = rid
-                if fobj["direction"] == 'inject':
-                    fobj["direction"] = 'extract'
-                elif fobj["direction"] == 'extract':
-                    fobj["direction"] = 'inject'
-                else:
+                fobj = switch_direction(fobj)
+                if fobj is None:
                     return False 
+                fobj["cid"] = rid
                 msg.label = json.dumps(fobj)
                 msg.routing_id = 0
-                print("broker fobj",fobj)
-                print("broker send",msg)
                 self.backend.send(msg.encode())
-                print ("broker recv response")
                 got = self.backend.recv_string()
                 if got == 'OK':
                     return True
@@ -97,11 +110,12 @@ class FlowBroker:
                     msg.routing_id = rid
                     self.server.send(msg)
                     return False
-                return False    # unknown respose from botport
+                return False    # unknown respose 
 
         # route message to other
         cid = self.other[rid]
         msg.routing_id = cid
+        print (f"broker route {rid} -> {cid}: {msg}")
         self.server.send(msg)
 
         # if EOT comes through, we should forget the routing
@@ -117,3 +131,61 @@ class FlowBroker:
         self.backend.send_string("STOP")
 
 # fixme: broker doesn't handle endpoints disappearing.
+
+
+
+def dumper(ctx, pipe, flow_factory, *args):
+    '''
+    A dump handler which may be used as an actor talking to a broker's botport.
+
+    Parameters
+    ----------
+    flow_factory : a callable
+        Each call shall return an online zio.Flow.
+    '''
+    poller = zmq.Poller()
+    poller.register(pipe, zmq.POLLIN)
+    pipe.signal()               # ready
+
+    s2f = dict()                # socket to its flow
+
+    while True:
+        print ("dumper: polling")
+        for sock,_ in poller.poll(1000):
+
+            if sock == pipe:
+                print ("dumper: pipe hit")
+                data = pipe.recv()
+                if data == b'STOP':
+                    return
+                if len(data) == 0:
+                    return
+                bot = zio.Message(encoded=data)
+                fobj = objectify(bot)
+                if fobj['direction'] != 'inject':
+                    print("dumper: rejecting bot",bot)
+                    pipe.send_string('NO')
+                    continue
+                pipe.send_string('OK')
+                flow = flow_factory()
+                poller.register(flow.port.sock, zmq.POLLIN)
+                s2f[flow.port.sock] = flow
+                print ("dumper: BOT from pipe:",bot)
+                flow.send_bot(bot)
+                bot = flow.recv_bot()
+                print ("dumper: BOT from sock:",bot)
+                flow.flush_pay() # we are inject
+                print("dumper: handled pipe")
+                continue
+
+            flow = s2f[sock]
+            msg = flow.get()
+            print ("dumper: sock hit:",msg)
+            if msg is None:
+                print ("dumper: null message from get, sending EOT")
+                flow.send_eot()
+                del s2f[sock]
+                poller.unregister(sock)
+                continue
+            print ("dumper: msg: ",msg)
+    return

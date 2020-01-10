@@ -47,7 +47,7 @@ class Flow:
 
     It is equivalent to the C++ zio::flow::Flow class
 
-    All timeouts are in milliseconds.
+    All timeouts are in milliseconds.  A timeout of None means forever.
     '''
 
     credit = 0
@@ -83,18 +83,23 @@ class Flow:
         Returns None if EOT was received or timeout occurred.
         '''
         msg = self.port.recv(timeout)
+        print("flow recv_bot:" , msg)
         if msg is None:
+            print ("flow recv no bot")
             return None
         if msg.form != 'FLOW':
+            print ('flow recv non FLOW: "%s"' % msg.form)
             return None
         fobj = objectify(msg)
         if fobj.get("flow",None) != "BOT":
             log.debug("malformed BOT flow: %s" % (msg,))
+            print ("flow recv non BOT")
             return None
 
         credit = fobj.get("credit",None)
         if credit is None:
             log.debug("malformed BOT credit: %s" % (msg,))
+            print ("flow recv bad credit")
             return None
 
         self.total_credit = credit
@@ -113,7 +118,7 @@ class Flow:
         self.routing_id = msg.routing_id
         return msg
     
-    def slurp_pay(self, timeout=-1):
+    def slurp_pay(self, timeout=None):
         '''
         Receive any waiting PAY messages
 
@@ -156,6 +161,7 @@ class Flow:
         msg.form = 'FLOW'
         msg.label = stringify('DAT', **objectify(msg))
         msg.routing_id = self.routing_id
+        print (f"port send with credit %d: %s" % (self.credit, msg))
         self.port.send(msg)
         self.credit -= 1
         return True
@@ -179,12 +185,13 @@ class Flow:
         return nsent
 
 
-    def get(self, timeout=-1):
+    def get(self, timeout=None):
         '''
         Receive and return a DAT message and send any accumulated PAY.
 
         Return None if EOT was received instead.
         '''
+        print ("flow port recv, timeout=",timeout)
         msg = self.port.recv(timeout)
         self.flush_pay()
         if msg is None:
@@ -199,7 +206,7 @@ class Flow:
         self.flush_pay()
         return msg;
             
-    def send_eot(self, msg):
+    def send_eot(self, msg = Message()):
         '''
         Send EOT message to other end.
 
@@ -212,7 +219,7 @@ class Flow:
         msg.routing_id = self.routing_id
         self.port.send(msg)
 
-    def recv_eot(self, timeout=-1):
+    def recv_eot(self, timeout=None):
         '''
         Recv an EOT message.
 
