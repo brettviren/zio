@@ -126,10 +126,10 @@ class Port:
         intended to be used by a zio.Node which holds this zio.Port.
         '''
         for spec in self.to_bind:
-            if type(spec) is not str:
+            if len(spec) == 1 and type(spec[0]) is not str:
                 addr = bind_hostport(self.sock, *spec)
             else:
-                addr = bind_address(self.sock, bind_address)
+                addr = bind_address(self.sock, spec[0])
             self.bound.append(addr)
             self.add_headers(address=addr)
         self.to_bind = list()
@@ -147,8 +147,9 @@ class Port:
         if self.is_online: return
         self.is_online = True
         for conn in self.to_conn:
-            if type(conn) is str:
-                sock.connect(conn)
+            if len(conn) == 1 and type(conn[0]) is str:
+                conn = conn[0]
+                self.sock.connect(conn)
                 self.connected.append(conn)
                 continue
             

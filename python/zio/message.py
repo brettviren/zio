@@ -3,6 +3,7 @@
 Python interface to ZIO messages
 '''
 
+import zmq
 import struct
 from collections import namedtuple
 
