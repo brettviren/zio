@@ -7,9 +7,10 @@ from .message import Message
 
 def bind_address(sock, addr):
     try:
+        #print ("bind %s" % addr)
         port = sock.bind(addr)
     except ZMQError as e:
-        print(addr)
+        #print(addr)
         raise
     if addr.endswith("*"):      # this does not cover the full
         addr[:-1] += "%d"%port  # convention used by ZeroMQ address
@@ -22,6 +23,7 @@ def bind_hostport(sock, host, port):
         return bind_address(sock, "tcp://%s:%d" % (host, port))
     addr = "tcp://%s"%host
     try:
+        #print ("bind %s:*" % addr)
         port = sock.bind_to_random_port(addr,
                                         *ephemeral_port_range)
     except ZMQError as e:
@@ -31,7 +33,7 @@ def bind_hostport(sock, host, port):
             
 
 class Port:
-    def __init__(self, name, stype, hostname):
+    def __init__(self, name, stype, hostname='127.0.0.1'):
         '''
         Create a Port with a name and a ZeroMQ socket type.
 
@@ -68,6 +70,7 @@ class Port:
         If spec is a tuple ithen it is a (hostname,portnumber).
         '''
         if not spec:
+            #print ("[port %s] request default bind %s" % (self.name, spec,))
             self.to_bind.append((self._hostname, 0))
             return
         if len(spec) > 2:
@@ -126,9 +129,11 @@ class Port:
         intended to be used by a zio.Node which holds this zio.Port.
         '''
         for spec in self.to_bind:
-            if len(spec) == 1 and type(spec[0]) is not str:
+            if len(spec) == 2:
+                #print ("[port %s] bind host port %s" % (self.name, spec,))
                 addr = bind_hostport(self.sock, *spec)
-            else:
+            else:               # direct
+                #print ("[port %s] bind address %s" % (self.name, spec[0],))
                 addr = bind_address(self.sock, spec[0])
             self.bound.append(addr)
             self.add_headers(address=addr)
@@ -137,9 +142,11 @@ class Port:
         return self.headers;
                 
 
-    def online(self, peer):
+    def online(self, peer = None):
         '''
-        Bring this port online with a help of a zio.Peer object.
+        Bring this port online.
+
+        If no peer is given then indirect connects will fail.
 
         This method is intended for use by a zio.Node which holds this
         zio.Port.
@@ -153,6 +160,11 @@ class Port:
                 self.connected.append(conn)
                 continue
             
+            if not peer:
+                err="[port %s]: no peer given, can not connect %s" % \
+                    (self.name, conn)
+                raise ValueError(err)
+                      
             nodename,portname = conn
             uuids = peer.waitfor(nodename)
             if not uuids:

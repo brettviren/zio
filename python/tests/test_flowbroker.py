@@ -2,8 +2,8 @@
 import json
 import zmq
 import zio
-from zio.flow import objectify
-from zio.broker import FlowBroker
+from zio.flow import objectify, Broker
+
 from pyre.zactor import ZActor
 
 server_address = "tcp://127.0.0.1:5678"
@@ -106,7 +106,7 @@ def test_dumper():
 
     client = ZActor(ctx, client_actor)
     actor = ZActor(ctx, dumper, flow_maker)
-    broker = FlowBroker(server, actor.pipe)
+    broker = Broker(server, actor.pipe)
 
     for count in range(10):
         print (f"main: poll [{count}]")

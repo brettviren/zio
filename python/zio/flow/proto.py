@@ -4,10 +4,10 @@ zio.flow implements ZIO flow protocol helper
 
 This is equivalent to the C++ zio::flow namespace
 '''
-import json
 import logging
 
-from .message import Message
+from ..message import Message
+from .util import *
 
 log = logging.getLogger(__name__)
 
@@ -16,30 +16,6 @@ class Direction(Enum):
     undefined=0
     extract=1
     inject=2
-
-def objectify(morl):
-    '''
-    Return a flow object.
-
-    The morl may be a zio.Message or a zio.Message.label
-    '''
-    if not morl:
-        return dict()
-    if type(morl) is bytes:
-        morl = morl.decode('utf-8')
-    if type(morl) is str:
-        return json.loads(morl)
-    return objectify(morl.prefix.label)
-
-def stringify(flowtype, **params):
-    '''
-    Return a flow label string of given flow type and any extra
-    parameters.
-    '''
-    params = params or dict()
-    params['flow'] = flowtype
-    return json.dumps(params)
-
 
 class Flow:
     '''

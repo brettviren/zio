@@ -9,7 +9,6 @@ import zmq
 from zio import Node, Message, CoordHeader
 from zio.flow import Flow, stringify, objectify
 
-
 class TestFlow(unittest.TestCase):
 
     origin = 42

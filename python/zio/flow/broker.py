@@ -8,21 +8,9 @@ import json
 from collections import namedtuple
 import zmq
 import zio
-from zio.flow import objectify
+from .util import objectify, switch_direction
 
-def switch_direction(fobj):
-    fobj = dict(fobj)
-    if fobj["direction"] == 'inject':
-        fobj["direction"] = 'extract'
-    elif fobj["direction"] == 'extract':
-        fobj["direction"] = 'inject'
-    else:
-        return None
-    return fobj
-
-        
-
-class FlowBroker:
+class Broker:
     def __init__(self, server, backend):
         '''Create a flow broker.
 
