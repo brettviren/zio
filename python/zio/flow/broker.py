@@ -103,7 +103,7 @@ class Broker:
         # route message to other
         cid = self.other[rid]
         msg.routing_id = cid
-        print (f"broker route {rid} -> {cid}: {msg}")
+        print (f"broker route {rid} -> {cid}:\n{msg}\n")
         self.server.send(msg)
 
         # if EOT comes through, we should forget the routing

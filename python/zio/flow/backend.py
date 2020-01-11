@@ -6,36 +6,55 @@ import zmq
 from ..message import Message
 
 def spawner(ctx, pipe, factory, *args):
-    '''Broker backend that spawns handlers.
+    '''An actor that spawns other actors.
 
     Parameters
     ----------
     factory : a callable
-        Called with new BOT, return False if reject.
+        Called with new BOT, return actor or None if reject.
 
     '''
     poller = zmq.Poller()
     poller.register(pipe, zmq.POLLIN)
     pipe.signal()               # ready
 
-    s2f = dict()                # socket to its flow
+    actors = dict()             # sock to zactor
 
-    while True:
+    terminated = False
+    while not terminated:
 
-        which = poller.poll()
+        for sock,_ in poller.poll():
 
-        # how I might bail, let me count the ways
-        if not which:
-            return
-        data = pipe.recv()
-        if len(data) == 0 or data == b'STOP':
-            return
+            if sock == pipe:
+                data = pipe.recv()
+                print (data)
+                if len(data) == 0:
+                    print("spawner got EOT")
+                    terminated = True
+                    break
+                if data == b'STOP':
+                    print("spawner got STOP")
+                    terminated = True
+                    break
 
-        bot = Message(encoded=data)
-        if factory(bot):
-            pipe.send_string('OK')
-            continue
-        pipe.send_string('NO')
-        continue
+                bot = Message(encoded=data)
+                actor = factory(bot)
+                if actor is None:
+                    pipe.send_string('NO')
+                    continue
+                actors[actor.pipe] = actor
+                poller.register(actor.pipe, zmq.POLLIN)
+                pipe.send_string('OK')
+                continue
+            else:
+                # else its a spawned actor signaling us
+                poller.unregister(sock)
+                del actors[sock]
+                print ("spawner with %d actors spawned" % len(actors))
 
+    if actors:
+        print("spawner with %d live actors" % len(actors))
+        # now kill them
+    print ("spawner exiting")
+    
     return

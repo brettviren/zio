@@ -22,11 +22,14 @@ def client_actor(ctx, pipe, *args):
 
     msg = zio.Message(label=json.dumps(dict(direction='extract',credit=2)))
     cflow.send_bot(msg)
-    print ("client sent BOT", msg)
+    print ("client sent BOT:\n%s\n" % (msg,))
     msg = cflow.recv_bot(1000)
     assert(msg)
-    print ("client got BOT:",msg)
-    cflow.put(zio.Message())
+    print ("client got BOT:\n%s\n" % (msg,))
+
+    for count in range(10):
+        cflow.put(zio.Message())
+
     print ("client sent DAT")
     cflow.send_eot()
     print ("client sent EOT")
@@ -52,9 +55,15 @@ def test_broker():
     backend = ZActor(ctx, spawner, factory)
     broker = Broker(sport, backend.pipe)
 
-    for count in range(10):
+    for count in range(30):
         print (f"main: poll [{count}]")
-        broker.poll(1000)      # client->handler
+        ok = broker.poll(1000)      # client->handler
+        if not ok:
+            break
+
+    print ("main: stopping")
+    broker.stop()
+    client.pipe.signal()
 
 if '__main__' == __name__:
     test_broker()

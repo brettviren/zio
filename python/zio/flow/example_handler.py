@@ -28,9 +28,10 @@ def dump_actor(ctx, pipe, flow, bot, *args):
         msg = flow.get()
         if msg is None:
             flow.send_eot()
-            print("eot")
+            print("dumper sees EOT")
             return
         print (msg)
+    pipe.signal()
     return
 
 def gen_actor(ctx, pipe, flow, bot, *args):
@@ -44,8 +45,10 @@ def gen_actor(ctx, pipe, flow, bot, *args):
     while True:                 # fixme, check pipe
         ok = flow.put(Message())
         if not ok:
+            print("genner sees EOT")
             return
-    pass
+    pipe.signal()
+    return
 
 
 class Factory:
@@ -53,7 +56,6 @@ class Factory:
     def __init__(self, server_address):
         self.server_address = server_address
         self.ctx = zmq.Context()
-        self.actors = list()
 
     def __call__(self, bot):
         '''
@@ -65,10 +67,10 @@ class Factory:
         direction = fobj["direction"]
 
         if direction == "inject":
-            self.spawn(dump_actor, bot)
-        else:
-            self.spawn(gen_actor, bot)
-        return True
+            return self.spawn(dump_actor, bot)
+        elif direction == "extract":
+            return self.spawn(gen_actor, bot)
+        return 
     
     def spawn(self, actor_func, bot):
         '''
@@ -81,4 +83,5 @@ class Factory:
         port.online(None)
         flow = Flow(port)
         actor = ZActor(self.ctx, actor_func, flow, bot)
-        self.actors.append(actor)
+        return actor
+
