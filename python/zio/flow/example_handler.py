@@ -7,7 +7,7 @@ import json
 from ..port import Port
 from ..message import Message
 from .proto import Flow
-from .util import objectify, switch_direction
+from .util import objectify
 from pyre.zactor import ZActor
 
 def handshake(pipe, flow, bot):
@@ -20,6 +20,7 @@ def dump_actor(ctx, pipe, flow, bot, *args):
     '''
     Dump flow messages
     '''
+    print ("spawn dumper")
     handshake(pipe, flow, bot)
     flow.flush_pay()
 
@@ -36,6 +37,7 @@ def gen_actor(ctx, pipe, flow, bot, *args):
     '''
     Generate flow messages
     '''
+    print ("spawn genner")
     handshake(pipe, flow, bot)
     flow.slurp_pay(0)
 
@@ -60,14 +62,12 @@ class Factory:
         Broker waits for return so don't dally.
         '''
         fobj = objectify(bot)
-        their_direction = fobj["direction"]
-        fobj = switch_direction(fobj)
-        bot.label = json.dumps(fobj)
+        direction = fobj["direction"]
 
-        if their_direction == "inject":
-            self.spawn(gen_actor, bot)
-        else:
+        if direction == "inject":
             self.spawn(dump_actor, bot)
+        else:
+            self.spawn(gen_actor, bot)
         return True
     
     def spawn(self, actor_func, bot):
