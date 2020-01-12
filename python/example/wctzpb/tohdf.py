@@ -49,11 +49,14 @@ def save_dense(frame, group, tbin, nticks):
     '''
     nchans = len(frame.traces)
     chans = group.create_dataset("chans",(nchans,))
-    samples = group.create_dataset("samples",(nchans,nticks), chunks=True)
-    samples.attrs["tbin"] = tbin
-    for ind,trace in enumerate(frame.traces):
-        samples[ind,:] = trace.samples # does this broadcast work?
+    data = numpy.zeros((nchans, nticks))
+    for ind, trace in enumerate(frame.traces):
         chans[ind] = trace.channel
+        for i2, s in enumerate(trace.samples.elements):
+            data[ind,i2] = s
+    samples = group.create_dataset("samples", data=data, chunks=True)
+    samples.attrs["tbin"] = tbin
+
         
 def save_sparse(frame, group):
     '''
@@ -65,7 +68,7 @@ def save_sparse(frame, group):
     tg = group.create_group("traces")
     for ind,trace in enumerate(frame.traces):
         nticks = len(trace.samples.elements)
-        print(f"{ind} {nticks}")
+        #print(f"{ind} {nticks}")
         tbins[ind] = trace.tbin
         chans[ind] = trace.channel
         arr = numpy.asarray(trace.samples.elements, dtype='f')

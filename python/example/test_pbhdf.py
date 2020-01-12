@@ -89,3 +89,38 @@ if '__main__' == __name__:
     msg.seqno = 43
     writer.save(msg)
      
+
+    # 
+    # Do it again with an accidentally rectangular frame
+    #
+    frame = pb.Frame(ident=3, time=time.time(), tick=500.0)
+    nchans = 500
+    nticks = 1000
+    samples = numpy.random.normal(size=(nchans,nticks))
+    chanset = list(range(1000))
+    tbin=0
+    for ind in range(500):
+        chan = random.choice(chanset)
+        chanset.remove(chan)
+        tr = pb.Trace(channel = chan, tbin=tbin)
+        for s in samples[ind]:
+            tr.samples.elements.append(s)
+        frame.traces.append(tr)
+        tot = numpy.sum(samples[ind])
+        if tot < 0:
+            negs.append(ind)
+            negs_tot.append(tot)
+            brl = frame.channel_masks["bad"].bin_range_lists[chan]
+            brl.beg.append(tbin)
+            brl.end.append(tbin+nticks)
+    if len(negs) > 0:
+        frame.frame_tags.append("negged")
+                      
+    a = Any()
+    a.Pack(frame)
+    msg = zio.Message(form='FLOW',
+                      label=json.dumps({'stream':'frames'}),
+                      payload=[a.SerializeToString()])
+    msg.seqno = 44
+    writer.save(msg)
+        
