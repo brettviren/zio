@@ -3,10 +3,10 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-01-13 Mon 10:09 -->
+<!-- 2020-01-13 Mon 14:52 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>ZIO Installation</title>
+<title>ZIO HDD5 File Service Example</title>
 <meta name="generator" content="Org mode" />
 <meta name="author" content="Brett Viren" />
 <style type="text/css">
@@ -234,15 +234,13 @@ for the JavaScript code in this tag.
  |
  <a accesskey="H" href="index.html"> HOME </a>
 </div><div id="content">
-<h1 class="title">ZIO Installation</h1>
+<h1 class="title">ZIO HDD5 File Service Example</h1>
 <div id="table-of-contents">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org1cba9b1">1. Install ZIO</a></li>
-<li><a href="#org10f5247">2. Tests</a></li>
-<li><a href="#orgbb09073">3. Documentation</a></li>
-<li><a href="#orgd8821f8">4. Python</a></li>
+<li><a href="#org78d38a4">1. Running the example</a></li>
+<li><a href="#orga91d7b7">2. Attribute matching protocol</a></li>
 </ul>
 </div>
 </div>
@@ -258,105 +256,76 @@ for the JavaScript code in this tag.
 
 </div>
 
-<div id="outline-container-org1cba9b1" class="outline-2">
-<h2 id="org1cba9b1"><span class="section-number-2">1</span> Install ZIO</h2>
+<p>
+In the <code>zio/python/example/</code> directory lives an example of how to
+construct an HDF5 file service based on the <a href="flow-broker.html">flow broker</a> design.  This
+document describes how it works.
+</p>
+
+<div id="outline-container-org78d38a4" class="outline-2">
+<h2 id="org78d38a4"><span class="section-number-2">1</span> Running the example</h2>
 <div class="outline-text-2" id="text-1">
 <p>
-ZIO installs in the usual <a href="https://waf.io">Waf</a> way.
+A simple example that exercises the construction of ZIO messages from
+protobuf objects and their deconstruction into HDF5 elements can be
+run with:
 </p>
 
 <pre class="example">
-$ ./waf configure --prefix=/path/to/install
-$ ./waf install
+$ python python/example/test_pbhdf.py
+$ h5ls -r hpbhdf.hdf
 </pre>
 
 <p>
-To build, these software dependencies will be located via <a href="https://www.freedesktop.org/wiki/Software/pkg-config/">pkg-config</a>.
+The <code>h5ls</code> program may be found in the <code>hdf5-tools</code> package.
 </p>
-
-<ul class="org-ul">
-<li><a href="https://github.com/zeromq/libzmq">libzmq</a> (with draft sockets built)</li>
-<li><a href="https://github.com/zeromq/czmq">CZMQ</a></li>
-<li><a href="https://github.com/zeromq/zyre">Zyre</a></li>
-</ul>
 
 <p>
-In addition, ZIO uses <a href="https://github.com/zeromq/cppzmq">cppzmq</a> and <a href="https://github.com/nlohmann/json">nlohmann/json</a> and includes copies of
-these header-only packages.
+TBD: full read/write service example.
 </p>
 </div>
 </div>
 
-<div id="outline-container-org10f5247" class="outline-2">
-<h2 id="org10f5247"><span class="section-number-2">2</span> Tests</h2>
+
+<div id="outline-container-orga91d7b7" class="outline-2">
+<h2 id="orga91d7b7"><span class="section-number-2">2</span> Attribute matching protocol</h2>
 <div class="outline-text-2" id="text-2">
 <p>
-The default install target will compile and execute units tests.  To
-avoid running these tests you may add <code>--notests</code> as:
+The example brings together arbitrary flow clients in some remote
+application with arbitrary flow clients managing file resources.  In
+order to decouple both sets, an <i>attribute matching protocol</i> is used.
+This protocol is layered on top of the <b>BOT</b> protocol extension to the
+basic <i>flow protocol</i> as described in <a href="flow-broker.html">flow broker</a>.
 </p>
 
-<pre class="example">
-$ ./waf install --notests
+<p>
+The attribute matching (AM) protocol works in this manner:
+</p>
+
+<ol class="org-ol">
+<li>A remote flow client <b>asserts</b> a set of key/value attributes in its
+<i>flow object</i> in its <b>BOT</b> message (in addition to those required by
+the flow protocol).</li>
+<li>A <b>broker</b> <b>factory</b> is configured with a set of <b>rules</b> which are
+expressions in terms of the client attributes and the usual set of
+Boolean, arithmetic and other operators.  If a rule evaluates to
+true then an associated configuration is used to spawn a <b>handler</b>.</li>
+</ol>
+
+<p>
+A rule is in the form of an <a href="https://en.wikipedia.org/wiki/S-expression">S-expression</a> for example, if the <b>BOT</b> has
+an attribute <code>datatype</code> the following rule would evaluate <code>True</code>:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-lisp">(= datatype <span style="font-style: italic;">"wctzpb.Depo"</span>)
 </pre>
-
-<p>
-Or, to force their running:
-</p>
-</div>
 </div>
 
-<div id="outline-container-orgbb09073" class="outline-2">
-<h2 id="orgbb09073"><span class="section-number-2">3</span> Documentation</h2>
-<div class="outline-text-2" id="text-3">
 <p>
-The generated documentation committed to the repository.  With a
-suitable environment (need Emacs and a recent <a href="https://plantuml.com/">plantuml</a>) one can
-rebuild it:
+The configuration associated with that rule would then be applied by
+the <b>factory</b> in spawning a <b>handler</b>.
 </p>
-
-<pre class="example">
-$ cd docs
-$ make
-</pre>
-</div>
-</div>
-<div id="outline-container-orgd8821f8" class="outline-2">
-<h2 id="orgd8821f8"><span class="section-number-2">4</span> Python</h2>
-<div class="outline-text-2" id="text-4">
-<p>
-ZIO also provides a Python package.  It installs in "the usual way"
-but its dependencies need some more particular care.  It makes use of
-PyZMQ, the Python bindings to <b>libzmq</b>.  Because ZIO requires ZeroMQ
-"draft" sockets, PyZMQ needs to be installed manually in order to
-enable them as well as point to an installation of <b>libzmq</b> which
-includes them.
-</p>
-
-<pre class="example">
-$ python3 -m venv /path/to/venv
-$ source /path/to/venv/bin/activate
-$ cd zio/python
-$ pip install --pre pyzmq \
-    --install-option=--enable-drafts \
-    --install-option=--zmq=/path/to/zmq
-$ pip install -r requirements.txt
-$ pip install [-e] .
-</pre>
-
-<p>
-In the above, replace <code>/path/to</code> with paths suitable for your
-environment.  Use <code>-e</code> option to do in-place development on the <code>zio</code>
-Python module.
-</p>
-
-<p>
-The <code>zio</code> Python module has unit tests which can be run as:
-</p>
-
-<pre class="example">
-$ cd zio/python/tests
-$ python -m unittest 
-</pre>
 </div>
 </div>
 </div>

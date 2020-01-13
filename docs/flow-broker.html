@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-01-07 Tue 13:52 -->
+<!-- 2020-01-13 Mon 17:27 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Flow Broker</title>
@@ -186,7 +186,7 @@
 @licstart  The following is the entire license notice for the
 JavaScript code in this tag.
 
-Copyright (C) 2012-2018 Free Software Foundation, Inc.
+Copyright (C) 2012-2019 Free Software Foundation, Inc.
 
 The JavaScript code in this tag is free software: you can
 redistribute it and/or modify it under the terms of the GNU
@@ -273,22 +273,27 @@ the handling mechanism and this document describes one possible
 solution which is here called a <i>flow broker</i>.
 </p>
 
-<div id="outline-container-orgd4bb091" class="outline-2">
-<h2 id="architecture"><a id="orgd4bb091"></a><span class="section-number-2">1</span> Architecture</h2>
+<div id="outline-container-org4982fed" class="outline-2">
+<h2 id="architecture"><a id="org4982fed"></a><span class="section-number-2">1</span> Architecture</h2>
 <div class="outline-text-2" id="text-architecture">
 <p>
-The basic idea is to abstract the communication into <i>front end</i> (FE)
-which talks to remote clients and <i>back end</i> (BE) which talks to "local
-clients" where all clients can be considered to be implemented using a
-<code>zio::flow::Flow</code> (and each with a CLIENT socket).
+The <i>flow broker</i> associates a remote client with a local client
+handler.  The association is via the <i>routing ID</i> number which is
+carried by any message received from a SERVER socket held by the
+broker.  Likewise, for a message to be delivered to a client it must
+have had a <i>routing ID</i> set on it by the broker applications.
 </p>
 
 <p>
-The <i>broker</i> then provides two SERVER sockets, one to service the FE and
-one to service the BE.  A broker implementation is parameterized on a
-<i>factory</i> object which, given a <b>BOT</b> message, can construct some handler
-that acts as a local or BE client.  The following UML sequence diagram
-illustrates this architecture with one FE and one BE client.
+The broker thus can not associate these two clients until each try to
+send to each other.  But, they can not send to each other until the
+broker associates them.  This catch-22 is broken in the flow broker's
+begin-of-transmission (<b>BOT</b>) protocol which is a small extension to the
+basic <i>flow protocol</i> and is not exposed to remote clients.
+</p>
+
+<p>
+The <b>BOT</b> protocol is illustrated in the following UML sequence diagram.
 </p>
 
 
@@ -300,59 +305,59 @@ illustrates this architecture with one FE and one BE client.
 </div>
 
 
-
-
 <p>
-The left side is "toward" the remote client.  It accepts a <b>BOT</b> from
-the remote client (labeled <b>BOT-rem</b> in the sequence diagram),
-reverses the value of its <i>flow object</i> <code>.direction</code> attribute,
-extends the <i>flow object</i> with a <code>.cid</code> attribute before passes the
-result (<b>BOT-loc</b>) to the application-provided <i>factory</i>.  The factory
-should return without delay and the broker continues processing.
+The object <b>client</b> is the remote client, the <b>port</b> represents ZIO port
+with the broker SERVER socket.  The <b>BOT</b> protocol is inserted between
+the reception of the <b>BOT-rem</b> message and its <b>BOT-loc</b> reply and
+proceeds with this sequence:
 </p>
 
-<p>
-The <i>factory</i> is expected to spawn a handler which is configured based
-on the <b>BOT-loc</b>.  The original <b>BOT-rem</b> is not replied to until the
-broker receives a response from its handler.  This response must
-either be the original <b>BOT-loc</b> or an <b>EOT</b>.  In both cases the
-response must include the <code>.cid</code> attribute.  
-</p>
-
-<p>
-Not illustrated but when an <b>EOT</b> is returned, the <code>.cid</code> attribute is
-stripped and (per <i>flow protocol</i>) the result is returned to the BE
-client and it is forwarded to the associated FE client (using the
-<code>.cid</code> value for the routing ID).  A response from the FE client is
-anticipated.
-</p>
-
-<p>
-In the nominal situation (illustrated) the BE client handler returns
-the original <b>BOT-loc</b>.  The broker associates the FE routing ID held
-in the <code>.cid</code> with the just discovered BE routing ID.  It then
-forwards the <b>BOT-loc</b> to the FE client and then reverses its <i>flow
-object</i> <code>.direction</code> before returning it to the BE client handler.
-Two <i>flow protocol</i> transmissions are thus initiated with the broker
-in the middle.  Subsequent <b>DAT</b>, <b>PAY</b> or <b>EOT</b> messages are simply
-marshaled between FE and BE based on the association of routing IDs.
-</p>
+<ol class="org-ol">
+<li><b>broker</b> stores the <b>BOT-rem</b> <i>routing ID</i> into a <code>cid</code> attribute of the
+message flow object and reverses the flow <code>direction</code> attribute
+producing the <b>BOT-loc</b> message and calls the <b>factory</b> on this
+message.</li>
+<li><b>factory</b> dispatches the message in an application-dependent manner.
+Shown here, a <b>handler</b> is spawned.  Other dispatching patterns are
+allowed, but the subsequent behavior of the <b>handler</b> illustrates
+what is required from them by the <b>BOT</b> protocol.</li>
+<li><b>handler</b> sends to <b>port</b> the <b>BOT-loc</b> message, typically as-is but may
+make changes if the application level protocol requires it however
+it must keep the <code>cid</code> flow object attribute intact.</li>
+<li>On receipt of any message with a <code>cid</code> the <b>broker</b> records the <i>routing
+ID</i> of that message and the <code>cid</code> in that message in a bidirectional
+association.</li>
+<li>The <b>broker</b> strips the <code>cid</code>, forwards <b>BOT-loc</b> to the remote client,
+reverses its <code>direction</code> attribute and sends it to the local client
+handler thus completing the flow protocol <b>BOT</b> handling for both
+clients.</li>
+<li>Subsequent flow messages from either client can now be routed to
+its partner client.</li>
+<li>Any <b>EOT</b> flow message observed by the <b>broker</b> will result in removal
+of the corresponding entry in the bidirectional association.  Any
+non-<b>BOT</b> messages with a <i>routing ID</i> not present in this association
+are dropped.</li>
+</ol>
 </div>
 </div>
 
-<div id="outline-container-orgd5f6b08" class="outline-2">
-<h2 id="addressing"><a id="orgd5f6b08"></a><span class="section-number-2">2</span> Addressing</h2>
+<div id="outline-container-orgf6dc052" class="outline-2">
+<h2 id="addressing"><a id="orgf6dc052"></a><span class="section-number-2">2</span> Addressing</h2>
 <div class="outline-text-2" id="text-addressing">
 <p>
-The creation of the FE and BE SERVER ports is outside the scope of the
-broker and any application-provided handlers.  The choice of which to
-<code>bind()</code> or <code>connect()</code> is made by the application.  
+The creation of the <b>broker</b> SERVER <b>port</b> is outside the scope of the <b>BOT</b>
+protocol extension.  That is, the application must arrange for the
+<b>port</b> to be online prior to <b>broker</b> operation and any <b>factory</b> and
+<b>handlers</b> must know how to form attachment (be it connect or bind)
+between their sockets and that of the <b>port</b>.  It is not required, but
+this attachment mechanism may be simplified by requiring the <b>port</b>
+socket to bind and any clients to connect.
 </p>
 </div>
 </div>
 
-<div id="outline-container-orgee602c1" class="outline-2">
-<h2 id="complexity"><a id="orgee602c1"></a><span class="section-number-2">3</span> Broker Complexity</h2>
+<div id="outline-container-org715cded" class="outline-2">
+<h2 id="complexity"><a id="org715cded"></a><span class="section-number-2">3</span> Broker Complexity</h2>
 <div class="outline-text-2" id="text-complexity">
 <p>
 The complexity of the broker appears somewhat high while one might say
@@ -362,41 +367,45 @@ section outlines what this means.
 </p>
 </div>
 
-<div id="outline-container-orgad2d12d" class="outline-3">
-<h3 id="mirror"><a id="orgad2d12d"></a><span class="section-number-3">3.1</span> Broker as mirror</h3>
+<div id="outline-container-orged1e461" class="outline-3">
+<h3 id="mirror"><a id="orged1e461"></a><span class="section-number-3">3.1</span> Broker as mirror</h3>
 <div class="outline-text-3" id="text-mirror">
 <p>
-The broker provides a mirror that allows remote clients and local
-client handlers to be implemented with a high degree of symmetry.  A
-class providing the remote client may be used as-is in a local client
-handler.
+The <b>broker</b> and its given <b>factor</b> provides a mirror that allows remote
+clients and local client handlers to be implemented with a high degree
+of symmetry.  A class providing the remote client may be used as-is in
+a local client handler depending on the design of the
+application-provided <b>factory</b>.  That is, if both <b>client</b> and <b>handler</b> are
+designed to take their initial <b>BOT</b> they may be implemented
+identically.
 </p>
 </div>
 </div>
 
-<div id="outline-container-orge78de24" class="outline-3">
-<h3 id="simplicity"><a id="orge78de24"></a><span class="section-number-3">3.2</span> Handler simplicity</h3>
+<div id="outline-container-org5832cda" class="outline-3">
+<h3 id="simplicity"><a id="org5832cda"></a><span class="section-number-3">3.2</span> Handler simplicity</h3>
 <div class="outline-text-3" id="text-simplicity">
 <p>
 Because a handler may be implemented in terms of a client it may use
-the <code>zio::flow::Flow</code> API (see <a href="flow.html">flow</a>).  Without the extra BE SERVER
-socket and its added complexity a new protocol would need to be
-invented to implement client handlers.
+the <code>zio::flow::Flow</code> C++ API (see <a href="flow.html">flow</a>) or <code>zio.flow.Flow</code> object in
+Python.  Without the extra SERVER socket and its added complexity a
+new protocol would need to be invented to implement client handlers.
 </p>
 </div>
 </div>
 
-<div id="outline-container-org27475e8" class="outline-3">
-<h3 id="central"><a id="org27475e8"></a><span class="section-number-3">3.3</span> Centralization</h3>
+<div id="outline-container-org1165f99" class="outline-3">
+<h3 id="central"><a id="org1165f99"></a><span class="section-number-3">3.3</span> Centralization</h3>
 <div class="outline-text-3" id="text-central">
 <p>
-Brokers are naturally centralizing.  This can be advantageous.
-Without a broker, a developer may instead create one simple flow
-server (as described in <a href="flow.html">flow</a>) for each remote client to converse.  The
-software operator must then know to execute one such simple client per
-each remote.  ZIO <a href="peer.html">peering</a> can help ameliorate bringing together these
-pairs, but any execute-on-demand pattern would need to be invented by
-the developer.
+Brokers are naturally centralizing.  This can be advantageous or
+problematic.  Without a broker, a developer may instead create one
+simple flow server (as described in <a href="flow.html">flow</a>) for each remote client to
+converse.  The software operator must then know to configure and
+execute one such simple client per each remote.  ZIO <a href="peer.html">peering</a> can help
+ameliorate bringing together these pairs, but any execute-on-demand
+pattern would need to be invented by the developer.  The <b>factory</b>
+provides that pattern here.
 </p>
 
 <p>
@@ -406,38 +415,42 @@ write to a common file some mechanism is likely required to assure
 this writing is thread safe.  Such a mechanism is more naturally
 created if the handlers all reside in a common executable.
 </p>
+
+<p>
+The centralization does mean an aggregation of flows into one socket
+and this alone may pose a bottleneck on bandwidth grounds.  
+</p>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org5f03da5" class="outline-2">
-<h2 id="lockstep"><a id="org5f03da5"></a><span class="section-number-2">4</span> Handler Synchronicity</h2>
+<div id="outline-container-org7981ab8" class="outline-2">
+<h2 id="lockstep"><a id="org7981ab8"></a><span class="section-number-2">4</span> Handler Synchronicity</h2>
 <div class="outline-text-2" id="text-lockstep">
 <p>
-The broker operates asynchronously from its local client handlers.
-That is, communication with FE and BE does not cease because some
-handler might want it to.  The asynchronicity that the BE handlers
-enjoy must be explicitly defeated in order to synchronize writes to
-the common file.  Writing a stream of messages to a common file is one
-example where a handler may need others to wait while it performs its
-operation.
+The <b>broker</b> manages its <b>port</b> in a single thread and while the operation
+in that thread is very simple, it will only service one message at a
+time.  In particular, the <b>broker</b> relies on the call on the <b>factory</b> to
+return promptly.  The <b>factory</b> must not be designed to directly handle
+the BOT protocol or else deadlock is assured.
 </p>
 
 <p>
-A modified broker could be developed which assures BE handlers never
-operate simultaneously.  It would do this by waiting for a response
-after any message sent to the BE port.  This would then require the BE
-<i>data flow protocol</i> to operate with exactly 1 credit and for the broker
-to wait for a <code>recv()</code> on the BE port after any <code>send()</code>.  This wait will
-also block servicing the FE port.
+Depending on the nature of the <b>factory</b> dispatch method, handlers will
+typically operate asynchronously from each other. Depending on the
+application, some handler synchronization may be required.  For
+example, a <b>broker</b> may be created with a <b>factory</b> producing <b>handlers</b> for
+the purpose of writing ZIO message data to a file.  Typically,
+multiple writes must be performed synchronously.
 </p>
 
 <p>
-A simpler and better performing pattern would be to implement handlers
-that multiplex messages between their CLIENT sockets to a common,
-shared socket, eg via PUSH/PULL.  The code in this "back-back-end"
-would see a single stream of <b>DAT</b> messages which are then naturally
-safe to write to the file.
+The <b>handlers</b> could of course assert a mutex to assure this
+synchronization.  Another pattern which leverages message passing can
+be used.  The handlers may merely forward their messages to a single
+entity that manages a file resource.  They might use PUSH sockets and
+thus the PULL socket of the file service will provide the required
+synchronization.
 </p>
 
 <p>
@@ -448,7 +461,7 @@ This arrangement is illustrated in the following connection diagram.
 <pre class="src src-dot">digraph conn {
 rankdir=LR
 node[shape=box]
-flow1[label=<span style="font-style: italic;">"app"</span>];flow2[label=<span style="font-style: italic;">"app"</span>];flow3[label=<span style="font-style: italic;">"app"</span>]
+flow1[label=<span style="font-style: italic;">"handler"</span>];flow2[label=<span style="font-style: italic;">"handler"</span>];flow3[label=<span style="font-style: italic;">"handler"</span>]
 writer
 node[shape=circle,fixed=true,width=1]
 c1[label=<span style="font-style: italic;">"CLIENT"</span>];c2[label=<span style="font-style: italic;">"CLIENT"</span>];c3[label=<span style="font-style: italic;">"CLIENT"</span>]
@@ -463,18 +476,6 @@ c3-&gt;flow3-&gt;push3-&gt;pull
 }
 </pre>
 </div>
-
-
-
-
-<p>
-The "app" box represents an application provided class utilizing an
-instance of <code>zio::flow::Flow</code> which provides the CLIENT socket.  The
-"app" also provides a PUSH.  Together they make a handler front-end.
-They all send to a shared handler back-end "writer" which multiplexes
-their messages via its PULL socket into a single stream and safely
-writes them to file.
-</p>
 </div>
 </div>
 </div>

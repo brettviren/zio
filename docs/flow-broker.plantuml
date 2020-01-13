@@ -2,40 +2,29 @@
 !pragma teoz true
 
 title ZIO Flow Broker Sequence
-participant "FE port" as feport
+participant "client" as client
+participant "port" as feport
 participant "broker" as broker
-participant "BE port" as beport
 participant "handler" as app
 participant "factory" as factory
 
 broker -> feport : recv(wait)
-
-{festart} feport -> broker : BOT-rem
-broker -> factory : BOT-loc+cid
+client -> feport : BOT-rem
+& feport -> broker : BOT-rem
+broker -> factory : call(BOT-loc+cid)
 factory -> app : spawn handler
 activate app
-        {bestart} app -> beport : BOT-loc+cid
-        & beport -> broker : BOT-loc+cid
-        & broker -> feport : BOT-loc
-
-        broker -> beport : BOT-rem
-        & beport -> app  : BOT-rem
+        app -> feport : BOT-loc+cid
+        feport -> broker : BOT-loc+cid
+        broker -> feport 
+        & feport -> client : BOT-loc
+        broker -> feport : BOT-rem
+        feport -> app  : BOT-rem
         
-        {feend} feport -> broker : PAY/DAT/EOT
-        note left
-                FE flow
-        end note
-
-        app -> beport : PAY/DAT/EOT
-        {beend} beport -> broker : PAY/DAT/EOT
-        note right
-                BE flow
-        end note
+        client <-> feport
+        & feport <-> app : PAY/DAT/EOT
+        & broker <-> feport
 
 deactivate app
-
-{bestart} <-> {beend}
-
-{festart} <-> {feend}
 
 @enduml

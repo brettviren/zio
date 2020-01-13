@@ -1,0 +1,54 @@
+#+title: ZIO HDD5 File Service Example
+#+setupfile: setup.org
+#+include: nav.org
+
+In the ~zio/python/example/~ directory lives an example of how to
+construct an HDF5 file service based on the [[file:flow-broker.org][flow broker]] design.  This
+document describes how it works.
+
+* Running the example
+
+A simple example that exercises the construction of ZIO messages from
+protobuf objects and their deconstruction into HDF5 elements can be
+run with:
+
+  #+begin_example
+  $ python python/example/test_pbhdf.py
+  $ h5ls -r hpbhdf.hdf
+  #+end_example
+
+The ~h5ls~ program may be found in the ~hdf5-tools~ package.
+
+TBD: full read/write service example.
+
+
+* Attribute matching protocol
+
+The example brings together arbitrary flow clients in some remote
+application with arbitrary flow clients managing file resources.  In
+order to decouple both sets, an /attribute matching protocol/ is used.
+This protocol is layered on top of the *BOT* protocol extension to the
+basic /flow protocol/ as described in [[file:flow-broker.org][flow broker]].
+
+The attribute matching (AM) protocol works in this manner:
+
+1. A remote flow client *asserts* a set of key/value attributes in its
+   /flow object/ in its *BOT* message (in addition to those required by
+   the flow protocol).
+2. A *broker* *factory* is configured with a set of *rules* which are
+   expressions in terms of the client attributes and the usual set of
+   Boolean, arithmetic and other operators.  If a rule evaluates to
+   true then an associated configuration is used to spawn a *handler*.
+
+A rule is in the form of an [[https://en.wikipedia.org/wiki/S-expression][S-expression]] for example, if the *BOT* has
+an attribute ~datatype~ the following rule would evaluate ~True~:
+
+#+begin_src lisp
+(= datatype "wctzpb.Depo")
+#+end_src
+
+The configuration associated with that rule would then be applied by
+the *factory* in spawning a *handler*.
+
+
+

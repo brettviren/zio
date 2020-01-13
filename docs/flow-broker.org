@@ -14,52 +14,54 @@ solution which is here called a /flow broker/.
   :CUSTOM_ID: architecture
   :END:
 
+The /flow broker/ associates a remote client with a local client
+handler.  The association is via the /routing ID/ number which is
+carried by any message received from a SERVER socket held by the
+broker.  Likewise, for a message to be delivered to a client it must
+have had a /routing ID/ set on it by the broker applications.
 
-The basic idea is to abstract the communication into /front end/ (FE)
-which talks to remote clients and /back end/ (BE) which talks to "local
-clients" where all clients can be considered to be implemented using a
-~zio::flow::Flow~ (and each with a CLIENT socket).
+The broker thus can not associate these two clients until each try to
+send to each other.  But, they can not send to each other until the
+broker associates them.  This catch-22 is broken in the flow broker's
+begin-of-transmission (*BOT*) protocol which is a small extension to the
+basic /flow protocol/ and is not exposed to remote clients.
 
-The /broker/ then provides two SERVER sockets, one to service the FE and
-one to service the BE.  A broker implementation is parameterized on a
-/factory/ object which, given a *BOT* message, can construct some handler
-that acts as a local or BE client.  The following UML sequence diagram
-illustrates this architecture with one FE and one BE client.
+The *BOT* protocol is illustrated in the following UML sequence diagram.
 
 
 
 [[file:flow-broker.png]]
 
 
+The object *client* is the remote client, the *port* represents ZIO port
+with the broker SERVER socket.  The *BOT* protocol is inserted between
+the reception of the *BOT-rem* message and its *BOT-loc* reply and
+proceeds with this sequence:
 
-
-The left side is "toward" the remote client.  It accepts a *BOT* from
-the remote client (labeled *BOT-rem* in the sequence diagram),
-reverses the value of its /flow object/ ~.direction~ attribute,
-extends the /flow object/ with a ~.cid~ attribute before passes the
-result (*BOT-loc*) to the application-provided /factory/.  The factory
-should return without delay and the broker continues processing.
-
-The /factory/ is expected to spawn a handler which is configured based
-on the *BOT-loc*.  The original *BOT-rem* is not replied to until the
-broker receives a response from its handler.  This response must
-either be the original *BOT-loc* or an *EOT*.  In both cases the
-response must include the ~.cid~ attribute.  
-
-Not illustrated but when an *EOT* is returned, the ~.cid~ attribute is
-stripped and (per /flow protocol/) the result is returned to the BE
-client and it is forwarded to the associated FE client (using the
-~.cid~ value for the routing ID).  A response from the FE client is
-anticipated.
-
-In the nominal situation (illustrated) the BE client handler returns
-the original *BOT-loc*.  The broker associates the FE routing ID held
-in the ~.cid~ with the just discovered BE routing ID.  It then
-forwards the *BOT-loc* to the FE client and then reverses its /flow
-object/ ~.direction~ before returning it to the BE client handler.
-Two /flow protocol/ transmissions are thus initiated with the broker
-in the middle.  Subsequent *DAT*, *PAY* or *EOT* messages are simply
-marshaled between FE and BE based on the association of routing IDs.
+1. *broker* stores the *BOT-rem* /routing ID/ into a ~cid~ attribute of the
+   message flow object and reverses the flow ~direction~ attribute
+   producing the *BOT-loc* message and calls the *factory* on this
+   message.
+2. *factory* dispatches the message in an application-dependent manner.
+   Shown here, a *handler* is spawned.  Other dispatching patterns are
+   allowed, but the subsequent behavior of the *handler* illustrates
+   what is required from them by the *BOT* protocol.
+3. *handler* sends to *port* the *BOT-loc* message, typically as-is but may
+   make changes if the application level protocol requires it however
+   it must keep the ~cid~ flow object attribute intact.
+4. On receipt of any message with a ~cid~ the *broker* records the /routing
+   ID/ of that message and the ~cid~ in that message in a bidirectional
+   association. 
+5. The *broker* strips the ~cid~, forwards *BOT-loc* to the remote client,
+   reverses its ~direction~ attribute and sends it to the local client
+   handler thus completing the flow protocol *BOT* handling for both
+   clients.
+6. Subsequent flow messages from either client can now be routed to
+   its partner client.
+7. Any *EOT* flow message observed by the *broker* will result in removal
+   of the corresponding entry in the bidirectional association.  Any
+   non-*BOT* messages with a /routing ID/ not present in this association
+   are dropped.
 
 * Addressing
   :PROPERTIES:
@@ -67,9 +69,13 @@ marshaled between FE and BE based on the association of routing IDs.
   :END:
 
 
-The creation of the FE and BE SERVER ports is outside the scope of the
-broker and any application-provided handlers.  The choice of which to
-~bind()~ or ~connect()~ is made by the application.  
+The creation of the *broker* SERVER *port* is outside the scope of the *BOT*
+protocol extension.  That is, the application must arrange for the
+*port* to be online prior to *broker* operation and any *factory* and
+*handlers* must know how to form attachment (be it connect or bind)
+between their sockets and that of the *port*.  It is not required, but
+this attachment mechanism may be simplified by requiring the *port*
+socket to bind and any clients to connect.
 
 * Broker Complexity
   :PROPERTIES:
@@ -86,10 +92,13 @@ section outlines what this means.
    :CUSTOM_ID: mirror
    :END:
 
-The broker provides a mirror that allows remote clients and local
-client handlers to be implemented with a high degree of symmetry.  A
-class providing the remote client may be used as-is in a local client
-handler.
+The *broker* and its given *factor* provides a mirror that allows remote
+clients and local client handlers to be implemented with a high degree
+of symmetry.  A class providing the remote client may be used as-is in
+a local client handler depending on the design of the
+application-provided *factory*.  That is, if both *client* and *handler* are
+designed to take their initial *BOT* they may be implemented
+identically.
 
 ** Handler simplicity
    :PROPERTIES:
@@ -97,22 +106,23 @@ handler.
    :END:
 
 Because a handler may be implemented in terms of a client it may use
-the ~zio::flow::Flow~ API (see [[file:flow.org][flow]]).  Without the extra BE SERVER
-socket and its added complexity a new protocol would need to be
-invented to implement client handlers.
+the ~zio::flow::Flow~ C++ API (see [[file:flow.org][flow]]) or ~zio.flow.Flow~ object in
+Python.  Without the extra SERVER socket and its added complexity a
+new protocol would need to be invented to implement client handlers.
 
 ** Centralization
    :PROPERTIES:
    :CUSTOM_ID: central
    :END:
 
-Brokers are naturally centralizing.  This can be advantageous.
-Without a broker, a developer may instead create one simple flow
-server (as described in [[file:flow.org][flow]]) for each remote client to converse.  The
-software operator must then know to execute one such simple client per
-each remote.  ZIO [[file:peer.org][peering]] can help ameliorate bringing together these
-pairs, but any execute-on-demand pattern would need to be invented by
-the developer.
+Brokers are naturally centralizing.  This can be advantageous or
+problematic.  Without a broker, a developer may instead create one
+simple flow server (as described in [[file:flow.org][flow]]) for each remote client to
+converse.  The software operator must then know to configure and
+execute one such simple client per each remote.  ZIO [[file:peer.org][peering]] can help
+ameliorate bringing together these pairs, but any execute-on-demand
+pattern would need to be invented by the developer.  The *factory*
+provides that pattern here.
 
 The centralization also helps when the resource managed is shared
 between the local client handlers.  For example, if multiple handlers
@@ -120,31 +130,33 @@ write to a common file some mechanism is likely required to assure
 this writing is thread safe.  Such a mechanism is more naturally
 created if the handlers all reside in a common executable.
 
+The centralization does mean an aggregation of flows into one socket
+and this alone may pose a bottleneck on bandwidth grounds.  
+
 * Handler Synchronicity
   :PROPERTIES:
   :CUSTOM_ID: lockstep
   :END:
 
-The broker operates asynchronously from its local client handlers.
-That is, communication with FE and BE does not cease because some
-handler might want it to.  The asynchronicity that the BE handlers
-enjoy must be explicitly defeated in order to synchronize writes to
-the common file.  Writing a stream of messages to a common file is one
-example where a handler may need others to wait while it performs its
-operation.
+The *broker* manages its *port* in a single thread and while the operation
+in that thread is very simple, it will only service one message at a
+time.  In particular, the *broker* relies on the call on the *factory* to
+return promptly.  The *factory* must not be designed to directly handle
+the BOT protocol or else deadlock is assured.
 
-A modified broker could be developed which assures BE handlers never
-operate simultaneously.  It would do this by waiting for a response
-after any message sent to the BE port.  This would then require the BE
-/data flow protocol/ to operate with exactly 1 credit and for the broker
-to wait for a ~recv()~ on the BE port after any ~send()~.  This wait will
-also block servicing the FE port.
+Depending on the nature of the *factory* dispatch method, handlers will
+typically operate asynchronously from each other. Depending on the
+application, some handler synchronization may be required.  For
+example, a *broker* may be created with a *factory* producing *handlers* for
+the purpose of writing ZIO message data to a file.  Typically,
+multiple writes must be performed synchronously.
 
-A simpler and better performing pattern would be to implement handlers
-that multiplex messages between their CLIENT sockets to a common,
-shared socket, eg via PUSH/PULL.  The code in this "back-back-end"
-would see a single stream of *DAT* messages which are then naturally
-safe to write to the file.
+The *handlers* could of course assert a mutex to assure this
+synchronization.  Another pattern which leverages message passing can
+be used.  The handlers may merely forward their messages to a single
+entity that manages a file resource.  They might use PUSH sockets and
+thus the PULL socket of the file service will provide the required
+synchronization.
 
 This arrangement is illustrated in the following connection diagram.
 
@@ -152,7 +164,7 @@ This arrangement is illustrated in the following connection diagram.
 digraph conn {
 rankdir=LR
 node[shape=box]
-flow1[label="app"];flow2[label="app"];flow3[label="app"]
+flow1[label="handler"];flow2[label="handler"];flow3[label="handler"]
 writer
 node[shape=circle,fixed=true,width=1]
 c1[label="CLIENT"];c2[label="CLIENT"];c3[label="CLIENT"]
@@ -171,11 +183,3 @@ c3->flow3->push3->pull
 [[file:flow-broker-file.png]]
 
 
-
-
-The "app" box represents an application provided class utilizing an
-instance of ~zio::flow::Flow~ which provides the CLIENT socket.  The
-"app" also provides a PUSH.  Together they make a handler front-end.
-They all send to a shared handler back-end "writer" which multiplexes
-their messages via its PULL socket into a single stream and safely
-writes them to file.
