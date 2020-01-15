@@ -12,7 +12,7 @@ from wctzpb import pb, tohdf
 
 from google.protobuf.any_pb2 import Any 
 
-if '__main__' == __name__:
+def test_pbhdf():
 
     # In a "real" app, this would live off in a server.  The group
     # name would be chosen based on some unique identifier for the
@@ -124,3 +124,7 @@ if '__main__' == __name__:
     msg.seqno = 44
     writer.save(msg)
         
+
+if '__main__' == __name__:
+    test_pbhdf()
+    
