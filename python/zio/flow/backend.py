@@ -14,6 +14,7 @@ def spawner(ctx, pipe, factory, *args):
         Called with new BOT, return actor or None if reject.
 
     '''
+    print(f'actor: spawner({factory})')
     poller = zmq.Poller()
     poller.register(pipe, zmq.POLLIN)
     pipe.signal()               # ready
@@ -27,7 +28,7 @@ def spawner(ctx, pipe, factory, *args):
 
             if sock == pipe:
                 data = pipe.recv()
-                print (data)
+                print ("spawner: data:", data)
                 if len(data) == 0:
                     print("spawner got EOT")
                     terminated = True

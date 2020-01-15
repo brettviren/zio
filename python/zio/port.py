@@ -7,14 +7,12 @@ from .message import Message
 
 def bind_address(sock, addr):
     try:
-        #print ("bind %s" % addr)
-        port = sock.bind(addr)
+        sock.bind(addr)
     except ZMQError as e:
-        #print(addr)
+        print(f'failed to bind {addr}')
         raise
-    if addr.endswith("*"):      # this does not cover the full
-        addr[:-1] += "%d"%port  # convention used by ZeroMQ address
-    return addr                 # spellings.
+        
+    return addr
 
 ephemeral_port_range = (49152, 65535)
 
@@ -27,13 +25,13 @@ def bind_hostport(sock, host, port):
         port = sock.bind_to_random_port(addr,
                                         *ephemeral_port_range)
     except ZMQError as e:
-        print(addr)
+        print(f'failed to bind {addr}')
         raise
     return "tcp://%s:%d" % (host, port)
             
 
 class Port:
-    def __init__(self, name, stype, hostname='127.0.0.1'):
+    def __init__(self, name, sock, hostname='127.0.0.1'):
         '''
         Create a Port with a name and a ZeroMQ socket type.
 
@@ -42,8 +40,11 @@ class Port:
         '''
         self.name = name
         self._hostname = hostname
-        self.ctx = zmq.Context()
-        self.sock = self.ctx.socket(stype)
+        if type(sock) is int:
+            self.ctx = zmq.Context()
+            self.sock = self.ctx.socket(sock)
+        else:
+            self.sock = sock
         self.origin = 0
         self.to_bind = list()
         self.to_conn = list()
