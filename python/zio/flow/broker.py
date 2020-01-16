@@ -9,6 +9,8 @@ from collections import namedtuple
 import zmq
 import zio
 from .util import objectify, switch_direction
+import logging
+log = logging.getLogger(__name__)
 
 class Broker:
     def __init__(self, server, backend):
@@ -54,16 +56,18 @@ class Broker:
         Poll for at most one message from the SERVER port
 
         Return None if timeout, False if error, True if nominal
+
         '''
         msg = self.server.recv(timeout)
         if not msg:
-            #print ("broker poll timeout:",timeout)
+            log.debug (f'broker poll timeout with {timeout}')
             return None
-        #print ("broker poll:",msg)
+        #log.debug ("broker poll:",msg)
         rid = msg.routing_id
         fobj = objectify(msg)
         ftype = fobj.get("flow", None)
         if not ftype:
+            log.debug (f'broker poll got non flow msg:\n{msg}')
             return False
 
         # Special, assymetric handling of BOT
@@ -72,13 +76,16 @@ class Broker:
             if cid:             # BOT from handler
                 self.other[rid] = cid
                 self.other[cid] = rid
-                fobj = switch_direction(fobj)                
                 del fobj["cid"]
-                orig_label = msg.label
+
+                label_for_client = json.dumps(fobj)
+
+                fobj = switch_direction(fobj)                
                 msg.label = json.dumps(fobj)                
                 msg.routing_id = rid
-                self.server.send(msg) # mirror back to handler
-                msg.label = orig_label
+                self.server.send(msg) # to handler
+
+                msg.label = label_for_client
                 # fall through to send to client
                 
             else:               # BOT from client
@@ -103,7 +110,7 @@ class Broker:
         # route message to other
         cid = self.other[rid]
         msg.routing_id = cid
-        print (f"broker route {rid} -> {cid}:\n{msg}\n")
+        log.debug (f"broker route {rid} -> {cid}:\n{msg}\n")
         self.server.send(msg)
 
         # if EOT comes through, we should forget the routing

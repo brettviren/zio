@@ -7,7 +7,8 @@ import zio
 from zio.flow import objectify
 
 from google.protobuf.any_pb2 import Any 
-
+import logging
+log = logging.getLogger(__name__)
 class Writer:
     '''Write ZIO messages to HDF5.
 
@@ -40,7 +41,12 @@ class Writer:
 
     def save(self, msg):
         fobj = objectify(msg)
-        seq = self.group.create_group(str(msg.seqno))
+        gn = str(msg.seqno)
+        seq = self.group.get(gn, None)
+        if seq is None:         # as it should be
+            seq = self.group.create_group(gn)
+        else:
+            log.warning(f'HDF5 writer reusing existing group {gn}')
         seq.attrs["origin"] = msg.origin
         seq.attrs["granule"] = msg.granule
         for k,v in fobj.items():
@@ -53,13 +59,15 @@ class Writer:
             size = a.ParseFromString(data)
             assert(size>0)
             tn = a.TypeName()
-            print (tn)
-            print (f"payload {index} of size {size} and type {tn}")
+            log.debug(f"payload {index} of size {size} and type {tn}")
             type_name = tn.rsplit('.',1)[-1]
             PBType = getattr(self.pbmod, type_name)
             pbobj = PBType()
             ok = a.Unpack(pbobj)
-            assert(ok)
+            if not ok:
+                err = f'fail to unpack protobuf object of type {tn}'
+                log.error(err)
+                raise RuntimeError(err)
             tohdf = getattr(self.tohdf, type_name)
             slot = seq.create_group(str(index))
             tohdf(pbobj, slot)

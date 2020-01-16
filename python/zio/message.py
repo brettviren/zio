@@ -100,7 +100,7 @@ class CoordHeader:
         return encode_header_coord(self.origin, self.granule, self.seqno)
 
     def __str__(self):
-        return "origin:0x%x,granule:%ld,seqno:%ld" %(self.origin,self.granule,self.seqno)
+        return "[0x%x,%ld,%ld]" %(self.origin,self.granule,self.seqno)
 
     def __repr__(self):
         return "<zio.message.CoordHeader %s>" % bytes(self)
@@ -122,6 +122,7 @@ class Message:
 
     def __init__(self,
                  level=None, form=None, label=None, routing_id=None,
+                 origin=None, granule=None, seqno=None,
                  prefix=None, coord=None, payload=None,
                  parts=None, encoded=None, frame=None):
         '''Construct a zio.Message.
@@ -165,6 +166,12 @@ class Message:
             self.form = form
         if level is not None:
             self.level = level
+        if origin is not None:
+            self.origin = origin
+        if granule is not None:
+            self.granule = granule
+        if seqno is not None:
+            self.seqno = seqno
         return
 
     @property
@@ -268,7 +275,7 @@ class Message:
         self.payload = parts[2:]
 
     def __str__(self):
-        return "zio.Message: \"%s\" + %s + %d in payload" % \
+        return "zio.Message: \"%s\" + %s + [%d]" % \
             (self.prefix, self.coord, len(self.payload))
 
 

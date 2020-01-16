@@ -5,6 +5,9 @@ Actor functions that can work as broker backends.
 import zmq
 from ..message import Message
 
+import logging
+log = logging.getLogger(__name__)
+
 def spawner(ctx, pipe, factory, *args):
     '''An actor that spawns other actors.
 
@@ -14,7 +17,7 @@ def spawner(ctx, pipe, factory, *args):
         Called with new BOT, return actor or None if reject.
 
     '''
-    print(f'actor: spawner({factory})')
+    log.debug(f'actor: spawner({factory})')
     poller = zmq.Poller()
     poller.register(pipe, zmq.POLLIN)
     pipe.signal()               # ready
@@ -28,17 +31,18 @@ def spawner(ctx, pipe, factory, *args):
 
             if sock == pipe:
                 data = pipe.recv()
-                print ("spawner: data:", data)
+
                 if len(data) == 0:
-                    print("spawner got EOT")
+                    log.debug("spawner got EOT")
                     terminated = True
                     break
                 if data == b'STOP':
-                    print("spawner got STOP")
+                    log.debug("spawner got STOP")
                     terminated = True
                     break
 
                 bot = Message(encoded=data)
+                log.debug (f'spawner:\n{bot}')
                 actor = factory(bot)
                 if actor is None:
                     pipe.send_string('NO')
@@ -51,11 +55,12 @@ def spawner(ctx, pipe, factory, *args):
                 # else its a spawned actor signaling us
                 poller.unregister(sock)
                 del actors[sock]
-                print ("spawner with %d actors spawned" % len(actors))
+                log.debug ("spawner with %d actors spawned" % len(actors))
 
     if actors:
-        print("spawner with %d live actors" % len(actors))
-        # now kill them
-    print ("spawner exiting")
+        log.debug("spawner killing %d actors" % len(actors))
+        for pipe,actor in actors.items():
+            pipe.signal()
+    log.debug ("spawner exiting")
     
     return

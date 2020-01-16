@@ -12,11 +12,18 @@ from factory import Factory
 import wctzpb
 from google.protobuf.any_pb2 import Any 
 
+import logging
+logging.basicConfig(format='%(asctime)s %(levelname)10s %(name)-20s - %(message)s',
+                    datefmt='%H:%M:%S',
+                    level=logging.DEBUG)
+log = logging.getLogger('test-cbsfhwf')
+log.level = logging.DEBUG
+
 def flow_depos(ctx, pipe, nsend, name, address):
     '''
     An actor with a flow client sending depo messages.
     '''
-    print (f'actor: flow_depos({nsend}, "{name}", "{address}"')
+    log.debug(f'actor: flow_depos({nsend}, "{name}", "{address}"')
 
     pipe.signal()
 
@@ -25,10 +32,12 @@ def flow_depos(ctx, pipe, nsend, name, address):
     port.online(None)       # peer not needed if port only direct connects
     flow = Flow(port)
 
-    fobj = dict(flow='BOT', direction='extract', credit=2, stream=name)
+    fobj = dict(flow='BOT', direction='extract', credit=3, stream=name)
     msg = Message(form='FLOW',label=json.dumps(fobj))
+    log.debug (f'flow_depos {name} send BOT:\n{msg}')
     flow.send_bot(msg)
     msg = flow.recv_bot(1000)
+    log.debug (f'flow_depos {name} got BOT:\n{msg}')
     assert(msg)
 
     for count in range(nsend):
@@ -41,15 +50,21 @@ def flow_depos(ctx, pipe, nsend, name, address):
                               extent_tran=6.9) 
         a = Any()
         a.Pack(depo)
-        msg = Message(form='FLOW',
-                      label=json.dumps({'stream':name}),
+        msg = Message(form='FLOW',seqno=count,
+                      label=json.dumps({'flow':'DAT'}),
                       payload=[a.SerializeToString()])
+        log.debug (f'flow_depos {name} put: {count}/{nsend}[{flow.credit}]:\n{msg}')
         flow.put(msg)
+        log.debug (f'flow_depos {name} again [{flow.credit}]')
 
+    log.debug (f'flow_depos {name} send EOT')
     flow.send_eot()
+    log.debug (f'flow_depos {name} recv EOT')
     flow.recv_eot()
+    log.debug (f'flow_depos {name} wait for quit signal')
+    pipe.recv()                 # wait for signal to quit
+    log.debug(f'flow_depos {name} exiting')
 
-    port.offline()
     return
 
 def make_broker(ctx, ruleset, address):
@@ -60,16 +75,14 @@ def make_broker(ctx, ruleset, address):
     sport.do_binds()
     sport.online()    
 
-    print("make factory") 
+    log.debug("make factory") 
     factory = Factory(ctx, ruleset, address,
                       wargs=(wctzpb.pb, wctzpb.tohdf))
-    print("make backend") 
+    log.debug("make backend") 
     backend = ZActor(ctx, spawner, factory)
-    print("make broker") 
+    log.debug("make broker") 
     broker = Broker(sport, backend.pipe)
-    # fixme: need to manage the backend.  For now, punt.
-    broker._backend_actor = backend
-    return broker
+    return broker, backend, factory
 
 def test_cbsfhwf():
     ctx = zmq.Context()
@@ -84,16 +97,22 @@ def test_cbsfhwf():
     ]
 
     client1 = ZActor(ctx, flow_depos, 10, "client1", server_address)
-    broker = make_broker(ctx, ruleset, server_address)
+    broker,backend,factory = make_broker(ctx, ruleset, server_address)
 
-    print ("start broker poll")
+    log.debug ("start broker poll")
     while True:
-        ok = broker.poll(1000)
-        if not ok:
+        ok = broker.poll(10000)
+        if ok is None:
+            log.debug(f'broker is too lonely')
             break;
 
+    log.debug("broker stop")
     broker.stop()
+    log.debug("stop factory")
+    factory.stop()
+    log.debug("client1 pipe signal")
     client1.pipe.signal()
+    log.debug ("test done")
 
 if '__main__' == __name__:
     test_cbsfhwf()

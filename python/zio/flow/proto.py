@@ -4,11 +4,12 @@ zio.flow implements ZIO flow protocol helper
 
 This is equivalent to the C++ zio::flow namespace
 '''
-import logging
+
 
 from ..message import Message
 from .util import *
 
+import logging
 log = logging.getLogger(__name__)
 
 from enum import Enum
@@ -132,7 +133,7 @@ class Flow:
         msg.form = 'FLOW'
         msg.label = stringify('DAT', **objectify(msg))
         msg.routing_id = self.routing_id
-        #print (f"port send with credit %d: %s" % (self.credit, msg))
+        #log.debug (f"port send with credit %d: %s" % (self.credit, msg))
         self.port.send(msg)
         self.credit -= 1
         return True
@@ -162,16 +163,19 @@ class Flow:
 
         Return None if EOT was received instead.
         '''
-        #print ("flow port recv, timeout=",timeout)
-        msg = self.port.recv(timeout)
+        log.debug (f'flow.get({timeout})')
         self.flush_pay()
+        msg = self.port.recv(timeout)
         if msg is None:
             return None
         if msg.form != 'FLOW':
             return None
         fobj = objectify(msg)
+        if fobj.get('flow',None) == 'EOT':
+            log.debug("EOT during flow:\n%s" % (msg,))
+            return None
         if fobj.get('flow',None) != 'DAT':
-            log.debug("malformed DAT flow: %s" % (msg,))
+            log.warning("malformed DAT flow:\n%s" % (msg,))
             return None
         self.credit += 1
         self.flush_pay()

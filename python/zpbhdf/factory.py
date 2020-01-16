@@ -15,9 +15,12 @@ import lispish
 from zio import Port, Message
 from zio.flow import objectify, Flow
 from pyre.zactor import ZActor
-from zmq import CLIENT, PUSH, PULL
+from zmq import CLIENT, PUSH, PULL, Poller, POLLIN
 import h5py
 from writer import Writer
+
+import logging
+log = logging.getLogger(__name__)
 
 def message_to_dict(msg):
     '''
@@ -52,37 +55,50 @@ def writer(ctx, pipe, filename, addrpat, wargs):
         Args passed to Writer.
 
     '''
-    print(f'actor: writer("{filename}", "{addrpat}")')
+    log.debug(f'actor: writer("{filename}", "{addrpat}")')
     fp = h5py.File(filename,'w')
-    print(f'opened {filename}')
+    log.debug(f'opened {filename}')
     pipe.signal()
-    print('make writer PULL socket')
+    log.debug('make writer PULL socket')
     pull = ctx.socket(PULL)
     minport,maxport = 49999,65000
     for port in range(minport,maxport):
         writer_addr = addrpat.format(port=port)
         pull.bind(writer_addr)
-        print(f'writer bind to {writer_addr}')
+        log.debug(f'writer bind to {writer_addr}')
         pipe.send_string(writer_addr)
         break
 
     flow_writer = dict()
 
+    poller = Poller()
+    poller.register(pipe, POLLIN)
+    poller.register(pull, POLLIN)
+
     while True:
-        data = pull.recv()
-        if not data:
-            continue
-        msg = Message(encoded=data)
-        attr = message_to_dict(msg)
-        path = attr["hdfgroup"] # must be supplied
+        for which,_ in poller.poll():
+            if not which:
+                return
+            if which == pipe: # signal exit
+                log.debug(f'writer for {filename} exiting')
+                return
 
-        try:
-            fw = flow_writer[path]
-        except KeyError:
-            sg = fp.create_group(path)
-            fw = flow_writer[path] = Writer(sg, *wargs)
+            # o.w. we have flow
 
-        fw.save(msg)
+            data = pull.recv()
+            if not data:
+                continue
+            msg = Message(encoded=data)
+            attr = message_to_dict(msg)
+            path = attr["hdfgroup"] # must be supplied
+            log.debug(f'{filename}:/{path} writing:\n{msg}')
+
+            fw = flow_writer.get(path, None)
+            if fw is None:
+                sg = fp.get(path, None) or fp.create_group(path)
+                fw = flow_writer[path] = Writer(sg, *wargs)
+
+            fw.save(msg)
         
 
     return
@@ -110,21 +126,26 @@ def write_handler(ctx, pipe, bot, base_path, broker_addr, writer_addr):
         The address of the writer's PULL socket to connect.
 
     '''
-    print(f'actor: write_handler(msg, "{base_path}", "{broker_addr}", "{writer_addr}")')
-    print(bot)
+    log.debug(f'actor: write_handler(msg, "{base_path}", "{broker_addr}", "{writer_addr}")')
+    log.debug(bot)
     pipe.signal()
-
-    port = Port("write-handler", ctx.socket(CLIENT))
-    port.connect(broker_addr)
-    port.online(None)
-    flow = Flow(port)
-    flow.send_bot(bot)          # this introduces us to the server
-    flow.recv_bot()
 
     push = ctx.socket(PUSH)
     push.connect(writer_addr)
 
+    sock = ctx.socket(CLIENT)
+    port = Port("write-handler", sock)
+    port.connect(broker_addr)
+    port.online(None)
+    flow = Flow(port)
+    log.debug (f'write_handler({base_path}) send BOT to {broker_addr}')
+    flow.send_bot(bot)          # this introduces us to the server
+    bot = flow.recv_bot()
+    log.debug (f'write_handler({base_path}) got response:\n{bot}')
+    flow.flush_pay()
+
     def push_message(m):
+        log.debug (f'write_handler({base_path}) push {m}')
         attr = message_to_dict(m)
         attr['hdfgroup'] = base_path
         m.label = json.dumps(attr)
@@ -132,33 +153,47 @@ def write_handler(ctx, pipe, bot, base_path, broker_addr, writer_addr):
 
     push_message(bot)
 
+    poller = Poller()
+    poller.register(pipe, POLLIN)
+    poller.register(sock, POLLIN)
     while True:
-        msg = flow.get()
-        if not msg:
-            flow.send_eot()
-            # fixme: send an EOT also to push socket?.
-            break
 
-        fobj = objectify(msg)
-        if not fobj.get(form, None):
+        for which,_ in poller.poll():
+            if not which:
+                return
+
+            if which == pipe: # signal exit
+                log.debug ('write_handler pipe hit')
+                return          
+
+            # o.w. we have flow
+
+            msg = flow.get()
+            if not msg:
+                flow.send_eot()
+                # fixme: send an EOT also to push socket?.
+                break
+
+            if msg.form != 'FLOW':
+                continue
+
+            fobj = objectify(msg)
+            ftype = fobj.get("flow", None)
+            if not ftype:
+                continue
+
+            # fixme: maybe add some to fobj here and repack
+
+            push_message(msg)
+
+            if ftype == 'EOT':
+                flow.send_eot()
+
+            # fixme: we might get fresh BOT, check for it.
+
+            # fixme: how do we exit?
             continue
-
-        ftype = fobj.get("flow", None)
-        if not ftype:
-            continue
-
-        # fixme: maybe add some to fobj here and repack
-
-        push_message(msg)
-
-        if ftype == 'EOT':
-            flow.send_eot()
-            
-        # fixme: we might get fresh BOT, check for it.
-
-        # fixme: how do we exit?
-        continue
-    
+    log.debug ('write_handler exiting')
 
 class Factory:
 
@@ -244,7 +279,7 @@ class Factory:
             rule = maybe["rule"]
             parser = lispish.sexp(rattr)
             parsed = parser.parseString(rule)
-            #print ("parsed:",parsed)
+            log.debug ("parsed:",parsed)
             expr = Rule(parsed, return_bool = True)
             if not expr.match():
                 continue;
@@ -266,7 +301,7 @@ class Factory:
                     err = f"failed to bind any {self.addrpat} for {filename}"
                     raise RuntimeError(err)
                 wactor.addr = waddr # copascetic?
-                print(f"zpbhdf.Factory: make writer for {filename}")
+                log.debug(f"zpbhdf.Factory: make writer for {filename}")
                 self.writers[filename] = wactor
 
             base_path = maybe["grouppat"].format(**rattr)
@@ -275,4 +310,7 @@ class Factory:
                            self.writers[filename].addr)
             return actor
         return
-    
+    def stop(self):
+        for filename, wactor in self.writers.items():
+            log.debug(f'stop writer for {filename}')
+            wactor.pipe.signal()
