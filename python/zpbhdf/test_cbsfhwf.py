@@ -33,7 +33,7 @@ def flow_depos(ctx, pipe, nsend, name, address):
     flow = Flow(port)
 
     fobj = dict(flow='BOT', direction='extract', credit=3, stream=name)
-    msg = Message(form='FLOW',label=json.dumps(fobj))
+    msg = Message(seqno=0, form='FLOW',label=json.dumps(fobj))
     log.debug (f'flow_depos {name} send BOT:\n{msg}')
     flow.send_bot(msg)
     msg = flow.recv_bot(1000)
@@ -50,7 +50,7 @@ def flow_depos(ctx, pipe, nsend, name, address):
                               extent_tran=6.9) 
         a = Any()
         a.Pack(depo)
-        msg = Message(form='FLOW',seqno=count,
+        msg = Message(form='FLOW',seqno=count+1,
                       label=json.dumps({'flow':'DAT'}),
                       payload=[a.SerializeToString()])
         log.debug (f'flow_depos {name} put: {count}/{nsend}[{flow.credit}]:\n{msg}')
@@ -58,7 +58,7 @@ def flow_depos(ctx, pipe, nsend, name, address):
         log.debug (f'flow_depos {name} again [{flow.credit}]')
 
     log.debug (f'flow_depos {name} send EOT')
-    flow.send_eot()
+    flow.send_eot(Message(seqno=nsend+1))
     log.debug (f'flow_depos {name} recv EOT')
     flow.recv_eot()
     log.debug (f'flow_depos {name} wait for quit signal')
@@ -101,7 +101,7 @@ def test_cbsfhwf():
 
     log.debug ("start broker poll")
     while True:
-        ok = broker.poll(10000)
+        ok = broker.poll(1000)
         if ok is None:
             log.debug(f'broker is too lonely')
             break;

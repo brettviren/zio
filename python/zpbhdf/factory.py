@@ -89,8 +89,9 @@ def writer(ctx, pipe, filename, addrpat, wargs):
             if not data:
                 continue
             msg = Message(encoded=data)
-            attr = message_to_dict(msg)
-            path = attr["hdfgroup"] # must be supplied
+            fobj = objectify(msg)
+            path = fobj.pop("hdfgroup") # must be supplied
+            msg.label = json.dumps(fobj)
             log.debug(f'{filename}:/{path} writing:\n{msg}')
 
             fw = flow_writer.get(path, None)
