@@ -265,6 +265,7 @@ class Factory:
         self.ruleset = ruleset
         self.broker_addr = broker_addr
         self.writers = dict()
+        self.handlers = list()
         self.addrpat = addrpat
         self.wargs = wargs
         return
@@ -309,9 +310,13 @@ class Factory:
             actor = ZActor(self.ctx, write_handler, bot, base_path,
                            self.broker_addr,
                            self.writers[filename].addr)
-            return actor
+            self.handlers.append(actor)
+            return True
         return
     def stop(self):
+        log.debug('stop %d handlers' % len(self.handlers))
+        for handler in self.handlers:
+            handler.pipe.signal()
         for filename, wactor in self.writers.items():
             log.debug(f'stop writer for {filename}')
             wactor.pipe.signal()

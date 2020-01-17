@@ -13,34 +13,30 @@ import logging
 log = logging.getLogger(__name__)
 
 class Broker:
-    def __init__(self, server, backend):
+    def __init__(self, server, factory):
         '''Create a flow broker.
 
         Parameters
         ----------
         server : zio.Port
             An online SERVER port
-        backend : zmq.socket
+        factory : callable
             See below
         
         This broker routes messages between a pair of clients: a
         remote client and its handler.  It does this by adding a flow
-        handler protocol to ZIO flow protocol.
+        initiation protocol to ZIO flow protocol.
 
-        The flow handler protocol is spoken by the broker on its
-        backend socket.  When a new BOT flow message is received from
-        the server port it will be checked for the existence of a
-        'cid' attribute in the flow object.  If not existing then the
-        BOT came from a remote client.  The BOT direction is switched
-        and sent to the backend socket and the broker waits for a
-        response.
-  
-        The response shall be a simple string message holding either
-        "OK" or "NO".  If "NO", an immediate EOT message is sent to
-        the remote client.  Otherwise, the broker expects some future
-        BOT message on the server port which includes this `cid`.
-        Once that BOT is received by the server any subsequent PAY,
-        DAT or EOT will be exchanged between client and handler.
+        On receipt of a BOT, the broker passes it to the factory which
+        should return True if the BOT was accepted else None.  The
+        factory call should return as promptly as possible as the
+        broker blocks.
+
+        If factory returns True then it is expected that the factory
+        has started some other client which contacs the broker with
+        the BOT.  The factory or the new client may modify the BOT as
+        per flow protorocl but must leave intact the `cid` attribute
+        placed in the flow object by the broker.
 
         Note that the flow handler protocol does not communicate the
         location of the broker's SERVER socket.  It is up to handler
@@ -48,7 +44,7 @@ class Broker:
 
         '''
         self.server = server
-        self.backend = backend
+        self.factory = factory
         self.other = dict()     # map router IDs
 
     def poll(self, timeout=None):
@@ -95,16 +91,15 @@ class Broker:
                 fobj["cid"] = rid
                 msg.label = json.dumps(fobj)
                 msg.routing_id = 0
-                self.backend.send(msg.encode())
-                got = self.backend.recv_string()
-                if got == 'OK':
-                    return True
-                if got == 'NO':
+                got = self.factory(msg)
+                if got is None:
                     fobj['flow'] = 'EOT'
                     msg.label = json.dumps(fobj)
                     msg.routing_id = rid
                     self.server.send(msg)
                     return False
+                else:
+                    return True
                 return False    # unknown respose 
 
         # route message to other
@@ -120,10 +115,10 @@ class Broker:
         return True
 
     def stop(self):
-        '''
-        Stop the broker by sending a signal backend.
-        '''
-        self.backend.send_string("STOP")
+        self.factory.stop()
+        return
+
+
 
 # fixme: broker doesn't handle endpoints disappearing.
 

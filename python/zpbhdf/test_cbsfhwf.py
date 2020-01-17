@@ -78,11 +78,7 @@ def make_broker(ctx, ruleset, address):
     log.debug("make factory") 
     factory = Factory(ctx, ruleset, address,
                       wargs=(wctzpb.pb, wctzpb.tohdf))
-    log.debug("make backend") 
-    backend = ZActor(ctx, spawner, factory)
-    log.debug("make broker") 
-    broker = Broker(sport, backend.pipe)
-    return broker, backend, factory
+    return Broker(sport, factory)
 
 def test_cbsfhwf():
     ctx = zmq.Context()
@@ -97,7 +93,7 @@ def test_cbsfhwf():
     ]
 
     client1 = ZActor(ctx, flow_depos, 10, "client1", server_address)
-    broker,backend,factory = make_broker(ctx, ruleset, server_address)
+    broker = make_broker(ctx, ruleset, server_address)
 
     log.debug ("start broker poll")
     while True:
@@ -108,8 +104,6 @@ def test_cbsfhwf():
 
     log.debug("broker stop")
     broker.stop()
-    log.debug("stop factory")
-    factory.stop()
     log.debug("client1 pipe signal")
     client1.pipe.signal()
     log.debug ("test done")
