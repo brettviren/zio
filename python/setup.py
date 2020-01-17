@@ -12,7 +12,7 @@ setuptools.setup(
     install_requires = [
         "click",
         "pyzmq",
-        "pyre @ https://github.com/zeromq/pyre/archive/51451524f0107b67a8e1235c9d85e364d898657a.zip",
+        "pyre==0.3.2",
     ]
 )
 
