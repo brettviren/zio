@@ -23,41 +23,44 @@ have had a /routing ID/ set on it by the broker applications.
 The broker thus can not associate these two clients until each try to
 send to each other.  But, they can not send to each other until the
 broker associates them.  This catch-22 is broken in the flow broker's
-begin-of-transmission (*BOT*) protocol which is a small extension to the
-basic /flow protocol/ and is not exposed to remote clients.
+/flow initiation protocol/ which is a small extension to the basic /flow
+protocol/ and is not exposed to remote clients.
 
-The *BOT* protocol is illustrated in the following UML sequence diagram.
+The flow initiation (FI) protocol is illustrated in the following UML
+sequence diagram.
 
 
 
 [[file:flow-broker.png]]
 
 
-The object *client* is the remote client, the *port* represents ZIO port
-with the broker SERVER socket.  The *BOT* protocol is inserted between
-the reception of the *BOT-rem* message and its *BOT-loc* reply and
-proceeds with this sequence:
+In the diagram the object named *client* is the remote client, the *port*
+represents the *broker* ZIO port with a SERVER socket.  The FI protocol
+is inserted between the reception of the *BOT* message from the remote
+client (*BOT-rem) and its reply (*BOT-loc*) from the local client handler
+and proceeds through this sequence:
 
-1. *broker* stores the *BOT-rem* /routing ID/ into a ~cid~ attribute of the
-   message flow object and reverses the flow ~direction~ attribute
-   producing the *BOT-loc* message and calls the *factory* on this
-   message.
+1. *broker* receives *BOT-rem* and stores the ZeroMQ /routing ID/ of that
+   message into a ~cid~ attribute of the ZIO message flow object (prefix
+   header label attribute) and reverses the value of the flow
+   ~direction~ attribute producing the *BOT-loc* message.  It then calls
+   the *factory* on this message.
 2. *factory* dispatches the message in an application-dependent manner.
    Shown here, a *handler* is spawned.  Other dispatching patterns are
    allowed, but the subsequent behavior of the *handler* illustrates
-   what is required from them by the *BOT* protocol.
+   what is required those patterns by the FI protocol.
 3. *handler* sends to *port* the *BOT-loc* message, typically as-is but may
    make changes if the application level protocol requires it however
    it must keep the ~cid~ flow object attribute intact.
-4. On receipt of any message with a ~cid~ the *broker* records the /routing
-   ID/ of that message and the ~cid~ in that message in a bidirectional
-   association. 
+4. On receipt of any message with a ~cid~ attribute the *broker* records
+   the /routing ID/ of that message and the ~cid~ in that message in a
+   bidirectional association.
 5. The *broker* strips the ~cid~, forwards *BOT-loc* to the remote client,
    reverses its ~direction~ attribute and sends it to the local client
    handler thus completing the flow protocol *BOT* handling for both
    clients.
-6. Subsequent flow messages from either client can now be routed to
-   its partner client.
+6. Subsequent flow messages from either remote client or local client
+   handler can now be routed to its partner.
 7. Any *EOT* flow message observed by the *broker* will result in removal
    of the corresponding entry in the bidirectional association.  Any
    non-*BOT* messages with a /routing ID/ not present in this association
@@ -69,7 +72,7 @@ proceeds with this sequence:
   :END:
 
 
-The creation of the *broker* SERVER *port* is outside the scope of the *BOT*
+The creation of the *broker* SERVER *port* is outside the scope of the FI
 protocol extension.  That is, the application must arrange for the
 *port* to be online prior to *broker* operation and any *factory* and
 *handlers* must know how to form attachment (be it connect or bind)
@@ -142,7 +145,7 @@ The *broker* manages its *port* in a single thread and while the operation
 in that thread is very simple, it will only service one message at a
 time.  In particular, the *broker* relies on the call on the *factory* to
 return promptly.  The *factory* must not be designed to directly handle
-the BOT protocol or else deadlock is assured.
+the FI protocol or else deadlock is assured.
 
 Depending on the nature of the *factory* dispatch method, handlers will
 typically operate asynchronously from each other. Depending on the
@@ -181,5 +184,8 @@ c3->flow3->push3->pull
 
 #+RESULTS:
 [[file:flow-broker-file.png]]
+
+
+
 
 

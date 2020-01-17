@@ -6,7 +6,6 @@ import zmq
 import json
 from zio import Port, Message
 from zio.flow import Flow, Broker
-from zio.flow.backend import spawner
 from pyre.zactor import ZActor
 from factory import Factory
 import wctzpb
