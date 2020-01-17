@@ -10,8 +10,9 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     python_requires='>=3.3',    # how to know?
     install_requires = [
+        "click",
         "pyzmq",
-        "pyre>=0.3.2"
+        "pyre @ https://github.com/zeromq/pyre/archive/51451524f0107b67a8e1235c9d85e364d898657a.zip",
     ]
 )
 
