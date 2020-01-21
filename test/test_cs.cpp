@@ -3,7 +3,7 @@
 #include <map>
 #include <vector>
 
-void test_owoa(bool backwards)
+void test_owoa(bool backwards, const char* addr)
 {
     const int nclients = 3;
     std::vector<zsock_t*> clients;
@@ -22,25 +22,28 @@ void test_owoa(bool backwards)
                nclients, mode[backwards]);
 
     const int base_port = 5670;
-    // const char * addr = "tcp://127.0.0.1:%d";
-    const char * addr = "ipc://test_cs%d.ipc";
-    // const char * addr = "inproc://test_cs%d";
     if (backwards) {            // bind clients, connect server
         for (int ind=0; ind<nclients; ++ind) {
             auto c = clients[ind];
             const int port = base_port + ind;
+            zsys_error("backwards bind %s port %d",
+                       addr, port);
             const int p = zsock_bind(c, addr, port);
             if (p<0) {
                 zsys_error("backwards failed bind %s port %d",
                            addr, port);
             }
             assert (p >= 0);
+            zsys_error("backwards connect %s port %d",
+                       addr, port);
             int rc = zsock_connect(s, addr, port);
             assert (rc >= 0);
         }
     }
     else {                      // bind server, connect clients
         const int port = base_port;
+        zsys_error("forward bind %s port %d",
+                   addr, port);
         const int p = zsock_bind(s, addr, port);
         if (p<0) {
             zsys_error("forwards failed bind %s port %d",
@@ -48,6 +51,8 @@ void test_owoa(bool backwards)
         }
         assert(p >= 0);
         for (auto c : clients) {
+            zsys_error("forward connect %s port %d",
+                       addr, port);
             int rc = zsock_connect(c, addr, port);
             assert (rc >= 0);
         }
@@ -109,8 +114,20 @@ void test_owoa(bool backwards)
 
 int main()
 {
-    test_owoa(false);
-    test_owoa(true);
+    std::vector<bool> tf{true, false};
+    std::vector<const char*> addrs{
+        "tcp://127.0.0.1:%d",
+        "ipc://test_cs%d.ipc",
+        "inproc://test_cs%d"
+    };
+
+    for (bool backwards : tf) {
+        for (const char* addr : addrs) {
+            test_owoa(backwards, addr);
+            // too fast and previous bound inproc will still be bound
+            zclock_sleep(100);
+        }
+    }
 
     return 0;
 }
