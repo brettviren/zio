@@ -18,6 +18,7 @@ def configure(cfg):
     cfg.check_cfg(package='libzyre', uselib_store='ZYRE', **p);
     # cfg.check_cfg(package='protobuf', uselib_store='PROTOBUF', **p);
     cfg.write_config_header('config.h')
+    cfg.check(features='cxx cxxprogram', lib=['pthread'], uselib_store='PTHREAD')
 
 def build(bld):
     uses='ZMQ CZMQ ZYRE'.split()
@@ -39,7 +40,7 @@ def build(bld):
                     install_path = None,
                     includes = ['inc','build','test'],
                     rpath = rpath,
-                    use = ['zio'] + uses)
+                    use = ['zio'] + uses + ['PTHREAD'])
     csources = bld.path.ant_glob('test/check*.cpp')
     for cmain in csources:
         bld.program(features = 'cxx',
