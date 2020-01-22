@@ -16,12 +16,8 @@ typedef std::chrono::duration<int64_t,std::micro> microseconds_type;
 
 // a very very ugly server
 static
-void server()
+void server(zmq::socket_t& s)
 {
-    zmq::context_t ctx;
-    zmq::socket_t s(ctx, server_type);
-    s.bind(addr);
-
     std::map<uint32_t,uint32_t> rids;
     std::map<uint32_t, std::vector<int> > tosend;
 
@@ -116,13 +112,9 @@ void server()
 }
 
 static
-void client(int me)
+void client(zmq::socket_t& c, int me)
 {
     zsys_debug("client %d: starts", me);
-    zmq::context_t ctx;
-    zmq::socket_t c(ctx, client_type);
-    c.connect(addr);
-    zsys_debug("client %d: connected", me);
 
     zmq::poller_t<> poller;
     poller.add(c, zmq::event_flags::pollin);
@@ -163,15 +155,28 @@ int main()
     zsys_init();
     zsys_info("test_tcs starting");
 
-    std::thread ser(server);
+    zmq::context_t ctx;
+    zmq::socket_t s(ctx, server_type);
+    s.bind(addr);
+
+    std::thread ser(server, std::ref(s));
     zsys_warning("sleeping between server and client thread starts");
     usleep(100000);
-    std::thread c1(client, 1);
-    std::thread c2(client, 2);    
 
 
-    c1.join();
-    c2.join();
+    zmq::socket_t c1(ctx, client_type);
+    c1.connect(addr);
+    zsys_debug("client 1: connected");
+
+    zmq::socket_t c2(ctx, client_type);
+    c2.connect(addr);
+    zsys_debug("client 2: connected");
+
+    std::thread cli1(client, std::ref(c1), 1);
+    std::thread cli2(client, std::ref(c2), 2);    
+
+    cli1.join();
+    cli2.join();
     ser.join();
 
 }
