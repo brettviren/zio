@@ -52,11 +52,11 @@ int main()
             zsys_debug("false return, maybe EOT");
             break;
         }
-        zsys_debug("have credits %d/%d",
-                   cflow.credits(),
-                   cflow.total_credits() );
+        zsys_debug("have credit %d/%d",
+                   cflow.credit(),
+                   cflow.total_credit() );
         
-        //assert(cflow.total_credits() - cflow.credits() == 1);
+        //assert(cflow.total_credit() - cflow.credit() == 1);
         if (maybe(rng) > 0.9) {
             I_quit = true;
             break;

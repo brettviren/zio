@@ -61,8 +61,8 @@ int main()
     assert (dir == "extract");
     fobj["direction"] = "inject";
     msg.set_label(fobj.dump());
-    int credits = fobj["credit"];
-    cerr <<"sflow credits:"<<credits << " rid:"<< rid
+    int credit = fobj["credit"];
+    cerr <<"sflow credit:"<<credit << " rid:"<< rid
          <<" stype:" << zio::sock_type(sport->socket()) << endl;
 
     assert (!sflow.is_sender());
@@ -79,24 +79,24 @@ int main()
     // at this point deadlock could occur because this test is
     // synchronous between both client and server.  We must manually
     // prime the pump.  Internally the server's get() would do this.
-    credits = sflow.flush_pay();
-    assert (credits == credits_in_play);
-    assert (credits_in_play == sflow.total_credits());
-    assert (0 == sflow.credits());
+    credit = sflow.flush_pay();
+    assert (credit == credits_in_play);
+    assert (credits_in_play == sflow.total_credit());
+    assert (0 == sflow.credit());
     
     cerr <<"cflow send DAT\n";
     zio::json lobj{{"flow","DAT"}};
     msg.set_label(lobj.dump());
     ok = cflow.put(msg);
     assert(ok);
-    assert(cflow.total_credits() - cflow.credits() == 1);
+    assert(cflow.total_credit() - cflow.credit() == 1);
 
-    zsys_debug("sflow recv DAT, credits %d/%d",
-               sflow.credits(), sflow.total_credits());
-    assert(0 == sflow.credits());
+    zsys_debug("sflow recv DAT, credit %d/%d",
+               sflow.credit(), sflow.total_credit());
+    assert(0 == sflow.credit());
     ok = sflow.get(msg);
     assert(ok);
-    assert(sflow.credits() == 1);    
+    assert(sflow.credit() == 1);    
     
     cerr <<"sflow send EOT\n";
     sflow.send_eot(msg);

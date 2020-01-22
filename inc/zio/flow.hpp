@@ -106,11 +106,11 @@ namespace zio {
             bool recv_eot(Message& msg, int timeout=-1);
 
             bool is_sender() const { return m_sender; }
-            int credits() const { return m_credits; }
-            int total_credits() const { return m_total_credits; }
+            int credit() const { return m_credit; }
+            int total_credit() const { return m_total_credit; }
         private:
             portptr_t m_port;
-            int m_credits, m_total_credits;
+            int m_credit, m_total_credit;
             bool m_sender;      // false if we are recver
 
             // A Flow can use a SERVER socket.  The BOT in recv() sets

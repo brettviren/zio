@@ -34,7 +34,7 @@ diagram.  The protocol has two phases: /initiate/ and /transfer/.
 *Initiate* starts with the client sending a begin-of-transmission (*BOT*)
 message and the server responding with another *BOT*.  Both required
 these attributes: *direction* gives the /flow direction/ (see below) of
-the flow from the point of view of the message sender and *credits*
+the flow from the point of view of the message sender and *credit*
 gives the number of credits in play in the protocol
 
 The /direction/ is one of two values: /extract/ means the endpoint will
@@ -118,13 +118,13 @@ described:
 
 - *BOT* :: begin-of-transmission, the /flow object/ has attribute
            ~.direction~ set to ~"extract"~ or ~"inject"~ and
-           ~.credits~ set to an integer.
+           ~.credit~ set to an integer.
 
 - *EOT* :: end-of-transmission, either side may send, receiver should
            echo back.  No associated attributes.
 
 - *PAY* :: credit is extended from one endpoint to another as given in
-           the ~.credit~ attribute with a whole number value.
+           the ~.credit~ attribute (singular) with a whole number value.
 
 - *DAT* :: the message payload holds an application specific encoded
            message and no additional attribute is associated.
@@ -211,7 +211,7 @@ handler with each handler using a distinct ~Flow~ instance.
 
 As mentioned above, the /flow object/ stored in the header prefix
 label field and the /payload/ may be used by the application.  The
-~.direction~ and ~.credits~ attributes of the /flow object/ are
+~.direction~ and ~.credit~ attributes of the /flow object/ are
 reserved by the protocol but application specific attributes may be
 included and will be passed through the protocol.  Likewise, the
 entire /payload/ of the [[file:messages.org][flow messages]] is passed

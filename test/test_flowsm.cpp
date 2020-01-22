@@ -11,7 +11,7 @@ struct flow_protocol {
     typedef int endpoint_t;
     enum FlowDirection { undefined, extract, inject };
     typedef int direction_t;
-    typedef int credits_t;
+    typedef int credit_t;
 
     // Events
     struct ev_error {};
@@ -23,7 +23,7 @@ struct flow_protocol {
     // begin-of-transmission
     struct ev_bot : public ev_msg {
         FlowDirection fdir; // server&&extract or client&&inject == recving
-        credits_t credits;
+        credit_t credit;
     };
     // end-of-tranmission
     struct ev_eot : public ev_msg {
@@ -31,16 +31,16 @@ struct flow_protocol {
     };
     typedef ev_bot ev_checksr;
     struct ev_sending{
-        int credits;
+        int credit;
     };
     struct ev_recving{
-        int credits;
+        int credit;
     };
     struct ev_dat : public ev_msg {
         int data;
     };
     struct ev_pay : public ev_msg {
-        int credits;
+        int credit;
     };
 
     // Injected event callbacks
@@ -62,8 +62,8 @@ struct flow_protocol {
 
 
     struct protocol {
-        int credits{0};
-        int total_credits{0};
+        int credit{0};
+        int total_credit{0};
 
         auto operator()() {
             namespace sml = boost::sml;
@@ -76,47 +76,47 @@ struct flow_protocol {
 
                 *"establishing"_s + sml::event<ev_bot> [we_are_client] / (
                     [this](const ev_bot& ev, actioncbs& ac) {
-                        total_credits = ev.credits;
+                        total_credit = ev.credit;
                         ac.recv_bot(ev);
                     },
                     [this](const ev_bot& ev, back::process<ev_sending, ev_recving> p) {
                         if (ev.fdir == inject) {
-                            p(ev_recving{ev.credits});
+                            p(ev_recving{ev.credit});
                         }
                         else {
-                            p(ev_sending{ev.credits});
+                            p(ev_sending{ev.credit});
                         }
                     }) = "established"_s
 
                 ,"establishing"_s + sml::event<ev_bot> [we_are_server] / (
                     [this](const ev_bot& ev, actioncbs& ac) {
-                        total_credits = ev.credits;
+                        total_credit = ev.credit;
                         ac.recv_bot(ev);
                     },
                     [this](const ev_bot& ev, back::process<ev_sending, ev_recving> p) {
                         if (ev.fdir == extract) {
-                            p(ev_recving{ev.credits});
+                            p(ev_recving{ev.credit});
                         }
                         else {
-                            p(ev_sending{ev.credits});
+                            p(ev_sending{ev.credit});
                         }
                     }) = "established"_s
 
                 ,"established"_s + on_entry<_> / []{std::cout<<"established\n";}
-                ,"established"_s + event<ev_sending> / [this](const ev_sending& ev){credits=ev.credits;} = "sending"_s
-                ,"established"_s + event<ev_recving> / [this](const ev_recving& ev){credits=0;} = "recving"_s
+                ,"established"_s + event<ev_sending> / [this](const ev_sending& ev){credit=ev.credit;} = "sending"_s
+                ,"established"_s + event<ev_recving> / [this](const ev_recving& ev){credit=0;} = "recving"_s
 
 
                 ,"sending"_s + on_entry<_> / []{std::cout<<"wait for pay\n";}
                 ,"sending"_s + event<ev_pay> / [this](const ev_pay& p, actioncbs&ac) {
-                                                   credits += p.credits;
+                                                   credit += p.credit;
                                                    ac.got_pay(p);
                                                }
 
 
                 ,"recving"_s + on_entry<_> / []{std::cout<<"wait for dat\n";}
                 ,"recving"_s + event<ev_dat> / [this](const ev_dat& d, actioncbs&ac) {
-                                                   ++credits;
+                                                   ++credit;
                                                    ac.got_dat(d);
                                                }
 
@@ -146,7 +146,7 @@ struct flow_protocol {
 
 std::ostream& operator<<(std::ostream& o, const flow_protocol::ev_bot& bot)
 {
-    o << "<BOT ep=" << bot.ep << " fdir=" << bot.fdir << " credits=" << bot.credits << ">";
+    o << "<BOT ep=" << bot.ep << " fdir=" << bot.fdir << " credit=" << bot.credit << ">";
     return o;
 }
 std::ostream& operator<<(std::ostream& o, const flow_protocol::ev_eot& eot)
@@ -161,7 +161,7 @@ std::ostream& operator<<(std::ostream& o, const flow_protocol::ev_dat& dat)
 }
 std::ostream& operator<<(std::ostream& o, const flow_protocol::ev_pay& pay)
 {
-    o << "<PAY ep=" << pay.ep << " credits=" << pay.credits << ">";
+    o << "<PAY ep=" << pay.ep << " credit=" << pay.credit << ">";
     return o;
 }
 

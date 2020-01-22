@@ -2,8 +2,8 @@
 
 zio::flow::Flow::Flow(zio::portptr_t port)
     : m_port(port)
-    , m_credits(0)
-    , m_total_credits(0)
+    , m_credit(0)
+    , m_total_credit(0)
     , m_sender(true)
     , m_rid(0)
 {
@@ -61,7 +61,8 @@ bool zio::flow::Flow::recv_bot(zio::Message& bot, int timeout)
 
     zio::json fobj;
     if (!parse_label(bot, fobj)) {
-        throw std::runtime_error("bad message label for flow::recv_bot()");
+        zsys_warning("bad message label for flow::recv_bot()");
+        return false;
     }
     std::string flowtype = fobj["flow"];
     if (flowtype != "BOT") {
@@ -69,16 +70,16 @@ bool zio::flow::Flow::recv_bot(zio::Message& bot, int timeout)
                      m_port->name().c_str(), flowtype.c_str());
         return false;
     }
-    m_total_credits = fobj["credit"];
+    m_total_credit = fobj["credit"];
     // here, fobj is from the point of view of the OTHER end
     std::string dir = fobj["direction"];
     if (dir == "extract") { 
         m_sender = false;       // we are receiver
-        m_credits = m_total_credits;
+        m_credit = m_total_credit;
     }
     else if (dir == "inject") {
         m_sender = true;
-        m_credits = 0;          
+        m_credit = 0;          
     }
     else {
         zsys_warning("[flow %s]: unknown direction: %s",
@@ -110,7 +111,7 @@ int zio::flow::Flow::slurp_pay(int timeout)
     std::string flowtype = fobj["flow"];
     if (flowtype == "PAY") {
         int credit = fobj["credit"];
-        zsys_debug("[flow %s] recv PAY %d credits (rid:%u)",
+        zsys_debug("[flow %s] recv PAY %d credit (rid:%u)",
                    m_port->name().c_str(), credit, m_rid);
         return credit;
     }
@@ -123,22 +124,22 @@ int zio::flow::Flow::slurp_pay(int timeout)
 
 bool zio::flow::Flow::put(zio::Message& dat)
 {
-    if (m_credits < m_total_credits) {
+    if (m_credit < m_total_credit) {
         // quick try to get any PAY already sitting in buffers
         int c = slurp_pay(0);
         if (c < 0) {
             return false;
         }
-        m_credits += c;
+        m_credit += c;
     }
-    if (m_credits == 0) {
-        // no credits, we really have to wait until we get some PAY
+    if (m_credit == 0) {
+        // no credit, we really have to wait until we get some PAY
         int c = slurp_pay(-1);
         if (c < 0) {
             return false;
         }
         assert (c>0);
-        m_credits = c;
+        m_credit = c;
     }
 
     zio::json fobj;
@@ -150,22 +151,22 @@ bool zio::flow::Flow::put(zio::Message& dat)
     dat.set_label(fobj.dump());
     if (m_rid) { dat.set_routing_id(m_rid); }
     m_port->send(dat);
-    --m_credits;
+    --m_credit;
     return true;
 }
 
 int zio::flow::Flow::flush_pay()
 {
-    if (!m_credits) {
+    if (!m_credit) {
         return 0;
     }
     Message msg("FLOW");
-    zio::json obj{{"flow","PAY"},{"credit",m_credits}};
+    zio::json obj{{"flow","PAY"},{"credit",m_credit}};
     msg.set_label(obj.dump());
-    zsys_debug("[flow %s] send PAY %d credits (rid:%u)",
-               m_port->name().c_str(), m_credits, m_rid);
-    const int nsent = m_credits;
-    m_credits=0;
+    zsys_debug("[flow %s] send PAY %d credit (rid:%u)",
+               m_port->name().c_str(), m_credit, m_rid);
+    const int nsent = m_credit;
+    m_credit=0;
     if (m_rid) { msg.set_routing_id(m_rid); }
     m_port->send(msg);
 
@@ -174,8 +175,8 @@ int zio::flow::Flow::flush_pay()
 
 bool zio::flow::Flow::get(zio::Message& dat, int timeout)
 {
-    zsys_debug("[flow %s] get with %d credits (rid:%u)",
-               m_port->name().c_str(), m_credits, m_rid);
+    zsys_debug("[flow %s] get with %d credit (rid:%u)",
+               m_port->name().c_str(), m_credit, m_rid);
 
     bool ok = m_port->recv(dat, timeout);
     if (!ok) { return false; }
@@ -186,7 +187,7 @@ bool zio::flow::Flow::get(zio::Message& dat, int timeout)
     if (fobj["flow"] != "DAT") {
         return false;
     }
-    ++m_credits;
+    ++m_credit;
     return true;
 }
 
