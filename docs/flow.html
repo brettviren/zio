@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-01-07 Tue 13:52 -->
+<!-- 2020-01-22 Wed 12:33 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>ZIO data flow</title>
@@ -186,7 +186,7 @@
 @licstart  The following is the entire license notice for the
 JavaScript code in this tag.
 
-Copyright (C) 2012-2018 Free Software Foundation, Inc.
+Copyright (C) 2012-2019 Free Software Foundation, Inc.
 
 The JavaScript code in this tag is free software: you can
 redistribute it and/or modify it under the terms of the GNU
@@ -283,8 +283,8 @@ restrictions or limitations) are described in the section of the
 ZeroMQ guide covering <a href="http://zguide.zeromq.org/page:all#toc211">credit-based flow control</a>.
 </p>
 
-<div id="outline-container-orgff7ef83" class="outline-2">
-<h2 id="protocol"><a id="orgff7ef83"></a><span class="section-number-2">1</span> Flow protocol</h2>
+<div id="outline-container-orgdb40ac0" class="outline-2">
+<h2 id="protocol"><a id="orgdb40ac0"></a><span class="section-number-2">1</span> Flow protocol</h2>
 <div class="outline-text-2" id="text-protocol">
 <p>
 The ZIO <i>data flow protocol</i> is partly illustrated in the UML sequence
@@ -301,7 +301,7 @@ diagram.  The protocol has two phases: <i>initiate</i> and <i>transfer</i>.
 <b>Initiate</b> starts with the client sending a begin-of-transmission (<b>BOT</b>)
 message and the server responding with another <b>BOT</b>.  Both required
 these attributes: <b>direction</b> gives the <i>flow direction</i> (see below) of
-the flow from the point of view of the message sender and <b>credits</b>
+the flow from the point of view of the message sender and <b>credit</b>
 gives the number of credits in play in the protocol
 </p>
 
@@ -382,8 +382,8 @@ the other end is still online or not.
 </div>
 
 
-<div id="outline-container-org06239ec" class="outline-2">
-<h2 id="messages"><a id="org06239ec"></a><span class="section-number-2">2</span> Flow messages</h2>
+<div id="outline-container-org3519a2e" class="outline-2">
+<h2 id="messages"><a id="org3519a2e"></a><span class="section-number-2">2</span> Flow messages</h2>
 <div class="outline-text-2" id="text-messages">
 <p>
 ZIO data flow introduces a new ZIO message of type <b>FLOW</b>.  This message
@@ -408,13 +408,13 @@ described:
 <dl class="org-dl">
 <dt><b>BOT</b></dt><dd>begin-of-transmission, the <i>flow object</i> has attribute
 <code>.direction</code> set to <code>"extract"</code> or <code>"inject"</code> and
-<code>.credits</code> set to an integer.</dd>
+<code>.credit</code> set to an integer.</dd>
 
 <dt><b>EOT</b></dt><dd>end-of-transmission, either side may send, receiver should
 echo back.  No associated attributes.</dd>
 
 <dt><b>PAY</b></dt><dd>credit is extended from one endpoint to another as given in
-the <code>.credit</code> attribute with a whole number value.</dd>
+the <code>.credit</code> attribute (singular) with a whole number value.</dd>
 
 <dt><b>DAT</b></dt><dd>the message payload holds an application specific encoded
 message and no additional attribute is associated.</dd>
@@ -427,8 +427,8 @@ and is free to fill the payload frame or frames of any <b>FLOW</b> message.
 </div>
 </div>
 
-<div id="outline-container-orge205316" class="outline-2">
-<h2 id="api"><a id="orge205316"></a><span class="section-number-2">3</span> Flow API</h2>
+<div id="outline-container-org1312d52" class="outline-2">
+<h2 id="api"><a id="org1312d52"></a><span class="section-number-2">3</span> Flow API</h2>
 <div class="outline-text-2" id="text-api">
 <p>
 ZIO provides an API to simplify developing software that participates
@@ -490,8 +490,8 @@ the application.
 </div>
 
 
-<div id="outline-container-org7ee05c7" class="outline-2">
-<h2 id="server"><a id="org7ee05c7"></a><span class="section-number-2">4</span> Simple Flow Server</h2>
+<div id="outline-container-org02aac6e" class="outline-2">
+<h2 id="server"><a id="org02aac6e"></a><span class="section-number-2">4</span> Simple Flow Server</h2>
 <div class="outline-text-2" id="text-server">
 <p>
 A <i>data flow server</i> may be directly implemented using an instance of
@@ -514,13 +514,13 @@ handler with each handler using a distinct <code>Flow</code> instance.
 </div>
 
 
-<div id="outline-container-orgf8d35f8" class="outline-2">
-<h2 id="extending"><a id="orgf8d35f8"></a><span class="section-number-2">5</span> Extending Flow API</h2>
+<div id="outline-container-org0948fc1" class="outline-2">
+<h2 id="extending"><a id="org0948fc1"></a><span class="section-number-2">5</span> Extending Flow API</h2>
 <div class="outline-text-2" id="text-extending">
 <p>
 As mentioned above, the <i>flow object</i> stored in the header prefix
 label field and the <i>payload</i> may be used by the application.  The
-<code>.direction</code> and <code>.credits</code> attributes of the <i>flow object</i> are
+<code>.direction</code> and <code>.credit</code> attributes of the <i>flow object</i> are
 reserved by the protocol but application specific attributes may be
 included and will be passed through the protocol.  Likewise, the
 entire <i>payload</i> of the <a href="messages.html">flow messages</a> is passed

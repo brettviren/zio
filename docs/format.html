@@ -3,10 +3,10 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-01-03 Fri 16:34 -->
+<!-- 2020-01-22 Wed 12:33 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>ZIO Format</title>
+<title>ZIO Message Format</title>
 <meta name="generator" content="Org mode" />
 <meta name="author" content="Brett Viren" />
 <style type="text/css">
@@ -234,7 +234,7 @@ for the JavaScript code in this tag.
  |
  <a accesskey="H" href="index.html"> HOME </a>
 </div><div id="content">
-<h1 class="title">ZIO Format</h1>
+<h1 class="title">ZIO Message Format</h1>
 <div class="nav">
 <ul class="org-ul">
 <li><a href="index.html">Main Page</a></li>
@@ -248,47 +248,61 @@ for the JavaScript code in this tag.
 </div>
 
 <p>
-ZIO message payloads frames parsed given the value of the <b>format</b> ZIO
-message header frame field.  ZIO defines and reserves these formats:
+Bytes 4 through 8 inclusive (following the <code>ZIOx</code>) of a ZIO message
+contain the prefix header <b>form</b> attribute.  This is used as a hint to
+interpreting the remainder of the message.  An application may define
+its own <b>form</b> freely exclusive of reserved forms which are described
+below.  The <b>form</b> should be ASCII and any forms with less than 4
+meaningful bytes should be end-padded with ASCII spaces.
+</p>
+
+<p>
+ZIO defines and reserves these forms:
 </p>
 
 <dl class="org-dl">
-<dt>BUFF</dt><dd>The BUFF format is essentially no format.  It is an
-anonymous array of bytes.  If "parsing" the payload requires
-merely loading it into a contiguous block of memory then
-this format is sufficient.</dd>
+<dt><code>BUFF</code></dt><dd>The BUFF format is essentially no format.  It is an
+anonymous array of bytes.  If "parsing" the payload
+requires merely loading it into a contiguous block of
+memory then this format is sufficient.</dd>
 
-<dt>TEXT</dt><dd>The TEXT format is essentially the BUFF format but limited
+<dt><code>TEXT</code></dt><dd>The TEXT format is essentially the BUFF format but limited
 so that each byte is a printable character or otherwise a
-value that one might typically expect in a <code>std::string</code>.</dd>
+value that one might typically expect in a <code>std::string</code>.
+The binary encoding shall be assumed to be UTF-8.</dd>
 
-<dt>JSON</dt><dd>The JSON format is further limits the TEXT format so that
-the contents may be parsed as a valid JSON document.</dd>
+<dt><code>JSON</code></dt><dd>The JSON format further limits the TEXT format so that the
+contents may be parsed as a valid JSON document.</dd>
 
-<dt>BSON</dt><dd>Binary JSON</dd>
+<dt><code>BSON</code></dt><dd>Binary JSON</dd>
 
-<dt>CBOR</dt><dd>Concise Binary Object Representation</dd>
+<dt><code>CBOR</code></dt><dd>Concise Binary Object Representation</dd>
 
-<dt>MSGP</dt><dd>MessagePack</dd>
+<dt><code>MSGP</code></dt><dd>MessagePack</dd>
 
-<dt>UBJS</dt><dd>Universal Binary JSON Specification</dd>
+<dt><code>UBJS</code></dt><dd>Universal Binary JSON Specification</dd>
 
-<dt>PBUF</dt><dd>Protocol Buffers</dd>
+<dt><code>PBUF</code></dt><dd>Protocol Buffers</dd>
+
+<dt><code>FLOW</code></dt><dd>The message participates in ZIO credit-based data flow
+protocol.  More details are in <a href="flow.html">flow</a>.</dd>
 </dl>
 
 <p>
-The formats reserved by ZIO do <b>not</b> specify what, if any, internal
-schema any structure expressed in the format may follow.  Eg, TEXT may
-or may not be delimited by newlines.  Or, a JSON message may be an
-array or an object and its internal structure is not limited as long
-as it is the whole is represented as a valid JSON document.
+The forms reserved by ZIO do <b>not</b> specify what, if any, internal schema
+any structure expressed in the rest of the message may follow.  Eg,
+the <code>TEXT</code> form may or may not be delimited by newlines.  Or, a message
+of <code>JSON</code> form may be an array or an object and its internal structure
+is not limited as long as it is the whole is represented as a valid
+JSON document.  
 </p>
 
 <p>
-Application developers must thus rely on other hints to the receiving
-application to interpret the payload after it is parsed based on the
-ZIO <b>format</b> hint.  Some guidance and more discussion can be found in 
-<a href="message.html">message</a> and in <a href="peer.html">peer</a>.
+Thus, it is up to the application to define these details and their
+developers must rely on some other means or hints know how to
+interpret the message payload after it is parsed based on the ZIO <b>form</b>
+hint.  Some guidance and more discussion can be found in <a href="message.html">message</a> and
+in <a href="peer.html">peer</a>.
 </p>
 </div>
 </body>

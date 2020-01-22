@@ -24,7 +24,7 @@ subtable represents one message segment.
 |---------------+---------------------+-------|
 | magic         | "ZIO"               |     3 |
 | level         | "%d"                |     1 |
-| format        | (eg "JSON", "TEXT") |     4 |
+| form          | (eg "JSON", "TEXT") |     4 |
 | label         | free string         |    N0 |
 |---------------+---------------------+-------|
 |---------------+---------------------+-------|
@@ -33,10 +33,10 @@ subtable represents one message segment.
 | seqno         | uint64              |     8 |
 |---------------+---------------------+-------|
 |---------------+---------------------+-------|
-| payload       | per format          |    N1 |
+| payload       | per form            |    N1 |
 |---------------+---------------------+-------|
 |---------------+---------------------+-------|
-| payload       | per format          |    N2 |
+| payload       | per form            |    N2 |
 |---------------+---------------------+-------|
 |---------------+---------------------+-------|
 | ...           |                     |       |
@@ -49,7 +49,7 @@ contains these fields:
 
 - magic :: three ASCII characters: ~ZIO~ marks this as a ZIO message
 - level :: a single digit, ASCII encoded gives the message level
-- format :: a four byte format ID specifying the payload format, ZIO reserves a few.
+- form :: a four byte form ID specifying the payload format, ZIO reserves a few.
 - label :: optional, application dependent string
 
 Up to the ~label~ (but often including it as well) the prefix header can
@@ -103,20 +103,20 @@ information on the payload segments follow.
  message.  Or, it may be interpreted as each message which satisfies
  some criteria.
 
-** Format
+** Form
 
- The *format* field provides a hint for the parsing of the payload, and
- possibly its further interpretation.  That is, given the format,
+ The *form* field provides a hint for the parsing of the payload, and
+ possibly its further interpretation.  That is, given the form,
  application code consuming the payload should be able to read the
  payload into memory in some suitable type of data structure and
  possibly react to its content.
 
- Except for the formats reserved by ZIO and described in [[file:format.org][format]], the
- application developer is free to set the *format* field to any four byte
+ Except for the forms reserved by ZIO and described in [[file:format.org][format]], the
+ application developer is free to set the *form* field to any four byte
  value.  It is suggested to try to make use of the reserved formats and
  to not proliferate them due to conflating need for a new format hint
  with need for schema hints.  The latter is discussed below in section
- [[Payload]].  If custom formats are used, it is further recommended to use
+ [[Payload]].  If custom forms are used, it is further recommended to use
  four ASCII characters to facilitate prefix matching. 
 
 ** Origin
@@ -151,14 +151,14 @@ information on the payload segments follow.
 
  All segments that follow the header are called /payload/.  Ultimately,
  the payload is fully in the domain of the application developer.  ZIO
- does not dictate their use or format beyond the ZIO-reserved formats
- and providing the *format* field in the ZIO header.
+ does not dictate their use or format beyond the ZIO-reserved forms
+ and providing the *form* field in the ZIO header.
 
- The header field *format* is intended to provide the hint needed to at
+ The header field *form* is intended to provide the hint needed to at
  least *parse* the payload if not also to *interpret* it.  The field *label*
  may be used to provide further hinting.
 
- For example, it is expected that payload of a message with *format* set
+ For example, it is expected that payload of a message with *form* set
  to ~JSON~ can be parsed as a string in JSON format.  Interpreting the
  resulting data structure may then rely on a variety of
  application-dependent hints.  These include

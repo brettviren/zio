@@ -25,11 +25,12 @@ namespace zio {
 
     struct PrefixHeader {
         level::MessageLevel level{level::undefined};
-        std::string format{""};
+        std::string form{"    "}; // we keep this exactly length 4
         std::string label{""};
 
         std::string dumps() const;
-        void loads(const std::string& s);
+        // Return false if s can not be parsed as a prefix header
+        bool loads(const std::string& s);
     };
 
     typedef uint64_t origin_t;
@@ -67,8 +68,8 @@ namespace zio {
         
         level::MessageLevel level() const;
         void set_level(level::MessageLevel level);
-        std::string format() const;
-        void set_format(const std::string& form);
+        std::string form() const;
+        void set_form(const std::string& form);
         std::string label() const;
         void set_label(const std::string& label);
 

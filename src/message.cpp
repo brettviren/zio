@@ -21,18 +21,22 @@ std::string zio::PrefixHeader::dumps() const
 {
     std::stringstream ss;
     char num = '0' + level;
-    ss << "ZIO" << num << format;
+    ss << "ZIO" << num << form;
     if (label.size() > 0) {
         ss << label;
     }
     return ss.str();
 }
 
-void zio::PrefixHeader::loads(const std::string& p)
+bool zio::PrefixHeader::loads(const std::string& p)
 {
+    const size_t siz = p.size();
+    if (siz < 8) return false;
+    if (p.substr(0,3) != "ZIO") return false;
     level = static_cast<zio::level::MessageLevel>(p[3]-'0');
-    format = p.substr(4,4);
+    form = p.substr(4,4);
     label = p.substr(8);
+    return true;
 }        
 
 zio::Message::Message()
@@ -54,9 +58,10 @@ zio::Message::Message(const header_t h)
 }
 
 zio::Message::Message(const std::string& form, level::MessageLevel lvl)
-    : m_header({{lvl,form,""},{0,0,0}})
+    : m_header({{lvl,"    ",""},{0,0,0}})
     , m_rid(0)
 {
+    set_form(form);
 }
 
 zio::level::MessageLevel zio::Message::level() const
@@ -71,13 +76,17 @@ void zio::Message::set_label(const std::string& label)
 {
     m_header.prefix.label = label;
 }
-std::string zio::Message::format() const {
-    return m_header.prefix.format;
+std::string zio::Message::form() const {
+    return m_header.prefix.form;
 }
-void zio::Message::set_format(const std::string& form)
+void zio::Message::set_form(const std::string& form)
 {
-    assert(form.size() <= 4);
-    m_header.prefix.format = form;
+    m_header.prefix.form = "    ";
+    const size_t maxsiz = 4;
+    const size_t siz = std::min(form.size(), maxsiz);
+    for (size_t ind=0; ind<siz; ++ind) {
+        m_header.prefix.form[ind] = form[ind];
+    }
 }
 std::string zio::Message::label() const {
     return m_header.prefix.label;
@@ -129,7 +138,7 @@ void zio::Message::decode(const zio::message_t& data)
         int siz=0;
         memcpy(&siz, dat+ind, sizeof(int));
         ind += sizeof(int);
-        zsys_debug("decoding size %d", siz);
+        //zsys_debug("decoding size %d", siz);
         mpmsg.addmem(dat+ind, siz);
         ind += siz;
     }
@@ -158,7 +167,10 @@ void zio::Message::fromparts(const zio::multipart_t& mpmsg)
 
     const auto& m0 = mpmsg[0];
     std::string p(static_cast<const char*>(m0.data()), m0.size());
-    m_header.prefix.loads(p);
+    bool ok = m_header.prefix.loads(p);
+    if (!ok) {
+        throw std::runtime_error("failed to parse prefix from parts");
+    }
     
     const auto& m1 = mpmsg[1];
     m_header.coord = *m1.data<zio::CoordHeader>();

@@ -5,6 +5,7 @@
 using namespace std;
 int main()
 {
+
     zsock_t* o = zsock_new(ZMQ_PAIR);
     zsock_bind(o, "inproc://teststr");
     zsock_t* i = zsock_new(ZMQ_PAIR);

@@ -18,7 +18,7 @@ int main()
     msg.add(zio::message_t(spl.data(), spl.size()));
 
     assert (msg.level() == 4);
-    assert (msg.format() == "TEXT");
+    assert (msg.form() == "TEXT");
     assert (msg.seqno() == 0);
     assert(!msg.payload().empty());
     {
@@ -38,7 +38,7 @@ int main()
 
 
     assert (msg.level() == 4);
-    assert (msg.format() == "TEXT");
+    assert (msg.form() == "TEXT");
     assert (msg.seqno() == 0);
     assert(!msg.payload().empty());
     {
@@ -57,5 +57,17 @@ int main()
     obj = zio::json::parse(msg.label());
     assert(obj["direction"] == "inject");
     cerr <<msg.label()<< endl;
+
+    {
+        zio::Message empty;
+        assert(empty.form().size() == 4);
+        assert(empty.form() == "    ");
+        assert(empty.prefix().dumps().substr(0,8) == "ZIO0    ");
+        empty.set_form("FOO");
+        assert(empty.form().size() == 4);
+        assert(empty.form() == "FOO ");
+        assert(empty.prefix().dumps().substr(0,8) == "ZIO0FOO ");
+    }
+
     return 0;
 }

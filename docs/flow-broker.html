@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-01-13 Mon 17:27 -->
+<!-- 2020-01-22 Wed 12:33 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Flow Broker</title>
@@ -273,8 +273,8 @@ the handling mechanism and this document describes one possible
 solution which is here called a <i>flow broker</i>.
 </p>
 
-<div id="outline-container-org4982fed" class="outline-2">
-<h2 id="architecture"><a id="org4982fed"></a><span class="section-number-2">1</span> Architecture</h2>
+<div id="outline-container-orgd259b68" class="outline-2">
+<h2 id="architecture"><a id="orgd259b68"></a><span class="section-number-2">1</span> Architecture</h2>
 <div class="outline-text-2" id="text-architecture">
 <p>
 The <i>flow broker</i> associates a remote client with a local client
@@ -288,12 +288,13 @@ have had a <i>routing ID</i> set on it by the broker applications.
 The broker thus can not associate these two clients until each try to
 send to each other.  But, they can not send to each other until the
 broker associates them.  This catch-22 is broken in the flow broker's
-begin-of-transmission (<b>BOT</b>) protocol which is a small extension to the
-basic <i>flow protocol</i> and is not exposed to remote clients.
+<i>flow initiation protocol</i> which is a small extension to the basic <i>flow
+protocol</i> and is not exposed to remote clients.
 </p>
 
 <p>
-The <b>BOT</b> protocol is illustrated in the following UML sequence diagram.
+The flow initiation (FI) protocol is illustrated in the following UML
+sequence diagram.
 </p>
 
 
@@ -306,33 +307,35 @@ The <b>BOT</b> protocol is illustrated in the following UML sequence diagram.
 
 
 <p>
-The object <b>client</b> is the remote client, the <b>port</b> represents ZIO port
-with the broker SERVER socket.  The <b>BOT</b> protocol is inserted between
-the reception of the <b>BOT-rem</b> message and its <b>BOT-loc</b> reply and
-proceeds with this sequence:
+In the diagram the object named <b>client</b> is the remote client, the <b>port</b>
+represents the <b>broker</b> ZIO port with a SERVER socket.  The FI protocol
+is inserted between the reception of the <b>BOT</b> message from the remote
+client (<b>BOT-rem) and its reply (*BOT-loc</b>) from the local client handler
+and proceeds through this sequence:
 </p>
 
 <ol class="org-ol">
-<li><b>broker</b> stores the <b>BOT-rem</b> <i>routing ID</i> into a <code>cid</code> attribute of the
-message flow object and reverses the flow <code>direction</code> attribute
-producing the <b>BOT-loc</b> message and calls the <b>factory</b> on this
-message.</li>
+<li><b>broker</b> receives <b>BOT-rem</b> and stores the ZeroMQ <i>routing ID</i> of that
+message into a <code>cid</code> attribute of the ZIO message flow object (prefix
+header label attribute) and reverses the value of the flow
+<code>direction</code> attribute producing the <b>BOT-loc</b> message.  It then calls
+the <b>factory</b> on this message.</li>
 <li><b>factory</b> dispatches the message in an application-dependent manner.
 Shown here, a <b>handler</b> is spawned.  Other dispatching patterns are
 allowed, but the subsequent behavior of the <b>handler</b> illustrates
-what is required from them by the <b>BOT</b> protocol.</li>
+what is required those patterns by the FI protocol.</li>
 <li><b>handler</b> sends to <b>port</b> the <b>BOT-loc</b> message, typically as-is but may
 make changes if the application level protocol requires it however
 it must keep the <code>cid</code> flow object attribute intact.</li>
-<li>On receipt of any message with a <code>cid</code> the <b>broker</b> records the <i>routing
-ID</i> of that message and the <code>cid</code> in that message in a bidirectional
-association.</li>
+<li>On receipt of any message with a <code>cid</code> attribute the <b>broker</b> records
+the <i>routing ID</i> of that message and the <code>cid</code> in that message in a
+bidirectional association.</li>
 <li>The <b>broker</b> strips the <code>cid</code>, forwards <b>BOT-loc</b> to the remote client,
 reverses its <code>direction</code> attribute and sends it to the local client
 handler thus completing the flow protocol <b>BOT</b> handling for both
 clients.</li>
-<li>Subsequent flow messages from either client can now be routed to
-its partner client.</li>
+<li>Subsequent flow messages from either remote client or local client
+handler can now be routed to its partner.</li>
 <li>Any <b>EOT</b> flow message observed by the <b>broker</b> will result in removal
 of the corresponding entry in the bidirectional association.  Any
 non-<b>BOT</b> messages with a <i>routing ID</i> not present in this association
@@ -341,11 +344,11 @@ are dropped.</li>
 </div>
 </div>
 
-<div id="outline-container-orgf6dc052" class="outline-2">
-<h2 id="addressing"><a id="orgf6dc052"></a><span class="section-number-2">2</span> Addressing</h2>
+<div id="outline-container-orgd46fd48" class="outline-2">
+<h2 id="addressing"><a id="orgd46fd48"></a><span class="section-number-2">2</span> Addressing</h2>
 <div class="outline-text-2" id="text-addressing">
 <p>
-The creation of the <b>broker</b> SERVER <b>port</b> is outside the scope of the <b>BOT</b>
+The creation of the <b>broker</b> SERVER <b>port</b> is outside the scope of the FI
 protocol extension.  That is, the application must arrange for the
 <b>port</b> to be online prior to <b>broker</b> operation and any <b>factory</b> and
 <b>handlers</b> must know how to form attachment (be it connect or bind)
@@ -356,8 +359,8 @@ socket to bind and any clients to connect.
 </div>
 </div>
 
-<div id="outline-container-org715cded" class="outline-2">
-<h2 id="complexity"><a id="org715cded"></a><span class="section-number-2">3</span> Broker Complexity</h2>
+<div id="outline-container-org4ce42ec" class="outline-2">
+<h2 id="complexity"><a id="org4ce42ec"></a><span class="section-number-2">3</span> Broker Complexity</h2>
 <div class="outline-text-2" id="text-complexity">
 <p>
 The complexity of the broker appears somewhat high while one might say
@@ -367,8 +370,8 @@ section outlines what this means.
 </p>
 </div>
 
-<div id="outline-container-orged1e461" class="outline-3">
-<h3 id="mirror"><a id="orged1e461"></a><span class="section-number-3">3.1</span> Broker as mirror</h3>
+<div id="outline-container-org3e17d10" class="outline-3">
+<h3 id="mirror"><a id="org3e17d10"></a><span class="section-number-3">3.1</span> Broker as mirror</h3>
 <div class="outline-text-3" id="text-mirror">
 <p>
 The <b>broker</b> and its given <b>factor</b> provides a mirror that allows remote
@@ -382,8 +385,8 @@ identically.
 </div>
 </div>
 
-<div id="outline-container-org5832cda" class="outline-3">
-<h3 id="simplicity"><a id="org5832cda"></a><span class="section-number-3">3.2</span> Handler simplicity</h3>
+<div id="outline-container-org8389b38" class="outline-3">
+<h3 id="simplicity"><a id="org8389b38"></a><span class="section-number-3">3.2</span> Handler simplicity</h3>
 <div class="outline-text-3" id="text-simplicity">
 <p>
 Because a handler may be implemented in terms of a client it may use
@@ -394,8 +397,8 @@ new protocol would need to be invented to implement client handlers.
 </div>
 </div>
 
-<div id="outline-container-org1165f99" class="outline-3">
-<h3 id="central"><a id="org1165f99"></a><span class="section-number-3">3.3</span> Centralization</h3>
+<div id="outline-container-org5894603" class="outline-3">
+<h3 id="central"><a id="org5894603"></a><span class="section-number-3">3.3</span> Centralization</h3>
 <div class="outline-text-3" id="text-central">
 <p>
 Brokers are naturally centralizing.  This can be advantageous or
@@ -424,15 +427,15 @@ and this alone may pose a bottleneck on bandwidth grounds.
 </div>
 </div>
 
-<div id="outline-container-org7981ab8" class="outline-2">
-<h2 id="lockstep"><a id="org7981ab8"></a><span class="section-number-2">4</span> Handler Synchronicity</h2>
+<div id="outline-container-org749cdc1" class="outline-2">
+<h2 id="lockstep"><a id="org749cdc1"></a><span class="section-number-2">4</span> Handler Synchronicity</h2>
 <div class="outline-text-2" id="text-lockstep">
 <p>
 The <b>broker</b> manages its <b>port</b> in a single thread and while the operation
 in that thread is very simple, it will only service one message at a
 time.  In particular, the <b>broker</b> relies on the call on the <b>factory</b> to
 return promptly.  The <b>factory</b> must not be designed to directly handle
-the BOT protocol or else deadlock is assured.
+the FI protocol or else deadlock is assured.
 </p>
 
 <p>

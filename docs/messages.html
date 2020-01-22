@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-01-03 Fri 16:34 -->
+<!-- 2020-01-22 Wed 12:33 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>ZIO messages</title>
@@ -239,19 +239,19 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orge5f88dd">1. Schema</a>
+<li><a href="#org3d19272">1. Schema</a>
 <ul>
-<li><a href="#orgc2409a8">1.1. Levels</a></li>
-<li><a href="#org15cd7d5">1.2. Format</a></li>
-<li><a href="#orgc1a9dba">1.3. Origin</a></li>
-<li><a href="#orgbab0363">1.4. Granule</a></li>
-<li><a href="#org738ad34">1.5. Seqno</a></li>
-<li><a href="#org2c2bcfc">1.6. Payload</a></li>
+<li><a href="#orgdb2053b">1.1. Levels</a></li>
+<li><a href="#org374c0c1">1.2. Form</a></li>
+<li><a href="#org058d7d0">1.3. Origin</a></li>
+<li><a href="#orgca66d44">1.4. Granule</a></li>
+<li><a href="#orgdfa1ec7">1.5. Seqno</a></li>
+<li><a href="#orged7378c">1.6. Payload</a></li>
 </ul>
 </li>
-<li><a href="#orgc821eab">2. Single-part vs Multi-part</a>
+<li><a href="#org924b5c7">2. Single-part vs Multi-part</a>
 <ul>
-<li><a href="#orgbc85ffa">2.1. ZeroMQ part-cardinality</a></li>
+<li><a href="#org87f967d">2.1. ZeroMQ part-cardinality</a></li>
 </ul>
 </li>
 </ul>
@@ -275,12 +275,12 @@ convention for a portion of these messages.  On this convention, a
 <a href="taxonomy.html">taxonomy</a> of ZIO behavior is built.
 </p>
 
-<div id="outline-container-orge5f88dd" class="outline-2">
-<h2 id="orge5f88dd"><span class="section-number-2">1</span> Schema</h2>
+<div id="outline-container-org3d19272" class="outline-2">
+<h2 id="org3d19272"><span class="section-number-2">1</span> Schema</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 A ZIO message is composed of several "segments" (avoiding "frame" and
-"part" here, see <a href="#orgc821eab">2</a> below).  The segments fall
+"part" here, see <a href="#org924b5c7">2</a> below).  The segments fall
 into one of two categories which are called:
 </p>
 
@@ -325,7 +325,7 @@ subtable represents one message segment.
 </tr>
 
 <tr>
-<td class="org-left">format</td>
+<td class="org-left">form</td>
 <td class="org-left">(eg "JSON", "TEXT")</td>
 <td class="org-right">4</td>
 </tr>
@@ -358,14 +358,14 @@ subtable represents one message segment.
 <tbody>
 <tr>
 <td class="org-left">payload</td>
-<td class="org-left">per format</td>
+<td class="org-left">per form</td>
 <td class="org-right">N1</td>
 </tr>
 </tbody>
 <tbody>
 <tr>
 <td class="org-left">payload</td>
-<td class="org-left">per format</td>
+<td class="org-left">per form</td>
 <td class="org-right">N2</td>
 </tr>
 </tbody>
@@ -388,7 +388,7 @@ contains these fields:
 <dl class="org-dl">
 <dt>magic</dt><dd>three ASCII characters: <code>ZIO</code> marks this as a ZIO message</dd>
 <dt>level</dt><dd>a single digit, ASCII encoded gives the message level</dd>
-<dt>format</dt><dd>a four byte format ID specifying the payload format, ZIO reserves a few.</dd>
+<dt>form</dt><dd>a four byte form ID specifying the payload format, ZIO reserves a few.</dd>
 <dt>label</dt><dd>optional, application dependent string</dd>
 </dl>
 
@@ -418,8 +418,8 @@ information on the payload segments follow.
 </div>
 
 
-<div id="outline-container-orgc2409a8" class="outline-3">
-<h3 id="orgc2409a8"><span class="section-number-3">1.1</span> Levels</h3>
+<div id="outline-container-orgdb2053b" class="outline-3">
+<h3 id="orgdb2053b"><span class="section-number-3">1.1</span> Levels</h3>
 <div class="outline-text-3" id="text-1-1">
 <p>
 ZIO message have a <b>level</b> indicated by a single ASCII digit.  The
@@ -463,31 +463,31 @@ some criteria.
 </div>
 </div>
 
-<div id="outline-container-org15cd7d5" class="outline-3">
-<h3 id="org15cd7d5"><span class="section-number-3">1.2</span> Format</h3>
+<div id="outline-container-org374c0c1" class="outline-3">
+<h3 id="org374c0c1"><span class="section-number-3">1.2</span> Form</h3>
 <div class="outline-text-3" id="text-1-2">
 <p>
-The <b>format</b> field provides a hint for the parsing of the payload, and
-possibly its further interpretation.  That is, given the format,
+The <b>form</b> field provides a hint for the parsing of the payload, and
+possibly its further interpretation.  That is, given the form,
 application code consuming the payload should be able to read the
 payload into memory in some suitable type of data structure and
 possibly react to its content.
 </p>
 
 <p>
-Except for the formats reserved by ZIO and described in <a href="format.html">format</a>, the
-application developer is free to set the <b>format</b> field to any four byte
+Except for the forms reserved by ZIO and described in <a href="format.html">format</a>, the
+application developer is free to set the <b>form</b> field to any four byte
 value.  It is suggested to try to make use of the reserved formats and
 to not proliferate them due to conflating need for a new format hint
 with need for schema hints.  The latter is discussed below in section
-<a href="#org2c2bcfc">1.6</a>.  If custom formats are used, it is further recommended to use
+<a href="#orged7378c">1.6</a>.  If custom forms are used, it is further recommended to use
 four ASCII characters to facilitate prefix matching. 
 </p>
 </div>
 </div>
 
-<div id="outline-container-orgc1a9dba" class="outline-3">
-<h3 id="orgc1a9dba"><span class="section-number-3">1.3</span> Origin</h3>
+<div id="outline-container-org058d7d0" class="outline-3">
+<h3 id="org058d7d0"><span class="section-number-3">1.3</span> Origin</h3>
 <div class="outline-text-3" id="text-1-3">
 <p>
 In general, the interpretation of the value of the <b>origin</b> field is
@@ -499,8 +499,8 @@ managing it.  The recommended interpretation of <b>origin</b> is to identify
 </div>
 
 
-<div id="outline-container-orgbab0363" class="outline-3">
-<h3 id="orgbab0363"><span class="section-number-3">1.4</span> Granule</h3>
+<div id="outline-container-orgca66d44" class="outline-3">
+<h3 id="orgca66d44"><span class="section-number-3">1.4</span> Granule</h3>
 <div class="outline-text-3" id="text-1-4">
 <p>
 In general, the interpretation of the value of the <b>granule</b> field is
@@ -514,8 +514,8 @@ origins.
 </div>
 
 
-<div id="outline-container-org738ad34" class="outline-3">
-<h3 id="org738ad34"><span class="section-number-3">1.5</span> Seqno</h3>
+<div id="outline-container-orgdfa1ec7" class="outline-3">
+<h3 id="orgdfa1ec7"><span class="section-number-3">1.5</span> Seqno</h3>
 <div class="outline-text-3" id="text-1-5">
 <p>
 In general, the interpretation of the value of the <b>seqno</b> field is
@@ -529,24 +529,24 @@ message loss (eg, if PUB/SUB is used).
 </div>
 </div>
 
-<div id="outline-container-org2c2bcfc" class="outline-3">
-<h3 id="org2c2bcfc"><span class="section-number-3">1.6</span> Payload</h3>
+<div id="outline-container-orged7378c" class="outline-3">
+<h3 id="orged7378c"><span class="section-number-3">1.6</span> Payload</h3>
 <div class="outline-text-3" id="text-1-6">
 <p>
 All segments that follow the header are called <i>payload</i>.  Ultimately,
 the payload is fully in the domain of the application developer.  ZIO
-does not dictate their use or format beyond the ZIO-reserved formats
-and providing the <b>format</b> field in the ZIO header.
+does not dictate their use or format beyond the ZIO-reserved forms
+and providing the <b>form</b> field in the ZIO header.
 </p>
 
 <p>
-The header field <b>format</b> is intended to provide the hint needed to at
+The header field <b>form</b> is intended to provide the hint needed to at
 least <b>parse</b> the payload if not also to <b>interpret</b> it.  The field <b>label</b>
 may be used to provide further hinting.
 </p>
 
 <p>
-For example, it is expected that payload of a message with <b>format</b> set
+For example, it is expected that payload of a message with <b>form</b> set
 to <code>JSON</code> can be parsed as a string in JSON format.  Interpreting the
 resulting data structure may then rely on a variety of
 application-dependent hints.  These include
@@ -562,8 +562,8 @@ application-dependent hints.  These include
 </div>
 
 
-<div id="outline-container-orgc821eab" class="outline-2">
-<h2 id="orgc821eab"><span class="section-number-2">2</span> Single-part vs Multi-part</h2>
+<div id="outline-container-org924b5c7" class="outline-2">
+<h2 id="org924b5c7"><span class="section-number-2">2</span> Single-part vs Multi-part</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 ZeroMQ exposes a concept of single-part vs multi-part messages.  This
@@ -571,8 +571,8 @@ section describes how ZIO deals with this dichotomy.
 </p>
 </div>
 
-<div id="outline-container-orgbc85ffa" class="outline-3">
-<h3 id="orgbc85ffa"><span class="section-number-3">2.1</span> ZeroMQ part-cardinality</h3>
+<div id="outline-container-org87f967d" class="outline-3">
+<h3 id="org87f967d"><span class="section-number-3">2.1</span> ZeroMQ part-cardinality</h3>
 <div class="outline-text-3" id="text-2-1">
 <p>
 In ZeroMQ, a "part" represents one atomic transfer of data between the
