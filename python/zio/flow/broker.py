@@ -10,7 +10,7 @@ import zmq
 import zio
 from .util import objectify, switch_direction
 import logging
-log = logging.getLogger(__name__)
+log = logging.getLogger("zpb")
 
 class Broker:
     def __init__(self, server, factory):
@@ -46,6 +46,7 @@ class Broker:
         self.server = server
         self.factory = factory
         self.other = dict()     # map router IDs
+        self.handlers = set()
 
     def poll(self, timeout=None):
         '''
@@ -54,65 +55,73 @@ class Broker:
         Return None if timeout, False if error, True if nominal
 
         '''
+        log.debug ("broker recving")
         msg = self.server.recv(timeout)
         if not msg:
             log.debug (f'broker poll timeout with {timeout}')
             return None
-        #log.debug ("broker poll:",msg)
         rid = msg.routing_id
+
+        orid = self.other.get(rid, None)
+        if orid:                # we have its other
+            if orid in self.handlers:
+                log.debug (f"broker route h2c {rid} -> {orid}:\n{msg}\n")
+            else:
+                log.debug (f"broker route c2h {rid} -> {orid}:\n{msg}\n")
+            msg.routing_id = orid
+            self.server.send(msg)
+            return True
+
+        # message is from new client or handler 
+
         fobj = objectify(msg)
+        log.debug(f'broker gets {rid} {fobj}')
         ftype = fobj.get("flow", None)
-        if not ftype:
-            log.debug (f'broker poll got non flow msg:\n{msg}')
+        if not ftype or ftype != "BOT":
+            log.warning (f'broker poll got unexpected msg from {rid}:\n{msg}')
             return False
 
-        # Special, assymetric handling of BOT
-        if ftype == "BOT":
-            cid = fobj.get('cid',None)
-            if cid:             # BOT from handler
-                self.other[rid] = cid
-                self.other[cid] = rid
-                del fobj["cid"]
+        cid = fobj.get('cid',None)
+        if cid:             # BOT from handler
+            self.handlers.add(rid)
+            self.other[rid] = cid
+            self.other[cid] = rid
+            del fobj["cid"]
+            log.debug(f'broker route from handler {rid} <--> {cid}')
 
-                label_for_client = json.dumps(fobj)
+            label_for_client = json.dumps(fobj)
 
-                fobj = switch_direction(fobj)                
-                msg.label = json.dumps(fobj)                
-                msg.routing_id = rid
-                self.server.send(msg) # to handler
+            fobj = switch_direction(fobj)                
+            msg.label = json.dumps(fobj)                
+            msg.routing_id = rid
+            self.server.send(msg) # to handler
 
-                msg.label = label_for_client
-                # fall through to send to client
-                
-            else:               # BOT from client
-                fobj = switch_direction(fobj)
-                if fobj is None:
-                    return False 
-                fobj["cid"] = rid
-                msg.label = json.dumps(fobj)
-                msg.routing_id = 0
-                got = self.factory(msg)
-                if got is None:
-                    fobj['flow'] = 'EOT'
-                    msg.label = json.dumps(fobj)
-                    msg.routing_id = rid
-                    self.server.send(msg)
-                    return False
-                else:
-                    return True
-                return False    # unknown respose 
+            msg.label = label_for_client
+            msg.routing_id = cid
+            log.debug (f"broker route h2c {rid} -> {cid}:\n{msg}\n")
+            self.server.send(msg)
+            return True
 
-        # route message to other
-        cid = self.other[rid]
-        msg.routing_id = cid
-        log.debug (f"broker route {rid} -> {cid}:\n{msg}\n")
+        # BOT from client
+        log.debug(f'broker route from client {rid}')
+        fobj = switch_direction(fobj)
+        if fobj is None:
+            return False 
+        fobj["cid"] = rid
+        msg.label = json.dumps(fobj)
+        msg.routing_id = 0
+        got = self.factory(msg)
+        if got:
+            return True
+
+        # factory refuses
+        log.debug (f"broker factory rejects {msg.label}")
+        fobj['flow'] = 'EOT'
+        msg.label = json.dumps(fobj)
+        msg.routing_id = rid
         self.server.send(msg)
+        return False
 
-        # if EOT comes through, we should forget the routing
-        if ftype == 'EOT':
-            del self.other[rid]
-
-        return True
 
     def stop(self):
         self.factory.stop()

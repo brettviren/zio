@@ -24,7 +24,7 @@ def cli(ctx):
 @click.option("--pre-sleep", type=int, default=0,
               help='Number of seconds to sleep after our peer goes on line and before looking for friends')
 @click.option("--post-sleep", type=int, default=0,
-              help='Number of seconds to sleep after our peer goes on line and before looking for friends')
+              help='Number of seconds to sleep after our peer goes on line and before exiting')
 @click.option("-n","--name", default="lurker",
               help='Set a Zyre nick name for this node')
 @click.argument("headers",nargs=-1)

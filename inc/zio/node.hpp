@@ -73,7 +73,8 @@ namespace zio {
         
         /// @brief Bring the node online.
         /// 
-        /// The extra headers are merged with those provided by this nodes @ref zio::Peer.
+        /// The extra headers are merged with those provided by this
+        /// nodes @ref zio::Peer.
         void online(const headerset_t& extra_headers = {});
 
         /// Bring the node offline.
