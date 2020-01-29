@@ -125,7 +125,7 @@ class Flow:
             log.debug("malformed PAY credit: %s" % (msg,))
             return None
         self.credit += credit
-        self.self.recv_seqno += 1
+        self.recv_seqno += 1
         return credit
 
 
