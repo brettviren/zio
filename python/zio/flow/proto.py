@@ -10,7 +10,7 @@ from ..message import Message
 from .util import *
 
 import logging
-log = logging.getLogger(__name__)
+log = logging.getLogger("zpb")
 
 from enum import Enum
 class Direction(Enum):
@@ -31,6 +31,8 @@ class Flow:
     total_credit = 0
     is_sender = True
     routing_id = 0
+    send_seqno = -1
+    recv_seqno = -1
 
     def __init__(self, port):
         '''
@@ -46,10 +48,12 @@ class Flow:
 
         Client calls send_bot() first, server calls send_bot() second.
         '''
+        assert(self.send_seqno == -1)
         msg.form = 'FLOW'
         fobj = objectify(msg)
         msg.label = stringify('BOT', **fobj)
         msg.routing_id = self.routing_id
+        msg.seqno = self.send_seqno = 0
         self.port.send(msg)
 
 
@@ -59,8 +63,11 @@ class Flow:
 
         Returns None if EOT was received or timeout occurred.
         '''
+        assert(self.recv_seqno == -1)
         msg = self.port.recv(timeout)
         if msg is None:
+            return None
+        if msg.seqno != 0:
             return None
         if msg.form != 'FLOW':
             return None
@@ -74,8 +81,6 @@ class Flow:
             log.debug("malformed BOT credit: %s" % (msg,))
             return None
 
-        self.total_credit = credit
-
         fdir = fobj.get("direction", None)
         if fdir == "extract":
             self.is_sender = False
@@ -87,6 +92,8 @@ class Flow:
             log.debug("malformed BOT direction: %s" % (msg,))
             return None
 
+        self.total_credit = credit
+        self.recv_seqno = 1
         self.routing_id = msg.routing_id
         return msg
     
@@ -100,8 +107,11 @@ class Flow:
         PAY is received.  Caller should likely respond to that with
         send_eot(msg,0).
         '''
+        assert(self.recv_seqno > 0)
         msg = self.port.recv(timeout)
         if msg is None:
+            return None
+        if msg.seqno - self.recv_seqno != 1:
             return None
         if msg.form != 'FLOW':
             return None
@@ -115,6 +125,7 @@ class Flow:
             log.debug("malformed PAY credit: %s" % (msg,))
             return None
         self.credit += credit
+        self.self.recv_seqno += 1
         return credit
 
 
@@ -133,6 +144,9 @@ class Flow:
         msg.form = 'FLOW'
         msg.label = stringify('DAT', **objectify(msg))
         msg.routing_id = self.routing_id
+        assert(self.send_seqno >= 0)
+        self.send_seqno += 1
+        msg.seqno = self.send_seqno
         #log.debug (f"port send with credit %d: %s" % (self.credit, msg))
         self.port.send(msg)
         self.credit -= 1
@@ -152,6 +166,9 @@ class Flow:
         nsent = self.credit
         self.credit = 0
         msg = Message(form='FLOW', label=stringify('PAY', credit=nsent))
+        assert(self.send_seqno >= 0)
+        self.send_seqno += 1
+        msg.seqno = self.send_seqno
         log.debug("send: %s" % msg)
         self.port.send(msg)
         return nsent
@@ -163,12 +180,18 @@ class Flow:
 
         Return None if EOT was received instead.
         '''
+        assert(self.recv_seqno > 0)
         log.debug (f'flow.get({timeout})')
         self.flush_pay()
         msg = self.port.recv(timeout)
         if msg is None:
+            log.debug("flow.get timeout")
+            return None
+        if msg.seqno - self.recv_seqno != 1:
+            log.debug(f'flow.get bad seqno: {msg.seqno}, last {self.recv_seqno}\n{msg}')
             return None
         if msg.form != 'FLOW':
+            log.debug(f'flow.get not FLOW message\n{msg}')
             return None
         fobj = objectify(msg)
         if fobj.get('flow',None) == 'EOT':
@@ -178,6 +201,7 @@ class Flow:
             log.warning("malformed DAT flow:\n%s" % (msg,))
             return None
         self.credit += 1
+        self.recv_seqno += 1
         self.flush_pay()
         return msg;
             
@@ -192,7 +216,11 @@ class Flow:
         msg.form = 'FLOW'
         msg.label = stringify('EOT', **objectify(msg))
         msg.routing_id = self.routing_id
+        assert(self.send_seqno >= 0)
+        self.send_seqno += 1
+        msg.seqno = self.send_seqno
         self.port.send(msg)
+        self.send_seqno = -1
 
     def recv_eot(self, timeout=None):
         '''
@@ -206,13 +234,18 @@ class Flow:
         it should send_eot() but not expect another EOT ack.
         '''
         while True:
+            assert(self.recv_seqno > 0)
             msg = self.port.recv(timeout)
             if msg is None:
                 return None
+            if msg.seqno - self.recv_seqno != 1:
+                continue
             if msg.form != 'FLOW':
                 continue        # who's knocking at my door?
+            self.recv_seqno += 1
             fobj = objectify(msg)
             if fobj.get('flow',None) == 'EOT':
+                self.recv_seqno = -1
                 return msg
             continue            # try again, probably got a PAY/DAT
         return                  # won't reach

@@ -83,6 +83,9 @@ namespace zio {
         /// granule (if 0 use time), origin (if 0, leave as is).
         void set_coord(origin_t origin=0, granule_t gran=0);
 
+        /// Explicit set
+        void set_seqno(int seqno) { m_header.coord.seqno = seqno; }
+
         /// Encode self to single-part message.  If self has a routing
         /// ID, it will be set on the produced message.
         message_t encode() const;

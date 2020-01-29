@@ -118,6 +118,9 @@ namespace zio {
             // subsequent send()
             Message::routing_id_t m_rid;
 
+            int m_send_seqno{0};
+            int m_recv_seqno{0};
+
             bool parse_label(Message& msg, zio::json& lobj);
         };
 

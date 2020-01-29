@@ -4,9 +4,9 @@
 
 ZIO /data flow protocol/ is a layer on top of basic ZIO [[file::port.org][ports]].  It
 provides for one-way transmission of application-dependent payload
-messages between two ports with additional guarantees beyond those
-that are provided by ZIO ports (and their underlying ZeroMQ sockets).
-These guarantees include:
+messages between two ports with additional guarantees (requirements)
+beyond those that are provided by ZIO ports (and their underlying
+ZeroMQ sockets).  These guarantees include:
 
 - The ZeroMQ sockets are CLIENT/SERVER pairs.
 
@@ -15,6 +15,8 @@ These guarantees include:
 
 - The total number of messages buffered during the transmission by the
   sockets at both endpoints combined will not exceed a given maximum.
+
+- The ~seqno~ field in a ZIO message is strictly incremented on send. 
 
 Some of the benefits of these guarantees (some might call them
 restrictions or limitations) are described in the section of the

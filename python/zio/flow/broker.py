@@ -65,9 +65,9 @@ class Broker:
         orid = self.other.get(rid, None)
         if orid:                # we have its other
             if orid in self.handlers:
-                log.debug (f"broker route h2c {rid} -> {orid}:\n{msg}\n")
-            else:
                 log.debug (f"broker route c2h {rid} -> {orid}:\n{msg}\n")
+            else:
+                log.debug (f"broker route h2c {rid} -> {orid}:\n{msg}\n")
             msg.routing_id = orid
             self.server.send(msg)
             return True
@@ -94,6 +94,7 @@ class Broker:
             fobj = switch_direction(fobj)                
             msg.label = json.dumps(fobj)                
             msg.routing_id = rid
+            log.debug (f"broker route c2h {cid} -> {rid}:\n{msg}\n")
             self.server.send(msg) # to handler
 
             msg.label = label_for_client
