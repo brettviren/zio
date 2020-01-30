@@ -48,12 +48,15 @@ class Flow:
 
         Client calls send_bot() first, server calls send_bot() second.
         '''
-        assert(self.send_seqno == -1)
+        if self.send_seqno != -1:
+            raise RuntimeError("BOT must be sent first")
+
         msg.form = 'FLOW'
         fobj = objectify(msg)
         msg.label = stringify('BOT', **fobj)
         msg.routing_id = self.routing_id
         msg.seqno = self.send_seqno = 0
+        log.debug(f'send_bot: {self.send_seqno} {msg}')
         self.port.send(msg)
 
 
@@ -61,25 +64,28 @@ class Flow:
         '''
         Receive and return BOT message or None.
 
-        Returns None if EOT was received or timeout occurred.
+        Returns None if EOT was received.  
+
+        Raises exceptions
         '''
-        assert(self.recv_seqno == -1)
+        if self.recv_seqno != -1:
+            raise RuntimeError("BOT must be recv first")
+
         msg = self.port.recv(timeout)
         if msg is None:
-            return None
+            raise TimeoutError('flow.recv_bot: timeout')
         if msg.seqno != 0:
-            return None
+            raise RuntimeError(f'flow.recv_bot: BOT not seqno 0 {msg.seqno}')
         if msg.form != 'FLOW':
-            return None
+            raise TypeError('flow.recv_bot: not FLOW message')
         fobj = objectify(msg)
-        if fobj.get("flow",None) != "BOT":
-            log.debug("malformed BOT flow: %s" % (msg,))
-            return None
+        ftype = fobj.get("flow",None) 
+        if ftype != "BOT":
+            raise TypeError(f'flow.recv_bot: unknown FLOW message {ftype}')
 
         credit = fobj.get("credit",None)
         if credit is None:
-            log.debug("malformed BOT credit: %s" % (msg,))
-            return None
+            raise ValueError('flow.recv_bot: no credit')
 
         fdir = fobj.get("direction", None)
         if fdir == "extract":
@@ -89,11 +95,10 @@ class Flow:
             self.is_sender = True
             self.credit = 0
         else:
-            log.debug("malformed BOT direction: %s" % (msg,))
-            return None
+            raise ValueError(f'flow.recv_bot: uknonwn direction {fdir}')
 
         self.total_credit = credit
-        self.recv_seqno = 1
+        self.recv_seqno = 0
         self.routing_id = msg.routing_id
         return msg
     
@@ -107,7 +112,9 @@ class Flow:
         PAY is received.  Caller should likely respond to that with
         send_eot(msg,0).
         '''
-        assert(self.recv_seqno > 0)
+        if self.recv_seqno < 0:
+            raise RuntimeError("must recv BOT before PAY")
+
         msg = self.port.recv(timeout)
         if msg is None:
             return None
@@ -144,7 +151,8 @@ class Flow:
         msg.form = 'FLOW'
         msg.label = stringify('DAT', **objectify(msg))
         msg.routing_id = self.routing_id
-        assert(self.send_seqno >= 0)
+        if self.send_seqno < 0:
+            raise RuntimeError("must send BOT before DAT")
         self.send_seqno += 1
         msg.seqno = self.send_seqno
         #log.debug (f"port send with credit %d: %s" % (self.credit, msg))
@@ -166,10 +174,11 @@ class Flow:
         nsent = self.credit
         self.credit = 0
         msg = Message(form='FLOW', label=stringify('PAY', credit=nsent))
-        assert(self.send_seqno >= 0)
         self.send_seqno += 1
         msg.seqno = self.send_seqno
-        log.debug("send: %s" % msg)
+        log.debug(f'flush_pay: {self.send_seqno} {msg}')
+        if self.send_seqno < 0:
+            raise RuntimeError("must recv BOT before PAY")
         self.port.send(msg)
         return nsent
 
@@ -178,28 +187,34 @@ class Flow:
         '''
         Receive and return a DAT message and send any accumulated PAY.
 
-        Return None if EOT was received instead.
+        Return None if EOT was received instead of DAT.
+
+        Exceptions raised.
         '''
-        assert(self.recv_seqno > 0)
+        if self.recv_seqno < 0:
+            raise RuntimeError("must recv BOT before DAT")
+
         log.debug (f'flow.get({timeout})')
         self.flush_pay()
         msg = self.port.recv(timeout)
         if msg is None:
             log.debug("flow.get timeout")
-            return None
+            raise TimeoutError("flow.get timeout")
         if msg.seqno - self.recv_seqno != 1:
             log.debug(f'flow.get bad seqno: {msg.seqno}, last {self.recv_seqno}\n{msg}')
-            return None
+            raise ValueError('flow.get bad seqno')
         if msg.form != 'FLOW':
             log.debug(f'flow.get not FLOW message\n{msg}')
-            return None
+            raise TypeError('flow.get not FLOW message')
         fobj = objectify(msg)
         if fobj.get('flow',None) == 'EOT':
             log.debug("EOT during flow:\n%s" % (msg,))
             return None
-        if fobj.get('flow',None) != 'DAT':
+        ftype = fobj.get('flow',None)
+        if ftype != 'DAT':
             log.warning("malformed DAT flow:\n%s" % (msg,))
-            return None
+            raise TypeError(f'flow.get unexpected FLOW type {ftype}')
+
         self.credit += 1
         self.recv_seqno += 1
         self.flush_pay()
@@ -216,9 +231,12 @@ class Flow:
         msg.form = 'FLOW'
         msg.label = stringify('EOT', **objectify(msg))
         msg.routing_id = self.routing_id
-        assert(self.send_seqno >= 0)
+        if self.send_seqno < 0:
+            raise RuntimeError("must send BOT before EOT")
+
         self.send_seqno += 1
         msg.seqno = self.send_seqno
+        log.debug(f'send_eot: {self.send_seqno} {msg}')
         self.port.send(msg)
         self.send_seqno = -1
 
@@ -234,7 +252,9 @@ class Flow:
         it should send_eot() but not expect another EOT ack.
         '''
         while True:
-            assert(self.recv_seqno > 0)
+            if self.recv_seqno < 0:
+                raise RuntimeError("must recv BOT before EOT")
+
             msg = self.port.recv(timeout)
             if msg is None:
                 return None

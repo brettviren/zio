@@ -94,7 +94,6 @@ std::string zio::Message::label() const {
 
 void zio::Message::set_coord(origin_t origin, granule_t gran)
 {
-    ++m_header.coord.seqno;
     if (gran == 0) {
         auto tmp = std::chrono::system_clock::now().time_since_epoch();
         gran = std::chrono::duration_cast<std::chrono::microseconds>(tmp).count();

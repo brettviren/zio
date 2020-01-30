@@ -33,7 +33,7 @@ def switch_direction(fobj):
     elif fobj["direction"] == 'extract':
         fobj["direction"] = 'inject'
     else:
-        return None
+        raise KeyError('direction')
     return fobj
 
         

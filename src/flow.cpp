@@ -37,6 +37,10 @@ bool zio::flow::Flow::parse_label(Message& msg, zio::json& lobj)
 
 void zio::flow::Flow::send_bot(zio::Message& bot)
 {
+    if (m_send_seqno != -1) {
+        throw std::runtime_error("flow::send_bot() already called");
+    }
+
     zsys_debug("[flow %s]: send_bot", m_port->name().c_str());
     zio::json fobj;
     if (!parse_label(bot, fobj)) {
@@ -164,6 +168,12 @@ bool zio::flow::Flow::put(zio::Message& dat)
         m_credit = c;
     }
 
+    if (m_send_seqno < 0) {
+        zsys_error("[flow %s] send DAT %d",
+                   m_port->name().c_str(), m_send_seqno);
+        throw std::runtime_error("flow::put() must send BOT first");
+    }
+
     zio::json fobj;
     if (!parse_label(dat, fobj)) {
         throw std::runtime_error("bad message label for Flow::put()");
@@ -188,8 +198,8 @@ int zio::flow::Flow::flush_pay()
     zio::json obj{{"flow","PAY"},{"credit",m_credit}};
     msg.set_label(obj.dump());
     msg.set_seqno(++m_send_seqno);
-    zsys_debug("[flow %s] send PAY %d credit (rid:%u)",
-               m_port->name().c_str(), m_credit, m_rid);
+    zsys_debug("[flow %s] send PAY %d, credit:%d (rid:%u)",
+               m_port->name().c_str(), m_send_seqno, m_credit, m_rid);
     const int nsent = m_credit;
     m_credit=0;
     if (m_rid) { msg.set_routing_id(m_rid); }
@@ -200,6 +210,7 @@ int zio::flow::Flow::flush_pay()
 
 bool zio::flow::Flow::get(zio::Message& dat, int timeout)
 {
+    flush_pay();
     zsys_debug("[flow %s] get with %d credit (rid:%u)",
                m_port->name().c_str(), m_credit, m_rid);
 

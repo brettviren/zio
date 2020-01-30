@@ -218,8 +218,8 @@ static bool needs_codec(int stype)
 
 void zio::Port::send(zio::Message& msg)
 {
-    zsys_debug("[port %s] send %s %s",
-               m_name.c_str(), msg.form().c_str(), msg.label().c_str());
+    zsys_debug("[port %s] send %s %d %s",
+               m_name.c_str(), msg.form().c_str(), msg.seqno(), msg.label().c_str());
     msg.set_coord(m_origin);
     int stype = zio::sock_type(m_sock);
     if (needs_codec(stype)) {

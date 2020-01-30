@@ -52,14 +52,14 @@ class Broker:
         '''
         Poll for at most one message from the SERVER port
 
-        Return None if timeout, False if error, True if nominal
+        Raises exceptions.
 
         '''
-        log.debug ("broker recving")
         msg = self.server.recv(timeout)
+        log.debug (f'broker recv {msg}')
         if not msg:
-            log.debug (f'broker poll timeout with {timeout}')
-            return None
+            log.error (f'broker poll timeout with {timeout}')
+            raise TimeoutError(f'broker poll timeout with {timeout}')
         rid = msg.routing_id
 
         orid = self.other.get(rid, None)
@@ -70,16 +70,17 @@ class Broker:
                 log.debug (f"broker route h2c {rid} -> {orid}:\n{msg}\n")
             msg.routing_id = orid
             self.server.send(msg)
-            return True
+            return
 
         # message is from new client or handler 
 
         fobj = objectify(msg)
-        log.debug(f'broker gets {rid} {fobj}')
         ftype = fobj.get("flow", None)
-        if not ftype or ftype != "BOT":
-            log.warning (f'broker poll got unexpected msg from {rid}:\n{msg}')
-            return False
+        if not ftype:
+            raise TypeError(f'message not type FLOW')
+        if ftype != "BOT":
+            raise TypeError(f'flow message not type BOT')
+
 
         cid = fobj.get('cid',None)
         if cid:             # BOT from handler
@@ -101,19 +102,18 @@ class Broker:
             msg.routing_id = cid
             log.debug (f"broker route h2c {rid} -> {cid}:\n{msg}\n")
             self.server.send(msg)
-            return True
+            return
 
         # BOT from client
         log.debug(f'broker route from client {rid}')
         fobj = switch_direction(fobj)
-        if fobj is None:
-            return False 
+            
         fobj["cid"] = rid
         msg.label = json.dumps(fobj)
         msg.routing_id = 0
         got = self.factory(msg)
         if got:
-            return True
+            return
 
         # factory refuses
         log.debug (f"broker factory rejects {msg.label}")
@@ -121,7 +121,7 @@ class Broker:
         msg.label = json.dumps(fobj)
         msg.routing_id = rid
         self.server.send(msg)
-        return False
+        raise RuntimeError('broker factory rejects {msg.label}')
 
 
     def stop(self):
