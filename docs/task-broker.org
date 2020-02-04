@@ -7,15 +7,55 @@ This is still under design.
 #+end_warning
 
 The ZIO task broker is essentially a rip off of ZeroMQ [[https://github.com/zeromq/majordomo][majordomo]] aka [[http://zguide.zeromq.org/page:all#toc98][service
-oriented reliable queueing]] pattern with some variation:
+oriented reliable queueing]] pattern ([[http://zguide.zeromq.org/py:all#toc98][python version]]) with some variation:
 
-- It is more generic ("generaldomo"?) in that clients and services are
-  not directly matched by simply a hard-wired service name but by
-  applying a factory pattern as is done with the [[file:flow-broker.org][ZIO flow broker]].
+- It is more generalized ("generaldomo"?) in how client requests and
+  workers are matched.
 
-- Use of SERVER socket type instead of ROUTER to allow for clients to
-  use CLIENT and thus operate in a thread-safe manner in a changing
-  and multi-threaded context.
+- Replace ROUTER with SERVER so that clients may use thread-safe
+  CLIENT socket.
+
+* Requirements
+
+The primary requirements (goals) for the system are:
+
+- Allow one program ("client") to run a task in an "external" program
+  ("worker") where the two may be on different computers.
+
+- Support N-to-M mapping between clients and workers such that either
+  number may change over time without affecting operation ("broker",
+  aka ZeroMQ reliable request pattern / pirate patterns).
+
+- Do not restrict client endpoints to always run from the same thread
+  (use CLIENT socket, not REQ nor DEALER).
+
+- Allow for workers to be chosen based on a priority (eg, a task has
+  workers with a GPU implementation and others with a CPU
+  implementation, choose the from the former set unless they are all
+  occupied then accept a worker from the latter set).
+  
+- Allow clients and workers to come and go from the broker.
+
+- Reissue task if worker disappears after accepting it.
+
+- Never return the same result to a client (eg, if worker reappears
+  after a reissue)
+
+- Clients and workers can discover the broker SERVER socket address.
+ 
+- Broker provides status information.
+
+* Parts
+
+- client request message specification and payload
+- worker service specification
+- request/service matching mechanism
+- result messages specification and payload
+- client API
+- worker API
+- broker implementation
+
+
 
 
 

@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-02-04 Tue 14:52 -->
+<!-- 2020-02-04 Tue 17:00 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Task Broker</title>
@@ -248,6 +248,15 @@ for the JavaScript code in this tag.
  <a accesskey="H" href="index.html"> HOME </a>
 </div><div id="content">
 <h1 class="title">Task Broker</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#orgf0fc3b1">1. Requirements</a></li>
+<li><a href="#org0da21a8">2. Parts</a></li>
+</ul>
+</div>
+</div>
 <div class="nav">
 <ul class="org-ul">
 <li><a href="index.html">Main Page</a></li>
@@ -268,18 +277,68 @@ This is still under design.
 
 <p>
 The ZIO task broker is essentially a rip off of ZeroMQ <a href="https://github.com/zeromq/majordomo">majordomo</a> aka <a href="http://zguide.zeromq.org/page:all#toc98">service
-oriented reliable queueing</a> pattern with some variation:
+oriented reliable queueing</a> pattern (<a href="http://zguide.zeromq.org/py:all#toc98">python version</a>) with some variation:
 </p>
 
 <ul class="org-ul">
-<li>It is more generic ("generaldomo"?) in that clients and services are
-not directly matched by simply a hard-wired service name but by
-applying a factory pattern as is done with the <a href="flow-broker.html">ZIO flow broker</a>.</li>
+<li>It is more generalized ("generaldomo"?) in how client requests and
+workers are matched.</li>
 
-<li>Use of SERVER socket type instead of ROUTER to allow for clients to
-use CLIENT and thus operate in a thread-safe manner in a changing
-and multi-threaded context.</li>
+<li>Replace ROUTER with SERVER so that clients may use thread-safe
+CLIENT socket.</li>
 </ul>
+
+<div id="outline-container-orgf0fc3b1" class="outline-2">
+<h2 id="orgf0fc3b1"><span class="section-number-2">1</span> Requirements</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+The primary requirements (goals) for the system are:
+</p>
+
+<ul class="org-ul">
+<li>Allow one program ("client") to run a task in an "external" program
+("worker") where the two may be on different computers.</li>
+
+<li>Support N-to-M mapping between clients and workers such that either
+number may change over time without affecting operation ("broker",
+aka ZeroMQ reliable request pattern / pirate patterns).</li>
+
+<li>Do not restrict client endpoints to always run from the same thread
+(use CLIENT socket, not REQ nor DEALER).</li>
+
+<li>Allow for workers to be chosen based on a priority (eg, a task has
+workers with a GPU implementation and others with a CPU
+implementation, choose the from the former set unless they are all
+occupied then accept a worker from the latter set).</li>
+
+<li>Allow clients and workers to come and go from the broker.</li>
+
+<li>Reissue task if worker disappears after accepting it.</li>
+
+<li>Never return the same result to a client (eg, if worker reappears
+after a reissue)</li>
+
+<li>Clients and workers can discover the broker SERVER socket address.</li>
+
+<li>Broker provides status information.</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org0da21a8" class="outline-2">
+<h2 id="org0da21a8"><span class="section-number-2">2</span> Parts</h2>
+<div class="outline-text-2" id="text-2">
+<ul class="org-ul">
+<li>client request message specification and payload</li>
+<li>worker service specification</li>
+<li>request/service matching mechanism</li>
+<li>result messages specification and payload</li>
+<li>client API</li>
+<li>worker API</li>
+<li>broker implementation</li>
+</ul>
+</div>
+</div>
 </div>
 </body>
 </html>
