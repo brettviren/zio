@@ -1,0 +1,118 @@
+.TH "zio.flow.broker.Broker" 3 "Tue Feb 4 2020" "ZIO" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+zio.flow.broker.Broker
+.SH SYNOPSIS
+.br
+.PP
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "def \fB__init__\fP (self, \fBserver\fP, \fBfactory\fP)"
+.br
+.ti -1c
+.RI "def \fBpoll\fP (self, \fBtimeout\fP=None)"
+.br
+.ti -1c
+.RI "def \fBstop\fP (self)"
+.br
+.in -1c
+.SS "Public Attributes"
+
+.in +1c
+.ti -1c
+.RI "\fBserver\fP"
+.br
+.ti -1c
+.RI "\fBfactory\fP"
+.br
+.ti -1c
+.RI "\fBother\fP"
+.br
+.ti -1c
+.RI "\fBhandlers\fP"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+Definition at line 15 of file broker\&.py\&.
+.SH "Constructor & Destructor Documentation"
+.PP 
+.SS "def zio\&.flow\&.broker\&.Broker\&.__init__ ( self,  server,  factory)"
+
+.PP
+.nf
+Create a flow broker.
+
+Parameters
+----------
+server : zio.Port
+    An online SERVER port
+factory : callable
+    See below
+
+This broker routes messages between a pair of clients: a
+remote client and its handler.  It does this by adding a flow
+initiation protocol to ZIO flow protocol.
+
+On receipt of a BOT, the broker passes it to the factory which
+should return True if the BOT was accepted else None.  The
+factory call should return as promptly as possible as the
+broker blocks.
+
+If factory returns True then it is expected that the factory
+has started some other client which contacs the broker with
+the BOT.  The factory or the new client may modify the BOT as
+per flow protorocl but must leave intact the `cid` attribute
+placed in the flow object by the broker.
+
+Note that the flow handler protocol does not communicate the
+location of the broker's SERVER socket.  It is up to handler
+implementations to locate the the server.
+.fi
+.PP
+ 
+.PP
+Definition at line 16 of file broker\&.py\&.
+.SH "Member Function Documentation"
+.PP 
+.SS "def zio\&.flow\&.broker\&.Broker\&.poll ( self,  timeout = \fCNone\fP)"
+
+.PP
+.nf
+Poll for at most one message from the SERVER port
+
+Raises exceptions.
+.fi
+.PP
+ 
+.PP
+Definition at line 51 of file broker\&.py\&.
+.SS "def zio\&.flow\&.broker\&.Broker\&.stop ( self)"
+
+.PP
+Definition at line 127 of file broker\&.py\&.
+.SH "Member Data Documentation"
+.PP 
+.SS "zio\&.flow\&.broker\&.Broker\&.factory"
+
+.PP
+Definition at line 47 of file broker\&.py\&.
+.SS "zio\&.flow\&.broker\&.Broker\&.handlers"
+
+.PP
+Definition at line 49 of file broker\&.py\&.
+.SS "zio\&.flow\&.broker\&.Broker\&.other"
+
+.PP
+Definition at line 48 of file broker\&.py\&.
+.SS "zio\&.flow\&.broker\&.Broker\&.server"
+
+.PP
+Definition at line 46 of file broker\&.py\&.
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for ZIO from the source code\&.

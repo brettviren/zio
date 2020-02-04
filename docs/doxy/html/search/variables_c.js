@@ -1,5 +1,8 @@
 var searchData=
 [
-  ['payload',['payload',['../d7/d60/structclient__protocol_1_1events.html#ad0af21461ae77c50419cab2647a43dc9',1,'client_protocol::events']]],
-  ['prefix',['prefix',['../df/d17/structzio_1_1_header.html#ad1b8e7766b61664d6943cd6d91cb2ba3',1,'zio::Header']]]
+  ['name',['name',['../d8/d7e/classrule_1_1op_1_1_op.html#adf9e994d18bb98013cb9f2d3c7cf4bd5',1,'rule.op.Op.name()'],['../dc/dac/classzio_1_1port_1_1_port.html#a894f34412fafda79a05c853add7d7867',1,'zio.port.Port.name()'],['../d1/dae/namespacerule_1_1op.html#a42772bb9e5382a010c26c66a66d6ae19',1,'rule.op.name()'],['../dd/dc4/namespacesetup.html#ab3a7a0638d76a01367c5bc3cc699447f',1,'setup.name()']]],
+  ['nick',['nick',['../d9/d6a/structzio_1_1peer__info__t.html#a12e5b65c8ae6fb045411478dac8de0b6',1,'zio::peer_info_t::nick()'],['../dc/dea/classzio_1_1node_1_1_node.html#a805353a1b80fe464d7c7c8cdc3db345b',1,'zio.node.Node.nick()']]],
+  ['nick1',['nick1',['../da/dde/classtest__peer_1_1_test_peer.html#af2c632321479fd7f019ad0042d756240',1,'test_peer::TestPeer']]],
+  ['nick2',['nick2',['../da/dde/classtest__peer_1_1_test_peer.html#afd8fda0a6b51cf0b2c62e5c984e88791',1,'test_peer::TestPeer']]],
+  ['node',['node',['../d0/dab/namespacetest__ugly.html#a550ccb6a89167a6496446483fd5d57d7',1,'test_ugly']]]
 ];

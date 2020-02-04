@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['table_20of_20contents',['Table of Contents',['../d4/d8c/md_docs_doxymain.html',1,'']]]
+  ['new_20operators',['new operators',['../d6/dca/md_python_rule__t_o_d_o.html',1,'']]]
 ];

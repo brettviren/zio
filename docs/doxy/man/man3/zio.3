@@ -1,4 +1,4 @@
-.TH "zio" 3 "Fri Jan 3 2020" "ZIO" \" -*- nroff -*-
+.TH "zio" 3 "Tue Feb 4 2020" "ZIO" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -11,11 +11,29 @@ zio \- implementation of ZIO data flow protocol endpoints
 
 .in +1c
 .ti -1c
+.RI " \fB__main__\fP"
+.br
+.ti -1c
 .RI " \fBflow\fP"
 .br
 .RI "ZIO data flow\&. "
 .ti -1c
 .RI " \fBlevel\fP"
+.br
+.ti -1c
+.RI " \fBmessage\fP"
+.br
+.ti -1c
+.RI " \fBnode\fP"
+.br
+.ti -1c
+.RI " \fBpeer\fP"
+.br
+.ti -1c
+.RI " \fBport\fP"
+.br
+.ti -1c
+.RI " \fButil\fP"
 .br
 .in -1c
 .SS "Classes"
@@ -133,13 +151,35 @@ zio \- implementation of ZIO data flow protocol endpoints
 .PP 
 implementation of ZIO data flow protocol endpoints 
 
-Functions to manage message data including send and receiving with a socket\&. 
+Functions to manage message data including send and receiving with a socket\&.
+.PP
+.PP
+.nf
+The zio module provides Python functionality similar to C++ libzio.
+
+This module does not bepend on libzio and instead uses PyZMQ and Pyre.
+
+The Python classes are similar if not exactly the same as those found
+in the zio:: C++ namespace.
+
+>>> import zio
+>>> n = zio.Node(...)
+>>> p = n.port("portname", zmq.CLIENT)
+>>> p.bind(...)
+>>> p.connect(...)
+>>> f = zio.Flow(p)
+>>> bot = f.bot()
+>>> dat = ...
+>>> ok = f.dat(dat)
+.fi
+.PP
+ 
 .SH "Typedef Documentation"
 .PP 
 .SS "typedef uint64_t \fBzio::granule_t\fP"
 
 .PP
-Definition at line 36 of file message\&.hpp\&.
+Definition at line 37 of file message\&.hpp\&.
 .SS "typedef std::string \fBzio::header_key_t\fP"
 
 .PP
@@ -183,7 +223,7 @@ Definition at line 12 of file peer\&.hpp\&.
 .SS "typedef uint64_t \fBzio::origin_t\fP"
 
 .PP
-Definition at line 35 of file message\&.hpp\&.
+Definition at line 36 of file message\&.hpp\&.
 .SS "typedef std::map<\fBuuid_t\fP, \fBpeer_info_t\fP> \fBzio::peerset_t\fP"
 
 .PP
@@ -197,7 +237,7 @@ Definition at line 148 of file port\&.hpp\&.
 .SS "typedef uint64_t \fBzio::seqno_t\fP"
 
 .PP
-Definition at line 37 of file message\&.hpp\&.
+Definition at line 38 of file message\&.hpp\&.
 .SS "typedef std::string \fBzio::uuid_t\fP"
 
 .PP

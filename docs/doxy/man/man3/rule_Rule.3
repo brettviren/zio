@@ -1,0 +1,116 @@
+.TH "rule.Rule" 3 "Tue Feb 4 2020" "ZIO" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+rule.Rule
+.SH SYNOPSIS
+.br
+.PP
+.PP
+Inherits object\&.
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "def \fB__init__\fP (self, \fBrule\fP, \fBreturn_bool\fP=False)"
+.br
+.ti -1c
+.RI "def \fB__str__\fP (self)"
+.br
+.ti -1c
+.RI "def \fBmatch\fP (self, \fBcontext\fP=None)"
+.br
+.in -1c
+.SS "Public Attributes"
+
+.in +1c
+.ti -1c
+.RI "\fBrule\fP"
+.br
+.ti -1c
+.RI "\fBexpr\fP"
+.br
+.ti -1c
+.RI "\fBreturn_bool\fP"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+
+.PP
+.nf
+>>> from rule import Rule
+>>>
+>>> context = dict(a=1, world='hello')
+>>> Rule(['=', ['var', 'a'], 1]).match(context)
+True
+>>> Rule("['=', ['var', 'a'], 1]").match(context)
+True
+>>> Rule(['=', 'a', 1]).match(context)
+True
+>>> Rule(['=', 'hello', 'hello']).match(context)
+True
+>>> Rule(['=', 'world', 'hello']).match(context)
+True
+>>> Rule(['<', 'a', 10]).match(context)
+True
+>>> Rule(['=', ['>', 'a', 10], False]).match(context)
+True
+>>>
+>>> context = dict(ldap_id='Harry', hosts='sa,sb,sc', reason='hehe', nologin=False,
+...                group='wheel,sysadmin,platform', package='dev-python/sa-tools',
+...                branch='release', cc='Tony,Mike',)
+>>> Rule(['contains', 'hosts', 'sa,']).match(context)
+True
+>>> Rule(['contains', ['split', 'hosts', ','], 'sa']).match(context)
+True
+>>> Rule(['in', 'branch', 'master', 'release']).match(context)
+True
+>>> Rule(['=', 'ldap_id', 'Harry']).match(context)
+True
+>>> Rule(['match', 'package', 'dev-python/*']).match(context)
+True
+>>> Rule(['regex', 'package', 'dev-python/.*']).match(context)
+True
+>>> Rule(['is', 'nologin', False]).match(context)
+True
+
+.fi
+.PP
+ 
+.PP
+Definition at line 40 of file __init__\&.py\&.
+.SH "Constructor & Destructor Documentation"
+.PP 
+.SS "def rule\&.Rule\&.__init__ ( self,  rule,  return_bool = \fCFalse\fP)"
+
+.PP
+Definition at line 79 of file __init__\&.py\&.
+.SH "Member Function Documentation"
+.PP 
+.SS "def rule\&.Rule\&.__str__ ( self)"
+
+.PP
+Definition at line 88 of file __init__\&.py\&.
+.SS "def rule\&.Rule\&.match ( self,  context = \fCNone\fP)"
+
+.PP
+Definition at line 93 of file __init__\&.py\&.
+.SH "Member Data Documentation"
+.PP 
+.SS "rule\&.Rule\&.expr"
+
+.PP
+Definition at line 85 of file __init__\&.py\&.
+.SS "rule\&.Rule\&.return_bool"
+
+.PP
+Definition at line 86 of file __init__\&.py\&.
+.SS "rule\&.Rule\&.rule"
+
+.PP
+Definition at line 81 of file __init__\&.py\&.
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for ZIO from the source code\&.

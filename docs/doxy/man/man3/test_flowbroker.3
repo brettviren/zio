@@ -1,0 +1,93 @@
+.TH "test_flowbroker" 3 "Tue Feb 4 2020" "ZIO" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+test_flowbroker
+.SH SYNOPSIS
+.br
+.PP
+.SS "Classes"
+
+.in +1c
+.ti -1c
+.RI "class \fBFactory\fP"
+.br
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "def \fBclient_actor\fP (ctx, pipe, address)"
+.br
+.ti -1c
+.RI "def \fBdumper\fP (ctx, pipe, bot, address)"
+.br
+.ti -1c
+.RI "def \fBtest_dumper\fP ()"
+.br
+.in -1c
+.SS "Variables"
+
+.in +1c
+.ti -1c
+.RI "\fBlevel\fP"
+.br
+.ti -1c
+.RI "\fBformat\fP"
+.br
+.ti -1c
+.RI "\fBdatefmt\fP"
+.br
+.ti -1c
+.RI "\fBlog\fP = logging\&.getLogger('zpb')"
+.br
+.in -1c
+.SH "Function Documentation"
+.PP 
+.SS "def test_flowbroker\&.client_actor ( ctx,  pipe,  address)"
+
+.PP
+Definition at line 18 of file test_flowbroker\&.py\&.
+.SS "def test_flowbroker\&.dumper ( ctx,  pipe,  bot,  address)"
+
+.PP
+.nf
+A dump handler which may be used as an actor talking to a broker's botport.
+
+Parameters
+----------
+bot : zio.Message
+    Our initiating BOT message
+address : string
+    A ZeroMQ address string for a bound broker SERVER socket
+
+.fi
+.PP
+ 
+.PP
+Definition at line 47 of file test_flowbroker\&.py\&.
+.SS "def test_flowbroker\&.test_dumper ()"
+
+.PP
+Definition at line 132 of file test_flowbroker\&.py\&.
+.SH "Variable Documentation"
+.PP 
+.SS "test_flowbroker\&.datefmt"
+
+.PP
+Definition at line 5 of file test_flowbroker\&.py\&.
+.SS "test_flowbroker\&.format"
+
+.PP
+Definition at line 4 of file test_flowbroker\&.py\&.
+.SS "test_flowbroker\&.level"
+
+.PP
+Definition at line 3 of file test_flowbroker\&.py\&.
+.SS "test_flowbroker\&.log = logging\&.getLogger('zpb')"
+
+.PP
+Definition at line 6 of file test_flowbroker\&.py\&.
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for ZIO from the source code\&.

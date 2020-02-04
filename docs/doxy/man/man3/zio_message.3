@@ -1,0 +1,142 @@
+.TH "zio.message" 3 "Tue Feb 4 2020" "ZIO" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+zio.message
+.SH SYNOPSIS
+.br
+.PP
+.SS "Classes"
+
+.in +1c
+.ti -1c
+.RI "class \fBCoordHeader\fP"
+.br
+.ti -1c
+.RI "class \fBMessage\fP"
+.br
+.ti -1c
+.RI "class \fBMessageLevel\fP"
+.br
+.ti -1c
+.RI "class \fBPrefixHeader\fP"
+.br
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "def \fBencode_message\fP (parts)"
+.br
+.ti -1c
+.RI "def \fBdecode_message\fP (encoded)"
+.br
+.ti -1c
+.RI "def \fBencode_header_prefix\fP (mform='FLOW', level=0, label='')"
+.br
+.ti -1c
+.RI "def \fBdecode_header_prefix\fP (henc)"
+.br
+.ti -1c
+.RI "def \fBencode_header_coord\fP (origin, granule, seqno)"
+.br
+.ti -1c
+.RI "def \fBdecode_header_coord\fP (henc)"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+
+.PP
+.nf
+Python interface to ZIO messages
+
+.fi
+.PP
+ 
+.SH "Function Documentation"
+.PP 
+.SS "def zio\&.message\&.decode_header_coord ( henc)"
+
+.PP
+.nf
+Parse the bytes of one encoded message part into a ZIO message
+header coord.  This is ususally the second part of a multipart
+message or as returend by decode().  Returns tuple (origin,
+granule, seqno) or None if parse error.
+
+.fi
+.PP
+ 
+.PP
+Definition at line 353 of file message\&.py\&.
+.SS "def zio\&.message\&.decode_header_prefix ( henc)"
+
+.PP
+.nf
+Parse the bytes of one encoded message part into a ZIO message
+header prefix.  This is usually the first part of a multipart
+message or as returned by decode().  Returns tuple (level, format,
+label) or None if parse error.
+
+.fi
+.PP
+ 
+.PP
+Definition at line 329 of file message\&.py\&.
+.SS "def zio\&.message\&.decode_message ( encoded)"
+
+.PP
+.nf
+Unpack an encoded single-part ZIO message such as returned by
+socket.recv() on a SERVER socket.  It's the moral opposite of
+zio::Message::encode().  What is returned is sequence of message
+parts.
+
+.fi
+.PP
+ 
+.PP
+Definition at line 296 of file message\&.py\&.
+.SS "def zio\&.message\&.encode_header_coord ( origin,  granule,  seqno)"
+
+.PP
+.nf
+Return a binary encoded header coord suitable for use as a message
+part.  Arguments are taken to be 64 bit unsigned ints.
+
+.fi
+.PP
+ 
+.PP
+Definition at line 345 of file message\&.py\&.
+.SS "def zio\&.message\&.encode_header_prefix ( mform = \fC'FLOW'\fP,  level = \fC0\fP,  label = \fC''\fP)"
+
+.PP
+.nf
+Return a binary encoded header prefix suitable for use as a
+message part.
+
+.fi
+.PP
+ 
+.PP
+Definition at line 319 of file message\&.py\&.
+.SS "def zio\&.message\&.encode_message ( parts)"
+
+.PP
+.nf
+Return a binary encoded concatenation of parts in the input
+sequence.  Result is suitable for use as a single-part message.
+For ZIO messages the first two parts should be encoded header
+prefix and coord, respectively.  Subseqent parts can be payload of
+arbitrary encoding.
+
+.fi
+.PP
+ 
+.PP
+Definition at line 282 of file message\&.py\&.
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for ZIO from the source code\&.

@@ -1,4 +1,4 @@
-.TH "zio::PrefixHeader" 3 "Fri Jan 3 2020" "ZIO" \" -*- nroff -*-
+.TH "zio::PrefixHeader" 3 "Tue Feb 4 2020" "ZIO" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -15,7 +15,7 @@ zio::PrefixHeader
 .RI "std::string \fBdumps\fP () const"
 .br
 .ti -1c
-.RI "void \fBloads\fP (const std::string &s)"
+.RI "bool \fBloads\fP (const std::string &s)"
 .br
 .in -1c
 .SS "Public Attributes"
@@ -25,7 +25,7 @@ zio::PrefixHeader
 .RI "\fBlevel::MessageLevel\fP \fBlevel\fP {\fBlevel::undefined\fP}"
 .br
 .ti -1c
-.RI "std::string \fBformat\fP {''}"
+.RI "std::string \fBform\fP {' '}"
 .br
 .ti -1c
 .RI "std::string \fBlabel\fP {''}"
@@ -40,13 +40,13 @@ Definition at line 26 of file message\&.hpp\&.
 
 .PP
 Definition at line 20 of file message\&.cpp\&.
-.SS "void zio::PrefixHeader::loads (const std::string & s)"
+.SS "bool zio::PrefixHeader::loads (const std::string & s)"
 
 .PP
 Definition at line 31 of file message\&.cpp\&.
 .SH "Member Data Documentation"
 .PP 
-.SS "std::string zio::PrefixHeader::format {''}"
+.SS "std::string zio::PrefixHeader::form {' '}"
 
 .PP
 Definition at line 28 of file message\&.hpp\&.

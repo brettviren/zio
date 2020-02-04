@@ -1,23 +1,8 @@
 var searchData=
 [
-  ['detail',['detail',['../de/d24/namespacezmq_1_1detail.html',1,'zmq']]],
-  ['flow',['flow',['../df/de9/namespacezio_1_1flow.html',1,'zio']]],
-  ['level',['level',['../dc/d70/namespacezio_1_1level.html',1,'zio']]],
-  ['zio',['zio',['../d1/dad/namespacezio.html',1,'']]],
-  ['zio_2ehpp',['zio.hpp',['../d6/d24/zio_8hpp.html',1,'']]],
-  ['zmq',['zmq',['../d0/db9/namespacezmq.html',1,'']]],
-  ['zmq_2ehpp',['zmq.hpp',['../da/d3f/zmq_8hpp.html',1,'']]],
-  ['zmq_5faddon_2ehpp',['zmq_addon.hpp',['../d5/de4/zmq__addon_8hpp.html',1,'']]],
-  ['zmq_5fassert',['ZMQ_ASSERT',['../da/d3f/zmq_8hpp.html#a188bda73be51e867c8d99f148a51938d',1,'zmq.hpp']]],
-  ['zmq_5fconstexpr_5ffn',['ZMQ_CONSTEXPR_FN',['../da/d3f/zmq_8hpp.html#a9a0766b1680e98d30ba7dcbc0c99f8a7',1,'zmq.hpp']]],
-  ['zmq_5fconstexpr_5fvar',['ZMQ_CONSTEXPR_VAR',['../da/d3f/zmq_8hpp.html#ae2c455e5dc53b370a40bb65a6e3aff8b',1,'zmq.hpp']]],
-  ['zmq_5fdeleted_5ffunction',['ZMQ_DELETED_FUNCTION',['../da/d3f/zmq_8hpp.html#a7d4ac120b73fef58d8e9a92180025d45',1,'zmq.hpp']]],
-  ['zmq_5fevent_5ft',['zmq_event_t',['../d0/d84/structzmq__event__t.html',1,'']]],
-  ['zmq_5fexplicit',['ZMQ_EXPLICIT',['../da/d3f/zmq_8hpp.html#a45c2a63f53f51580d5ed30c4d07ef5ed',1,'zmq.hpp']]],
-  ['zmq_5fhas_5fproxy_5fsteerable',['ZMQ_HAS_PROXY_STEERABLE',['../da/d3f/zmq_8hpp.html#ad1e288f05295e6cb30529bbaabc2b10d',1,'zmq.hpp']]],
-  ['zmq_5fnew_5fmonitor_5fevent_5flayout',['ZMQ_NEW_MONITOR_EVENT_LAYOUT',['../da/d3f/zmq_8hpp.html#ade1462cd65bda4d48a473bfa84694eff',1,'zmq.hpp']]],
-  ['zmq_5fnodiscard',['ZMQ_NODISCARD',['../da/d3f/zmq_8hpp.html#aea89080474dddccb71aca54929cf7c84',1,'zmq.hpp']]],
-  ['zmq_5fnothrow',['ZMQ_NOTHROW',['../da/d3f/zmq_8hpp.html#af540f52ff7104699376dd441dbfdbe4a',1,'zmq.hpp']]],
-  ['zmq_5fnullptr',['ZMQ_NULLPTR',['../da/d3f/zmq_8hpp.html#a708addc5459ce20ab43ef604a8cf800c',1,'zmq.hpp']]],
-  ['zmq_5foverride',['ZMQ_OVERRIDE',['../da/d3f/zmq_8hpp.html#aa4caf15ac895e373093a8b1d2e403138',1,'zmq.hpp']]]
+  ['valid',['valid',['../d3/db5/structack.html#a8347233df37a314adb307a79ebb2965e',1,'ack::valid()'],['../d6/daf/structfin.html#af36d6c507064eca35094f9c475729227',1,'fin::valid()']]],
+  ['value',['value',['../d0/d84/structzmq__event__t.html#a4e8c25ddecfe9a4ba1af68a6f19c4377',1,'zmq_event_t']]],
+  ['var',['Var',['../d2/d23/classrule_1_1op_1_1_var.html',1,'rule::op']]],
+  ['verbose',['verbose',['../d0/d4b/classzio_1_1message_1_1_message_level.html#a194433769b3f77a5b5baf90f27a9e8b9',1,'zio.message.MessageLevel.verbose()'],['../de/d36/classzio_1_1_node.html#a352bddd3fb88582bd9a160a57d14d1b6',1,'zio::Node::verbose()'],['../df/d69/classzio_1_1_outbox.html#a01f2454cdecd7a38f1cdeb9d8173221f',1,'zio::Outbox::verbose()'],['../dc/d70/namespacezio_1_1level.html#a57ecf132ca8f49e9f3b17bdad6cf83deabf2ac704fa2a6e9153d14827258b5bee',1,'zio::level::verbose()']]],
+  ['version',['version',['../dd/dc4/namespacesetup.html#a2aa722b36a933088812b50ea79b97a5c',1,'setup.version()'],['../d0/db9/namespacezmq.html#af04cbb1885b768c4ce23615883367c20',1,'zmq::version()']]]
 ];

@@ -1,0 +1,82 @@
+.TH "zio.flow.example_handler.Factory" 3 "Tue Feb 4 2020" "ZIO" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+zio.flow.example_handler.Factory
+.SH SYNOPSIS
+.br
+.PP
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "def \fB__init__\fP (self, \fBserver_address\fP)"
+.br
+.ti -1c
+.RI "def \fB__call__\fP (self, bot)"
+.br
+.ti -1c
+.RI "def \fBspawn\fP (self, actor_func, bot)"
+.br
+.in -1c
+.SS "Public Attributes"
+
+.in +1c
+.ti -1c
+.RI "\fBserver_address\fP"
+.br
+.ti -1c
+.RI "\fBctx\fP"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+Definition at line 54 of file example_handler\&.py\&.
+.SH "Constructor & Destructor Documentation"
+.PP 
+.SS "def zio\&.flow\&.example_handler\&.Factory\&.__init__ ( self,  server_address)"
+
+.PP
+Definition at line 56 of file example_handler\&.py\&.
+.SH "Member Function Documentation"
+.PP 
+.SS "def zio\&.flow\&.example_handler\&.Factory\&.__call__ ( self,  bot)"
+
+.PP
+.nf
+Broker calls this to dispatch a BOT.
+
+Broker waits for return so don't dally.
+
+.fi
+.PP
+ 
+.PP
+Definition at line 60 of file example_handler\&.py\&.
+.SS "def zio\&.flow\&.example_handler\&.Factory\&.spawn ( self,  actor_func,  bot)"
+
+.PP
+.nf
+Spawn actor function.
+
+Function must take a flow and the BOT.
+
+.fi
+.PP
+ 
+.PP
+Definition at line 75 of file example_handler\&.py\&.
+.SH "Member Data Documentation"
+.PP 
+.SS "zio\&.flow\&.example_handler\&.Factory\&.ctx"
+
+.PP
+Definition at line 58 of file example_handler\&.py\&.
+.SS "zio\&.flow\&.example_handler\&.Factory\&.server_address"
+
+.PP
+Definition at line 57 of file example_handler\&.py\&.
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for ZIO from the source code\&.

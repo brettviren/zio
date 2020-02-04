@@ -1,0 +1,181 @@
+.TH "zio.peer.Peer" 3 "Tue Feb 4 2020" "ZIO" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+zio.peer.Peer
+.SH SYNOPSIS
+.br
+.PP
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "def \fB__init__\fP (self, nickname, headers)"
+.br
+.ti -1c
+.RI "def \fB__del__\fP (self)"
+.br
+.ti -1c
+.RI "def \fBstop\fP (self)"
+.br
+.ti -1c
+.RI "def \fBpoll\fP (self, \fBtimeout\fP=0)"
+.br
+.ti -1c
+.RI "def \fBdrain\fP (self)"
+.br
+.ti -1c
+.RI "def \fBmatchnick\fP (self, nick)"
+.br
+.ti -1c
+.RI "def \fBwaitfor\fP (self, nickname, \fBtimeout\fP=\-1)"
+.br
+.ti -1c
+.RI "def \fBparty\fP (self, nicks, \fBtimeout\fP=\-1)"
+.br
+.in -1c
+.SS "Public Attributes"
+
+.in +1c
+.ti -1c
+.RI "\fBzyre\fP"
+.br
+.ti -1c
+.RI "\fBpeers\fP"
+.br
+.ti -1c
+.RI "\fBpoller\fP"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+
+.PP
+.nf
+Peer at the network to discover others and advertise self.
+
+This is equivalent to C++ zio::Peer and is a wrapper around Pyre,
+the Python Zyre.
+
+.fi
+.PP
+ 
+.PP
+Definition at line 16 of file peer\&.py\&.
+.SH "Constructor & Destructor Documentation"
+.PP 
+.SS "def zio\&.peer\&.Peer\&.__init__ ( self,  nickname,  headers)"
+
+.PP
+.nf
+Create a peer with a nickname.
+
+Extra headers may be given as a dictionary.
+
+.fi
+.PP
+ 
+.PP
+Definition at line 24 of file peer\&.py\&.
+.SS "def zio\&.peer\&.Peer\&.__del__ ( self)"
+
+.PP
+Definition at line 40 of file peer\&.py\&.
+.SH "Member Function Documentation"
+.PP 
+.SS "def zio\&.peer\&.Peer\&.drain ( self)"
+
+.PP
+.nf
+Continually poll until all queued Zyre events are processed.
+
+.fi
+.PP
+ 
+.PP
+Definition at line 86 of file peer\&.py\&.
+.SS "def zio\&.peer\&.Peer\&.matchnick ( self,  nick)"
+
+.PP
+.nf
+Return UUIDs of all peers with matching nicks
+
+.fi
+.PP
+ 
+.PP
+Definition at line 93 of file peer\&.py\&.
+.SS "def zio\&.peer\&.Peer\&.party ( self,  nicks,  timeout = \fC\-1\fP)"
+
+.PP
+.nf
+Wait as set of nicks have been seen or until timeout.
+
+Return a peer dictionary holding last seen info about peers
+with matching nicks.
+
+.fi
+.PP
+ 
+.PP
+Definition at line 128 of file peer\&.py\&.
+.SS "def zio\&.peer\&.Peer\&.poll ( self,  timeout = \fC0\fP)"
+
+.PP
+.nf
+Poll the network for an update.
+
+Return True if an event was received.  True is returned on
+reception of any type of Zyre event.  Use timeout in msec to
+wait for an event.
+
+.fi
+.PP
+ 
+.PP
+Definition at line 54 of file peer\&.py\&.
+.SS "def zio\&.peer\&.Peer\&.stop ( self)"
+
+.PP
+.nf
+Stop the peer.
+
+This MUST be called or the application will hang.
+
+.fi
+.PP
+ 
+.PP
+Definition at line 43 of file peer\&.py\&.
+.SS "def zio\&.peer\&.Peer\&.waitfor ( self,  nickname,  timeout = \fC\-1\fP)"
+
+.PP
+.nf
+Wait for at least one peer with the nickname to be.
+
+Return a list of UUIDs of peers discovered to have this
+nickname.
+
+.fi
+.PP
+ 
+.PP
+Definition at line 104 of file peer\&.py\&.
+.SH "Member Data Documentation"
+.PP 
+.SS "zio\&.peer\&.Peer\&.peers"
+
+.PP
+Definition at line 31 of file peer\&.py\&.
+.SS "zio\&.peer\&.Peer\&.poller"
+
+.PP
+Definition at line 37 of file peer\&.py\&.
+.SS "zio\&.peer\&.Peer\&.zyre"
+
+.PP
+Definition at line 30 of file peer\&.py\&.
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for ZIO from the source code\&.

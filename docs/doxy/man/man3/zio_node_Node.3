@@ -1,0 +1,143 @@
+.TH "zio.node.Node" 3 "Tue Feb 4 2020" "ZIO" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+zio.node.Node
+.SH SYNOPSIS
+.br
+.PP
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "def \fB__init__\fP (self, \fBnick\fP, \fBorigin\fP=0, hostname='127\&.0\&.0\&.1')"
+.br
+.ti -1c
+.RI "def \fB__str__\fP (self)"
+.br
+.ti -1c
+.RI "def \fBport\fP (self, name, stype=None)"
+.br
+.ti -1c
+.RI "def \fBonline\fP (self, headers)"
+.br
+.ti -1c
+.RI "def \fBoffline\fP (self)"
+.br
+.in -1c
+.SS "Public Attributes"
+
+.in +1c
+.ti -1c
+.RI "\fBnick\fP"
+.br
+.ti -1c
+.RI "\fBorigin\fP"
+.br
+.ti -1c
+.RI "\fBports\fP"
+.br
+.ti -1c
+.RI "\fBpeer\fP"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+
+.PP
+.nf
+A vertex in a ported graph with ZIO edges
+
+.fi
+.PP
+ 
+.PP
+Definition at line 9 of file node\&.py\&.
+.SH "Constructor & Destructor Documentation"
+.PP 
+.SS "def zio\&.node\&.Node\&.__init__ ( self,  nick,  origin = \fC0\fP,  hostname = \fC'127\&.0\&.0\&.1'\fP)"
+
+.PP
+.nf
+Create a node.
+
+A node has a nickname.  It may assert a unique origin number.
+A hostname may be specified for default binds of its ports or
+one will attempt to be autodetected.
+
+.fi
+.PP
+ 
+.PP
+Definition at line 14 of file node\&.py\&.
+.SH "Member Function Documentation"
+.PP 
+.SS "def zio\&.node\&.Node\&.__str__ ( self)"
+
+.PP
+Definition at line 27 of file node\&.py\&.
+.SS "def zio\&.node\&.Node\&.offline ( self)"
+
+.PP
+.nf
+Bring node offline.
+
+This will cause all ports to disconnect and unbind and the
+peer to be destroyed.
+
+.fi
+.PP
+ 
+.PP
+Definition at line 67 of file node\&.py\&.
+.SS "def zio\&.node\&.Node\&.online ( self,  headers)"
+
+.PP
+.nf
+Bring node online.
+
+The node will advertise a number of ZIO headers based on the
+ports that have been prepared.  Additional application headers
+may also be included.
+
+.fi
+.PP
+ 
+.PP
+Definition at line 47 of file node\&.py\&.
+.SS "def zio\&.node\&.Node\&.port ( self,  name,  stype = \fCNone\fP)"
+
+.PP
+.nf
+Return a port.
+
+If the port with this name exists, return it.  Otherwise,
+create one with the given ZeroMQ socket type.
+
+.fi
+.PP
+ 
+.PP
+Definition at line 31 of file node\&.py\&.
+.SH "Member Data Documentation"
+.PP 
+.SS "zio\&.node\&.Node\&.nick"
+
+.PP
+Definition at line 22 of file node\&.py\&.
+.SS "zio\&.node\&.Node\&.origin"
+
+.PP
+Definition at line 23 of file node\&.py\&.
+.SS "zio\&.node\&.Node\&.peer"
+
+.PP
+Definition at line 62 of file node\&.py\&.
+.SS "zio\&.node\&.Node\&.ports"
+
+.PP
+Definition at line 25 of file node\&.py\&.
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for ZIO from the source code\&.

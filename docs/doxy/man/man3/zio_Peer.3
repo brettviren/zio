@@ -1,4 +1,4 @@
-.TH "zio::Peer" 3 "Fri Jan 3 2020" "ZIO" \" -*- nroff -*-
+.TH "zio::Peer" 3 "Tue Feb 4 2020" "ZIO" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -102,19 +102,19 @@ Definition at line 16 of file peer\&.cpp\&.
 .PP
 Continually poll until all queued zyre messages are processed\&. 
 .PP
-Definition at line 182 of file peer\&.cpp\&.
+Definition at line 187 of file peer\&.cpp\&.
 .SS "bool zio::Peer::isknown (const \fBuuid_t\fP & uuid)"
 
 .PP
 Return true if peer has been seen ENTER the network and not yet seen to EXIT\&. 
 .PP
-Definition at line 187 of file peer\&.cpp\&.
+Definition at line 192 of file peer\&.cpp\&.
 .SS "std::vector< \fBzio::uuid_t\fP > zio::Peer::nickmatch (const \fBnickname_t\fP & nick)"
 
 .PP
 Return all UUIDs with matching nickname\&. 
 .PP
-Definition at line 139 of file peer\&.cpp\&.
+Definition at line 140 of file peer\&.cpp\&.
 .SS "const \fBnickname_t\fP zio::Peer::nickname ()\fC [inline]\fP"
 
 .PP
@@ -126,13 +126,13 @@ Definition at line 60 of file peer\&.hpp\&.
 .PP
 Return info about peer\&. If unknown, return default structure\&. 
 .PP
-Definition at line 199 of file peer\&.cpp\&.
+Definition at line 204 of file peer\&.cpp\&.
 .SS "const \fBzio::peerset_t\fP & zio::Peer::peers ()"
 
 .PP
 Return known peers as map from UUID to nickname\&. This will return new values on subsequent calls as peers enter and exit the network\&. 
 .PP
-Definition at line 194 of file peer\&.cpp\&.
+Definition at line 199 of file peer\&.cpp\&.
 .SS "bool zio::Peer::poll (\fBtimeout_t\fP timeout = \fC0\fP)"
 
 .PP
@@ -144,13 +144,13 @@ Definition at line 50 of file peer\&.cpp\&.
 .PP
 Turn on verbose debugging of the underlying Zyre actor\&. 
 .PP
-Definition at line 211 of file peer\&.cpp\&.
+Definition at line 216 of file peer\&.cpp\&.
 .SS "std::vector< \fBzio::uuid_t\fP > zio::Peer::waitfor (const \fBnickname_t\fP & nickname, \fBtimeout_t\fP timeout = \fC\-1\fP)"
 
 .PP
 Wait for a peer of a given nickname to be discovered\&. Return UUID if found, empty string if timeout occurs\&. Note, multiple peers may share the same nickname\&. 
 .PP
-Definition at line 155 of file peer\&.cpp\&.
+Definition at line 156 of file peer\&.cpp\&.
 .SS "void zio::Peer::waituntil (const \fBuuid_t\fP & uuid, \fBtimeout_t\fP timeout = \fC\-1\fP)"
 
 .PP

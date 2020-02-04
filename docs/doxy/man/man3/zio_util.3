@@ -1,0 +1,93 @@
+.TH "zio.util" 3 "Tue Feb 4 2020" "ZIO" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+zio.util
+.SH SYNOPSIS
+.br
+.PP
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "def \fBneeds_codec\fP (stype)"
+.br
+.ti -1c
+.RI "def \fBguess_hostname\fP ()"
+.br
+.ti -1c
+.RI "def \fBbyteify_list\fP (lst)"
+.br
+.in -1c
+.SS "Variables"
+
+.in +1c
+.ti -1c
+.RI "list \fBsocket_names\fP"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+
+.PP
+.nf
+Utilities
+
+.fi
+.PP
+ 
+.SH "Function Documentation"
+.PP 
+.SS "def zio\&.util\&.byteify_list ( lst)"
+
+.PP
+Definition at line 46 of file util\&.py\&.
+.SS "def zio\&.util\&.guess_hostname ()"
+
+.PP
+Definition at line 42 of file util\&.py\&.
+.SS "def zio\&.util\&.needs_codec ( stype)"
+
+.PP
+.nf
+Return True if socket type stype requires single-part messages
+
+.fi
+.PP
+ 
+.PP
+Definition at line 32 of file util\&.py\&.
+.SH "Variable Documentation"
+.PP 
+.SS "list zio\&.util\&.socket_names"
+\fBInitial value:\fP
+.PP
+.nf
+1 =  [
+2     "PAIR",
+3     "PUB",
+4     "SUB",
+5     "REQ",
+6     "REP",
+7     "DEALER",
+8     "ROUTER",
+9     "PULL",
+10     "PUSH",
+11     "XPUB",
+12     "XSUB",
+13     "STREAM",
+14     "SERVER",
+15     "CLIENT",
+16     "RADIO",
+17     "DISH",
+18     "GATHER",
+19     "SCATTER",
+20     "DGRAM",
+21     0
+22 ]
+.fi
+.PP
+Definition at line 8 of file util\&.py\&.
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for ZIO from the source code\&.

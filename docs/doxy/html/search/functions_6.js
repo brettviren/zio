@@ -1,8 +1,10 @@
 var searchData=
 [
-  ['get',['get',['../dc/d09/classzio_1_1flow_1_1_flow.html#a9f7879f13a2cd6c41f71e137b9611e7c',1,'zio::flow::Flow::get()'],['../d1/dba/classzmq_1_1message__t.html#a3fac1ef69f92445db21a77b87d58af9d',1,'zmq::message_t::get()']]],
-  ['getctxopt',['getctxopt',['../dd/d18/classzmq_1_1context__t.html#a7500b2611c32e6432548728126050490',1,'zmq::context_t']]],
-  ['gets',['gets',['../d1/dba/classzmq_1_1message__t.html#ac6f9e68964449c6bc1e3858b0bf88694',1,'zmq::message_t']]],
-  ['getsockopt',['getsockopt',['../de/db1/classzmq_1_1detail_1_1socket__base.html#ae1ba7ffc7cbb86191fb224d572a3d871',1,'zmq::detail::socket_base::getsockopt(int option_, void *optval_, size_t *optvallen_) const'],['../de/db1/classzmq_1_1detail_1_1socket__base.html#a763b3fa30215174e4e013c696008a56b',1,'zmq::detail::socket_base::getsockopt(int option_) const']]],
-  ['granule',['granule',['../d2/df1/classzio_1_1_message.html#a83e440274ad707805c8d8b92eb9cdf38',1,'zio::Message']]]
+  ['fatal',['fatal',['../df/d69/classzio_1_1_outbox.html#a888122ed0ae8b1c4306b1ffd71ff74c4',1,'zio::Outbox']]],
+  ['flow',['Flow',['../dc/d09/classzio_1_1flow_1_1_flow.html#a9f8a870d7c3d84aa6f659de2d8745026',1,'zio::flow::Flow']]],
+  ['flush_5fpay',['flush_pay',['../dc/d09/classzio_1_1flow_1_1_flow.html#a3c33f542cac9463f05f540421963372f',1,'zio::flow::Flow::flush_pay()'],['../dc/dc3/classzio_1_1flow_1_1proto_1_1_flow.html#aa54b2ad4f8415baad1eb69251e70baf7',1,'zio::flow.proto.Flow.flush_pay()']]],
+  ['form',['form',['../d2/df1/classzio_1_1_message.html#af37032be1f1ddbf17edae7cc0854627c',1,'zio::Message::form()'],['../dd/d06/classzio_1_1message_1_1_message.html#a3f9cad134fb147b046fa6d069f75cb79',1,'zio.message.Message.form(self)'],['../dd/d06/classzio_1_1message_1_1_message.html#afbcce4efff4ba2b3f4fc990f9f1bdf0c',1,'zio.message.Message.form(self, val)']]],
+  ['from_5fhandle_5ft',['from_handle_t',['../d9/d02/structzmq_1_1from__handle__t.html#aeba2de68a274cce2fc3021206636f37f',1,'zmq::from_handle_t']]],
+  ['fromframe',['fromframe',['../dd/d06/classzio_1_1message_1_1_message.html#afcb418d7506afbff2630e79061501ec6',1,'zio::message::Message']]],
+  ['fromparts',['fromparts',['../d2/df1/classzio_1_1_message.html#a1e8067b00051a6428a3de7710d16686f',1,'zio::Message::fromparts()'],['../dd/d06/classzio_1_1message_1_1_message.html#a263a96fe9f06f7658194851c4c5dfba3',1,'zio.message.Message.fromparts()']]]
 ];

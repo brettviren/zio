@@ -1,0 +1,291 @@
+.TH "zio.port.Port" 3 "Tue Feb 4 2020" "ZIO" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+zio.port.Port
+.SH SYNOPSIS
+.br
+.PP
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "def \fB__init__\fP (self, \fBname\fP, \fBsock\fP, hostname='127\&.0\&.0\&.1')"
+.br
+.ti -1c
+.RI "def \fB__str__\fP (self)"
+.br
+.ti -1c
+.RI "def \fBbind\fP (self, spec)"
+.br
+.ti -1c
+.RI "def \fBconnect\fP (self, spec)"
+.br
+.ti -1c
+.RI "def \fBsubscribe\fP (self, prefix='')"
+.br
+.ti -1c
+.RI "def \fBadd_headers\fP (self, args, kwargs)"
+.br
+.ti -1c
+.RI "def \fBdo_binds\fP (self)"
+.br
+.ti -1c
+.RI "def \fBonline\fP (self, peer=None)"
+.br
+.ti -1c
+.RI "def \fBoffline\fP (self)"
+.br
+.ti -1c
+.RI "def \fBsend\fP (self, msg)"
+.br
+.ti -1c
+.RI "def \fBrecv\fP (self, \fBtimeout\fP=None)"
+.br
+.in -1c
+.SS "Public Attributes"
+
+.in +1c
+.ti -1c
+.RI "\fBname\fP"
+.br
+.ti -1c
+.RI "\fBctx\fP"
+.br
+.ti -1c
+.RI "\fBsock\fP"
+.br
+.ti -1c
+.RI "\fBorigin\fP"
+.br
+.ti -1c
+.RI "\fBto_bind\fP"
+.br
+.ti -1c
+.RI "\fBto_conn\fP"
+.br
+.ti -1c
+.RI "\fBheaders\fP"
+.br
+.ti -1c
+.RI "\fBis_online\fP"
+.br
+.ti -1c
+.RI "\fBconnected\fP"
+.br
+.ti -1c
+.RI "\fBbound\fP"
+.br
+.ti -1c
+.RI "\fBpoller\fP"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+Definition at line 33 of file port\&.py\&.
+.SH "Constructor & Destructor Documentation"
+.PP 
+.SS "def zio\&.port\&.Port\&.__init__ ( self,  name,  sock,  hostname = \fC'127\&.0\&.0\&.1'\fP)"
+
+.PP
+.nf
+Create a Port with a name and a ZeroMQ socket type.
+
+Ports are typically not meant to be constructed directly by
+application code but instead through a managing zio.Node
+
+.fi
+.PP
+ 
+.PP
+Definition at line 34 of file port\&.py\&.
+.SH "Member Function Documentation"
+.PP 
+.SS "def zio\&.port\&.Port\&.__str__ ( self)"
+
+.PP
+Definition at line 58 of file port\&.py\&.
+.SS "def zio\&.port\&.Port\&.add_headers ( self,  args,  kwargs)"
+
+.PP
+.nf
+Add one or more headers or dictionaries of headers.
+
+Every key will be wrapped into ZIO port header convention.
+The headers will appear to the network as
+
+zio.port.<portname>.<key> = <value>
+
+The self.headers collects these.
+
+.fi
+.PP
+ 
+.PP
+Definition at line 104 of file port\&.py\&.
+.SS "def zio\&.port\&.Port\&.bind ( self,  spec)"
+
+.PP
+.nf
+Request a bind.
+
+If spec is None, do a default/ephemeral bind.
+If spec is a string, it is assumed to be a ZeroMQ adddress.
+If spec is a tuple ithen it is a (hostname,portnumber).
+
+.fi
+.PP
+ 
+.PP
+Definition at line 64 of file port\&.py\&.
+.SS "def zio\&.port\&.Port\&.connect ( self,  spec)"
+
+.PP
+.nf
+Request a connect.
+
+If a single string is given it is a ZeroMQ address.
+If two strings are given they are (nodename, portname).
+
+.fi
+.PP
+ 
+.PP
+Definition at line 81 of file port\&.py\&.
+.SS "def zio\&.port\&.Port\&.do_binds ( self)"
+
+.PP
+.nf
+Actually perform binds.
+
+Return dictionary suitable for use as peer headers the give
+information about the binds.
+
+This must be called prior to any call of .online() and is
+intended to be used by a zio.Node which holds this zio.Port.
+
+.fi
+.PP
+ 
+.PP
+Definition at line 121 of file port\&.py\&.
+.SS "def zio\&.port\&.Port\&.offline ( self)"
+
+.PP
+.nf
+Bring this port offline.
+
+This unbinds and disconnects and forgets their addresses
+
+.fi
+.PP
+ 
+.PP
+Definition at line 185 of file port\&.py\&.
+.SS "def zio\&.port\&.Port\&.online ( self,  peer = \fCNone\fP)"
+
+.PP
+.nf
+Bring this port online.
+
+If no peer is given then indirect connects will fail.
+
+This method is intended for use by a zio.Node which holds this
+zio.Port.
+
+.fi
+.PP
+ 
+.PP
+Definition at line 145 of file port\&.py\&.
+.SS "def zio\&.port\&.Port\&.recv ( self,  timeout = \fCNone\fP)"
+
+.PP
+.nf
+Receive and return a zio.Message waiting up to a timeout 
+
+If timeout is reached then None is returned.
+
+.fi
+.PP
+ 
+.PP
+Definition at line 220 of file port\&.py\&.
+.SS "def zio\&.port\&.Port\&.send ( self,  msg)"
+
+.PP
+.nf
+Send a zio.Message
+
+This modifies the message prior to sending to set the origin
+if this port has one.
+
+.fi
+.PP
+ 
+.PP
+Definition at line 200 of file port\&.py\&.
+.SS "def zio\&.port\&.Port\&.subscribe ( self,  prefix = \fC''\fP)"
+
+.PP
+.nf
+Subscribe to a PUB/SUB topic.
+
+This method is only meaningful if our socket is a SUB and then
+it MUST be called if messages are expected to be received.
+
+.fi
+.PP
+ 
+.PP
+Definition at line 92 of file port\&.py\&.
+.SH "Member Data Documentation"
+.PP 
+.SS "zio\&.port\&.Port\&.bound"
+
+.PP
+Definition at line 54 of file port\&.py\&.
+.SS "zio\&.port\&.Port\&.connected"
+
+.PP
+Definition at line 53 of file port\&.py\&.
+.SS "zio\&.port\&.Port\&.ctx"
+
+.PP
+Definition at line 44 of file port\&.py\&.
+.SS "zio\&.port\&.Port\&.headers"
+
+.PP
+Definition at line 51 of file port\&.py\&.
+.SS "zio\&.port\&.Port\&.is_online"
+
+.PP
+Definition at line 52 of file port\&.py\&.
+.SS "zio\&.port\&.Port\&.name"
+
+.PP
+Definition at line 41 of file port\&.py\&.
+.SS "zio\&.port\&.Port\&.origin"
+
+.PP
+Definition at line 48 of file port\&.py\&.
+.SS "zio\&.port\&.Port\&.poller"
+
+.PP
+Definition at line 55 of file port\&.py\&.
+.SS "zio\&.port\&.Port\&.sock"
+
+.PP
+Definition at line 45 of file port\&.py\&.
+.SS "zio\&.port\&.Port\&.to_bind"
+
+.PP
+Definition at line 49 of file port\&.py\&.
+.SS "zio\&.port\&.Port\&.to_conn"
+
+.PP
+Definition at line 50 of file port\&.py\&.
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for ZIO from the source code\&.

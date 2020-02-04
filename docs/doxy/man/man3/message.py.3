@@ -1,0 +1,56 @@
+.TH "python/zio/message.py" 3 "Tue Feb 4 2020" "ZIO" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+python/zio/message.py
+.SH SYNOPSIS
+.br
+.PP
+.SS "Classes"
+
+.in +1c
+.ti -1c
+.RI "class \fBzio\&.message\&.MessageLevel\fP"
+.br
+.ti -1c
+.RI "class \fBzio\&.message\&.PrefixHeader\fP"
+.br
+.ti -1c
+.RI "class \fBzio\&.message\&.CoordHeader\fP"
+.br
+.ti -1c
+.RI "class \fBzio\&.message\&.Message\fP"
+.br
+.in -1c
+.SS "Namespaces"
+
+.in +1c
+.ti -1c
+.RI " \fBzio\&.message\fP"
+.br
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "def \fBzio\&.message\&.encode_message\fP (parts)"
+.br
+.ti -1c
+.RI "def \fBzio\&.message\&.decode_message\fP (encoded)"
+.br
+.ti -1c
+.RI "def \fBzio\&.message\&.encode_header_prefix\fP (mform='FLOW', level=0, label='')"
+.br
+.ti -1c
+.RI "def \fBzio\&.message\&.decode_header_prefix\fP (henc)"
+.br
+.ti -1c
+.RI "def \fBzio\&.message\&.encode_header_coord\fP (origin, granule, seqno)"
+.br
+.ti -1c
+.RI "def \fBzio\&.message\&.decode_header_coord\fP (henc)"
+.br
+.in -1c
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for ZIO from the source code\&.

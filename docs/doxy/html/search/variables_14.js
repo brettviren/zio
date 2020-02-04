@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['w',['w',['../df/ddb/structnlohmann_1_1detail_1_1dtoa__impl_1_1boundaries.html#ad1668c60aeade5f2557fafed8b8aee1a',1,'nlohmann::detail::dtoa_impl::boundaries']]],
-  ['wait_5fretry',['wait_retry',['../d9/d83/structclient__protocol_1_1actions.html#abcdfe296027720ad0543f3342a5f78c7',1,'client_protocol::actions']]]
+  ['wait_5fretry',['wait_retry',['../d9/d83/structclient__protocol_1_1actions.html#abcdfe296027720ad0543f3342a5f78c7',1,'client_protocol::actions']]],
+  ['warning',['warning',['../d0/d4b/classzio_1_1message_1_1_message_level.html#aaa7e3a87da07e0ec7c52f560f6afd4d2',1,'zio::message::MessageLevel']]]
 ];

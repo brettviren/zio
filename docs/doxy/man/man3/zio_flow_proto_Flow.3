@@ -1,0 +1,299 @@
+.TH "zio.flow.proto.Flow" 3 "Tue Feb 4 2020" "ZIO" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+zio.flow.proto.Flow
+.SH SYNOPSIS
+.br
+.PP
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "def \fB__init__\fP (self, \fBport\fP)"
+.br
+.ti -1c
+.RI "def \fBsend_bot\fP (self, msg)"
+.br
+.ti -1c
+.RI "def \fBrecv_bot\fP (self, \fBtimeout\fP=\-1)"
+.br
+.ti -1c
+.RI "def \fBslurp_pay\fP (self, \fBtimeout\fP=None)"
+.br
+.ti -1c
+.RI "def \fBput\fP (self, msg)"
+.br
+.ti -1c
+.RI "def \fBflush_pay\fP (self)"
+.br
+.ti -1c
+.RI "def \fBget\fP (self, \fBtimeout\fP=None)"
+.br
+.ti -1c
+.RI "def \fBsend_eot\fP (self, msg=\fBMessage\fP())"
+.br
+.ti -1c
+.RI "def \fBrecv_eot\fP (self, \fBtimeout\fP=None)"
+.br
+.in -1c
+.SS "Public Attributes"
+
+.in +1c
+.ti -1c
+.RI "\fBport\fP"
+.br
+.ti -1c
+.RI "\fBsend_seqno\fP"
+.br
+.ti -1c
+.RI "\fBis_sender\fP"
+.br
+.ti -1c
+.RI "\fBcredit\fP"
+.br
+.ti -1c
+.RI "\fBtotal_credit\fP"
+.br
+.ti -1c
+.RI "\fBrecv_seqno\fP"
+.br
+.ti -1c
+.RI "\fBrouting_id\fP"
+.br
+.in -1c
+.SS "Static Public Attributes"
+
+.in +1c
+.ti -1c
+.RI "int \fBcredit\fP = 0"
+.br
+.ti -1c
+.RI "int \fBtotal_credit\fP = 0"
+.br
+.ti -1c
+.RI "bool \fBis_sender\fP = True"
+.br
+.ti -1c
+.RI "int \fBrouting_id\fP = 0"
+.br
+.ti -1c
+.RI "int \fBsend_seqno\fP = \-1"
+.br
+.ti -1c
+.RI "int \fBrecv_seqno\fP = \-1"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+
+.PP
+.nf
+A Flow object provides ZIO flow protocol API
+
+It is equivalent to the C++ zio::flow::Flow class
+
+All timeouts are in milliseconds.  A timeout of None means forever.
+
+.fi
+.PP
+ 
+.PP
+Definition at line 21 of file proto\&.py\&.
+.SH "Constructor & Destructor Documentation"
+.PP 
+.SS "def zio\&.flow\&.proto\&.Flow\&.__init__ ( self,  port)"
+
+.PP
+.nf
+Construct a flow object on a port.
+
+Application shall handle ports bind/connect and online states.
+
+.fi
+.PP
+ 
+.PP
+Definition at line 37 of file proto\&.py\&.
+.SH "Member Function Documentation"
+.PP 
+.SS "def zio\&.flow\&.proto\&.Flow\&.flush_pay ( self)"
+
+.PP
+.nf
+Send any accumulated credit as PAY.
+
+This is called in a get() but app may call any time after a
+BOT exchange.  Number of credits sent is returned.  This does
+not block.
+
+.fi
+.PP
+ 
+.PP
+Definition at line 164 of file proto\&.py\&.
+.SS "def zio\&.flow\&.proto\&.Flow\&.get ( self,  timeout = \fCNone\fP)"
+
+.PP
+.nf
+Receive and return a DAT message and send any accumulated PAY.
+
+Return None if EOT was received instead of DAT.
+
+Exceptions raised.
+
+.fi
+.PP
+ 
+.PP
+Definition at line 186 of file proto\&.py\&.
+.SS "def zio\&.flow\&.proto\&.Flow\&.put ( self,  msg)"
+
+.PP
+.nf
+Send a DAT message and slurp for any waiting PAY.
+
+Return True if sent, None if an EOT was received instead of
+PAY.
+
+.fi
+.PP
+ 
+.PP
+Definition at line 139 of file proto\&.py\&.
+.SS "def zio\&.flow\&.proto\&.Flow\&.recv_bot ( self,  timeout = \fC\-1\fP)"
+
+.PP
+.nf
+Receive and return BOT message or None.
+
+Returns None if EOT was received.  
+
+Raises exceptions
+
+.fi
+.PP
+ 
+.PP
+Definition at line 63 of file proto\&.py\&.
+.SS "def zio\&.flow\&.proto\&.Flow\&.recv_eot ( self,  timeout = \fCNone\fP)"
+
+.PP
+.nf
+Recv an EOT message.
+
+EOT message is returned or None if timeout occurs.
+
+If app explicitly calls send_eot() it should call recv_eot()
+to wait for the ack from the other end.  If an app receives
+EOT as an unepxected message while receiving PAY or DAT then
+it should send_eot() but not expect another EOT ack.
+
+.fi
+.PP
+ 
+.PP
+Definition at line 243 of file proto\&.py\&.
+.SS "def zio\&.flow\&.proto\&.Flow\&.send_bot ( self,  msg)"
+
+.PP
+.nf
+Send a BOT message to the other end.
+
+Client calls send_bot() first, server calls send_bot() second.
+
+.fi
+.PP
+ 
+.PP
+Definition at line 45 of file proto\&.py\&.
+.SS "def zio\&.flow\&.proto\&.Flow\&.send_eot ( self,  msg = \fC\fBMessage\fP()\fP)"
+
+.PP
+.nf
+Send EOT message to other end.
+
+Note, if app initiates the EOT, it should then call
+recv_eot().  If it unexpectedly got EOT when recving another
+then it should send EOT as a response.
+
+.fi
+.PP
+ 
+.PP
+Definition at line 223 of file proto\&.py\&.
+.SS "def zio\&.flow\&.proto\&.Flow\&.slurp_pay ( self,  timeout = \fCNone\fP)"
+
+.PP
+.nf
+Receive any waiting PAY messages
+
+The flow object will slurp prior to a sending a DAT but the
+application may call this at any time after BOT.  Number of
+credits slurped is returned.  None is returned if other than a
+PAY is received.  Caller should likely respond to that with
+send_eot(msg,0).
+
+.fi
+.PP
+ 
+.PP
+Definition at line 105 of file proto\&.py\&.
+.SH "Member Data Documentation"
+.PP 
+.SS "int zio\&.flow\&.proto\&.Flow\&.credit = 0\fC [static]\fP"
+
+.PP
+Definition at line 30 of file proto\&.py\&.
+.SS "zio\&.flow\&.proto\&.Flow\&.credit"
+
+.PP
+Definition at line 93 of file proto\&.py\&.
+.SS "bool zio\&.flow\&.proto\&.Flow\&.is_sender = True\fC [static]\fP"
+
+.PP
+Definition at line 32 of file proto\&.py\&.
+.SS "zio\&.flow\&.proto\&.Flow\&.is_sender"
+
+.PP
+Definition at line 92 of file proto\&.py\&.
+.SS "zio\&.flow\&.proto\&.Flow\&.port"
+
+.PP
+Definition at line 43 of file proto\&.py\&.
+.SS "int zio\&.flow\&.proto\&.Flow\&.recv_seqno = \-1\fC [static]\fP"
+
+.PP
+Definition at line 35 of file proto\&.py\&.
+.SS "zio\&.flow\&.proto\&.Flow\&.recv_seqno"
+
+.PP
+Definition at line 101 of file proto\&.py\&.
+.SS "int zio\&.flow\&.proto\&.Flow\&.routing_id = 0\fC [static]\fP"
+
+.PP
+Definition at line 33 of file proto\&.py\&.
+.SS "zio\&.flow\&.proto\&.Flow\&.routing_id"
+
+.PP
+Definition at line 102 of file proto\&.py\&.
+.SS "int zio\&.flow\&.proto\&.Flow\&.send_seqno = \-1\fC [static]\fP"
+
+.PP
+Definition at line 34 of file proto\&.py\&.
+.SS "zio\&.flow\&.proto\&.Flow\&.send_seqno"
+
+.PP
+Definition at line 58 of file proto\&.py\&.
+.SS "int zio\&.flow\&.proto\&.Flow\&.total_credit = 0\fC [static]\fP"
+
+.PP
+Definition at line 31 of file proto\&.py\&.
+.SS "zio\&.flow\&.proto\&.Flow\&.total_credit"
+
+.PP
+Definition at line 100 of file proto\&.py\&.
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for ZIO from the source code\&.

@@ -1,29 +1,4 @@
 var searchData=
 [
-  ['send',['send',['../df/d69/classzio_1_1_outbox.html#a634ef4179c2558c904dbe42ab9996d93',1,'zio::Outbox::send()'],['../d5/d39/classzio_1_1_port.html#a2deb092210815d65c06eb42b44c87e18',1,'zio::Port::send()'],['../de/db1/classzmq_1_1detail_1_1socket__base.html#a2d723ddb789deed1e56a662b2ae7d296',1,'zmq::detail::socket_base::send(const void *buf_, size_t len_, int flags_=0)'],['../de/db1/classzmq_1_1detail_1_1socket__base.html#acbe2664870fd1d0584789e6848be546c',1,'zmq::detail::socket_base::send(message_t &amp;msg_, int flags_=0)'],['../de/db1/classzmq_1_1detail_1_1socket__base.html#ae2fc0a7fd811ecb9e125c06dd1023906',1,'zmq::detail::socket_base::send(T first, T last, int flags_=0)'],['../d8/dec/structsender.html#a76d43cbeca630ee68031bc6903acaf65',1,'sender::send()']]],
-  ['send_5fbot',['send_bot',['../dc/d09/classzio_1_1flow_1_1_flow.html#a3f6f7126b62bc00761f61c4916cd02ec',1,'zio::flow::Flow']]],
-  ['seqno',['seqno',['../d2/df1/classzio_1_1_message.html#ad60770ebe97e78559e5f901799243648',1,'zio::Message']]],
-  ['set_5fcoord',['set_coord',['../d2/df1/classzio_1_1_message.html#aac8368bc1699a7f51e249b848c303fb6',1,'zio::Message']]],
-  ['set_5fformat',['set_format',['../d2/df1/classzio_1_1_message.html#a9778c20add309bc64cc2201c8d91a9ae',1,'zio::Message']]],
-  ['set_5fheader',['set_header',['../d5/d39/classzio_1_1_port.html#a6929ef0d3d8216ddac98d2e9f8d81dd2',1,'zio::Port']]],
-  ['set_5flabel',['set_label',['../d2/df1/classzio_1_1_message.html#af12fc23588e3dbc421283d402066918a',1,'zio::Message']]],
-  ['set_5flevel',['set_level',['../d2/df1/classzio_1_1_message.html#ae60b460d78ba385a22f8d9c9b7457fd5',1,'zio::Message']]],
-  ['set_5fnick',['set_nick',['../de/d36/classzio_1_1_node.html#aa3ec9fc25d4678ae542da4d3a6e10acb',1,'zio::Node']]],
-  ['set_5forigin',['set_origin',['../de/d36/classzio_1_1_node.html#a19e4bf5816a0672bc422ff7157dd6d90',1,'zio::Node::set_origin()'],['../d5/d39/classzio_1_1_port.html#a23c4aaaf930b413efb318e32cf1bb218',1,'zio::Port::set_origin()']]],
-  ['set_5frouting_5fid',['set_routing_id',['../d2/df1/classzio_1_1_message.html#a287eac56fa65190a004293e2214a6367',1,'zio::Message']]],
-  ['set_5fverbose',['set_verbose',['../de/d36/classzio_1_1_node.html#a35b069369e47d0169a80adedfdb82043',1,'zio::Node::set_verbose()'],['../dc/d2b/classzio_1_1_peer.html#acf9f5b982f95a66f338d5467301ed7da',1,'zio::Peer::set_verbose()'],['../d5/d39/classzio_1_1_port.html#a7e31d096ceee38b1390ba83b2a4c612f',1,'zio::Port::set_verbose()']]],
-  ['setctxopt',['setctxopt',['../dd/d18/classzmq_1_1context__t.html#a1b7abe34787b406c3ca612ec4728f7f6',1,'zmq::context_t']]],
-  ['setsockopt',['setsockopt',['../de/db1/classzmq_1_1detail_1_1socket__base.html#a9a5fec44878fbae7f19432c23d103778',1,'zmq::detail::socket_base::setsockopt(int option_, T const &amp;optval)'],['../de/db1/classzmq_1_1detail_1_1socket__base.html#ae8b25975545d24389d597f22416d3128',1,'zmq::detail::socket_base::setsockopt(int option_, const void *optval_, size_t optvallen_)']]],
-  ['size',['size',['../d1/dba/classzmq_1_1message__t.html#a95bbb9796582768c847c5223ae03f206',1,'zmq::message_t']]],
-  ['slurp_5fpay',['slurp_pay',['../dc/d09/classzio_1_1flow_1_1_flow.html#a79cfc84cfcaa29a5ca2f3de1c496687d',1,'zio::flow::Flow']]],
-  ['sock_5ftype',['sock_type',['../d1/dad/namespacezio.html#a180be56ce28fc3773685e1db92f30656',1,'zio']]],
-  ['sock_5ftype_5fname',['sock_type_name',['../d1/dad/namespacezio.html#a22e4e2f3cf5c086f8346583055e7a1b3',1,'zio']]],
-  ['socket',['socket',['../d5/d39/classzio_1_1_port.html#a52c3ed74afc3a09a934b4a89810d6c38',1,'zio::Port']]],
-  ['socket_5fbase',['socket_base',['../de/db1/classzmq_1_1detail_1_1socket__base.html#abff9755a7f71db281217d1bd08d5caf8',1,'zmq::detail::socket_base::socket_base() ZMQ_NOTHROW'],['../de/db1/classzmq_1_1detail_1_1socket__base.html#a482d492460ad5d9030181211fe3f77d9',1,'zmq::detail::socket_base::socket_base(void *handle) ZMQ_NOTHROW']]],
-  ['socket_5fref',['socket_ref',['../dd/d85/classzmq_1_1socket__ref.html#a3b9ba8aecff5e3ead5f6991970ec43af',1,'zmq::socket_ref::socket_ref() ZMQ_NOTHROW'],['../dd/d85/classzmq_1_1socket__ref.html#ad38bf1dd7ab89f7c1769462287c60c6f',1,'zmq::socket_ref::socket_ref(from_handle_t, void *handle) ZMQ_NOTHROW']]],
-  ['socket_5ft',['socket_t',['../da/d1d/classzmq_1_1socket__t.html#ab2757b65ca7f4aeabd8d9e7545ed1567',1,'zmq::socket_t::socket_t() ZMQ_NOTHROW'],['../da/d1d/classzmq_1_1socket__t.html#a40e7d9f2ab962d051b4fe6831d923a58',1,'zmq::socket_t::socket_t(context_t &amp;context_, int type_)']]],
-  ['str',['str',['../d1/dba/classzmq_1_1message__t.html#aed6502a922a73cda7f47d47689617d03',1,'zmq::message_t']]],
-  ['subscribe',['subscribe',['../d5/d39/classzio_1_1_port.html#ae09620f9721b1a960cbb6ec47966ff05',1,'zio::Port']]],
-  ['summary',['summary',['../df/d69/classzio_1_1_outbox.html#a4504343e1a24037daff4f4dc4e4b9073',1,'zio::Outbox']]],
-  ['swap',['swap',['../d1/dba/classzmq_1_1message__t.html#a48fa2f9b464a2522d340533a99a36f5f',1,'zmq::message_t::swap()'],['../dd/d18/classzmq_1_1context__t.html#a2ae3caec030a250b3896f8b6154d024f',1,'zmq::context_t::swap()'],['../da/d1d/classzmq_1_1socket__t.html#a08f5da517679e373ce945e2a8c0af3ac',1,'zmq::socket_t::swap()'],['../d0/db9/namespacezmq.html#adea7e522720e4ecd0c53d30016d7f3c7',1,'zmq::swap(message_t &amp;a, message_t &amp;b) ZMQ_NOTHROW'],['../d0/db9/namespacezmq.html#ad40238135150435c4213bc87a113a2a8',1,'zmq::swap(context_t &amp;a, context_t &amp;b) ZMQ_NOTHROW'],['../d0/db9/namespacezmq.html#a9173b8e9f5a5a9baf27d53528d145eee',1,'zmq::swap(socket_t &amp;a, socket_t &amp;b) ZMQ_NOTHROW']]]
+  ['quick_5fop',['quick_op',['../d1/dae/namespacerule_1_1op.html#afc78b170a2d8a44d772aa23b8eb92594',1,'rule::op']]]
 ];

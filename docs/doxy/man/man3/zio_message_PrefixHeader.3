@@ -1,0 +1,118 @@
+.TH "zio.message.PrefixHeader" 3 "Tue Feb 4 2020" "ZIO" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+zio.message.PrefixHeader
+.SH SYNOPSIS
+.br
+.PP
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "def \fB__init__\fP (self, args, \fBlevel\fP=0, \fBform\fP=' ' *4, \fBlabel\fP='')"
+.br
+.ti -1c
+.RI "def \fB__str__\fP (self)"
+.br
+.ti -1c
+.RI "def \fB__repr__\fP (self)"
+.br
+.ti -1c
+.RI "def \fB__bytes__\fP (self)"
+.br
+.in -1c
+.SS "Public Attributes"
+
+.in +1c
+.ti -1c
+.RI "\fBform\fP"
+.br
+.ti -1c
+.RI "\fBlabel\fP"
+.br
+.in -1c
+.SS "Static Public Attributes"
+
+.in +1c
+.ti -1c
+.RI "\fBlevel\fP = \fBMessageLevel\&.undefined\fP"
+.br
+.ti -1c
+.RI "string \fBform\fP = ' '*4"
+.br
+.ti -1c
+.RI "string \fBlabel\fP = ''"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+
+.PP
+.nf
+A ZIO message prefix header.
+
+It is a triplet of (level, form, label) with a "ZIO" leading
+magic.
+
+.fi
+.PP
+ 
+.PP
+Definition at line 24 of file message\&.py\&.
+.SH "Constructor & Destructor Documentation"
+.PP 
+.SS "def zio\&.message\&.PrefixHeader\&.__init__ ( self,  args,  level = \fC0\fP,  form = \fC' '*4\fP,  label = \fC''\fP)"
+
+.PP
+.nf
+Create a prefix header
+
+>>> PrefixHeader(0, "FLOW", json.dumps(dict(flow="DAT")))
+>>> PrefixHeader(form="TEXT", level=3)
+
+.fi
+.PP
+ 
+.PP
+Definition at line 35 of file message\&.py\&.
+.SH "Member Function Documentation"
+.PP 
+.SS "def zio\&.message\&.PrefixHeader\&.__bytes__ ( self)"
+
+.PP
+Definition at line 75 of file message\&.py\&.
+.SS "def zio\&.message\&.PrefixHeader\&.__repr__ ( self)"
+
+.PP
+Definition at line 72 of file message\&.py\&.
+.SS "def zio\&.message\&.PrefixHeader\&.__str__ ( self)"
+
+.PP
+Definition at line 69 of file message\&.py\&.
+.SH "Member Data Documentation"
+.PP 
+.SS "string zio\&.message\&.PrefixHeader\&.form = ' '*4\fC [static]\fP"
+
+.PP
+Definition at line 32 of file message\&.py\&.
+.SS "zio\&.message\&.PrefixHeader\&.form"
+
+.PP
+Definition at line 43 of file message\&.py\&.
+.SS "string zio\&.message\&.PrefixHeader\&.label = ''\fC [static]\fP"
+
+.PP
+Definition at line 33 of file message\&.py\&.
+.SS "zio\&.message\&.PrefixHeader\&.label"
+
+.PP
+Definition at line 44 of file message\&.py\&.
+.SS "zio\&.message\&.PrefixHeader\&.level = \fBMessageLevel\&.undefined\fP\fC [static]\fP"
+
+.PP
+Definition at line 31 of file message\&.py\&.
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for ZIO from the source code\&.

@@ -1,0 +1,339 @@
+.TH "zio.message.Message" 3 "Tue Feb 4 2020" "ZIO" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+zio.message.Message
+.SH SYNOPSIS
+.br
+.PP
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "def \fB__init__\fP (self, \fBlevel\fP=None, \fBform\fP=None, \fBlabel\fP=None, \fBrouting_id\fP=None, \fBorigin\fP=None, \fBgranule\fP=None, \fBseqno\fP=None, \fBprefix\fP=None, \fBcoord\fP=None, \fBpayload\fP=None, parts=None, encoded=None, frame=None)"
+.br
+.ti -1c
+.RI "def \fBform\fP (self)"
+.br
+.ti -1c
+.RI "def \fBform\fP (self, val)"
+.br
+.ti -1c
+.RI "def \fBlevel\fP (self)"
+.br
+.ti -1c
+.RI "def \fBlevel\fP (self, val)"
+.br
+.ti -1c
+.RI "def \fBlabel\fP (self)"
+.br
+.ti -1c
+.RI "def \fBlabel\fP (self, val)"
+.br
+.ti -1c
+.RI "def \fBorigin\fP (self)"
+.br
+.ti -1c
+.RI "def \fBorigin\fP (self, val)"
+.br
+.ti -1c
+.RI "def \fBgranule\fP (self)"
+.br
+.ti -1c
+.RI "def \fBgranule\fP (self, val)"
+.br
+.ti -1c
+.RI "def \fBseqno\fP (self)"
+.br
+.ti -1c
+.RI "def \fBseqno\fP (self, val)"
+.br
+.ti -1c
+.RI "def \fBpayload\fP (self)"
+.br
+.ti -1c
+.RI "def \fBpayload\fP (self, pl)"
+.br
+.ti -1c
+.RI "def \fBtoframe\fP (self)"
+.br
+.ti -1c
+.RI "def \fBfromframe\fP (self, frame)"
+.br
+.ti -1c
+.RI "def \fBencode\fP (self)"
+.br
+.ti -1c
+.RI "def \fBdecode\fP (self, encoded)"
+.br
+.ti -1c
+.RI "def \fBtoparts\fP (self)"
+.br
+.ti -1c
+.RI "def \fBfromparts\fP (self, parts)"
+.br
+.ti -1c
+.RI "def \fB__str__\fP (self)"
+.br
+.in -1c
+.SS "Public Attributes"
+
+.in +1c
+.ti -1c
+.RI "\fBpayload\fP"
+.br
+.ti -1c
+.RI "\fBrouting_id\fP"
+.br
+.ti -1c
+.RI "\fBlabel\fP"
+.br
+.ti -1c
+.RI "\fBform\fP"
+.br
+.ti -1c
+.RI "\fBlevel\fP"
+.br
+.ti -1c
+.RI "\fBorigin\fP"
+.br
+.ti -1c
+.RI "\fBgranule\fP"
+.br
+.ti -1c
+.RI "\fBseqno\fP"
+.br
+.in -1c
+.SS "Static Public Attributes"
+
+.in +1c
+.ti -1c
+.RI "int \fBrouting_id\fP = 0"
+.br
+.ti -1c
+.RI "\fBprefix\fP = None"
+.br
+.ti -1c
+.RI "\fBcoord\fP = None"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+
+.PP
+.nf
+A zio.Message fixes some of the message schema.
+
+It is equivalent to a C++ zio::Message.
+.fi
+.PP
+ 
+.PP
+Definition at line 109 of file message\&.py\&.
+.SH "Constructor & Destructor Documentation"
+.PP 
+.SS "def zio\&.message\&.Message\&.__init__ ( self,  level = \fCNone\fP,  form = \fCNone\fP,  label = \fCNone\fP,  routing_id = \fCNone\fP,  origin = \fCNone\fP,  granule = \fCNone\fP,  seqno = \fCNone\fP,  prefix = \fCNone\fP,  coord = \fCNone\fP,  payload = \fCNone\fP,  parts = \fCNone\fP,  encoded = \fCNone\fP,  frame = \fCNone\fP)"
+
+.PP
+.nf
+Construct a zio.Message.
+
+Construction applies arguments in reverse order.  Thus one
+may, eg, construct a message with a frame and then override
+the payload and label.  The ingredients may be considered
+deconstructed as:
+
+    frame = encoding + routing_id
+
+    encoding = packing of parts
+
+    parts = [prefix, coord, ...payloads]
+
+A frame should be used when the zio.Message will be used with
+a SERVER socket.  Or else the routing_id must be explicitly
+set.
+.fi
+.PP
+ 
+.PP
+Definition at line 127 of file message\&.py\&.
+.SH "Member Function Documentation"
+.PP 
+.SS "def zio\&.message\&.Message\&.__str__ ( self)"
+
+.PP
+Definition at line 277 of file message\&.py\&.
+.SS "def zio\&.message\&.Message\&.decode ( self,  encoded)"
+
+.PP
+.nf
+Decode to self.
+
+.fi
+.PP
+ 
+.PP
+Definition at line 253 of file message\&.py\&.
+.SS "def zio\&.message\&.Message\&.encode ( self)"
+
+.PP
+.nf
+Return encoded byte array of self.
+
+It is suitable for use as the data arg to a zmq.Frame
+
+.fi
+.PP
+ 
+.PP
+Definition at line 244 of file message\&.py\&.
+.SS "def zio\&.message\&.Message\&.form ( self)"
+
+.PP
+Definition at line 178 of file message\&.py\&.
+.SS "def zio\&.message\&.Message\&.form ( self,  val)"
+
+.PP
+Definition at line 181 of file message\&.py\&.
+.SS "def zio\&.message\&.Message\&.fromframe ( self,  frame)"
+
+.PP
+.nf
+Set self from a frame
+
+.fi
+.PP
+ 
+.PP
+Definition at line 237 of file message\&.py\&.
+.SS "def zio\&.message\&.Message\&.fromparts ( self,  parts)"
+
+.PP
+.nf
+Set self from multipart message / array of encoded data.
+
+.fi
+.PP
+ 
+.PP
+Definition at line 267 of file message\&.py\&.
+.SS "def zio\&.message\&.Message\&.granule ( self)"
+
+.PP
+Definition at line 206 of file message\&.py\&.
+.SS "def zio\&.message\&.Message\&.granule ( self,  val)"
+
+.PP
+Definition at line 209 of file message\&.py\&.
+.SS "def zio\&.message\&.Message\&.label ( self)"
+
+.PP
+Definition at line 192 of file message\&.py\&.
+.SS "def zio\&.message\&.Message\&.label ( self,  val)"
+
+.PP
+Definition at line 195 of file message\&.py\&.
+.SS "def zio\&.message\&.Message\&.level ( self)"
+
+.PP
+Definition at line 185 of file message\&.py\&.
+.SS "def zio\&.message\&.Message\&.level ( self,  val)"
+
+.PP
+Definition at line 188 of file message\&.py\&.
+.SS "def zio\&.message\&.Message\&.origin ( self)"
+
+.PP
+Definition at line 199 of file message\&.py\&.
+.SS "def zio\&.message\&.Message\&.origin ( self,  val)"
+
+.PP
+Definition at line 202 of file message\&.py\&.
+.SS "def zio\&.message\&.Message\&.payload ( self)"
+
+.PP
+Definition at line 221 of file message\&.py\&.
+.SS "def zio\&.message\&.Message\&.payload ( self,  pl)"
+
+.PP
+Definition at line 225 of file message\&.py\&.
+.SS "def zio\&.message\&.Message\&.seqno ( self)"
+
+.PP
+Definition at line 213 of file message\&.py\&.
+.SS "def zio\&.message\&.Message\&.seqno ( self,  val)"
+
+.PP
+Definition at line 216 of file message\&.py\&.
+.SS "def zio\&.message\&.Message\&.toframe ( self)"
+
+.PP
+.nf
+Return self as a frame.
+
+.fi
+.PP
+ 
+.PP
+Definition at line 228 of file message\&.py\&.
+.SS "def zio\&.message\&.Message\&.toparts ( self)"
+
+.PP
+.nf
+Return self as a multipart set of encoded data
+
+.fi
+.PP
+ 
+.PP
+Definition at line 261 of file message\&.py\&.
+.SH "Member Data Documentation"
+.PP 
+.SS "zio\&.message\&.Message\&.coord = None\fC [static]\fP"
+
+.PP
+Definition at line 120 of file message\&.py\&.
+.SS "zio\&.message\&.Message\&.form"
+
+.PP
+Definition at line 166 of file message\&.py\&.
+.SS "zio\&.message\&.Message\&.granule"
+
+.PP
+Definition at line 172 of file message\&.py\&.
+.SS "zio\&.message\&.Message\&.label"
+
+.PP
+Definition at line 164 of file message\&.py\&.
+.SS "zio\&.message\&.Message\&.level"
+
+.PP
+Definition at line 168 of file message\&.py\&.
+.SS "zio\&.message\&.Message\&.origin"
+
+.PP
+Definition at line 170 of file message\&.py\&.
+.SS "zio\&.message\&.Message\&.payload"
+
+.PP
+Definition at line 156 of file message\&.py\&.
+.SS "zio\&.message\&.Message\&.prefix = None\fC [static]\fP"
+
+.PP
+Definition at line 119 of file message\&.py\&.
+.SS "int zio\&.message\&.Message\&.routing_id = 0\fC [static]\fP"
+
+.PP
+Definition at line 118 of file message\&.py\&.
+.SS "zio\&.message\&.Message\&.routing_id"
+
+.PP
+Definition at line 162 of file message\&.py\&.
+.SS "zio\&.message\&.Message\&.seqno"
+
+.PP
+Definition at line 174 of file message\&.py\&.
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for ZIO from the source code\&.

@@ -1,8 +1,10 @@
 var searchData=
 [
-  ['eot',['eot',['../da/d77/structflow__protocol_1_1actioncbs.html#a277b2827764b593bb8d6229eeca3bf06',1,'flow_protocol::actioncbs']]],
-  ['ep',['ep',['../de/daf/structflow__protocol_1_1ev__msg.html#a2b1213fd8fdaf472d208e92e11c36927',1,'flow_protocol::ev_msg']]],
-  ['error',['error',['../d1/d32/structflow__protocol_1_1eventcbs.html#ad132b4d1e5736cac1c97beb9c04d2280',1,'flow_protocol::eventcbs::error()'],['../d7/d60/structclient__protocol_1_1events.html#aad177acd8a50ad2e583fdbc9028fc4d5',1,'client_protocol::events::error()']]],
-  ['established',['established',['../d7/d60/structclient__protocol_1_1events.html#aa4c8155b567166ac9c69ba95a06a6d3d',1,'client_protocol::events']]],
-  ['event',['event',['../d0/d84/structzmq__event__t.html#a82b19531e51d234ec37b8562d0eb30ad',1,'zmq_event_t']]]
+  ['data',['data',['../d3/d13/structflow__protocol_1_1ev__dat.html#ad3a4058d46ceff80639c10b8cf8db67d',1,'flow_protocol::ev_dat::data()'],['../d4/d36/structclient__protocol_1_1ev__payload.html#ae46371595deed7d21a4855e88dcfcfb5',1,'client_protocol::ev_payload::data()']]],
+  ['datefmt',['datefmt',['../dd/def/namespacetest__flowbroker.html#a3a392283017403aeceaa8dd1ebde88d1',1,'test_flowbroker']]],
+  ['debug',['debug',['../d0/d4b/classzio_1_1message_1_1_message_level.html#a0ebc0d1737b4a0e4356b0c4486718988',1,'zio::message::MessageLevel']]],
+  ['description',['description',['../dd/dc4/namespacesetup.html#aedf461ec52a946bda975938ba0b93ec0',1,'setup']]],
+  ['direction',['direction',['../d6/df4/classtest__ugly_1_1_simple_server.html#af962ce56ba57ed9a3f21476c77e24c9e',1,'test_ugly::SimpleServer']]],
+  ['disconnect',['disconnect',['../da/d77/structflow__protocol_1_1actioncbs.html#a418c3475ee080b6c219bfc1eb1609b7e',1,'flow_protocol::actioncbs::disconnect()'],['../d9/d83/structclient__protocol_1_1actions.html#aaa70867cd02c00f57fde8c2790a8b00e',1,'client_protocol::actions::disconnect()']]],
+  ['disconnected',['disconnected',['../d7/d60/structclient__protocol_1_1events.html#a58200120183ca12149a5663afcfee947',1,'client_protocol::events']]]
 ];

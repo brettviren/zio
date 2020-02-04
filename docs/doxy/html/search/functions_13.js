@@ -1,7 +1,4 @@
 var searchData=
 [
-  ['waitfor',['waitfor',['../dc/d2b/classzio_1_1_peer.html#ace5e704b5d442073968ed52da9e327e3',1,'zio::Peer']]],
-  ['waituntil',['waituntil',['../dc/d2b/classzio_1_1_peer.html#ab655ef6515474d1cb65742e29eb71275',1,'zio::Peer']]],
-  ['warning',['warning',['../df/d69/classzio_1_1_outbox.html#a64969bb01111a2a487eaaebaf641256d',1,'zio::Outbox']]],
-  ['what',['what',['../d4/d29/classzio_1_1exception.html#a7854089eb676ebebc746e439f289301b',1,'zio::exception::what()'],['../d3/d9a/classzmq_1_1error__t.html#ae17eabefc24504776bd9aa8773c604b8',1,'zmq::error_t::what()']]]
+  ['unbind',['unbind',['../de/db1/classzmq_1_1detail_1_1socket__base.html#a1fd02cd14a084aa43172cecb31bf2283',1,'zmq::detail::socket_base::unbind(std::string const &amp;addr)'],['../de/db1/classzmq_1_1detail_1_1socket__base.html#abcbafe7ea943efce7f495893d45c0217',1,'zmq::detail::socket_base::unbind(const char *addr_)']]]
 ];

@@ -1,0 +1,93 @@
+.TH "test_ugly" 3 "Tue Feb 4 2020" "ZIO" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+test_ugly
+.SH SYNOPSIS
+.br
+.PP
+.SS "Classes"
+
+.in +1c
+.ti -1c
+.RI "class \fBSimpleServer\fP"
+.br
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "def \fBnow\fP ()"
+.br
+.in -1c
+.SS "Variables"
+
+.in +1c
+.ti -1c
+.RI "\fBctx\fP = zmq\&.Context()"
+.br
+.ti -1c
+.RI "\fBsock\fP = ctx\&.socket(zmq\&.SERVER)"
+.br
+.ti -1c
+.RI "string \fBaddr\fP = 'tcp://127\&.0\&.0\&.1:5678'"
+.br
+.ti -1c
+.RI "\fBnode\fP = pyre\&.Pyre('testflows')"
+.br
+.ti -1c
+.RI "string \fBportname\fP = 'recver'"
+.br
+.ti -1c
+.RI "\fBss\fP = \fBSimpleServer\fP(\fBsock\fP);"
+.br
+.ti -1c
+.RI "bool \fBI_quit\fP = False"
+.br
+.ti -1c
+.RI "\fBok\fP = ss\&.recv_dat()"
+.br
+.in -1c
+.SH "Function Documentation"
+.PP 
+.SS "def test_ugly\&.now ()"
+
+.PP
+Definition at line 10 of file test_ugly\&.py\&.
+.SH "Variable Documentation"
+.PP 
+.SS "string test_ugly\&.addr = 'tcp://127\&.0\&.0\&.1:5678'"
+
+.PP
+Definition at line 160 of file test_ugly\&.py\&.
+.SS "test_ugly\&.ctx = zmq\&.Context()"
+
+.PP
+Definition at line 158 of file test_ugly\&.py\&.
+.SS "bool test_ugly\&.I_quit = False"
+
+.PP
+Definition at line 173 of file test_ugly\&.py\&.
+.SS "test_ugly\&.node = pyre\&.Pyre('testflows')"
+
+.PP
+Definition at line 163 of file test_ugly\&.py\&.
+.SS "test_ugly\&.ok = ss\&.recv_dat()"
+
+.PP
+Definition at line 179 of file test_ugly\&.py\&.
+.SS "string test_ugly\&.portname = 'recver'"
+
+.PP
+Definition at line 164 of file test_ugly\&.py\&.
+.SS "test_ugly\&.sock = ctx\&.socket(zmq\&.SERVER)"
+
+.PP
+Definition at line 159 of file test_ugly\&.py\&.
+.SS "test_ugly\&.ss = \fBSimpleServer\fP(\fBsock\fP);"
+
+.PP
+Definition at line 171 of file test_ugly\&.py\&.
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for ZIO from the source code\&.

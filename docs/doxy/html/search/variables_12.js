@@ -1,6 +1,5 @@
 var searchData=
 [
-  ['tcpportnum',['tcpportnum',['../d9/d82/struct_host_port_binder.html#a1ff8cb75fbd310be0915f8f84186286a',1,'HostPortBinder']]],
-  ['tools',['tools',['../d9/d45/namespacebuild.html#a8d578fd8c3ff6abc23ecff7ba61fc3dd',1,'build']]],
-  ['total_5fcredits',['total_credits',['../d4/d05/structflow__protocol_1_1protocol.html#ab61a9702d52a69cf363edcd55fdd3c0c',1,'flow_protocol::protocol']]]
+  ['undefined',['undefined',['../d8/d14/classzio_1_1flow_1_1proto_1_1_direction.html#a4160fe4c3964037137f5aa8d3ec03d04',1,'zio::flow.proto.Direction.undefined()'],['../d0/d4b/classzio_1_1message_1_1_message_level.html#a5ebd3a5d278be1e662b763605807c916',1,'zio.message.MessageLevel.undefined()']]],
+  ['url',['url',['../dd/dc4/namespacesetup.html#afc13124aa5c0124e84e1d965e3f4b0fb',1,'setup']]]
 ];
