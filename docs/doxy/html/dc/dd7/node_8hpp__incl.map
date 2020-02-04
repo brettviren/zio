@@ -1,8 +1,0 @@
-<map id="inc/zio/node.hpp" name="inc/zio/node.hpp">
-<area shape="rect" id="node2" href="$d1/d42/port_8hpp.html" title="zio/port.hpp" alt="" coords="267,80,358,107"/>
-<area shape="rect" id="node3" href="$d0/d70/peer_8hpp.html" title="zio/peer.hpp" alt="" coords="126,155,219,181"/>
-<area shape="rect" id="node8" href="$d5/d8c/message_8hpp.html" title="zio/message.hpp" alt="" coords="252,155,373,181"/>
-<area shape="rect" id="node9" href="$df/ddc/interned_8hpp.html" title="zio/interned.hpp" alt="" coords="366,229,481,256"/>
-<area shape="rect" id="node11" href="$da/d3f/zmq_8hpp.html" title="zio/zmq.hpp" alt="" coords="471,379,565,405"/>
-<area shape="rect" id="node19" href="$d5/de4/zmq__addon_8hpp.html" title="zio/zmq_addon.hpp" alt="" coords="595,304,729,331"/>
-</map>
