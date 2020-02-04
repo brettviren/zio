@@ -15,6 +15,7 @@ var searchData=
   ['disconnected',['disconnected',['../d7/d60/structclient__protocol_1_1events.html#a58200120183ca12149a5663afcfee947',1,'client_protocol::events']]],
   ['do_5fbinds',['do_binds',['../d5/d39/classzio_1_1_port.html#a420836591e677ecbf4dacf29b72ca560',1,'zio::Port::do_binds()'],['../dc/dac/classzio_1_1port_1_1_port.html#ae9fb86683832df084a9d91fc3a826628',1,'zio.port.Port.do_binds()']]],
   ['do_5fbot',['do_bot',['../d6/df4/classtest__ugly_1_1_simple_server.html#a5beddf5849456234489892feb1ec7425',1,'test_ugly::SimpleServer']]],
+  ['doxymain_2emd',['doxymain.md',['../db/d1e/doxymain_8md.html',1,'']]],
   ['drain',['drain',['../dc/d2b/classzio_1_1_peer.html#a29cd4db5cf6b6f861f91b329222d79cd',1,'zio::Peer::drain()'],['../d3/d81/classzio_1_1peer_1_1_peer.html#a46fd7a61fb793c9d9b2d758f3156701e',1,'zio.peer.Peer.drain()']]],
   ['dump',['dump',['../d2/d74/test__hsm_8cpp.html#a65d6fdaa57d06df9ff466e1b9201aaf4',1,'test_hsm.cpp']]],
   ['dump_5factor',['dump_actor',['../d9/d43/namespacezio_1_1flow_1_1example__handler.html#ab3b7eba466abf787ac00d8697915f498',1,'zio::flow::example_handler']]],

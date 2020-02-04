@@ -1,5 +1,7 @@
 var searchData=
 [
-  ['verbose',['verbose',['../de/d36/classzio_1_1_node.html#a352bddd3fb88582bd9a160a57d14d1b6',1,'zio::Node::verbose()'],['../df/d69/classzio_1_1_outbox.html#a01f2454cdecd7a38f1cdeb9d8173221f',1,'zio::Outbox::verbose()']]],
-  ['version',['version',['../d0/db9/namespacezmq.html#af04cbb1885b768c4ce23615883367c20',1,'zmq']]]
+  ['waitfor',['waitfor',['../dc/d2b/classzio_1_1_peer.html#ace5e704b5d442073968ed52da9e327e3',1,'zio::Peer::waitfor()'],['../d3/d81/classzio_1_1peer_1_1_peer.html#a06af9d86e64498f02ffc3994ce506f0d',1,'zio.peer.Peer.waitfor()']]],
+  ['waituntil',['waituntil',['../dc/d2b/classzio_1_1_peer.html#ab655ef6515474d1cb65742e29eb71275',1,'zio::Peer']]],
+  ['warning',['warning',['../df/d69/classzio_1_1_outbox.html#a64969bb01111a2a487eaaebaf641256d',1,'zio::Outbox']]],
+  ['what',['what',['../d4/d29/classzio_1_1exception.html#a7854089eb676ebebc746e439f289301b',1,'zio::exception::what()'],['../d3/d9a/classzmq_1_1error__t.html#ae17eabefc24504776bd9aa8773c604b8',1,'zmq::error_t::what()']]]
 ];

@@ -1,8 +1,6 @@
 var searchData=
 [
-  ['name',['name',['../d8/d7e/classrule_1_1op_1_1_op.html#adf9e994d18bb98013cb9f2d3c7cf4bd5',1,'rule.op.Op.name()'],['../dc/dac/classzio_1_1port_1_1_port.html#a894f34412fafda79a05c853add7d7867',1,'zio.port.Port.name()'],['../d1/dae/namespacerule_1_1op.html#a42772bb9e5382a010c26c66a66d6ae19',1,'rule.op.name()'],['../dd/dc4/namespacesetup.html#ab3a7a0638d76a01367c5bc3cc699447f',1,'setup.name()']]],
-  ['nick',['nick',['../d9/d6a/structzio_1_1peer__info__t.html#a12e5b65c8ae6fb045411478dac8de0b6',1,'zio::peer_info_t::nick()'],['../dc/dea/classzio_1_1node_1_1_node.html#a805353a1b80fe464d7c7c8cdc3db345b',1,'zio.node.Node.nick()']]],
-  ['nick1',['nick1',['../da/dde/classtest__peer_1_1_test_peer.html#af2c632321479fd7f019ad0042d756240',1,'test_peer::TestPeer']]],
-  ['nick2',['nick2',['../da/dde/classtest__peer_1_1_test_peer.html#afd8fda0a6b51cf0b2c62e5c984e88791',1,'test_peer::TestPeer']]],
-  ['node',['node',['../d0/dab/namespacetest__ugly.html#a550ccb6a89167a6496446483fd5d57d7',1,'test_ugly']]]
+  ['ok',['ok',['../d0/dab/namespacetest__ugly.html#a208a3273b12b1bb0de52b18a50bc5d59',1,'test_ugly']]],
+  ['origin',['origin',['../d3/df0/structzio_1_1_coord_header.html#abf8d6dd2921b3891b8d6b314196ae795',1,'zio::CoordHeader::origin()'],['../da/d8e/classtest__flow_1_1_test_flow.html#a4af77bbdf6ec1ac4e4ad6a3b110720b1',1,'test_flow.TestFlow.origin()'],['../d8/dd1/classtest__node_1_1_test_node.html#a0c87c2e47de9e68ba68d998563ed7f42',1,'test_node.TestNode.origin()'],['../d6/df4/classtest__ugly_1_1_simple_server.html#a390b53968cbb5f867d381f24ffabd0c0',1,'test_ugly.SimpleServer.origin()'],['../d4/db1/classzio_1_1message_1_1_coord_header.html#a15d63ba54a3225253f989a7b568c23d9',1,'zio.message.CoordHeader.origin()'],['../d4/db1/classzio_1_1message_1_1_coord_header.html#a7dec1f13d6ed1764447d3067c2f0b05b',1,'zio.message.CoordHeader.origin()'],['../dd/d06/classzio_1_1message_1_1_message.html#af794dcc1169dea4896f20ea2048a11c7',1,'zio.message.Message.origin()'],['../dc/dea/classzio_1_1node_1_1_node.html#ad000ed60e050d4dd5c8fee683bb30a0a',1,'zio.node.Node.origin()'],['../dc/dac/classzio_1_1port_1_1_port.html#a381da28330d7aca10df7ca98c489af50',1,'zio.port.Port.origin()']]],
+  ['other',['other',['../d8/d62/classzio_1_1flow_1_1broker_1_1_broker.html#a98bb8935fd06c7fac73fe6d44b86870a',1,'zio::flow::broker::Broker']]]
 ];

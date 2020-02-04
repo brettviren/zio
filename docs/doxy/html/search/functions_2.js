@@ -4,6 +4,5 @@ var searchData=
   ['bind_5faddress',['bind_address',['../d1/d35/namespacezio_1_1port.html#a31562bb1f6e2e719a3bb9ee8928d9ae8',1,'zio::port']]],
   ['bind_5fhostport',['bind_hostport',['../d1/d35/namespacezio_1_1port.html#aed7b6388db476964be8c39561f65f0b0',1,'zio::port']]],
   ['branch',['branch',['../d9/d6a/structzio_1_1peer__info__t.html#a24d134c13ef9f6b237ffc3f102da6db7',1,'zio::peer_info_t']]],
-  ['build_5fexpr',['build_expr',['../df/d54/classrule_1_1_expr.html#aad1fb8092199446ebbad3da6f4979ff1',1,'rule::Expr']]],
   ['byteify_5flist',['byteify_list',['../da/d63/namespacezio_1_1util.html#a9a1dd93e95647121f096fdbd46c9cf05',1,'zio::util']]]
 ];

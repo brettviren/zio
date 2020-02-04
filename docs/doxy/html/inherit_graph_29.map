@@ -1,3 +1,6 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$d9/df7/structtcp__release.html" title="tcp_release" alt="" coords="5,5,95,32"/>
+<area shape="rect" id="node2" href="$da/d8e/classtest__flow_1_1_test_flow.html" title="test_flow.TestFlow" alt="" coords="159,5,292,32"/>
+<area shape="rect" id="node3" href="$d7/d25/classtest__message_1_1_test_message.html" title="test_message.TestMessage" alt="" coords="132,56,319,83"/>
+<area shape="rect" id="node4" href="$d8/dd1/classtest__node_1_1_test_node.html" title="test_node.TestNode" alt="" coords="155,107,295,133"/>
+<area shape="rect" id="node5" href="$da/dde/classtest__peer_1_1_test_peer.html" title="test_peer.TestPeer" alt="" coords="159,157,292,184"/>
 </map>

@@ -7,6 +7,5 @@ var searchData=
   ['branch',['branch',['../d9/d6a/structzio_1_1peer__info__t.html#a24d134c13ef9f6b237ffc3f102da6db7',1,'zio::peer_info_t']]],
   ['broker',['Broker',['../d8/d62/classzio_1_1flow_1_1broker_1_1_broker.html',1,'zio::flow::broker']]],
   ['broker_2epy',['broker.py',['../d2/d3b/broker_8py.html',1,'']]],
-  ['build_5fexpr',['build_expr',['../df/d54/classrule_1_1_expr.html#aad1fb8092199446ebbad3da6f4979ff1',1,'rule::Expr']]],
   ['byteify_5flist',['byteify_list',['../da/d63/namespacezio_1_1util.html#a9a1dd93e95647121f096fdbd46c9cf05',1,'zio::util']]]
 ];

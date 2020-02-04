@@ -6,12 +6,9 @@ var searchData=
   ['encode_5fheader_5fprefix',['encode_header_prefix',['../da/db0/namespacezio_1_1message.html#a214a463b143e1527be0598c31fa99f5a',1,'zio::message']]],
   ['encode_5fmessage',['encode_message',['../da/db0/namespacezio_1_1message.html#ab898d64c21114c2e499a420bf6ad2175',1,'zio::message']]],
   ['endpoint_5ft',['endpoint_t',['../d5/daa/structflow__protocol.html#a1a5479c92eb9de3a5c934e9627161837',1,'flow_protocol']]],
-  ['endswith',['Endswith',['../d9/d8c/classrule_1_1op_1_1_endswith.html',1,'rule::op']]],
-  ['entry_5fpoints',['entry_points',['../dd/dc4/namespacesetup.html#ada7058afc98897f073d3f3b8b9157059',1,'setup']]],
   ['eot',['eot',['../da/d77/structflow__protocol_1_1actioncbs.html#a277b2827764b593bb8d6229eeca3bf06',1,'flow_protocol::actioncbs::eot()'],['../d6/df4/classtest__ugly_1_1_simple_server.html#aaf7adffc42891c3a15a3faa15a906db2',1,'test_ugly.SimpleServer.eot()']]],
   ['ep',['ep',['../de/daf/structflow__protocol_1_1ev__msg.html#a2b1213fd8fdaf472d208e92e11c36927',1,'flow_protocol::ev_msg']]],
   ['ephemeral_5fport_5frange',['ephemeral_port_range',['../d1/d35/namespacezio_1_1port.html#a092116f4b60706e61b22996c40ba3ba8',1,'zio::port']]],
-  ['eq',['Eq',['../d3/d75/classrule_1_1op_1_1_eq.html',1,'rule::op']]],
   ['equal',['equal',['../d1/dba/classzmq_1_1message__t.html#a901d78ddce5bd77e7421c179b1ef3c3a',1,'zmq::message_t']]],
   ['error',['error',['../d0/d4b/classzio_1_1message_1_1_message_level.html#a59e74f30fd055b9c43f793a8b3d86481',1,'zio.message.MessageLevel.error()'],['../d1/d32/structflow__protocol_1_1eventcbs.html#ad132b4d1e5736cac1c97beb9c04d2280',1,'flow_protocol::eventcbs::error()'],['../d7/d60/structclient__protocol_1_1events.html#aad177acd8a50ad2e583fdbc9028fc4d5',1,'client_protocol::events::error()'],['../df/d69/classzio_1_1_outbox.html#acfedfeea6e1de491b12629b68c066364',1,'zio::Outbox::error()'],['../dc/d70/namespacezio_1_1level.html#a57ecf132ca8f49e9f3b17bdad6cf83dea97e94cd1abc80496daea798d3293585c',1,'zio::level::error()']]],
   ['error_5ft',['error_t',['../d3/d9a/classzmq_1_1error__t.html',1,'zmq::error_t'],['../d3/d9a/classzmq_1_1error__t.html#a9baffe79d9a187a5bbd2d6c23aceda92',1,'zmq::error_t::error_t()']]],
@@ -24,7 +21,7 @@ var searchData=
   ['ev_5fdisconnect',['ev_disconnect',['../da/de4/structclient__protocol_1_1ev__disconnect.html',1,'client_protocol']]],
   ['ev_5fdisconnected',['ev_disconnected',['../d0/d0e/structclient__protocol_1_1ev__disconnected.html',1,'client_protocol']]],
   ['ev_5feot',['ev_eot',['../da/dc4/structflow__protocol_1_1ev__eot.html',1,'flow_protocol']]],
-  ['ev_5ferror',['ev_error',['../de/d73/structclient__protocol_1_1ev__error.html',1,'client_protocol::ev_error'],['../d6/d75/structflow__protocol_1_1ev__error.html',1,'flow_protocol::ev_error']]],
+  ['ev_5ferror',['ev_error',['../d6/d75/structflow__protocol_1_1ev__error.html',1,'flow_protocol::ev_error'],['../de/d73/structclient__protocol_1_1ev__error.html',1,'client_protocol::ev_error']]],
   ['ev_5ffin',['ev_fin',['../db/df0/structclient__protocol_1_1ev__fin.html',1,'client_protocol']]],
   ['ev_5fhandshake_5fack',['ev_handshake_ack',['../d0/d7b/structclient__protocol_1_1ev__handshake__ack.html',1,'client_protocol']]],
   ['ev_5fmsg',['ev_msg',['../de/daf/structflow__protocol_1_1ev__msg.html',1,'flow_protocol']]],
@@ -39,6 +36,5 @@ var searchData=
   ['example_5fhandler_2epy',['example_handler.py',['../d2/d54/example__handler_8py.html',1,'']]],
   ['exception',['exception',['../d4/d29/classzio_1_1exception.html',1,'zio::exception'],['../d4/d29/classzio_1_1exception.html#ad557b6aed9b81397ab7da023529eeaaa',1,'zio::exception::exception()']]],
   ['exceptions_2ehpp',['exceptions.hpp',['../da/d49/exceptions_8hpp.html',1,'']]],
-  ['expr',['Expr',['../df/d54/classrule_1_1_expr.html',1,'rule.Expr'],['../d2/d5d/classrule_1_1_rule.html#a4e3a5b5d9e561017f09a18df71d835ee',1,'rule.Rule.expr()']]],
   ['extract',['extract',['../d8/d14/classzio_1_1flow_1_1proto_1_1_direction.html#a771b344bff434b4af61ae7edca1a80e5',1,'zio::flow.proto.Direction.extract()'],['../d5/daa/structflow__protocol.html#a4df0e5b42e8e98fd26f248fda465ebbca4e274da02395a3d82975ccea0bf3ac4e',1,'flow_protocol::extract()'],['../df/de9/namespacezio_1_1flow.html#ab7814964f0e0e9fb3755eacd94a5a2f2aed0713e152224358da82f4bedaaf6edc',1,'zio::flow::extract()']]]
 ];
