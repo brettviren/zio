@@ -1,0 +1,22 @@
+#+title: Task Broker
+#+setupfile: setup.org
+#+include: nav.org
+
+#+begin_warning
+This is still under design.
+#+end_warning
+
+The ZIO task broker is essentially a rip off of ZeroMQ [[https://github.com/zeromq/majordomo][majordomo]] aka [[http://zguide.zeromq.org/page:all#toc98][service
+oriented reliable queueing]] pattern with some variation:
+
+- It is more generic ("generaldomo"?) in that clients and services are
+  not directly matched by simply a hard-wired service name but by
+  applying a factory pattern as is done with the [[file:flow-broker.org][ZIO flow broker]].
+
+- Use of SERVER socket type instead of ROUTER to allow for clients to
+  use CLIENT and thus operate in a thread-safe manner in a changing
+  and multi-threaded context.
+
+
+
+

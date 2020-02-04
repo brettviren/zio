@@ -57,7 +57,7 @@ class PrefixHeader:
             phs = args[0]
             if phs.startswith("ZIO"):
                 phs = phs[3:]
-            self.level(MessageLevel(int(phs[0])))
+            self.level = MessageLevel(int(phs[0]))
             phs = phs[1:]
             self.form="%-4s"%phs[:4]
             self.label = phs[4:]

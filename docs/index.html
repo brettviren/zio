@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-01-02 Thu 16:37 -->
+<!-- 2020-02-04 Tue 14:47 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>ZIO - C++ interface to ZeroMQ and Zyre.</title>
@@ -249,8 +249,7 @@ for the JavaScript code in this tag.
 <ul class="org-ul">
 <li><a href="index.html">Main Page</a></li>
 <li><a href="install.html">Installation</a></li>
-<li><a href="tutorial.html">Tutorial</a></li>
-<li><a href="howtos.html">How-to guides</a></li>
+<li><a href="tutorial.html">Tutorials</a></li>
 <li><a href="whytos.html">Design documents</a></li>
 <li><a href="api.html">API Reference</a></li>
 </ul>
@@ -258,31 +257,47 @@ for the JavaScript code in this tag.
 </div>
 
 <p>
-ZIO provides a high-level interface to ZeroMQ, Zyre and some patterns
-described in the <a href="http://zguide.zeromq.org/">zguide</a>.  It also
-provides a <i>ported graph</i> model for constructing a network topology.
-Some of the features ZIO provides include:
+ZIO provides a high-level interface to ZeroMQ, Zyre and implements
+some patterns described in the <a href="http://zguide.zeromq.org/">zguide</a>.  It also provides a <i>ported
+graph</i> model for constructing a network topology.  Some of the features
+ZIO provides include:
 </p>
 
 <ul class="org-ul">
-<li>a "logger object" type interface to emitting messages supporting
+<li>A "logger object" type interface to emitting messages supporting
 both free form text strings as well as structured data metrics (<a href="outbox.html">outbox</a>).</li>
 
-<li>a high level, but still general message format (<a href="messages.html">messages</a> and <a href="format.html">format</a>)</li>
+<li>A high level, but still general message format (<a href="messages.html">messages</a> and <a href="format.html">format</a>)</li>
 
-<li>interface to Zyre peer discovery, persistence and reaction (<a href="peer.html">peer</a>)</li>
+<li>An interface to Zyre peer discovery, persistence and reaction (<a href="peer.html">peer</a>)</li>
 
-<li>a "ported graph" abstraction which provides network topology
+<li>A "ported graph" abstraction which provides network topology
 self-assembly and which may be used to develop distributed
 applications that follow the <i>data flow programming</i> paradigm (<a href="node.html">node</a>
 and <a href="port.html">port</a>).</li>
 
-<li>some message processing batteries included (<a href="batteries.html">batteries</a>).</li>
+<li>A <a href="api.html">C++ API</a> and matching <a href="python.html">Python package</a></li>
+
+<li>A Python <a href="flow-broker.html">flow broker</a> bringing together flow clients and flow
+handlers in a pluggable manner.</li>
+
+<li>A Python <a href="task-broker.html">task broker</a> implementing a modified version of ZeroMQ's
+<a href="https://github.com/zeromq/majordomo">majordomo</a> broker (WIP).</li>
 </ul>
 
 <p>
-See the navigation links for entry to more documentation.
+See the navigation links for other ways to enter the documentation.
 </p>
+
+<p>
+Known applications of ZIO include:
+</p>
+
+<ul class="org-ul">
+<li><a href="https://brettviren.github.io/wire-cell-zpb/">Wire-Cell Toolkit ZPB</a> plugin package uses ZIO as a basis for
+transport between multi-threaded WCT application components and
+single-threaded file I/O resources.</li>
+</ul>
 </div>
 </body>
 </html>

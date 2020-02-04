@@ -12,7 +12,7 @@ endef
 all: all_png all_svg all_html
 all_svg: $(plantuml_svg)
 all_png: $(plantuml_png)
-all_html: $(main_html)
+all_html: $(main_html) index.html
 
 
 %.svg : %.plantuml

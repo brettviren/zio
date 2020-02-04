@@ -5,27 +5,35 @@
 
 #+include: nav.org
 
-ZIO provides a high-level interface to ZeroMQ, Zyre and some patterns
-described in the [[http://zguide.zeromq.org/][zguide]].  It also provides a /ported graph/ model for
-constructing a network topology.  Some of the features ZIO provides
-include:
+ZIO provides a high-level interface to ZeroMQ, Zyre and implements
+some patterns described in the [[http://zguide.zeromq.org/][zguide]].  It also provides a /ported
+graph/ model for constructing a network topology.  Some of the features
+ZIO provides include:
 
-- a "logger object" type interface to emitting messages supporting
+- A "logger object" type interface to emitting messages supporting
   both free form text strings as well as structured data metrics ([[file:outbox.org][outbox]]).
 
-- a high level, but still general message format ([[file:messages.org][messages]] and [[file:format.org][format]])
+- A high level, but still general message format ([[file:messages.org][messages]] and [[file:format.org][format]])
 
-- interface to Zyre peer discovery, persistence and reaction ([[file:peer.org][peer]])
+- An interface to Zyre peer discovery, persistence and reaction ([[file:peer.org][peer]])
 
-- a "ported graph" abstraction which provides network topology
+- A "ported graph" abstraction which provides network topology
   self-assembly and which may be used to develop distributed
   applications that follow the /data flow programming/ paradigm ([[file:node.org][node]]
   and [[file:port.org][port]]).
 
-- some message processing batteries included ([[file:batteries.org][batteries]]).
-
 - A [[file:api.org][C++ API]] and matching [[file:python.org][Python package]]
 
-- A Python [[file:flow-broker.org][flow broker]] with behavior specific components such as an [[file:hdfexample.org][HDF5 file service example]]
+- A Python [[file:flow-broker.org][flow broker]] bringing together flow clients and flow
+  handlers in a pluggable manner.
 
-See the navigation links for entry to more documentation.
+- A Python [[file:task-broker.org][task broker]] implementing a modified version of ZeroMQ's
+  [[https://github.com/zeromq/majordomo][majordomo]] broker (WIP).
+
+See the navigation links for other ways to enter the documentation.
+
+Known applications of ZIO include:
+
+- [[https://brettviren.github.io/wire-cell-zpb/][Wire-Cell Toolkit ZPB]] plugin package uses ZIO as a basis for
+  transport between multi-threaded WCT application components and
+  single-threaded file I/O resources.

@@ -3,10 +3,10 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-01-22 Wed 16:02 -->
+<!-- 2020-02-04 Tue 14:40 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>ZIO How-Tos</title>
+<title>ZIO Tutorial: Nodes</title>
 <meta name="generator" content="Org mode" />
 <meta name="author" content="Brett Viren" />
 <style type="text/css">
@@ -234,13 +234,24 @@ for the JavaScript code in this tag.
  |
  <a accesskey="H" href="index.html"> HOME </a>
 </div><div id="content">
-<h1 class="title">ZIO How-Tos</h1>
+<h1 class="title">ZIO Tutorial: Nodes</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#orge1f763f">1. When to use a node</a></li>
+<li><a href="#orgb50af74">2. Create a node</a></li>
+<li><a href="#orgbb92de8">3. Making ports</a></li>
+<li><a href="#org2454868">4. Going online</a></li>
+<li><a href="#orgc1568e8">5. Going offline</a></li>
+</ul>
+</div>
+</div>
 <div class="nav">
 <ul class="org-ul">
 <li><a href="index.html">Main Page</a></li>
 <li><a href="install.html">Installation</a></li>
-<li><a href="tutorial.html">Tutorial</a></li>
-<li><a href="howtos.html">How-to guides</a></li>
+<li><a href="tutorial.html">Tutorials</a></li>
 <li><a href="whytos.html">Design documents</a></li>
 <li><a href="api.html">API Reference</a></li>
 </ul>
@@ -248,8 +259,102 @@ for the JavaScript code in this tag.
 </div>
 
 <p>
-t.b.d.
+ZIO provides <code>zio.Node</code> to provide simpler construction and management
+of <code>zio.Port</code> objects (<a href="port.html">writeup</a> and <a href="pytut-port.html">tutorial</a>) and to more easily
+participate in peering (<a href="peer.html">writeup</a> and <a href="pytut-peer.html">tutorial</a>)
 </p>
+
+<div id="outline-container-orge1f763f" class="outline-2">
+<h2 id="orge1f763f"><span class="section-number-2">1</span> When to use a node</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+A node is a distinct entity as seen on the network.  This means a
+single application may create multiple nodes and each will be seen as
+a distinct and independent peer on the network.  A node may have zero
+or more ports and each port may bind and/or connect to zero or more
+addresses.  How to choose between these levels of multiplicity depends
+on the need of the application.  Typically, each well defined program
+or possibly component will have a single node.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgb50af74" class="outline-2">
+<h2 id="orgb50af74"><span class="section-number-2">2</span> Create a node</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+A node must be created with a nick name, an optional <b>origin</b> number and
+an optional host name (or IP address).  This last is used if a default
+binds on a port is later requested.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">node</span> = zio.Node(<span style="font-style: italic;">"mynode"</span>, 42, <span style="font-style: italic;">'130.199.22.40'</span>)
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgbb92de8" class="outline-2">
+<h2 id="orgbb92de8"><span class="section-number-2">3</span> Making ports</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+The main thing a node provides is a simplified port construction.
+</p>
+
+<pre class="example">
+pi = node.port("input", zmq.SUB)
+po = node.port("output", zmq.PUB)
+</pre>
+
+<p>
+See <a href="pytut-port.html">port tutorial</a> for how to now connect and/or bind a port to addresses.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org2454868" class="outline-2">
+<h2 id="org2454868"><span class="section-number-2">4</span> Going online</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+When a node goes online it brings its ports online in a careful order
+so that ZIO peering can be used to resolve abstract connection
+addresses.  The application can also include additional headers that
+will be advertised to the network.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python">node.online(greeting = <span style="font-style: italic;">'Hello World'</span>)
+
+<span style="font-weight: bold; font-style: italic;">peer</span> = zio.Peer(<span style="font-style: italic;">"other"</span>)
+peer.drain()
+<span style="font-weight: bold;">print</span> (peer.peers)
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">{ UUID('b9d9476e-eb96-4ab2-98a2-9733c0ae013e'):</span>
+<span style="font-weight: bold; font-style: italic;">#      </span><span style="font-weight: bold; font-style: italic;">PeerInfo(uuid=UUID('b9d9476e-eb96-4ab2-98a2-9733c0ae013e'),</span>
+<span style="font-weight: bold; font-style: italic;">#    </span><span style="font-weight: bold; font-style: italic;">nick='mynode', </span>
+<span style="font-weight: bold; font-style: italic;">#    </span><span style="font-weight: bold; font-style: italic;">headers={'greeting': 'Hello World', </span>
+<span style="font-weight: bold; font-style: italic;">#                         </span><span style="font-weight: bold; font-style: italic;">'zio.port.input.socket': 'SUB',</span>
+<span style="font-weight: bold; font-style: italic;">#                         </span><span style="font-weight: bold; font-style: italic;">'zio.port.output.socket': 'PUB'})}</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgc1568e8" class="outline-2">
+<h2 id="orgc1568e8"><span class="section-number-2">5</span> Going offline</h2>
+<div class="outline-text-2" id="text-5">
+<p>
+When a node is taken offline, all its ports are taken offline.  This
+undoes any connections and binds.  It also deletes the underlying peer
+held by the node so the node will "disappear" from the Zyre network.
+</p>
+
+<p>
+A node <b>must</b> be explicitly taken offline or deleted by the application
+or it may hang on shutdown.
+</p>
+</div>
+</div>
 </div>
 </body>
 </html>

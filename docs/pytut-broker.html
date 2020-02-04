@@ -3,10 +3,10 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-02-04 Tue 14:45 -->
+<!-- 2020-02-04 Tue 14:40 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>ZIO Tutorials</title>
+<title>ZIO Tutorial: Flow Broker</title>
 <meta name="generator" content="Org mode" />
 <meta name="author" content="Brett Viren" />
 <style type="text/css">
@@ -161,19 +161,6 @@
   .footdef  { margin-bottom: 1em; }
   .figure { padding: 1em; }
   .figure p { text-align: center; }
-  .equation-container {
-    display: table;
-    text-align: center;
-    width: 100%;
-  }
-  .equation {
-    vertical-align: middle;
-  }
-  .equation-label {
-    display: table-cell;
-    text-align: right;
-    vertical-align: middle;
-  }
   .inlinetask {
     padding: 10px;
     border: 2px solid gray;
@@ -247,14 +234,14 @@ for the JavaScript code in this tag.
  |
  <a accesskey="H" href="index.html"> HOME </a>
 </div><div id="content">
-<h1 class="title">ZIO Tutorials</h1>
+<h1 class="title">ZIO Tutorial: Flow Broker</h1>
 <div id="table-of-contents">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orge914fd6">1. Languages</a></li>
-<li><a href="#orgcb63ddc">2. Prepare</a></li>
-<li><a href="#org51437b8">3. The Tutorials</a></li>
+<li><a href="#org5a02374">1. Running a flow broker</a></li>
+<li><a href="#org32673dc">2. Flow broker protocol</a></li>
+<li><a href="#org66d49e4">3. An example flow broker factory</a></li>
 </ul>
 </div>
 </div>
@@ -270,57 +257,177 @@ for the JavaScript code in this tag.
 </div>
 
 <p>
-A few "how to" type tutorials are provided.  They assume C++ libraries
-and/or Python modules are installed and available.  See <a href=":install.html">install</a> for
-how to provide that.
+ZIO provides <code>zio.flow.Broker</code> with which flow services can be easily
+built.  The broker design is described in detail in <a href="flow-broker.html">flow broker
+writeup</a> and it is suggested to read through that before using this
+tutorial to understand how to use the Python implementation.  
 </p>
 
-<div id="outline-container-orge914fd6" class="outline-2">
-<h2 id="orge914fd6"><span class="section-number-2">1</span> Languages</h2>
+<div id="outline-container-org5a02374" class="outline-2">
+<h2 id="org5a02374"><span class="section-number-2">1</span> Running a flow broker</h2>
 <div class="outline-text-2" id="text-1">
 <p>
-ZIO Python package implementation all ZIO concepts while the ZIO C++
-library lacks some higher-level concepts (eg, brokers).  The existing
-tutorials thus, so far, only cover the Python implementation.  Where a
-C++ implementation also exits, it follows almost identical patterns,
-just different language syntax.  Studying a Python tutorial should be
-sufficient for using the C++ implementation, should it exist.
+A flow broker brings together a <code>zio.Port</code> and a "factory".  The port
+should be prepared and online to use a SERVER socket.  The factory
+provides the application-specific handling of flows based on the port
+receiving any <b>BOT</b> flow message.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">node</span> = zio.Node(<span style="font-style: italic;">"mybroker"</span>)
+<span style="font-weight: bold; font-style: italic;">port</span> = node.port(<span style="font-style: italic;">"myservice"</span>, zmq.CLIENT)
+port.bind()
+node.online()
+
+<span style="font-weight: bold; font-style: italic;">factory</span> = MyFactory()
+
+<span style="font-weight: bold; font-style: italic;">broker</span> = zio.flow.Broker(port, factory)
+
+<span style="font-weight: bold;">while</span> <span style="font-weight: bold; text-decoration: underline;">True</span>:
+    <span style="font-weight: bold;">try</span>:
+        broker.poll(1000) <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">[ms]</span>
+    <span style="font-weight: bold;">except</span> <span style="font-weight: bold; text-decoration: underline;">TimeoutError</span>:
+        node.peer.drain()
+        <span style="font-weight: bold;">print</span>(node.peer.peers)
+    <span style="font-weight: bold;">except</span> <span style="font-weight: bold; text-decoration: underline;">Exception</span> <span style="font-weight: bold;">as</span> e:
+        <span style="font-weight: bold;">print</span>(f<span style="font-style: italic;">'error {e}'</span>)
+        <span style="font-weight: bold;">break</span>
+broker.stop()
+</pre>
+</div>
+
+<p>
+In this example we make a node with a single port on a CLIENT socket,
+bind that port, take the node online.  That port goes to the broker as
+does our factory (see below).  The main loop simply polls the broker
+to perform activity and if there is a timeout we notify the user as it
+implies flow to or from the broker has not occurred for a while (1s).
+Any error we simply exit and stop the broker.
+</p>
+
+<p>
+In nominal running, each poll handles at most one message sent to the
+broker by a client or a handler.  Thus this loop may spin quickly if
+the flow is heavy.  Interrupting this loop will hang all flows.
 </p>
 </div>
 </div>
 
-<div id="outline-container-orgcb63ddc" class="outline-2">
-<h2 id="orgcb63ddc"><span class="section-number-2">2</span> Prepare</h2>
+<div id="outline-container-org32673dc" class="outline-2">
+<h2 id="org32673dc"><span class="section-number-2">2</span> Flow broker protocol</h2>
 <div class="outline-text-2" id="text-2">
 <p>
-In addition to <a href=":install">installation</a> it is helpful to have
-<code>ipython</code> available and running to try out code snippets.
+The broker is a man-in-the-middle between clients and any handlers of
+client messages.  Likewise, handlers intermediate between a flow and
+some server-side resource (eg, a file for reading or writing flow
+data).  The application provides the factory object and it is must
+adhere to a flow broker protocol.  
+</p>
+
+<p>
+The factory object must be callable with a single argument, that of a
+flow <b>BOT</b> message.  While this call is active the broker will hang and
+so the call should return as quickly as possible.  The return value of
+this call shall be <code>True</code> if the <b>BOT</b> message will be handled by the
+factory or its delegates.  Otherwise the broker will immediately send
+<b>EOT</b> to the initiating client.
+</p>
+
+<p>
+After a successful call to the factory, the initiating client does not
+receive an immediate reply.  Instead the factory (or its delegate)
+will, based on the content of the given <b>BOT</b> message and prior
+knowledge of the broker's SERVER socket, send a modified <b>BOT</b> message
+to the broker.  This message <b>must</b> retain the <code>cid</code> attribute of the flow
+object stored as JSON in the <code>label</code> header attribute of the <b>BOT</b>
+message.  Through this <code>cid</code> value and the internal ID number associated
+with receiving the handler's <b>BOT</b> the broker can associate all future
+messages between client and handler.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org66d49e4" class="outline-2">
+<h2 id="org66d49e4"><span class="section-number-2">3</span> An example flow broker factory</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+The provided <code>test_flowbroker.py</code> includes a simple factory that will
+create a handler for each <b>BOT</b> that with <i>direction</i> "inject".  The
+"handling" is simply to dump it.  The test can be run simply as:
 </p>
 
 <pre class="example">
-$ pip install ipython
-$ ipython
-In [1]: import zio
+$ python python/tests/test_flowbroker.py
 </pre>
-</div>
-</div>
 
-<div id="outline-container-org51437b8" class="outline-2">
-<h2 id="org51437b8"><span class="section-number-2">3</span> The Tutorials</h2>
-<div class="outline-text-2" id="text-3">
 <p>
-The tutorials are listed below approximately in order that they should
-be exercised.
+This will dump various debug logging and will end cleanly and not
+hang.  The test factory is created with the broker's address which it
+merely passes to each handler.  Here is the factory in full:
 </p>
 
-<ul class="org-ul">
-<li><a href="pytut-message.html">message</a> ZIO's multipurpose message object</li>
-<li><a href="pytut-peer.html">peer</a> Distributed network discovery and presence</li>
-<li><a href="pytut-port.html">port</a> High level abstraction of a socket</li>
-<li><a href="pytut-node.html">node</a> A discoverable group of ports working together</li>
-<li><a href="pytut-flow.html">flow</a> Data flow protocol between two ports</li>
-<li><a href="pytut-broker.html">flow broker</a> Framework for a server bringing together flow clients with flow handlers in a pluggable manner.</li>
-</ul>
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">class</span> <span style="font-weight: bold; text-decoration: underline;">Factory</span>:
+    <span style="font-weight: bold;">def</span> <span style="font-weight: bold;">__init__</span>(<span style="font-weight: bold;">self</span>, address):
+        <span style="font-weight: bold;">self</span>.handlers = <span style="font-weight: bold;">list</span>()
+        <span style="font-weight: bold;">self</span>.address = address  <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">broker</span>
+        <span style="font-weight: bold;">self</span>.ctx = zmq.Context()
+
+    <span style="font-weight: bold;">def</span> <span style="font-weight: bold;">__call__</span>(<span style="font-weight: bold;">self</span>, bot):
+        <span style="font-weight: bold; font-style: italic;">fobj</span> = json.loads(bot.label) 
+        <span style="font-weight: bold;">if</span> fobj[<span style="font-style: italic;">'direction'</span>] == <span style="font-style: italic;">'extract'</span>: <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">my direction.</span>
+            <span style="font-weight: bold;">return</span>                         <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">only handle inject</span>
+        <span style="font-weight: bold; font-style: italic;">actor</span> = ZActor(<span style="font-weight: bold;">self</span>.ctx, dumper, bot, <span style="font-weight: bold;">self</span>.address)
+        <span style="font-weight: bold;">self</span>.handlers.append(actor)
+        <span style="font-weight: bold;">return</span> <span style="font-weight: bold; text-decoration: underline;">True</span>
+
+    <span style="font-weight: bold;">def</span> <span style="font-weight: bold;">stop</span>(<span style="font-weight: bold;">self</span>):
+        <span style="font-weight: bold;">for</span> actor <span style="font-weight: bold;">in</span> <span style="font-weight: bold;">self</span>.handlers:
+            log.debug(<span style="font-style: italic;">"factory stopping handler"</span>)
+            actor.pipe.signal()
+            <span style="font-weight: bold;">del</span>(actor)
+</pre>
+</div>
+
+<p>
+Remember that when the broker calls the factory the broker will hang
+until the call returns.  For that reason, the factory must not try to
+handle messages directly but must "spawn" a concurrent handler.  This
+is done using PyZMQ's implementation of ZeroMQ's "actor" pattern (eg
+as found in similarly named CZMQ <code>zactor_t</code> type).  The <code>dumper</code> is
+defined as:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">def</span> <span style="font-weight: bold;">dumper</span>(ctx, pipe, bot, address):
+    ....
+</pre>
+</div>
+
+<p>
+The first to arguments are provided by <code>ZActor</code> while the remainder are
+whatever are passed to <code>ZActor</code> constructor after the <code>dumper</code> argument.
+This tutorial will not go into detail of the implementation of <code>dumper</code>
+but to sketch the design it:
+</p>
+
+<ol class="org-ol">
+<li>creates its own flow object with a bare port</li>
+
+<li>participates in <b>BOT</b> handshake</li>
+
+<li>because it will poll on its socket it must explicitly <code>flush_pay()</code> as described more in <a href="pytut-flow.html">flow tutorial</a>.</li>
+
+<li>Enters a loop, using the poller to know when a flow message is available</li>
+
+<li>Quits loop if the factory sends a signal or if a timeout occurs on <code>flow.get()</code>.</li>
+</ol>
+
+<p>
+Note, this termination condition is just for this test.  Depending on
+the nature of a broker factory application, other termination
+conditions are likely needed.
+</p>
 </div>
 </div>
 </div>

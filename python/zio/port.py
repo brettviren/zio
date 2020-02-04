@@ -45,14 +45,13 @@ class Port:
             self.sock = self.ctx.socket(sock)
         else:
             self.sock = sock
-        self.origin = 0
+        self.origin = None
         self.to_bind = list()
         self.to_conn = list()
         self.headers = dict()
         self.is_online = False
         self.connected = list()
         self.bound = list()
-        self.origin = 0
         self.poller = zmq.Poller()
         self.poller.register(self.sock, zmq.POLLIN)
 
@@ -205,7 +204,7 @@ class Port:
         This modifies the message prior to sending to set the origin
         if this port has one.
         '''
-        if self.origin:
+        if self.origin is not None:
             msg.coord.origin = self.origin
         if needs_codec(self.sock.type):
             data = msg.encode()

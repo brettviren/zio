@@ -1,0 +1,74 @@
+#+title: ZIO Tutorial: Peering
+#+setupfile: setup.org
+#+include: nav.org
+
+ZIO provides ~zio.Peer~ which is a service to help an application "know"
+what other like-minded applications exist on the network.  See [[file:peer.org][peer]]
+write-up for more information.  Normally application code will use a
+peer via a ~zio.Node~ (see [[file:node.org][node]] and [[file:pytut-node.org][node tutorial]]) but it may also be
+used stand-alone and this tutorial will show how.
+
+* Create peers
+
+Peers have a "nickname" and an optional set of headers.
+
+#+begin_src python
+p1 =  zio.Peer("peer1", greeting = 'Hello world', color = 'green')
+p2 =  zio.Peer("peer2", greeting = 'Hajimemashita', color = 'blue')
+#+end_src
+
+* Get peer info
+
+The Zyre actor runs in a background thread while the ~zio.Peer~
+interface is synchronous with the application that uses it.  This
+means that the peer will not "know" anything unless given a chance to
+"catch up" with what Zyre has been up to.
+
+#+begin_src python
+print (p1.peers)
+# {}
+p1.drain()
+print (p1.peers)
+# {UUID('e5101ad1-e796-42f3-8d88-381cde0060f8'):
+#   PeerInfo(uuid=UUID('e5101ad1-e796-42f3-8d88-381cde0060f8'), 
+# nick='peer2', 
+# headers={'greeting': 'Hajimemashita', 'color': 'blue'})}
+#+end_src
+
+* Synchronizing
+
+One use of peering is for separate asynchronous tasks to synchronize.
+For example, one peer may want to wait for another peer to become
+available before the first continues.  
+
+#+begin_src python
+found = p2.waitfor('peer1')                            
+print(found)
+# [UUID('9a3fbd0e-54fc-4015-ae01-ebe9b15bab3a')]
+#+end_src
+
+* Finding peer info
+
+A peer may also query the network for other peers by a nickname.
+
+#+begin_src python
+found = p2.matchnick('peer2')
+print (found)
+# [UUID('e5101ad1-e796-42f3-8d88-381cde0060f8')]
+found = p1.matchnick('does not exist') 
+print (found)
+# []
+#+end_src
+
+* Stopping a peer
+
+To make a peer disappear use its ~stop()~ method or delete it.
+
+#+begin_src 
+p1.stop()
+del(p2)
+#+end_src
+
+Note, a peer *must* be explicitly stopped or destroyed by the
+application or else the application may hang on exit.
+

@@ -3,10 +3,10 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-02-04 Tue 14:45 -->
+<!-- 2020-02-04 Tue 14:40 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>ZIO Tutorials</title>
+<title>ZIO Tutorial: Peering</title>
 <meta name="generator" content="Org mode" />
 <meta name="author" content="Brett Viren" />
 <style type="text/css">
@@ -161,19 +161,6 @@
   .footdef  { margin-bottom: 1em; }
   .figure { padding: 1em; }
   .figure p { text-align: center; }
-  .equation-container {
-    display: table;
-    text-align: center;
-    width: 100%;
-  }
-  .equation {
-    vertical-align: middle;
-  }
-  .equation-label {
-    display: table-cell;
-    text-align: right;
-    vertical-align: middle;
-  }
   .inlinetask {
     padding: 10px;
     border: 2px solid gray;
@@ -247,14 +234,16 @@ for the JavaScript code in this tag.
  |
  <a accesskey="H" href="index.html"> HOME </a>
 </div><div id="content">
-<h1 class="title">ZIO Tutorials</h1>
+<h1 class="title">ZIO Tutorial: Peering</h1>
 <div id="table-of-contents">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orge914fd6">1. Languages</a></li>
-<li><a href="#orgcb63ddc">2. Prepare</a></li>
-<li><a href="#org51437b8">3. The Tutorials</a></li>
+<li><a href="#orge30b83b">1. Create peers</a></li>
+<li><a href="#org6963be2">2. Get peer info</a></li>
+<li><a href="#orgb874568">3. Synchronizing</a></li>
+<li><a href="#org39e2e69">4. Finding peer info</a></li>
+<li><a href="#org5a96f51">5. Stopping a peer</a></li>
 </ul>
 </div>
 </div>
@@ -270,57 +259,105 @@ for the JavaScript code in this tag.
 </div>
 
 <p>
-A few "how to" type tutorials are provided.  They assume C++ libraries
-and/or Python modules are installed and available.  See <a href=":install.html">install</a> for
-how to provide that.
+ZIO provides <code>zio.Peer</code> which is a service to help an application "know"
+what other like-minded applications exist on the network.  See <a href="peer.html">peer</a>
+write-up for more information.  Normally application code will use a
+peer via a <code>zio.Node</code> (see <a href="node.html">node</a> and <a href="pytut-node.html">node tutorial</a>) but it may also be
+used stand-alone and this tutorial will show how.
 </p>
 
-<div id="outline-container-orge914fd6" class="outline-2">
-<h2 id="orge914fd6"><span class="section-number-2">1</span> Languages</h2>
+<div id="outline-container-orge30b83b" class="outline-2">
+<h2 id="orge30b83b"><span class="section-number-2">1</span> Create peers</h2>
 <div class="outline-text-2" id="text-1">
 <p>
-ZIO Python package implementation all ZIO concepts while the ZIO C++
-library lacks some higher-level concepts (eg, brokers).  The existing
-tutorials thus, so far, only cover the Python implementation.  Where a
-C++ implementation also exits, it follows almost identical patterns,
-just different language syntax.  Studying a Python tutorial should be
-sufficient for using the C++ implementation, should it exist.
-</p>
-</div>
-</div>
-
-<div id="outline-container-orgcb63ddc" class="outline-2">
-<h2 id="orgcb63ddc"><span class="section-number-2">2</span> Prepare</h2>
-<div class="outline-text-2" id="text-2">
-<p>
-In addition to <a href=":install">installation</a> it is helpful to have
-<code>ipython</code> available and running to try out code snippets.
+Peers have a "nickname" and an optional set of headers.
 </p>
 
-<pre class="example">
-$ pip install ipython
-$ ipython
-In [1]: import zio
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">p1</span> =  zio.Peer(<span style="font-style: italic;">"peer1"</span>, greeting = <span style="font-style: italic;">'Hello world'</span>, color = <span style="font-style: italic;">'green'</span>)
+<span style="font-weight: bold; font-style: italic;">p2</span> =  zio.Peer(<span style="font-style: italic;">"peer2"</span>, greeting = <span style="font-style: italic;">'Hajimemashita'</span>, color = <span style="font-style: italic;">'blue'</span>)
 </pre>
 </div>
 </div>
+</div>
 
-<div id="outline-container-org51437b8" class="outline-2">
-<h2 id="org51437b8"><span class="section-number-2">3</span> The Tutorials</h2>
-<div class="outline-text-2" id="text-3">
+<div id="outline-container-org6963be2" class="outline-2">
+<h2 id="org6963be2"><span class="section-number-2">2</span> Get peer info</h2>
+<div class="outline-text-2" id="text-2">
 <p>
-The tutorials are listed below approximately in order that they should
-be exercised.
+The Zyre actor runs in a background thread while the <code>zio.Peer</code>
+interface is synchronous with the application that uses it.  This
+means that the peer will not "know" anything unless given a chance to
+"catch up" with what Zyre has been up to.
 </p>
 
-<ul class="org-ul">
-<li><a href="pytut-message.html">message</a> ZIO's multipurpose message object</li>
-<li><a href="pytut-peer.html">peer</a> Distributed network discovery and presence</li>
-<li><a href="pytut-port.html">port</a> High level abstraction of a socket</li>
-<li><a href="pytut-node.html">node</a> A discoverable group of ports working together</li>
-<li><a href="pytut-flow.html">flow</a> Data flow protocol between two ports</li>
-<li><a href="pytut-broker.html">flow broker</a> Framework for a server bringing together flow clients with flow handlers in a pluggable manner.</li>
-</ul>
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">print</span> (p1.peers)
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">{}</span>
+p1.drain()
+<span style="font-weight: bold;">print</span> (p1.peers)
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">{UUID('e5101ad1-e796-42f3-8d88-381cde0060f8'):</span>
+<span style="font-weight: bold; font-style: italic;">#   </span><span style="font-weight: bold; font-style: italic;">PeerInfo(uuid=UUID('e5101ad1-e796-42f3-8d88-381cde0060f8'), </span>
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">nick='peer2', </span>
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">headers={'greeting': 'Hajimemashita', 'color': 'blue'})}</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgb874568" class="outline-2">
+<h2 id="orgb874568"><span class="section-number-2">3</span> Synchronizing</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+One use of peering is for separate asynchronous tasks to synchronize.
+For example, one peer may want to wait for another peer to become
+available before the first continues.  
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">found</span> = p2.waitfor(<span style="font-style: italic;">'peer1'</span>)                            
+<span style="font-weight: bold;">print</span>(found)
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">[UUID('9a3fbd0e-54fc-4015-ae01-ebe9b15bab3a')]</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org39e2e69" class="outline-2">
+<h2 id="org39e2e69"><span class="section-number-2">4</span> Finding peer info</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+A peer may also query the network for other peers by a nickname.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">found</span> = p2.matchnick(<span style="font-style: italic;">'peer2'</span>)
+<span style="font-weight: bold;">print</span> (found)
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">[UUID('e5101ad1-e796-42f3-8d88-381cde0060f8')]</span>
+<span style="font-weight: bold; font-style: italic;">found</span> = p1.matchnick(<span style="font-style: italic;">'does not exist'</span>) 
+<span style="font-weight: bold;">print</span> (found)
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">[]</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org5a96f51" class="outline-2">
+<h2 id="org5a96f51"><span class="section-number-2">5</span> Stopping a peer</h2>
+<div class="outline-text-2" id="text-5">
+<p>
+To make a peer disappear use its <code>stop()</code> method or delete it.
+</p>
+
+<pre class="example">
+p1.stop()
+del(p2)
+</pre>
+
+<p>
+Note, a peer <b>must</b> be explicitly stopped or destroyed by the
+application or else the application may hang on exit.
+</p>
 </div>
 </div>
 </div>

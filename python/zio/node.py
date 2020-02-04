@@ -75,4 +75,5 @@ class Node:
         for port in self.ports.values():
             port.offline()
         self.ports = dict()
-        del(self.peer)
+        if hasattr(self,"peer"):
+            del(self.peer)

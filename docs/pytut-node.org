@@ -1,0 +1,75 @@
+#+title: ZIO Tutorial: Nodes
+#+setupfile: setup.org
+#+include: nav.org
+
+ZIO provides ~zio.Node~ to provide simpler construction and management
+of ~zio.Port~ objects ([[file:port.org][writeup]] and [[file:pytut-port.org][tutorial]]) and to more easily
+participate in peering ([[file:peer.org][writeup]] and [[file:pytut-peer.org][tutorial]])
+
+* When to use a node
+
+A node is a distinct entity as seen on the network.  This means a
+single application may create multiple nodes and each will be seen as
+a distinct and independent peer on the network.  A node may have zero
+or more ports and each port may bind and/or connect to zero or more
+addresses.  How to choose between these levels of multiplicity depends
+on the need of the application.  Typically, each well defined program
+or possibly component will have a single node.
+
+* Create a node
+
+A node must be created with a nick name, an optional *origin* number and
+an optional host name (or IP address).  This last is used if a default
+binds on a port is later requested.
+
+  #+begin_src python
+node = zio.Node("mynode", 42, '130.199.22.40')
+  #+end_src
+
+* Making ports
+
+The main thing a node provides is a simplified port construction.
+
+#+begin_example
+pi = node.port("input", zmq.SUB)
+po = node.port("output", zmq.PUB)
+#+end_example
+
+See [[file:pytut-port.org][port tutorial]] for how to now connect and/or bind a port to addresses.
+
+* Going online
+
+When a node goes online it brings its ports online in a careful order
+so that ZIO peering can be used to resolve abstract connection
+addresses.  The application can also include additional headers that
+will be advertised to the network.
+
+#+begin_src python
+node.online(greeting = 'Hello World')
+
+peer = zio.Peer("other")
+peer.drain()
+print (peer.peers)
+# { UUID('b9d9476e-eb96-4ab2-98a2-9733c0ae013e'):
+#      PeerInfo(uuid=UUID('b9d9476e-eb96-4ab2-98a2-9733c0ae013e'),
+#    nick='mynode', 
+#    headers={'greeting': 'Hello World', 
+#                         'zio.port.input.socket': 'SUB',
+#                         'zio.port.output.socket': 'PUB'})}
+#+end_src
+
+* Going offline
+
+When a node is taken offline, all its ports are taken offline.  This
+undoes any connections and binds.  It also deletes the underlying peer
+held by the node so the node will "disappear" from the Zyre network.
+
+#+begin_export python
+node.offline()
+# or:
+del(node)
+#+end_export
+
+A node *must* be explicitly taken offline or deleted by the application
+or it may hang on shutdown.
+

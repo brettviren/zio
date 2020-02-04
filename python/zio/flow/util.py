@@ -27,7 +27,10 @@ def stringify(flowtype, **params):
 
 
 def switch_direction(fobj):
-    fobj = dict(fobj)
+    if isinstance(fobj, str):
+        fobj = json.loads(fobj)
+    else:
+        fobj = dict(fobj)
     if fobj["direction"] == 'inject':
         fobj["direction"] = 'extract'
     elif fobj["direction"] == 'extract':

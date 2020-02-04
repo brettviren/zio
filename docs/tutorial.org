@@ -1,5 +1,40 @@
-#+title: ZIO Tutorial
+#+title: ZIO Tutorials
 #+setupfile: setup.org
 #+include: nav.org
 
-t.b.d.
+A few "how to" type tutorials are provided.  They assume C++ libraries
+and/or Python modules are installed and available.  See [[file::install.org][install]] for
+how to provide that.
+
+* Languages
+
+ZIO Python package implementation all ZIO concepts while the ZIO C++
+library lacks some higher-level concepts (eg, brokers).  The existing
+tutorials thus, so far, only cover the Python implementation.  Where a
+C++ implementation also exits, it follows almost identical patterns,
+just different language syntax.  Studying a Python tutorial should be
+sufficient for using the C++ implementation, should it exist.
+
+* Prepare
+
+In addition to [[file::install][installation]] it is helpful to have
+~ipython~ available and running to try out code snippets.
+
+#+begin_example
+$ pip install ipython
+$ ipython
+In [1]: import zio
+#+end_example
+
+* The Tutorials
+
+The tutorials are listed below approximately in order that they should
+be exercised.
+
+- [[file:pytut-message.org][message]] ZIO's multipurpose message object
+- [[file:pytut-peer.org][peer]] Distributed network discovery and presence
+- [[file:pytut-port.org][port]] High level abstraction of a socket
+- [[file:pytut-node.org][node]] A discoverable group of ports working together
+- [[file:pytut-flow.org][flow]] Data flow protocol between two ports
+- [[file:pytut-broker.org][flow broker]] Framework for a server bringing together flow clients with flow handlers in a pluggable manner.
+

@@ -3,10 +3,10 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-02-04 Tue 14:45 -->
+<!-- 2020-02-04 Tue 14:40 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>ZIO Tutorials</title>
+<title>ZIO Tutorial: Messages in Python</title>
 <meta name="generator" content="Org mode" />
 <meta name="author" content="Brett Viren" />
 <style type="text/css">
@@ -161,19 +161,6 @@
   .footdef  { margin-bottom: 1em; }
   .figure { padding: 1em; }
   .figure p { text-align: center; }
-  .equation-container {
-    display: table;
-    text-align: center;
-    width: 100%;
-  }
-  .equation {
-    vertical-align: middle;
-  }
-  .equation-label {
-    display: table-cell;
-    text-align: right;
-    vertical-align: middle;
-  }
   .inlinetask {
     padding: 10px;
     border: 2px solid gray;
@@ -247,14 +234,15 @@ for the JavaScript code in this tag.
  |
  <a accesskey="H" href="index.html"> HOME </a>
 </div><div id="content">
-<h1 class="title">ZIO Tutorials</h1>
+<h1 class="title">ZIO Tutorial: Messages in Python</h1>
 <div id="table-of-contents">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orge914fd6">1. Languages</a></li>
-<li><a href="#orgcb63ddc">2. Prepare</a></li>
-<li><a href="#org51437b8">3. The Tutorials</a></li>
+<li><a href="#orge6fbccc">1. Creating a message</a></li>
+<li><a href="#orgb2ee46a">2. Modifying a message</a></li>
+<li><a href="#org7e2adf7">3. Origin, granule, seqno, oh my!</a></li>
+<li><a href="#orge35f7a1">4. Serializing a message</a></li>
 </ul>
 </div>
 </div>
@@ -270,57 +258,144 @@ for the JavaScript code in this tag.
 </div>
 
 <p>
-A few "how to" type tutorials are provided.  They assume C++ libraries
-and/or Python modules are installed and available.  See <a href=":install.html">install</a> for
-how to provide that.
+ZIO uses a single <code>zio.Message</code> class which acts as a general container.
+Details can be found in the <a href="messages.html">messages</a> write-up.  Here, we show how to
+work with messages.
 </p>
 
-<div id="outline-container-orge914fd6" class="outline-2">
-<h2 id="orge914fd6"><span class="section-number-2">1</span> Languages</h2>
+<div id="outline-container-orge6fbccc" class="outline-2">
+<h2 id="orge6fbccc"><span class="section-number-2">1</span> Creating a message</h2>
 <div class="outline-text-2" id="text-1">
 <p>
-ZIO Python package implementation all ZIO concepts while the ZIO C++
-library lacks some higher-level concepts (eg, brokers).  The existing
-tutorials thus, so far, only cover the Python implementation.  Where a
-C++ implementation also exits, it follows almost identical patterns,
-just different language syntax.  Studying a Python tutorial should be
-sufficient for using the C++ implementation, should it exist.
+A <code>zio.Message</code> can be created in a flexible way depending on the form
+of information you have.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">import</span> zio
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">empty message</span>
+<span style="font-weight: bold; font-style: italic;">m1</span> = zio.Message()
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">more specified</span>
+<span style="font-weight: bold; font-style: italic;">m2</span> = zio.Message(form=<span style="font-style: italic;">'TEXT'</span>, label=<span style="font-style: italic;">'my source'</span>, 
+                 level=zio.MessageLevel.warning,
+                 payload=[<span style="font-style: italic;">'The system is on fire'</span>]) 
+</pre>
+</div>
+
+<p>
+The constructor takes many keyword parameters and builds the message
+content in a cascading manner from most general to most specific,
+where the latter may override the former.  For example, you may
+specify a full message encoding and then override some part.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">ph</span> = zio.PrefixHeader(<span style="font-style: italic;">'ZIO6TEXTmy source'</span>)
+<span style="font-weight: bold; font-style: italic;">m</span> = zio.Message(level=zio.MessageLevel.info, prefix=ph)
+<span style="font-weight: bold;">print</span>(m)
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">zio.Message: "ZIO4TEXTmy source" + [0x0,0,0] + [0]</span>
+</pre>
+</div>
+
+<p>
+Note the 6 in <code>ZIO6</code> becomes a 4.
 </p>
 </div>
 </div>
 
-<div id="outline-container-orgcb63ddc" class="outline-2">
-<h2 id="orgcb63ddc"><span class="section-number-2">2</span> Prepare</h2>
+<div id="outline-container-orgb2ee46a" class="outline-2">
+<h2 id="orgb2ee46a"><span class="section-number-2">2</span> Modifying a message</h2>
 <div class="outline-text-2" id="text-2">
 <p>
-In addition to <a href=":install">installation</a> it is helpful to have
-<code>ipython</code> available and running to try out code snippets.
+Given a message object, it can be modified.  This may be particularly
+useful when a message must be crafted which is a response from an
+incoming message.  For example, in <a href="flow.html">data flow protocol</a> the <code>.label</code>
+attribute is assumed to be a JSON encoded string providing protocol
+information.  In particular the <i>begin of transmission</i> (BOT) handshake
+involves "reversing" a value held in the JSON between the two
+endpoints.
 </p>
 
-<pre class="example">
-$ pip install ipython
-$ ipython
-In [1]: import zio
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">m</span> = zio.Message(form=<span style="font-style: italic;">'FLOW'</span>, 
+                label=json.dumps(<span style="font-weight: bold;">dict</span>(flow=<span style="font-style: italic;">'BOT'</span>,
+                                      direction=<span style="font-style: italic;">'inject'</span>,
+                                      credit=10)))
+<span style="font-weight: bold;">print</span>(m)
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">zio.Message: "ZIO0FLOW{"flow": "BOT", "direction": "inject", "credit": 10}" + [0x0,0,0] + [0]</span>
+
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">now pretend we send-&gt;recv "m" to another ZIO app</span>
+
+<span style="font-weight: bold; font-style: italic;">fobj</span> = json.loads(m.label)
+<span style="font-weight: bold; font-style: italic;">fobj</span>[<span style="font-style: italic;">"direction"</span>] = <span style="font-style: italic;">'inject'</span> <span style="font-weight: bold;">if</span> fobj[<span style="font-style: italic;">"direction"</span>] == <span style="font-style: italic;">"extract"</span> <span style="font-weight: bold;">else</span> <span style="font-style: italic;">"extract"</span>
+<span style="font-weight: bold; font-style: italic;">m.label</span> = json.dumps(fobj)
+<span style="font-weight: bold;">print</span>(m)
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">zio.Message: "ZIO0FLOW{"flow": "BOT", "direction": "extract", "credit": 10}" + [0x0,0,0] + [0]</span>
+
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">and now we'd probably send "m" back to the first endpoint...</span>
 </pre>
 </div>
 </div>
+</div>
 
-<div id="outline-container-org51437b8" class="outline-2">
-<h2 id="org51437b8"><span class="section-number-2">3</span> The Tutorials</h2>
+<div id="outline-container-org7e2adf7" class="outline-2">
+<h2 id="org7e2adf7"><span class="section-number-2">3</span> Origin, granule, seqno, oh my!</h2>
 <div class="outline-text-2" id="text-3">
 <p>
-The tutorials are listed below approximately in order that they should
-be exercised.
+In addition to the <code>ZIO</code> prefix, the "level" and an optional "label",
+all ZIO message headers have a trio of numbers: <b>origin</b>, <b>granule</b> and
+<b>seqno</b>.  These are described in <a href="messages.html">messages</a>.  The <code>zio.Message</code> object
+itself does not manage their values.  Rather provides accessors:
 </p>
 
-<ul class="org-ul">
-<li><a href="pytut-message.html">message</a> ZIO's multipurpose message object</li>
-<li><a href="pytut-peer.html">peer</a> Distributed network discovery and presence</li>
-<li><a href="pytut-port.html">port</a> High level abstraction of a socket</li>
-<li><a href="pytut-node.html">node</a> A discoverable group of ports working together</li>
-<li><a href="pytut-flow.html">flow</a> Data flow protocol between two ports</li>
-<li><a href="pytut-broker.html">flow broker</a> Framework for a server bringing together flow clients with flow handlers in a pluggable manner.</li>
-</ul>
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">import</span> time
+<span style="font-weight: bold; font-style: italic;">m</span> = zio.Message(form=<span style="font-style: italic;">'NULL'</span>, origin=42, granule=time.time())
+<span style="font-weight: bold;">print</span> (m)
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">zio.Message: "ZIO0NULL" + [0x2a,1580828219,0] + [0]</span>
+time.sleep(1)
+<span style="font-weight: bold; font-style: italic;">m.granule</span> = time.time()
+<span style="font-weight: bold; font-style: italic;">m.seqno</span> += 1
+<span style="font-weight: bold;">print</span> (m)
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">zio.Message: "ZIO0NULL" + [0x2a,1580828220,1] + [0]</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orge35f7a1" class="outline-2">
+<h2 id="orge35f7a1"><span class="section-number-2">4</span> Serializing a message</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+A ZIO message is meant to be useful with established ZeroMQ sockets
+that may be multi-part as well as newer thread-safe sockets which must
+be sent as a monolithic single-part message.  The serializing methods
+are exposed to the user.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">m</span> = zio.Message(form=<span style="font-style: italic;">'TEXT'</span>, label=<span style="font-style: italic;">'my logger'</span>, 
+                level=zio.MessageLevel.warning, 
+                payload=[<span style="font-style: italic;">'Hello'</span>, <span style="font-style: italic;">'World'</span>])
+<span style="font-weight: bold;">print</span>(m)
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">zio.Message: "ZIO6TEXTmy logger" + [0x0,0,0] + [2]</span>
+<span style="font-weight: bold;">print</span> (m.toparts())
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">[b'ZIO6TEXTmy logger',</span>
+<span style="font-weight: bold; font-style: italic;">#  </span><span style="font-weight: bold; font-style: italic;">b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00', </span>
+<span style="font-weight: bold; font-style: italic;">#  </span><span style="font-weight: bold; font-style: italic;">b'Hello', </span>
+<span style="font-weight: bold; font-style: italic;">#  </span><span style="font-weight: bold; font-style: italic;">b'World']</span>
+<span style="font-weight: bold;">print</span> (m.encode())
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">b'\x11\x00\x00\x00ZIO6TEXTmy logger\x18\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x05\x00\x00\x00Hello\x05\x00\x00\x00World'</span>
+</pre>
+</div>
+
+<p>
+The <code>decode()</code> and <code>fromparts()</code> are the inverse of these two methods.
+</p>
+
+<p>
+When messages are used with a <a href="port.html">port</a> (see also <a href="pytut-port.html">port tutorial</a>) the user need not worry about this detail.
+</p>
 </div>
 </div>
 </div>

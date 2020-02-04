@@ -6,7 +6,7 @@
 <!-- 2020-02-04 Tue 14:40 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>ZIO Installation</title>
+<title>ZIO Tutorial: Ports</title>
 <meta name="generator" content="Org mode" />
 <meta name="author" content="Brett Viren" />
 <style type="text/css">
@@ -234,20 +234,17 @@ for the JavaScript code in this tag.
  |
  <a accesskey="H" href="index.html"> HOME </a>
 </div><div id="content">
-<h1 class="title">ZIO Installation</h1>
+<h1 class="title">ZIO Tutorial: Ports</h1>
 <div id="table-of-contents">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgd4ea1f5">1. Install ZIO</a></li>
-<li><a href="#orgd9f1bb4">2. Tests</a></li>
-<li><a href="#org92f7941">3. Documentation</a></li>
-<li><a href="#org260027e">4. Python</a>
-<ul>
-<li><a href="#org6b4a0f6">4.1. Install from source</a></li>
-<li><a href="#org2307e6a">4.2. Python Package Index</a></li>
-</ul>
-</li>
+<li><a href="#org4ce9a20">1. Create a port</a></li>
+<li><a href="#org5cccf4a">2. Connecting, binding</a></li>
+<li><a href="#orga872060">3. Peer headers</a></li>
+<li><a href="#orgd1888d4">4. Going online</a></li>
+<li><a href="#org3957f68">5. Going offline</a></li>
+<li><a href="#orgaf83529">6. Ports and messages</a></li>
 </ul>
 </div>
 </div>
@@ -262,125 +259,202 @@ for the JavaScript code in this tag.
 
 </div>
 
-<div id="outline-container-orgd4ea1f5" class="outline-2">
-<h2 id="orgd4ea1f5"><span class="section-number-2">1</span> Install ZIO</h2>
+<p>
+ZIO provides <code>zio.Port</code> which is a high level wrapper around a PyZMQ
+<code>zmq.socket</code>.  A port can work with a <code>zio.Peer</code> (<a href="peer.html">peer writup</a> and <a href="pytut-peer.html">peer
+tutoral</a>) usually via a <code>zio.Node</code> (<a href="node.html">node writeup</a> and <a href="pytut-node">node tutorial</a>)
+provide dynamic socket address discovery.  This frees the user from
+having to specify precise TCP/IP addresses and instead use abstracted
+names for connections.  No DNS or central naming service required!  A
+<code>zio.Port</code> also can help send and receive <code>zio.Message</code> (<a href="messages.html">messages</a> and
+<a href="pytut-messages.html">messages tutorial</a>) so that their "partness" is correctly handled based
+on the port's underlying socket type.
+</p>
+
+<div id="outline-container-org4ce9a20" class="outline-2">
+<h2 id="org4ce9a20"><span class="section-number-2">1</span> Create a port</h2>
 <div class="outline-text-2" id="text-1">
 <p>
-ZIO installs in the usual <a href="https://waf.io">Waf</a> way.
+Again, ports are usually created and used via <code>zio.Node</code> but with a bit
+of extra low-level attention, they can also be created directly.
 </p>
 
-<pre class="example">
-$ ./waf configure --prefix=/path/to/install
-$ ./waf install
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">import</span> zmq
+<span style="font-weight: bold; font-style: italic;">port</span> = zio.Port(<span style="font-style: italic;">"client"</span>, zmq.CLIENT, <span style="font-style: italic;">"127.0.0.1"</span>)
 </pre>
+</div>
 
 <p>
-To build, these software dependencies will be located via <a href="https://www.freedesktop.org/wiki/Software/pkg-config/">pkg-config</a>.
-</p>
-
-<ul class="org-ul">
-<li><a href="https://github.com/zeromq/libzmq">libzmq</a> (with draft sockets built)</li>
-<li><a href="https://github.com/zeromq/czmq">CZMQ</a></li>
-<li><a href="https://github.com/zeromq/zyre">Zyre</a></li>
-</ul>
-
-<p>
-In addition, ZIO uses <a href="https://github.com/zeromq/cppzmq">cppzmq</a> and <a href="https://github.com/nlohmann/json">nlohmann/json</a> and includes copies of
-these header-only packages.
+A portname, the socket type and an optional hostname are given.  The
+last is a detail to set which network interface to use if the port
+will later <code>bind()</code>.
 </p>
 </div>
 </div>
 
-<div id="outline-container-orgd9f1bb4" class="outline-2">
-<h2 id="orgd9f1bb4"><span class="section-number-2">2</span> Tests</h2>
+<div id="outline-container-org5cccf4a" class="outline-2">
+<h2 id="org5cccf4a"><span class="section-number-2">2</span> Connecting, binding</h2>
 <div class="outline-text-2" id="text-2">
 <p>
-The default install target will compile and execute units tests.  To
-avoid running these tests you may add <code>--notests</code> as:
+Before a port can be used it needs a way to talk to other ports.  It
+may either connect or bind to ZeroMQ addresses and it may connect to
+abstract pairs of node/port names.  And, a port may have any number
+and a mix of connects and binds!
 </p>
 
-<pre class="example">
-$ ./waf install --notests
+<div class="org-src-container">
+<pre class="src src-python">port.connect(<span style="font-style: italic;">"ipc://myfifo.ipc"</span>)                    <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">1</span>
+port.connect(<span style="font-style: italic;">"tcp://someserver.example.com:12345"</span>)  <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">2</span>
+port.connect(<span style="font-style: italic;">"myfriend"</span>,<span style="font-style: italic;">"spigot"</span>)                   <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">3</span>
 </pre>
+</div>
 
-<p>
-Or, to force their running:
-</p>
+<ol class="org-ol">
+<li>Directly connect to a Unix domain socket <code>myfifo.ipc</code></li>
+<li>Directly connect to a TCP/IP address</li>
+<li>Indirectly connect to a node/port name pair to be resolved</li>
+</ol>
+
+<div class="org-src-container">
+<pre class="src src-python">port.bind()                                         <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">1</span>
+port.bind(<span style="font-style: italic;">"ipc://myfifo.ipc"</span>)                       <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">2</span>
+port.bind(<span style="font-style: italic;">"someserver.example.com"</span>, 12345)          <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">3</span>
+</pre>
+</div>
+
+<ol class="org-ol">
+<li>Bind to first available port on the hostname given during construction</li>
+<li>Bind to a specific ZeroMQ address (Unix domain socket in this case)</li>
+<li>Bind to TCP/IP on given host and port</li>
+</ol>
 </div>
 </div>
 
-<div id="outline-container-org92f7941" class="outline-2">
-<h2 id="org92f7941"><span class="section-number-2">3</span> Documentation</h2>
+<div id="outline-container-orga872060" class="outline-2">
+<h2 id="orga872060"><span class="section-number-2">3</span> Peer headers</h2>
 <div class="outline-text-2" id="text-3">
 <p>
-The generated documentation committed to the repository.  With a
-suitable environment (need Emacs and a recent <a href="https://plantuml.com/">plantuml</a>) one can
-rebuild it:
+A <code>zio.Port</code> can hold headers that may be used with a <code>zio.Peer</code>.  Some
+headers are created based on any <code>bind()</code> calls but the user may load up
+arbitrary headers.
 </p>
 
-<pre class="example">
-$ cd docs
-$ make
+<div class="org-src-container">
+<pre class="src src-python">port.add_headers(greeting = <span style="font-style: italic;">'Hello World'</span>)
+<span style="font-weight: bold;">print</span> (port.headers)
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">{'zio.port.client.greeting': 'Hello World'}</span>
 </pre>
+</div>
+
+<p>
+As can be seen, <code>zio.Port</code> header keys are forced to be presented in a
+convention adds <code>zio.port.&lt;portname&gt;.</code> as a prefix.
+</p>
 </div>
 </div>
 
-<div id="outline-container-org260027e" class="outline-2">
-<h2 id="org260027e"><span class="section-number-2">4</span> Python</h2>
+<div id="outline-container-orgd1888d4" class="outline-2">
+<h2 id="orgd1888d4"><span class="section-number-2">4</span> Going online</h2>
 <div class="outline-text-2" id="text-4">
 <p>
-ZIO also provides a Python package.  
-</p>
-</div>
-
-<div id="outline-container-org6b4a0f6" class="outline-3">
-<h3 id="org6b4a0f6"><span class="section-number-3">4.1</span> Install from source</h3>
-<div class="outline-text-3" id="text-4-1">
-<p>
-The ZIO Python package installs in "the usual way" from source but its
-dependencies need some particular care.  ZIO makes use of PyZMQ, the
-Python bindings to <b>libzmq</b> and because ZIO requires ZeroMQ "draft"
-sockets, PyZMQ needs to be installed manually in order to enable them
-as well as point to an installation of <b>libzmq</b> which includes them.
+Taking a port online requires certain stages.  When ports are used via
+a <code>zio.Node</code> this is handled automatically.  An application that
+constructs a port outside a node and use peering must take care as
+described in this tutorial.
 </p>
 
-<pre class="example">
-$ python3 -m venv /path/to/venv
-$ source /path/to/venv/bin/activate
-$ cd zio/python
-$ pip install --pre pyzmq \
-    --install-option=--enable-drafts \
-    --install-option=--zmq=/path/to/zmq
-$ pip install -r requirements.txt
-$ pip install [-e] .
-</pre>
-
-<p>
-In the above, replace <code>/path/to</code> with paths suitable for your
-environment.  Use <code>-e</code> option to do in-place development on the <code>zio</code>
-Python module.
-</p>
-
-<p>
-The <code>zio</code> Python module has unit tests which can be run as:
-</p>
-
-<pre class="example">
-$ cd zio/python/tests
-$ python -m unittest 
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">port</span> = zio.Port(<span style="font-style: italic;">"client"</span>, zmq.CLIENT)
+port.add_headers(greeting = <span style="font-style: italic;">'Hello World'</span>)
+port.bind()
+<span style="font-weight: bold; font-style: italic;">headers</span> = port.do_binds()
+<span style="font-weight: bold;">print</span> (headers)
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">{'zio.port.client.greeting': 'Hello World', </span>
+<span style="font-weight: bold; font-style: italic;">#  </span><span style="font-weight: bold; font-style: italic;">'zio.port.client.address': 'tcp://127.0.0.1:56572',</span>
+<span style="font-weight: bold; font-style: italic;">#  </span><span style="font-weight: bold; font-style: italic;">'zio.port.client.socket': 'CLIENT'}</span>
+<span style="font-weight: bold; font-style: italic;">peer</span> =  zio.Peer(<span style="font-style: italic;">"mynode"</span>, **headers)
+port.online(peer)
 </pre>
 </div>
+
+<p>
+This verbose sequence is needed to first allow for all ports to really
+perform their binding (<code>do_binds()</code>) and generate the ZIO peer headers
+related to that.  Then, these headers can be collected from all ports
+and given to a <code>zio.Peer</code>.  Finally, a port makes actual connections
+(<code>online()</code>) and is given the peer object in order to resolve any
+connections registered with node/port name pairs.  If an application
+only registers direct connections then a peer is not required for
+<code>online()</code> and if no binding is requested then the <code>do_binds()</code> may be
+omitted.
+</p>
+
+<p>
+Again, this is much simpler when the application uses ports through a
+<code>zio.Node</code>.
+</p>
+</div>
 </div>
 
-<div id="outline-container-org2307e6a" class="outline-3">
-<h3 id="org2307e6a"><span class="section-number-3">4.2</span> Python Package Index</h3>
-<div class="outline-text-3" id="text-4-2">
+<div id="outline-container-org3957f68" class="outline-2">
+<h2 id="org3957f68"><span class="section-number-2">5</span> Going offline</h2>
+<div class="outline-text-2" id="text-5">
 <p>
-At some point ZIO may be placed in PyPI.  Currently there is an
-unsurprising name conflict with "ZIO".  For now, just know that the
-<a href="https://pypi.org/project/zio/">four year untouched package currently holding the name ZIO</a> is totally
-unrelated to this here project.
+The binds and connects established by a port may be undone very
+simply:
 </p>
+
+<div class="org-src-container">
+<pre class="src src-python">port.offline()
+</pre>
+</div>
+
+<p>
+This also "forgets" all registered binds, taking the port state
+essentially back to just after construction.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgaf83529" class="outline-2">
+<h2 id="orgaf83529"><span class="section-number-2">6</span> Ports and messages</h2>
+<div class="outline-text-2" id="text-6">
+<p>
+A <code>zio.Port</code> can send and receive ("recv") a <code>zio.Message</code>.  See <a href="pytut-message.html">message
+tutorial</a> for ways to construct and work with messages.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">An echo service</span>
+<span style="font-weight: bold; font-style: italic;">timeout</span> = 1000 <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">units of ms</span>
+<span style="font-weight: bold; font-style: italic;">m</span> = port.recv(timeout)
+<span style="font-weight: bold;">if</span> <span style="font-weight: bold;">not</span> m:
+    <span style="font-weight: bold;">print</span>(<span style="font-style: italic;">"timeout"</span>)
+<span style="font-weight: bold;">else</span>:
+    <span style="font-weight: bold;">print</span> (m)
+port.send(m)
+</pre>
+</div>
+
+<p>
+Regardless of the type of the underlying socket, the message will be
+properly serialized.
+</p>
+
+<p>
+A port will also assure a sent message has its <code>origin</code> set if the port
+itself was given one.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">port.origin</span> = 42
+port.send(m)
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">other end point:</span>
+<span style="font-weight: bold; font-style: italic;">m</span> = otherport.recv()
+<span style="font-weight: bold;">print</span> (m.origin)
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">42</span>
+</pre>
 </div>
 </div>
 </div>

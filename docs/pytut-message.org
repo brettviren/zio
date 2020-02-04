@@ -1,0 +1,111 @@
+#+title: ZIO Tutorial: Messages in Python 
+#+setupfile: setup.org
+#+include: nav.org
+
+ZIO uses a single ~zio.Message~ class which acts as a general container.
+Details can be found in the [[file:messages.org][messages]] write-up.  Here, we show how to
+work with messages.
+
+* Creating a message
+
+A ~zio.Message~ can be created in a flexible way depending on the form
+of information you have.
+
+#+begin_src python
+import zio
+# empty message
+m1 = zio.Message()
+# more specified
+m2 = zio.Message(form='TEXT', label='my source', 
+                 level=zio.MessageLevel.warning,
+                 payload=['The system is on fire']) 
+#+end_src
+
+The constructor takes many keyword parameters and builds the message
+content in a cascading manner from most general to most specific,
+where the latter may override the former.  For example, you may
+specify a full message encoding and then override some part.
+
+#+begin_src python
+ph = zio.PrefixHeader('ZIO6TEXTmy source')
+m = zio.Message(level=zio.MessageLevel.info, prefix=ph)
+print(m)
+# zio.Message: "ZIO4TEXTmy source" + [0x0,0,0] + [0]
+#+end_src
+
+Note the 6 in ~ZIO6~ becomes a 4.
+
+* Modifying a message
+
+Given a message object, it can be modified.  This may be particularly
+useful when a message must be crafted which is a response from an
+incoming message.  For example, in [[file:flow.org][data flow protocol]] the ~.label~
+attribute is assumed to be a JSON encoded string providing protocol
+information.  In particular the /begin of transmission/ (BOT) handshake
+involves "reversing" a value held in the JSON between the two
+endpoints.
+
+#+begin_src python
+m = zio.Message(form='FLOW', 
+                label=json.dumps(dict(flow='BOT',
+                                      direction='inject',
+                                      credit=10)))
+print(m)
+# zio.Message: "ZIO0FLOW{"flow": "BOT", "direction": "inject", "credit": 10}" + [0x0,0,0] + [0]
+
+# now pretend we send->recv "m" to another ZIO app
+
+fobj = json.loads(m.label)
+fobj["direction"] = 'inject' if fobj["direction"] == "extract" else "extract"
+m.label = json.dumps(fobj)
+print(m)
+# zio.Message: "ZIO0FLOW{"flow": "BOT", "direction": "extract", "credit": 10}" + [0x0,0,0] + [0]
+
+# and now we'd probably send "m" back to the first endpoint...
+#+end_src
+
+* Origin, granule, seqno, oh my!
+
+In addition to the ~ZIO~ prefix, the "level" and an optional "label",
+all ZIO message headers have a trio of numbers: *origin*, *granule* and
+*seqno*.  These are described in [[file:messages.org][messages]].  The ~zio.Message~ object
+itself does not manage their values.  Rather provides accessors:
+
+#+begin_src python
+import time
+m = zio.Message(form='NULL', origin=42, granule=time.time())
+print (m)
+# zio.Message: "ZIO0NULL" + [0x2a,1580828219,0] + [0]
+time.sleep(1)
+m.granule = time.time()
+m.seqno += 1
+print (m)
+# zio.Message: "ZIO0NULL" + [0x2a,1580828220,1] + [0]
+#+end_src
+
+* Serializing a message
+
+A ZIO message is meant to be useful with established ZeroMQ sockets
+that may be multi-part as well as newer thread-safe sockets which must
+be sent as a monolithic single-part message.  The serializing methods
+are exposed to the user.
+
+#+begin_src python
+m = zio.Message(form='TEXT', label='my logger', 
+                level=zio.MessageLevel.warning, 
+                payload=['Hello', 'World'])
+print(m)
+# zio.Message: "ZIO6TEXTmy logger" + [0x0,0,0] + [2]
+print (m.toparts())
+# [b'ZIO6TEXTmy logger',
+#  b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00', 
+#  b'Hello', 
+#  b'World']
+print (m.encode())
+# b'\x11\x00\x00\x00ZIO6TEXTmy logger\x18\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x05\x00\x00\x00Hello\x05\x00\x00\x00World'
+#+end_src
+
+The ~decode()~ and ~fromparts()~ are the inverse of these two methods.
+
+When messages are used with a [[file:port.org][port]] (see also [[file:pytut-port.org][port tutorial]]) the user need not worry about this detail.
+

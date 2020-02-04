@@ -1,0 +1,527 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2020-02-04 Tue 14:40 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ZIO Tutorial: Flow</title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="Brett Viren" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { width: 90%; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="org.css"/>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2019 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="org-div-home-and-up">
+ <a accesskey="h" href=""> UP </a>
+ |
+ <a accesskey="H" href="index.html"> HOME </a>
+</div><div id="content">
+<h1 class="title">ZIO Tutorial: Flow</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#orgadc7e1a">1. Create a flow</a></li>
+<li><a href="#orge8fa918">2. Start a flow</a></li>
+<li><a href="#org1c89e25">3. Perform data flow</a></li>
+<li><a href="#org2976472">4. Counting messages</a></li>
+<li><a href="#org9c259d4">5. Blocking</a></li>
+<li><a href="#org6e44d90">6. End a flow</a></li>
+</ul>
+</div>
+</div>
+<div class="nav">
+<ul class="org-ul">
+<li><a href="index.html">Main Page</a></li>
+<li><a href="install.html">Installation</a></li>
+<li><a href="tutorial.html">Tutorials</a></li>
+<li><a href="whytos.html">Design documents</a></li>
+<li><a href="api.html">API Reference</a></li>
+</ul>
+
+</div>
+
+<p>
+ZIO provides <code>zio.flow.Flow</code> class to provide Python side implementation
+of the ZIO data flow protocol (see <a href="flow.html">flow writeup</a>).  
+</p>
+
+<div id="outline-container-orgadc7e1a" class="outline-2">
+<h2 id="orgadc7e1a"><span class="section-number-2">1</span> Create a flow</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+The flow object requires an externally prepared port to be provided.
+The port may be created stand-alone (see <a href="pytut-port.html">port tutorial</a>) but is more
+simply and usefully created in a node (see <a href="pytut-node.html">node tutorial</a>).  Here we do
+the latter:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">import</span> zio, zmq
+<span style="font-weight: bold; font-style: italic;">node</span> = zio.Node(<span style="font-style: italic;">"mynode"</span>)
+<span style="font-weight: bold; font-style: italic;">port</span> = node.port(<span style="font-style: italic;">"myflow"</span>, zmq.CLIENT)
+port.bind()
+node.online()
+<span style="font-weight: bold; font-style: italic;">flow</span> = zio.flow.Flow(port)
+</pre>
+</div>
+
+<p>
+Notes:
+</p>
+
+<ul class="org-ul">
+<li>The application is free to bring the node, and thus the port online
+either before or after the flow is created.  They must, of course,
+be online prior to using the flow object to exercise the flow
+protocol.</li>
+
+<li>The ZIO flow protocol typically uses CLIENT/SERVER sockets and the
+<code>zio.flow.Flow</code> object typically is used for the CLIENT side.  As
+expert level use, it can also provide the SERVER role.</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orge8fa918" class="outline-2">
+<h2 id="orge8fa918"><span class="section-number-2">2</span> Start a flow</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+The ZIO data flow protocol starts with both sides shaking hands to
+determine their mutually opposing <i>directions</i> and their agreed on
+number of flow control <i>credit</i>.  This is done by exchanging a flow
+<i>begin-of-transmission</i> (<b>BOT</b>) message.  From the point of view of a flow
+client:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">cbot</span> = Message(label=<span style="font-style: italic;">'{"credit":2,"direction":"inject"}'</span>)
+flow.send_bot(cbot)
+<span style="font-weight: bold; font-style: italic;">sbot</span> = flow.recv_bot(1000);
+<span style="font-weight: bold; font-style: italic;">fobj</span> = json.loads(sbot.label)
+<span style="font-weight: bold;">assert</span>(fobj[<span style="font-style: italic;">'direction'</span>] == <span style="font-style: italic;">'extract'</span>)
+<span style="font-weight: bold; font-style: italic;">total_credit</span> = fobj[<span style="font-style: italic;">'credit'</span>]
+</pre>
+</div>
+
+<p>
+The server is similar but it must first call <code>recv_bot()</code> and then
+<code>send_bot()</code>.  In between it must accept the clients <i>direction</i> and
+accept or lower the client's suggested <i>credit</i> and return the result.
+If the server does not accept then it returns an <b>EOT</b> message.
+</p>
+
+<p>
+Note the required <code>form='FLOW'</code> message header and the <code>flow='BOT'</code>
+attribute of the flow object in the message '.label' are both set
+implicitly inside the <code>flow.send_bot()</code> method so the application need
+not be concerned.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org1c89e25" class="outline-2">
+<h2 id="org1c89e25"><span class="section-number-2">3</span> Perform data flow</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+The actual "flowing" phase of the data flow protocol involves explicit
+exchange of "payload" <b>DAT</b> messages and implicit exchange of <b>PAY</b>
+messages traveling in opposite directions.  
+</p>
+
+<p>
+A flow which has direction "inject" will receive payload messages:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python">flow.flush_pay()
+
+<span style="font-weight: bold; font-style: italic;">timeout</span> = 1000 <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">[ms]</span>
+<span style="font-weight: bold; font-style: italic;">dat</span> = flow.get(timeout)
+<span style="font-weight: bold;">if</span> <span style="font-weight: bold;">not</span> dat:
+    <span style="font-weight: bold;">print</span>(<span style="font-style: italic;">"timeout"</span>)
+<span style="font-weight: bold;">else</span>:
+    <span style="font-weight: bold;">print</span> (f<span style="font-style: italic;">'got payload {dat}'</span>)
+</pre>
+</div>
+
+<p>
+Note the call to <code>flow.flush_pay()</code>.  The other end shall not send <b>DAT</b>
+messages until it has credit and it starts out with none.  This means
+the receiving end must signal it is ready to get flow.  It does this
+by explicitly sending some initial credit (ie, all of it) to the other
+end with <code>flush_pay()</code>.  
+</p>
+
+<p>
+Note, in this particular example, the call is redundant as
+<code>flow.flush_pay()</code> is called at the start of a <code>flow.get()</code>.  However, it
+is typical for applications to rely on a ZeroMQ "poller" to watch the
+client socket for waiting messages before calling <code>flow.get()</code>.  In such
+a case, no <b>DAT</b> will come because the other end is waiting for <b>PAY</b> and
+no <b>PAY</b> will be sent because the receiving end is waiting for <b>DAT</b>.
+Thus an explicit, initial call to <code>flow.flush_pay()</code> is needed to break
+the deadlock.
+</p>
+
+<p>
+Goign the other way, a flow which has direction "extract" might send
+payload messages simply like:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">dat</span> = zio.Message(...)
+flow.put(dat)
+</pre>
+</div>
+
+<p>
+In this case there is an analogue to <code>flow.flush_pay()</code> called
+<code>flow.slurp_pay()</code>.  This may be explicitly called but it is called in
+<code>flow.put()</code> and no deadlock should arise.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org2976472" class="outline-2">
+<h2 id="org2976472"><span class="section-number-2">4</span> Counting messages</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+The Python (and C++) implementation of ZIO data flow requires that the
+<b>seqno</b> field in message from any flow port is strictly incrementing,
+starting with a value of 0 for the <b>BOT</b>.  It is up to the application
+to assure this for the initial <b>BOT</b> and subsequent <b>DAT</b> and final <b>EOT</b>.
+Ignoring details like actual payload, a flow sender might then:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">msg</span> = zio.Message()
+<span style="font-weight: bold;">for</span> count <span style="font-weight: bold;">in</span> <span style="font-weight: bold;">range</span>(100):
+    <span style="font-weight: bold; font-style: italic;">msg.seqno</span> = count
+    flow.put(dat)
+<span style="font-weight: bold; font-style: italic;">msg.seqno</span> = count+1
+flow.send_eot(msg)
+</pre>
+</div>
+
+<p>
+And a flow receiver:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">msg</span> = flow.recv_bot()
+<span style="font-weight: bold;">assert</span>(msg.seqno == 0)
+<span style="font-weight: bold; font-style: italic;">last_seqno</span> = 0
+<span style="font-weight: bold;">while</span> <span style="font-weight: bold; text-decoration: underline;">True</span>:
+    <span style="font-weight: bold; font-style: italic;">msg</span> = flow.get()
+    <span style="font-weight: bold;">if</span> <span style="font-weight: bold;">not</span> msg:
+        <span style="font-weight: bold;">break</span>
+    <span style="font-weight: bold;">assert</span>(msg.seqno - last_seqno == 1)
+    <span style="font-weight: bold; font-style: italic;">last_seqno</span> += 1
+flow.send_eot()
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org9c259d4" class="outline-2">
+<h2 id="org9c259d4"><span class="section-number-2">5</span> Blocking</h2>
+<div class="outline-text-2" id="text-5">
+<p>
+The ZIO data flow protocol is designed to maximize high throughput
+while minimizing keeping latency and bounding memory usage.  However,
+both the <code>get()</code> and the <code>put()</code> may still block:
+</p>
+
+<ul class="org-ul">
+<li>a <code>get()</code> will block if the other end ceases to send <b>DAT</b> and the local end exhausts the queue.</li>
+<li>a <code>put()</code> will block if the local end ceases to send <b>PAY</b> and the local end has used all accumulated <i>credit</i>.</li>
+</ul>
+
+<p>
+If blocks occur do to variation in message processing time increasing
+the total amount of <i>credit</i> will use more memory but may smooth out the
+resulting latency variation.  
+</p>
+
+<p>
+An important and desirable cause of blocking in the ZIO data flow
+control protocol is discussed next.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org6e44d90" class="outline-2">
+<h2 id="org6e44d90"><span class="section-number-2">6</span> End a flow</h2>
+<div class="outline-text-2" id="text-6">
+<p>
+The final stage of the ZIO data flow protocol is its
+<i>end-of-transmission</i> (<b>EOT</b>) message.  Like with <b>BOT</b> this is a handshake
+between both endpoints.  One endpoint must initiate <b>EOT</b> which means
+the other endpoint will have a "surprise discovery" while it is either
+expecting a <b>BOT</b>, a <b>DAT</b> or a <b>PAY</b> message.  In the first case, the code
+might be like:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">initiate EOT</span>
+flow.send_eot()
+<span style="font-weight: bold; font-style: italic;">timeout</span> = 10000 <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">[ms]</span>
+<span style="font-weight: bold; font-style: italic;">eot</span> = flow.recv_eot(timeout)
+<span style="font-weight: bold;">if</span> <span style="font-weight: bold;">not</span> eot:
+    <span style="font-weight: bold;">print</span>(<span style="font-style: italic;">"EOT timeout, may have lost data"</span>
+</pre>
+</div>
+
+<p>
+While on the ether end:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">"surprise" EOT</span>
+<span style="font-weight: bold; font-style: italic;">dat</span> = flow.get()
+<span style="font-weight: bold;">if</span> <span style="font-weight: bold;">not</span> dat:
+    <span style="font-weight: bold;">print</span> (<span style="font-style: italic;">"got EOT"</span>)
+    flow.send_eot()
+    do_clean_shutdown()
+</pre>
+</div>
+
+<p>
+Notes:
+</p>
+
+<ul class="org-ul">
+<li>The initiator of the <b>EOT</b> should wait for a return <b>EOT</b> for as long as
+"comfortable" for the application.  This assures that any queued <b>DAT</b>
+messages are processed.</li>
+
+<li>The endpoint that got the "surprise" <b>EOT</b> may return an <b>EOT</b>
+immediately unless there is a reason to keep the other end "hanging"
+while clean shutdown occurs.</li>
+
+<li>Flow methods can also raise exceptions.</li>
+</ul>
+</div>
+</div>
+</div>
+</body>
+</html>

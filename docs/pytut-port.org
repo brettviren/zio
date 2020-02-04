@@ -1,0 +1,145 @@
+#+title: ZIO Tutorial: Ports
+#+setupfile: setup.org
+#+include: nav.org
+
+ZIO provides ~zio.Port~ which is a high level wrapper around a PyZMQ
+~zmq.socket~.  A port can work with a ~zio.Peer~ ([[file:peer.org][peer writup]] and [[file:pytut-peer.org][peer
+tutoral]]) usually via a ~zio.Node~ ([[file:node.org][node writeup]] and [[file:pytut-node][node tutorial]])
+provide dynamic socket address discovery.  This frees the user from
+having to specify precise TCP/IP addresses and instead use abstracted
+names for connections.  No DNS or central naming service required!  A
+~zio.Port~ also can help send and receive ~zio.Message~ ([[file:messages.org][messages]] and
+[[file:pytut-messages.org][messages tutorial]]) so that their "partness" is correctly handled based
+on the port's underlying socket type.
+
+* Create a port
+
+Again, ports are usually created and used via ~zio.Node~ but with a bit
+of extra low-level attention, they can also be created directly.
+
+#+begin_src python
+import zmq
+port = zio.Port("client", zmq.CLIENT, "127.0.0.1")
+#+end_src
+
+A portname, the socket type and an optional hostname are given.  The
+last is a detail to set which network interface to use if the port
+will later ~bind()~.
+
+* Connecting, binding
+
+Before a port can be used it needs a way to talk to other ports.  It
+may either connect or bind to ZeroMQ addresses and it may connect to
+abstract pairs of node/port names.  And, a port may have any number
+and a mix of connects and binds!
+
+#+begin_src python
+port.connect("ipc://myfifo.ipc")                    # 1
+port.connect("tcp://someserver.example.com:12345")  # 2
+port.connect("myfriend","spigot")                   # 3
+#+end_src
+
+1. Directly connect to a Unix domain socket ~myfifo.ipc~
+2. Directly connect to a TCP/IP address
+3. Indirectly connect to a node/port name pair to be resolved
+
+#+begin_src python
+port.bind()                                         # 1
+port.bind("ipc://myfifo.ipc")                       # 2
+port.bind("someserver.example.com", 12345)          # 3
+#+end_src
+
+1. Bind to first available port on the hostname given during construction
+2. Bind to a specific ZeroMQ address (Unix domain socket in this case)
+3. Bind to TCP/IP on given host and port
+
+* Peer headers
+
+A ~zio.Port~ can hold headers that may be used with a ~zio.Peer~.  Some
+headers are created based on any ~bind()~ calls but the user may load up
+arbitrary headers.
+
+#+begin_src python
+port.add_headers(greeting = 'Hello World')
+print (port.headers)
+# {'zio.port.client.greeting': 'Hello World'}
+#+end_src
+
+As can be seen, ~zio.Port~ header keys are forced to be presented in a
+convention adds ~zio.port.<portname>.~ as a prefix.
+
+* Going online
+
+Taking a port online requires certain stages.  When ports are used via
+a ~zio.Node~ this is handled automatically.  An application that
+constructs a port outside a node and use peering must take care as
+described in this tutorial.
+
+#+begin_src python
+port = zio.Port("client", zmq.CLIENT)
+port.add_headers(greeting = 'Hello World')
+port.bind()
+headers = port.do_binds()
+print (headers)
+# {'zio.port.client.greeting': 'Hello World', 
+#  'zio.port.client.address': 'tcp://127.0.0.1:56572',
+#  'zio.port.client.socket': 'CLIENT'}
+peer =  zio.Peer("mynode", **headers)
+port.online(peer)
+#+end_src
+
+This verbose sequence is needed to first allow for all ports to really
+perform their binding (~do_binds()~) and generate the ZIO peer headers
+related to that.  Then, these headers can be collected from all ports
+and given to a ~zio.Peer~.  Finally, a port makes actual connections
+(~online()~) and is given the peer object in order to resolve any
+connections registered with node/port name pairs.  If an application
+only registers direct connections then a peer is not required for
+~online()~ and if no binding is requested then the ~do_binds()~ may be
+omitted.
+
+Again, this is much simpler when the application uses ports through a
+~zio.Node~.
+
+* Going offline
+
+The binds and connects established by a port may be undone very
+simply:
+
+#+begin_src python
+port.offline()
+#+end_src
+
+This also "forgets" all registered binds, taking the port state
+essentially back to just after construction.
+
+* Ports and messages
+
+A ~zio.Port~ can send and receive ("recv") a ~zio.Message~.  See [[file:pytut-message.org][message
+tutorial]] for ways to construct and work with messages.
+
+#+begin_src python
+# An echo service
+timeout = 1000 # units of ms
+m = port.recv(timeout)
+if not m:
+    print("timeout")
+else:
+    print (m)
+port.send(m)
+#+end_src
+
+Regardless of the type of the underlying socket, the message will be
+properly serialized.
+
+A port will also assure a sent message has its ~origin~ set if the port
+itself was given one.
+
+#+begin_src python
+port.origin = 42
+port.send(m)
+# other end point:
+m = otherport.recv()
+print (m.origin)
+# 42
+#+end_src
