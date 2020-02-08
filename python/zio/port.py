@@ -6,6 +6,16 @@ from .util import socket_names, needs_codec
 from .message import Message
 
 def bind_address(sock, addr):
+    """Bind socket to address
+
+    Any error is printed and reraised.
+
+    :param sock: ZeroMQ socket object
+    :param addr: address in ZeroMQ format
+    :returns: the address
+    :rtype: string
+
+    """
     try:
         sock.bind(addr)
     except ZMQError as e:
@@ -17,6 +27,15 @@ def bind_address(sock, addr):
 ephemeral_port_range = (49152, 65535)
 
 def bind_hostport(sock, host, port):
+    """Bind socket TCP host and port
+
+    :param sock: ZeroMQ socket object
+    :param host: name or IP address of host to bind
+    :param port: TCP port number
+    :returns: ZeroMQ address string
+    :rtype: string
+
+    """
     if type(port) is int and port > 0:
         return bind_address(sock, "tcp://%s:%d" % (host, port))
     addr = "tcp://%s"%host

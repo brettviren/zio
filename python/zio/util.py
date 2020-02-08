@@ -30,9 +30,13 @@ socket_names = [
 
 
 def needs_codec(stype):
-    '''
-    Return True if socket type stype requires single-part messages
-    '''
+    """Determine if socket needs codec
+
+    :param stype: a ZeroMQ socket type number
+    :returns: True if socket type stype requires single-part messages
+    :rtype: bool
+
+    """
     return \
         stype == zmq.SERVER or \
         stype == zmq.CLIENT or \
@@ -40,10 +44,23 @@ def needs_codec(stype):
         stype == zmq.DISH
 
 def guess_hostname():
+    """Guess the local hostname
+
+    :returns: host name
+    :rtype: string
+
+    """
     import socket
     return socket.getfqdn()
         
 def byteify_list(lst):
+    """Encode to bytes elements of a list
+
+    :param lst: list of things that can be converted to bytes
+    :returns: list of bytes
+    :rtype: list
+
+    """
     ret = list()
     for el in lst:
         if type(el) is str:
