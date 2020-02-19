@@ -29,12 +29,10 @@ The primary requirements (goals) for the system are:
 - Do not restrict client endpoints to always run from the same thread
   (use CLIENT socket, not REQ nor DEALER).
 
-- Allow for workers to be chosen based on a priority (eg, a task has
-  workers with a GPU implementation and others with a CPU
-  implementation, choose the from the former set unless they are all
-  occupied then accept a worker from the latter set).
+- Separate out broker logic from request/service matching logic.
   
-- Allow clients and workers to come and go from the broker.
+- Broker accepts clients and workers appearing and disappearing over
+  its lifetime.
 
 - Reissue task if worker disappears after accepting it.
 
@@ -55,8 +53,84 @@ The primary requirements (goals) for the system are:
 - worker API
 - broker implementation
 
+* Roles and activity
+
+- broker (B) starts with a given service resolver (SR) plugin
+
+- one worker (W) of many and one client (C) of many connect to broker
+  in any order
+
+- W sends as a query to B a message M1 which includes a service
+  description object (SDO)
+
+- If M1 has payload, B sends M1 to waiting client C previously
+  associated to W.
+
+- B applies SR to SDO and receives associated service management object (SMO)
+
+- B adds W to SMO
+
+- C sends message M2 with request description object (RDO) + payload
+
+- B applies SR to RDO and receives associated SMO
+
+- B sends M2 to first W in SMO, removes W
+
+This is essentially identical to ZeroMQ Majordomo except for adding
+the transformations ~SR(SDO) -> SMO~ and ~SR(RDO) -> SMO~.  In Majordomo,
+the SMO is simply a hard-wired service name which both client and
+worker agree on by contract.  Here, client and worker to express their
+own terms and the contract is embodied in code (the SR transform
+function).
+
+Besides breaking a tight conceptual binding, this allows the SR to
+take into account additional information which could be static or
+dynamic.  A static example is to apply some priority bias to selecting
+which service to match to a request.  Eg, workers fronting GPUs of
+different capabilities.  A dynamic example would be to load balance
+workers across some set of resources.  
+
+This generality reduces to Majordomo.  If not needed then a trivial SR
+function may be provided.
 
 
+* Why SERVER/CLIENT
 
+WCT has a single-threaded and a multi-threaded graph execution engine.
+The latter runs WCT components via a TBB thread pool in TBB's "flow
+graph" implementation.  
 
+If a the conventional DEALER socket was used from a component it will
+execute on different threads over its lifetime, yet it is not
+thread-safe.  Proper operation is not guaranteed and likely not even
+by luck.  
 
+Instead CLIENT must be used which forces a SERVER socket somewhere.
+Two clear options exist:
+
+1) Re-implement Majordomo broker to replace ROUTER with SERVER.
+
+2) Run one or more SERVER<-->DEALER "devices" outside of TBB thread
+   pool to proxy to standard Majordomo ROUTER.
+
+A Python prototype for option 1 exists as [[https://github.com/brettviren/generaldomo][generaldomo]].  It lets SERVER
+be swapped for ROUTER at runtime by providing a dichotomy in how
+message handling is implemented.  This adds some runtime overhead but
+it's not horrible.  A "real" implementation might stick to just a
+SERVER-based implementation.  Note, such an implementation is *not* RFC
+18/MDP-compliant as use of ROUTER is explicitly required.  This
+prototype also does not handle message envelopes.
+
+Option 2 would allow the [[https://github.com/zeromq/majordomo]["official"]] Majordomo implementation to be
+used.  As it is C/C++, the Majordomo broker could be embedded in a WCT
+(service-ish) component, as could the SERVER-DEALER "device" proxy.
+This would allow ~inproc://~ transport from client, through proxy to
+broker.  Besides reducing message transfer time inherently, it would
+allow messages to hold pointers.  And, it would simplify job
+configuration and management as the over all job would look to the
+user like just one ~wire-cell~ program.  As the broker's router could
+bind to both ~inproc://~ and ~tcp://~ external workers can still be
+supported.  However, this would either require either that
+pointer-based messages are not used or it would require some
+data-aware "device" proxy running inside WCT which converts between
+pointer and object and forwards to a worker.

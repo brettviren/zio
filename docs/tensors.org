@@ -1,0 +1,43 @@
+#+title: ZIO Tensors
+#+setupfile: setup.org
+#+include: nav.org
+
+In some cases, we want to easily send tensors out of WCT and to a "GPU
+service".  We want a fairly simple and general way to do this.
+
+A most general way is to produce HDF5 "core" (in-memory) files with
+arbitrary HDF5 data.
+
+But, that requires adding yet more dependency and complication.
+Simpler is to devise a packing.  WCT has the ~cnpy~ C++ interface to
+Numpy files.  It provides ~cnpy::NpyArray~ class which can do the heavy
+lifting keep some compatibility with Numpy.
+
+It has a 
+
+- shape :: a 1D vector giving dimension, length is rank of tensor
+- word size :: number of bytes in an element
+- fortran order :: Boolean
+- data array :: 1D byte (~char~) std::vector
+
+Creating a ~NpyArray~ allocates the data array.  It's then up to user to
+fill that array.  To serialize to a ~zio::Message~ we do the simplest
+thing.
+
+- use the ~label~ prefix header as a JSON object and the attribute
+  ~arrays~ to hold meta data about array data.
+
+- ~arrays~ is a list with each element holding an object corresponding
+  to each part of the multipart payoad.
+
+- the object has attributes:
+  - shape :: list of size of each dimension
+
+  - word :: word size
+
+  - fortran :: Boolean, assumed false if missing
+
+- the corresponding part in the payload is a byte array produced by ~cnpy::NpyArray::data()~.
+
+Because this is so generic, ZIO could include support for this
+directly, even by including ~cnpy~

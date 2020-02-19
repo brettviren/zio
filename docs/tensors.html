@@ -3,10 +3,10 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-02-10 Mon 08:38 -->
+<!-- 2020-02-19 Wed 15:46 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Task Broker</title>
+<title>ZIO Tensors</title>
 <meta name="generator" content="Org mode" />
 <meta name="author" content="Brett Viren" />
 <style type="text/css">
@@ -161,19 +161,6 @@
   .footdef  { margin-bottom: 1em; }
   .figure { padding: 1em; }
   .figure p { text-align: center; }
-  .equation-container {
-    display: table;
-    text-align: center;
-    width: 100%;
-  }
-  .equation {
-    vertical-align: middle;
-  }
-  .equation-label {
-    display: table-cell;
-    text-align: right;
-    vertical-align: middle;
-  }
   .inlinetask {
     padding: 10px;
     border: 2px solid gray;
@@ -247,18 +234,7 @@ for the JavaScript code in this tag.
  |
  <a accesskey="H" href="index.html"> HOME </a>
 </div><div id="content">
-<h1 class="title">Task Broker</h1>
-<div id="table-of-contents">
-<h2>Table of Contents</h2>
-<div id="text-table-of-contents">
-<ul>
-<li><a href="#orgc5c4965">1. Requirements</a></li>
-<li><a href="#org0c731fe">2. Parts</a></li>
-<li><a href="#org05e90f1">3. Roles and activity</a></li>
-<li><a href="#orgb2549e0">4. Why SERVER/CLIENT</a></li>
-</ul>
-</div>
-</div>
+<h1 class="title">ZIO Tensors</h1>
 <div class="nav">
 <ul class="org-ul">
 <li><a href="index.html">Main Page</a></li>
@@ -270,183 +246,63 @@ for the JavaScript code in this tag.
 
 </div>
 
-<div class="warning">
 <p>
-This is still under design.
+In some cases, we want to easily send tensors out of WCT and to a "GPU
+service".  We want a fairly simple and general way to do this.
 </p>
 
-</div>
+<p>
+A most general way is to produce HDF5 "core" (in-memory) files with
+arbitrary HDF5 data.
+</p>
 
 <p>
-The ZIO task broker is essentially a rip off of ZeroMQ <a href="https://github.com/zeromq/majordomo">majordomo</a> aka <a href="http://zguide.zeromq.org/page:all#toc98">service
-oriented reliable queueing</a> pattern (<a href="http://zguide.zeromq.org/py:all#toc98">python version</a>) with some variation:
+But, that requires adding yet more dependency and complication.
+Simpler is to devise a packing.  WCT has the <code>cnpy</code> C++ interface to
+Numpy files.  It provides <code>cnpy::NpyArray</code> class which can do the heavy
+lifting keep some compatibility with Numpy.
+</p>
+
+<p>
+It has a 
+</p>
+
+<dl class="org-dl">
+<dt>shape</dt><dd>a 1D vector giving dimension, length is rank of tensor</dd>
+<dt>word size</dt><dd>number of bytes in an element</dd>
+<dt>fortran order</dt><dd>Boolean</dd>
+<dt>data array</dt><dd>1D byte (<code>char</code>) std::vector</dd>
+</dl>
+
+<p>
+Creating a <code>NpyArray</code> allocates the data array.  It's then up to user to
+fill that array.  To serialize to a <code>zio::Message</code> we do the simplest
+thing.
 </p>
 
 <ul class="org-ul">
-<li>It is more generalized ("generaldomo"?) in how client requests and
-workers are matched.</li>
+<li>use the <code>label</code> prefix header as a JSON object and the attribute
+<code>arrays</code> to hold meta data about array data.</li>
 
-<li>Replace ROUTER with SERVER so that clients may use thread-safe
-CLIENT socket.</li>
-</ul>
+<li><code>arrays</code> is a list with each element holding an object corresponding
+to each part of the multipart payoad.</li>
 
-<div id="outline-container-orgc5c4965" class="outline-2">
-<h2 id="orgc5c4965"><span class="section-number-2">1</span> Requirements</h2>
-<div class="outline-text-2" id="text-1">
-<p>
-The primary requirements (goals) for the system are:
-</p>
+<li>the object has attributes:
+<dl class="org-dl">
+<dt>shape</dt><dd>list of size of each dimension</dd>
 
-<ul class="org-ul">
-<li>Allow one program ("client") to run a task in an "external" program
-("worker") where the two may be on different computers.</li>
+<dt>word</dt><dd>word size</dd>
 
-<li>Support N-to-M mapping between clients and workers such that either
-number may change over time without affecting operation ("broker",
-aka ZeroMQ reliable request pattern / pirate patterns).</li>
+<dt>fortran</dt><dd>Boolean, assumed false if missing</dd>
+</dl></li>
 
-<li>Do not restrict client endpoints to always run from the same thread
-(use CLIENT socket, not REQ nor DEALER).</li>
-
-<li>Separate out broker logic from request/service matching logic.</li>
-
-<li>Broker accepts clients and workers appearing and disappearing over
-its lifetime.</li>
-
-<li>Reissue task if worker disappears after accepting it.</li>
-
-<li>Never return the same result to a client (eg, if worker reappears
-after a reissue)</li>
-
-<li>Clients and workers can discover the broker SERVER socket address.</li>
-
-<li>Broker provides status information.</li>
-</ul>
-</div>
-</div>
-
-<div id="outline-container-org0c731fe" class="outline-2">
-<h2 id="org0c731fe"><span class="section-number-2">2</span> Parts</h2>
-<div class="outline-text-2" id="text-2">
-<ul class="org-ul">
-<li>client request message specification and payload</li>
-<li>worker service specification</li>
-<li>request/service matching mechanism</li>
-<li>result messages specification and payload</li>
-<li>client API</li>
-<li>worker API</li>
-<li>broker implementation</li>
-</ul>
-</div>
-</div>
-
-<div id="outline-container-org05e90f1" class="outline-2">
-<h2 id="org05e90f1"><span class="section-number-2">3</span> Roles and activity</h2>
-<div class="outline-text-2" id="text-3">
-<ul class="org-ul">
-<li>broker (B) starts with a given service resolver (SR) plugin</li>
-
-<li>one worker (W) of many and one client (C) of many connect to broker
-in any order</li>
-
-<li>W sends as a query to B a message M1 which includes a service
-description object (SDO)</li>
-
-<li>If M1 has payload, B sends M1 to waiting client C previously
-associated to W.</li>
-
-<li>B applies SR to SDO and receives associated service management object (SMO)</li>
-
-<li>B adds W to SMO</li>
-
-<li>C sends message M2 with request description object (RDO) + payload</li>
-
-<li>B applies SR to RDO and receives associated SMO</li>
-
-<li>B sends M2 to first W in SMO, removes W</li>
+<li>the corresponding part in the payload is a byte array produced by <code>cnpy::NpyArray::data()</code>.</li>
 </ul>
 
 <p>
-This is essentially identical to ZeroMQ Majordomo except for adding
-the transformations <code>SR(SDO) -&gt; SMO</code> and <code>SR(RDO) -&gt; SMO</code>.  In Majordomo,
-the SMO is simply a hard-wired service name which both client and
-worker agree on by contract.  Here, client and worker to express their
-own terms and the contract is embodied in code (the SR transform
-function).
+Because this is so generic, ZIO could include support for this
+directly, even by including <code>cnpy</code>
 </p>
-
-<p>
-Besides breaking a tight conceptual binding, this allows the SR to
-take into account additional information which could be static or
-dynamic.  A static example is to apply some priority bias to selecting
-which service to match to a request.  Eg, workers fronting GPUs of
-different capabilities.  A dynamic example would be to load balance
-workers across some set of resources.  
-</p>
-
-<p>
-This generality reduces to Majordomo.  If not needed then a trivial SR
-function may be provided.
-</p>
-</div>
-</div>
-
-
-<div id="outline-container-orgb2549e0" class="outline-2">
-<h2 id="orgb2549e0"><span class="section-number-2">4</span> Why SERVER/CLIENT</h2>
-<div class="outline-text-2" id="text-4">
-<p>
-WCT has a single-threaded and a multi-threaded graph execution engine.
-The latter runs WCT components via a TBB thread pool in TBB's "flow
-graph" implementation.  
-</p>
-
-<p>
-If a the conventional DEALER socket was used from a component it will
-execute on different threads over its lifetime, yet it is not
-thread-safe.  Proper operation is not guaranteed and likely not even
-by luck.  
-</p>
-
-<p>
-Instead CLIENT must be used which forces a SERVER socket somewhere.
-Two clear options exist:
-</p>
-
-<ol class="org-ol">
-<li>Re-implement Majordomo broker to replace ROUTER with SERVER.</li>
-
-<li>Run one or more SERVER&lt;&#x2013;&gt;DEALER "devices" outside of TBB thread
-pool to proxy to standard Majordomo ROUTER.</li>
-</ol>
-
-<p>
-A Python prototype for option 1 exists as <a href="https://github.com/brettviren/generaldomo">generaldomo</a>.  It lets SERVER
-be swapped for ROUTER at runtime by providing a dichotomy in how
-message handling is implemented.  This adds some runtime overhead but
-it's not horrible.  A "real" implementation might stick to just a
-SERVER-based implementation.  Note, such an implementation is <b>not</b> RFC
-18/MDP-compliant as use of ROUTER is explicitly required.  This
-prototype also does not handle message envelopes.
-</p>
-
-<p>
-Option 2 would allow the <a href="https://github.com/zeromq/majordomo">"official"</a> Majordomo implementation to be
-used.  As it is C/C++, the Majordomo broker could be embedded in a WCT
-(service-ish) component, as could the SERVER-DEALER "device" proxy.
-This would allow <code>inproc://</code> transport from client, through proxy to
-broker.  Besides reducing message transfer time inherently, it would
-allow messages to hold pointers.  And, it would simplify job
-configuration and management as the over all job would look to the
-user like just one <code>wire-cell</code> program.  As the broker's router could
-bind to both <code>inproc://</code> and <code>tcp://</code> external workers can still be
-supported.  However, this would either require either that
-pointer-based messages are not used or it would require some
-data-aware "device" proxy running inside WCT which converts between
-pointer and object and forwards to a worker.
-</p>
-</div>
-</div>
 </div>
 </body>
 </html>
