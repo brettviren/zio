@@ -13,5 +13,5 @@ written to help solidify thoughts.
 - A [[file:flow-broker.org][flow broker]] brings flow clients together with server-side flow handlers, such as those that may manage file resources.
 - A [[file:task-broker.org][task broker]] implements a reliable service oriented task queue based on ZeroMQ majordomo design.
 
-- Utility support to pack [[file:tensor.org][tensors]] into messages.
+- Utility support to pack [[file:tensors.org][tensors]] into messages.
 
