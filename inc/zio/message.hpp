@@ -68,10 +68,16 @@ namespace zio {
         
         level::MessageLevel level() const;
         void set_level(level::MessageLevel level);
+
         std::string form() const;
         void set_form(const std::string& form);
+
         std::string label() const;
         void set_label(const std::string& label);
+
+        /// Helper, when label holds a JSON object
+        zio::json label_object() const;
+        void set_label_object(const zio::json& lobj);
 
         const PrefixHeader& prefix() const { return m_header.prefix; }
         const CoordHeader& coord() const { return m_header.coord; }

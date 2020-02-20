@@ -76,6 +76,17 @@ void zio::Message::set_label(const std::string& label)
 {
     m_header.prefix.label = label;
 }
+
+zio::json zio::Message::label_object() const
+{
+    return json::parse(label());
+}
+void zio::Message::set_label_object(const zio::json& lobj)
+{
+    set_label(lobj.dump());
+}
+
+
 std::string zio::Message::form() const {
     return m_header.prefix.form;
 }
