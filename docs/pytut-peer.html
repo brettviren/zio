@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-02-04 Tue 14:40 -->
+<!-- 2020-02-20 Thu 12:10 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>ZIO Tutorial: Peering</title>
@@ -239,11 +239,11 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orge30b83b">1. Create peers</a></li>
-<li><a href="#org6963be2">2. Get peer info</a></li>
-<li><a href="#orgb874568">3. Synchronizing</a></li>
-<li><a href="#org39e2e69">4. Finding peer info</a></li>
-<li><a href="#org5a96f51">5. Stopping a peer</a></li>
+<li><a href="#org33cd045">1. Create peers</a></li>
+<li><a href="#org30128ae">2. Get peer info</a></li>
+<li><a href="#orge26dbbd">3. Synchronizing</a></li>
+<li><a href="#org814010e">4. Finding peer info</a></li>
+<li><a href="#org9ae4d34">5. Stopping a peer</a></li>
 </ul>
 </div>
 </div>
@@ -266,8 +266,8 @@ peer via a <code>zio.Node</code> (see <a href="node.html">node</a> and <a href="
 used stand-alone and this tutorial will show how.
 </p>
 
-<div id="outline-container-orge30b83b" class="outline-2">
-<h2 id="orge30b83b"><span class="section-number-2">1</span> Create peers</h2>
+<div id="outline-container-org33cd045" class="outline-2">
+<h2 id="org33cd045"><span class="section-number-2">1</span> Create peers</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 Peers have a "nickname" and an optional set of headers.
@@ -281,8 +281,8 @@ Peers have a "nickname" and an optional set of headers.
 </div>
 </div>
 
-<div id="outline-container-org6963be2" class="outline-2">
-<h2 id="org6963be2"><span class="section-number-2">2</span> Get peer info</h2>
+<div id="outline-container-org30128ae" class="outline-2">
+<h2 id="org30128ae"><span class="section-number-2">2</span> Get peer info</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 The Zyre actor runs in a background thread while the <code>zio.Peer</code>
@@ -305,8 +305,8 @@ p1.drain()
 </div>
 </div>
 
-<div id="outline-container-orgb874568" class="outline-2">
-<h2 id="orgb874568"><span class="section-number-2">3</span> Synchronizing</h2>
+<div id="outline-container-orge26dbbd" class="outline-2">
+<h2 id="orge26dbbd"><span class="section-number-2">3</span> Synchronizing</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 One use of peering is for separate asynchronous tasks to synchronize.
@@ -323,8 +323,8 @@ available before the first continues.
 </div>
 </div>
 
-<div id="outline-container-org39e2e69" class="outline-2">
-<h2 id="org39e2e69"><span class="section-number-2">4</span> Finding peer info</h2>
+<div id="outline-container-org814010e" class="outline-2">
+<h2 id="org814010e"><span class="section-number-2">4</span> Finding peer info</h2>
 <div class="outline-text-2" id="text-4">
 <p>
 A peer may also query the network for other peers by a nickname.
@@ -342,8 +342,8 @@ A peer may also query the network for other peers by a nickname.
 </div>
 </div>
 
-<div id="outline-container-org5a96f51" class="outline-2">
-<h2 id="org5a96f51"><span class="section-number-2">5</span> Stopping a peer</h2>
+<div id="outline-container-org9ae4d34" class="outline-2">
+<h2 id="org9ae4d34"><span class="section-number-2">5</span> Stopping a peer</h2>
 <div class="outline-text-2" id="text-5">
 <p>
 To make a peer disappear use its <code>stop()</code> method or delete it.

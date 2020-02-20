@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-02-04 Tue 14:40 -->
+<!-- 2020-02-20 Thu 12:10 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>ZIO Tutorial: Ports</title>
@@ -239,12 +239,12 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org4ce9a20">1. Create a port</a></li>
-<li><a href="#org5cccf4a">2. Connecting, binding</a></li>
-<li><a href="#orga872060">3. Peer headers</a></li>
-<li><a href="#orgd1888d4">4. Going online</a></li>
-<li><a href="#org3957f68">5. Going offline</a></li>
-<li><a href="#orgaf83529">6. Ports and messages</a></li>
+<li><a href="#orgc2f7139">1. Create a port</a></li>
+<li><a href="#org922f0b0">2. Connecting, binding</a></li>
+<li><a href="#org16a3ec4">3. Peer headers</a></li>
+<li><a href="#orgd462687">4. Going online</a></li>
+<li><a href="#org8e7093b">5. Going offline</a></li>
+<li><a href="#orgd7d0397">6. Ports and messages</a></li>
 </ul>
 </div>
 </div>
@@ -271,8 +271,8 @@ names for connections.  No DNS or central naming service required!  A
 on the port's underlying socket type.
 </p>
 
-<div id="outline-container-org4ce9a20" class="outline-2">
-<h2 id="org4ce9a20"><span class="section-number-2">1</span> Create a port</h2>
+<div id="outline-container-orgc2f7139" class="outline-2">
+<h2 id="orgc2f7139"><span class="section-number-2">1</span> Create a port</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 Again, ports are usually created and used via <code>zio.Node</code> but with a bit
@@ -293,8 +293,8 @@ will later <code>bind()</code>.
 </div>
 </div>
 
-<div id="outline-container-org5cccf4a" class="outline-2">
-<h2 id="org5cccf4a"><span class="section-number-2">2</span> Connecting, binding</h2>
+<div id="outline-container-org922f0b0" class="outline-2">
+<h2 id="org922f0b0"><span class="section-number-2">2</span> Connecting, binding</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 Before a port can be used it needs a way to talk to other ports.  It
@@ -331,8 +331,8 @@ port.bind(<span style="font-style: italic;">"someserver.example.com"</span>, 123
 </div>
 </div>
 
-<div id="outline-container-orga872060" class="outline-2">
-<h2 id="orga872060"><span class="section-number-2">3</span> Peer headers</h2>
+<div id="outline-container-org16a3ec4" class="outline-2">
+<h2 id="org16a3ec4"><span class="section-number-2">3</span> Peer headers</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 A <code>zio.Port</code> can hold headers that may be used with a <code>zio.Peer</code>.  Some
@@ -354,8 +354,8 @@ convention adds <code>zio.port.&lt;portname&gt;.</code> as a prefix.
 </div>
 </div>
 
-<div id="outline-container-orgd1888d4" class="outline-2">
-<h2 id="orgd1888d4"><span class="section-number-2">4</span> Going online</h2>
+<div id="outline-container-orgd462687" class="outline-2">
+<h2 id="orgd462687"><span class="section-number-2">4</span> Going online</h2>
 <div class="outline-text-2" id="text-4">
 <p>
 Taking a port online requires certain stages.  When ports are used via
@@ -397,8 +397,8 @@ Again, this is much simpler when the application uses ports through a
 </div>
 </div>
 
-<div id="outline-container-org3957f68" class="outline-2">
-<h2 id="org3957f68"><span class="section-number-2">5</span> Going offline</h2>
+<div id="outline-container-org8e7093b" class="outline-2">
+<h2 id="org8e7093b"><span class="section-number-2">5</span> Going offline</h2>
 <div class="outline-text-2" id="text-5">
 <p>
 The binds and connects established by a port may be undone very
@@ -417,8 +417,8 @@ essentially back to just after construction.
 </div>
 </div>
 
-<div id="outline-container-orgaf83529" class="outline-2">
-<h2 id="orgaf83529"><span class="section-number-2">6</span> Ports and messages</h2>
+<div id="outline-container-orgd7d0397" class="outline-2">
+<h2 id="orgd7d0397"><span class="section-number-2">6</span> Ports and messages</h2>
 <div class="outline-text-2" id="text-6">
 <p>
 A <code>zio.Port</code> can send and receive ("recv") a <code>zio.Message</code>.  See <a href="pytut-message.html">message

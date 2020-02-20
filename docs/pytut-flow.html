@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-02-04 Tue 14:40 -->
+<!-- 2020-02-20 Thu 12:10 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>ZIO Tutorial: Flow</title>
@@ -239,12 +239,12 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgadc7e1a">1. Create a flow</a></li>
-<li><a href="#orge8fa918">2. Start a flow</a></li>
-<li><a href="#org1c89e25">3. Perform data flow</a></li>
-<li><a href="#org2976472">4. Counting messages</a></li>
-<li><a href="#org9c259d4">5. Blocking</a></li>
-<li><a href="#org6e44d90">6. End a flow</a></li>
+<li><a href="#orgb127b6c">1. Create a flow</a></li>
+<li><a href="#org2872f77">2. Start a flow</a></li>
+<li><a href="#org7097ccd">3. Perform data flow</a></li>
+<li><a href="#org15d4246">4. Counting messages</a></li>
+<li><a href="#org2527a32">5. Blocking</a></li>
+<li><a href="#orgde87aa7">6. End a flow</a></li>
 </ul>
 </div>
 </div>
@@ -264,8 +264,8 @@ ZIO provides <code>zio.flow.Flow</code> class to provide Python side implementat
 of the ZIO data flow protocol (see <a href="flow.html">flow writeup</a>).  
 </p>
 
-<div id="outline-container-orgadc7e1a" class="outline-2">
-<h2 id="orgadc7e1a"><span class="section-number-2">1</span> Create a flow</h2>
+<div id="outline-container-orgb127b6c" class="outline-2">
+<h2 id="orgb127b6c"><span class="section-number-2">1</span> Create a flow</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 The flow object requires an externally prepared port to be provided.
@@ -301,8 +301,8 @@ expert level use, it can also provide the SERVER role.</li>
 </div>
 </div>
 
-<div id="outline-container-orge8fa918" class="outline-2">
-<h2 id="orge8fa918"><span class="section-number-2">2</span> Start a flow</h2>
+<div id="outline-container-org2872f77" class="outline-2">
+<h2 id="org2872f77"><span class="section-number-2">2</span> Start a flow</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 The ZIO data flow protocol starts with both sides shaking hands to
@@ -338,8 +338,8 @@ not be concerned.
 </div>
 </div>
 
-<div id="outline-container-org1c89e25" class="outline-2">
-<h2 id="org1c89e25"><span class="section-number-2">3</span> Perform data flow</h2>
+<div id="outline-container-org7097ccd" class="outline-2">
+<h2 id="org7097ccd"><span class="section-number-2">3</span> Perform data flow</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 The actual "flowing" phase of the data flow protocol involves explicit
@@ -401,8 +401,8 @@ In this case there is an analogue to <code>flow.flush_pay()</code> called
 </div>
 </div>
 
-<div id="outline-container-org2976472" class="outline-2">
-<h2 id="org2976472"><span class="section-number-2">4</span> Counting messages</h2>
+<div id="outline-container-org15d4246" class="outline-2">
+<h2 id="org15d4246"><span class="section-number-2">4</span> Counting messages</h2>
 <div class="outline-text-2" id="text-4">
 <p>
 The Python (and C++) implementation of ZIO data flow requires that the
@@ -442,8 +442,8 @@ flow.send_eot()
 </div>
 </div>
 
-<div id="outline-container-org9c259d4" class="outline-2">
-<h2 id="org9c259d4"><span class="section-number-2">5</span> Blocking</h2>
+<div id="outline-container-org2527a32" class="outline-2">
+<h2 id="org2527a32"><span class="section-number-2">5</span> Blocking</h2>
 <div class="outline-text-2" id="text-5">
 <p>
 The ZIO data flow protocol is designed to maximize high throughput
@@ -469,8 +469,8 @@ control protocol is discussed next.
 </div>
 </div>
 
-<div id="outline-container-org6e44d90" class="outline-2">
-<h2 id="org6e44d90"><span class="section-number-2">6</span> End a flow</h2>
+<div id="outline-container-orgde87aa7" class="outline-2">
+<h2 id="orgde87aa7"><span class="section-number-2">6</span> End a flow</h2>
 <div class="outline-text-2" id="text-6">
 <p>
 The final stage of the ZIO data flow protocol is its

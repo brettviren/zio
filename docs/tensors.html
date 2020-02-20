@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-02-19 Wed 15:46 -->
+<!-- 2020-02-20 Thu 12:10 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>ZIO Tensors</title>
@@ -227,6 +227,28 @@ for the JavaScript code in this tag.
  }
 /*]]>*///-->
 </script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        displayAlign: "center",
+        displayIndent: "0em",
+
+        "HTML-CSS": { scale: 100,
+                        linebreaks: { automatic: "false" },
+                        webFont: "TeX"
+                       },
+        SVG: {scale: 100,
+              linebreaks: { automatic: "false" },
+              font: "TeX"},
+        NativeMML: {scale: 100},
+        TeX: { equationNumbers: {autoNumber: "AMS"},
+               MultLineWidth: "85%",
+               TagSide: "right",
+               TagIndent: ".8em"
+             }
+});
+</script>
+<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_HTML"></script>
 </head>
 <body>
 <div id="org-div-home-and-up">
@@ -235,6 +257,17 @@ for the JavaScript code in this tag.
  <a accesskey="H" href="index.html"> HOME </a>
 </div><div id="content">
 <h1 class="title">ZIO Tensors</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#orgb86fa5b">1. Motivation</a></li>
+<li><a href="#org52927e9">2. Zio <code>TENS</code> message form</a></li>
+<li><a href="#org44cf8a2">3. Usage</a></li>
+<li><a href="#org3a9cc1c">4. Possible extension</a></li>
+</ul>
+</div>
+</div>
 <div class="nav">
 <ul class="org-ul">
 <li><a href="index.html">Main Page</a></li>
@@ -246,63 +279,90 @@ for the JavaScript code in this tag.
 
 </div>
 
+<div id="outline-container-orgb86fa5b" class="outline-2">
+<h2 id="orgb86fa5b"><span class="section-number-2">1</span> Motivation</h2>
+<div class="outline-text-2" id="text-1">
 <p>
 In some cases, we want to easily send tensors out of WCT and to a "GPU
 service".  We want a fairly simple and general way to do this.
 </p>
 
 <p>
-A most general way is to produce HDF5 "core" (in-memory) files with
-arbitrary HDF5 data.
+One general way is to produce HDF5 "core" (in-memory) files with
+arbitrary HDF5 data.  This gives all the flexible schema of HDF5 but
+it also brings in a new dependency.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org52927e9" class="outline-2">
+<h2 id="org52927e9"><span class="section-number-2">2</span> Zio <code>TENS</code> message form</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+The ZIO <code>TENS</code> message format is a compromise to provide a subset of
+HDF5 schema with not external software dependency.  It requires a JSON
+encoded prefix header <code>label</code> attribute named after the form, <code>TENS</code>.
+This attribute is a JSON array of JSON objects.  Each object
+represents the metadata of one tensor and the tensor elements are
+found in the corresponding payload part.  That is, a message with
+\(\mathcal{N}\) tensors will have \(\mathcal{N}\) elements in the <code>TENS</code>
+array and \(\mathcal{N}\) payload parts.
 </p>
 
 <p>
-But, that requires adding yet more dependency and complication.
-Simpler is to devise a packing.  WCT has the <code>cnpy</code> C++ interface to
-Numpy files.  It provides <code>cnpy::NpyArray</code> class which can do the heavy
-lifting keep some compatibility with Numpy.
-</p>
-
-<p>
-It has a 
+The element of the <code>TENS</code> array is an object with the following attributes
 </p>
 
 <dl class="org-dl">
-<dt>shape</dt><dd>a 1D vector giving dimension, length is rank of tensor</dd>
-<dt>word size</dt><dd>number of bytes in an element</dd>
-<dt>fortran order</dt><dd>Boolean</dd>
-<dt>data array</dt><dd>1D byte (<code>char</code>) std::vector</dd>
+<dt>shape</dt><dd>a 1D JSON array of integers giving size of each dimension.</dd>
+<dt>word</dt><dd>a JSON integer number giving the bytes for the elements of the tensor.</dd>
 </dl>
 
 <p>
-Creating a <code>NpyArray</code> allocates the data array.  It's then up to user to
-fill that array.  To serialize to a <code>zio::Message</code> we do the simplest
-thing.
+The <b>shape</b> and <b>word size</b> is then used in serializing and deserializing
+the corresponding payload part.  This payload is assumed packed as per
+<a href="https://github.com/rogersce/cnpy">cnpy</a>.  
 </p>
-
-<ul class="org-ul">
-<li>use the <code>label</code> prefix header as a JSON object and the attribute
-<code>arrays</code> to hold meta data about array data.</li>
-
-<li><code>arrays</code> is a list with each element holding an object corresponding
-to each part of the multipart payoad.</li>
-
-<li>the object has attributes:
-<dl class="org-dl">
-<dt>shape</dt><dd>list of size of each dimension</dd>
-
-<dt>word</dt><dd>word size</dd>
-
-<dt>fortran</dt><dd>Boolean, assumed false if missing</dd>
-</dl></li>
-
-<li>the corresponding part in the payload is a byte array produced by <code>cnpy::NpyArray::data()</code>.</li>
-</ul>
 
 <p>
-Because this is so generic, ZIO could include support for this
-directly, even by including <code>cnpy</code>
+Note, <code>cnpy</code> also characterizes a Numpy array with a "fortran order"
+Boolean.  <code>TENS</code> assumes this is always <code>false</code>.
 </p>
+</div>
+</div>
+
+<div id="outline-container-org44cf8a2" class="outline-2">
+<h2 id="org44cf8a2"><span class="section-number-2">3</span> Usage</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+See <code>test/test_tens.cpp</code> in the ZIO source.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org3a9cc1c" class="outline-2">
+<h2 id="org3a9cc1c"><span class="section-number-2">4</span> Possible extension</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+The <code>TENS</code> object may be extended in the future to honor
+</p>
+
+<dl class="org-dl">
+<dt>pointer</dt><dd>an optional string holding hexadecimal representation of a pointer (see below).</dd>
+</dl>
+
+<p>
+As a special case, if the <b>pointer</b> attribute is provided in the <code>TENS</code>
+object, it will be interpreted as a memory address containing the data
+that would otherwise be provided in the payload part itself.  The
+payload part must still exist but shall be ignored by <code>TENS</code> form.  It
+may be zero size.  This <b>pointer</b> can be provided to avoid transfer of
+data an obviously only works for messages sent over <code>inproc://</code>
+transport and for pointers into memory that is constant over the
+lifetime of the usage by the message receiver.
+</p>
+</div>
+</div>
 </div>
 </body>
 </html>

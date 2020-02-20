@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-02-04 Tue 14:54 -->
+<!-- 2020-02-20 Thu 12:10 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>ZIO design discussion</title>
@@ -259,6 +259,8 @@ written to help solidify thoughts.
 <li>A protocol called <a href="flow.html">flow</a> provides simpler message transfer than using ports directly</li>
 <li>A <a href="flow-broker.html">flow broker</a> brings flow clients together with server-side flow handlers, such as those that may manage file resources.</li>
 <li>A <a href="task-broker.html">task broker</a> implements a reliable service oriented task queue based on ZeroMQ majordomo design.</li>
+
+<li>Utility support to pack <a href="tensor.html">tensors</a> into messages.</li>
 </ul>
 </div>
 </body>

@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-02-04 Tue 14:40 -->
+<!-- 2020-02-20 Thu 12:10 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Flow Broker</title>
@@ -272,8 +272,8 @@ the handling mechanism and this document describes one possible
 solution which is here called a <i>flow broker</i>.
 </p>
 
-<div id="outline-container-org9f80a0b" class="outline-2">
-<h2 id="architecture"><a id="org9f80a0b"></a><span class="section-number-2">1</span> Architecture</h2>
+<div id="outline-container-org24d6356" class="outline-2">
+<h2 id="architecture"><a id="org24d6356"></a><span class="section-number-2">1</span> Architecture</h2>
 <div class="outline-text-2" id="text-architecture">
 <p>
 The <i>flow broker</i> associates a remote client with a local client
@@ -343,8 +343,8 @@ are dropped.</li>
 </div>
 </div>
 
-<div id="outline-container-org93cdae9" class="outline-2">
-<h2 id="addressing"><a id="org93cdae9"></a><span class="section-number-2">2</span> Addressing</h2>
+<div id="outline-container-org79a1cd9" class="outline-2">
+<h2 id="addressing"><a id="org79a1cd9"></a><span class="section-number-2">2</span> Addressing</h2>
 <div class="outline-text-2" id="text-addressing">
 <p>
 The creation of the <b>broker</b> SERVER <b>port</b> is outside the scope of the FI
@@ -358,8 +358,8 @@ socket to bind and any clients to connect.
 </div>
 </div>
 
-<div id="outline-container-org500bdbf" class="outline-2">
-<h2 id="complexity"><a id="org500bdbf"></a><span class="section-number-2">3</span> Broker Complexity</h2>
+<div id="outline-container-orgc1ebad7" class="outline-2">
+<h2 id="complexity"><a id="orgc1ebad7"></a><span class="section-number-2">3</span> Broker Complexity</h2>
 <div class="outline-text-2" id="text-complexity">
 <p>
 The complexity of the broker appears somewhat high while one might say
@@ -369,8 +369,8 @@ section outlines what this means.
 </p>
 </div>
 
-<div id="outline-container-org8aa3d2e" class="outline-3">
-<h3 id="mirror"><a id="org8aa3d2e"></a><span class="section-number-3">3.1</span> Broker as mirror</h3>
+<div id="outline-container-org7ba52c1" class="outline-3">
+<h3 id="mirror"><a id="org7ba52c1"></a><span class="section-number-3">3.1</span> Broker as mirror</h3>
 <div class="outline-text-3" id="text-mirror">
 <p>
 The <b>broker</b> and its given <b>factor</b> provides a mirror that allows remote
@@ -384,8 +384,8 @@ identically.
 </div>
 </div>
 
-<div id="outline-container-orge9013f0" class="outline-3">
-<h3 id="simplicity"><a id="orge9013f0"></a><span class="section-number-3">3.2</span> Handler simplicity</h3>
+<div id="outline-container-org0be074b" class="outline-3">
+<h3 id="simplicity"><a id="org0be074b"></a><span class="section-number-3">3.2</span> Handler simplicity</h3>
 <div class="outline-text-3" id="text-simplicity">
 <p>
 Because a handler may be implemented in terms of a client it may use
@@ -396,8 +396,8 @@ new protocol would need to be invented to implement client handlers.
 </div>
 </div>
 
-<div id="outline-container-orgc0c9417" class="outline-3">
-<h3 id="central"><a id="orgc0c9417"></a><span class="section-number-3">3.3</span> Centralization</h3>
+<div id="outline-container-org9bc3c4c" class="outline-3">
+<h3 id="central"><a id="org9bc3c4c"></a><span class="section-number-3">3.3</span> Centralization</h3>
 <div class="outline-text-3" id="text-central">
 <p>
 Brokers are naturally centralizing.  This can be advantageous or
@@ -426,8 +426,8 @@ and this alone may pose a bottleneck on bandwidth grounds.
 </div>
 </div>
 
-<div id="outline-container-orge1f3945" class="outline-2">
-<h2 id="lockstep"><a id="orge1f3945"></a><span class="section-number-2">4</span> Handler Synchronicity</h2>
+<div id="outline-container-org4f627e5" class="outline-2">
+<h2 id="lockstep"><a id="org4f627e5"></a><span class="section-number-2">4</span> Handler Synchronicity</h2>
 <div class="outline-text-2" id="text-lockstep">
 <p>
 The <b>broker</b> manages its <b>port</b> in a single thread and while the operation

@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-02-04 Tue 14:40 -->
+<!-- 2020-02-20 Thu 12:10 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>ZIO Tutorial: Messages in Python</title>
@@ -239,10 +239,10 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orge6fbccc">1. Creating a message</a></li>
-<li><a href="#orgb2ee46a">2. Modifying a message</a></li>
-<li><a href="#org7e2adf7">3. Origin, granule, seqno, oh my!</a></li>
-<li><a href="#orge35f7a1">4. Serializing a message</a></li>
+<li><a href="#org2d6d977">1. Creating a message</a></li>
+<li><a href="#org21894a9">2. Modifying a message</a></li>
+<li><a href="#org05f1ef5">3. Origin, granule, seqno, oh my!</a></li>
+<li><a href="#org129c9c8">4. Serializing a message</a></li>
 </ul>
 </div>
 </div>
@@ -263,8 +263,8 @@ Details can be found in the <a href="messages.html">messages</a> write-up.  Here
 work with messages.
 </p>
 
-<div id="outline-container-orge6fbccc" class="outline-2">
-<h2 id="orge6fbccc"><span class="section-number-2">1</span> Creating a message</h2>
+<div id="outline-container-org2d6d977" class="outline-2">
+<h2 id="org2d6d977"><span class="section-number-2">1</span> Creating a message</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 A <code>zio.Message</code> can be created in a flexible way depending on the form
@@ -303,8 +303,8 @@ Note the 6 in <code>ZIO6</code> becomes a 4.
 </div>
 </div>
 
-<div id="outline-container-orgb2ee46a" class="outline-2">
-<h2 id="orgb2ee46a"><span class="section-number-2">2</span> Modifying a message</h2>
+<div id="outline-container-org21894a9" class="outline-2">
+<h2 id="org21894a9"><span class="section-number-2">2</span> Modifying a message</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 Given a message object, it can be modified.  This may be particularly
@@ -338,8 +338,8 @@ endpoints.
 </div>
 </div>
 
-<div id="outline-container-org7e2adf7" class="outline-2">
-<h2 id="org7e2adf7"><span class="section-number-2">3</span> Origin, granule, seqno, oh my!</h2>
+<div id="outline-container-org05f1ef5" class="outline-2">
+<h2 id="org05f1ef5"><span class="section-number-2">3</span> Origin, granule, seqno, oh my!</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 In addition to the <code>ZIO</code> prefix, the "level" and an optional "label",
@@ -363,8 +363,8 @@ time.sleep(1)
 </div>
 </div>
 
-<div id="outline-container-orge35f7a1" class="outline-2">
-<h2 id="orge35f7a1"><span class="section-number-2">4</span> Serializing a message</h2>
+<div id="outline-container-org129c9c8" class="outline-2">
+<h2 id="org129c9c8"><span class="section-number-2">4</span> Serializing a message</h2>
 <div class="outline-text-2" id="text-4">
 <p>
 A ZIO message is meant to be useful with established ZeroMQ sockets
