@@ -34,6 +34,10 @@ the corresponding payload part.  This payload is assumed packed as per
 Note, ~cnpy~ also characterizes a Numpy array with a "fortran order"
 Boolean.  ~TENS~ assumes this is always ~false~.
 
+* Usage
+
+See ~test/test_tens.cpp~ in the ZIO source.
+
 * Possible extension
 
 The ~TENS~ object may be extended in the future to honor
