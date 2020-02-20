@@ -7,30 +7,46 @@
 
 #include "zio/message.hpp"
 
-// interned copy of https://github.com/rogersce/cnpy
-#include "zio/cnpy.hpp"
-
 namespace zio {
 
     namespace tens {
 
+        // The message format.
         const char* form = "TENS";
 
-        /*! Return a JSON object holding metadata for a tensor
-         */
-        zio::json metaobj(const cnpy::NpyArray& tensor);
+        /*! Generic version of append.  
+         *
+         * Use templated version for easier interface. */
+        void append(Message& msg, std::byte* data, const std::vector<size_t>& shape,
+                    size_t word_size, const std::type_info& t);
 
-        /*! Initialize a zio::Message to be used as TENS form.
+        /*! Append one array data of given shape to message.
+         *
+         * - shape :: number of elements in each dimension.
+         * 
+         * Note: the ordering of each dimension (ie, row-major vs
+         * column-major for 2D arrays) is not saved to the message.
          */
-        void init(Message& msg);
+        template<typename ElementType>
+        void append(Message& msg, const ElementType* data, const std::vector<size_t>& shape) {
+            append(msg, (std::byte*)data, shape, sizeof(ElementType), typeid(ElementType));
+        }
+                    
+        /*! Generic version of at().  
+         *
+         * Use templated version for easier interface. */
+        const std::byte* at(const Message& msg, size_t index, const std::type_info& t);
 
-        /*! Append copy of numpy array data and metadata to TENS message.
+        /*! Return the tensor data at payload index in FORM message.
+         *
+         * This returns a pointer into the message data.
+         *
+         * Index over/underflow or type mismatch returns NULL.
          */
-        void append(Message& msg, const cnpy::NpyArray& tensor);
-
-        /*! Return the tensor at payload index in FORM message
-         */
-        cnpy::NpyArray at(const Message& msg, size_t index);
+        template<typename ElementType>
+        const ElementType* at(const Message& msg, size_t index) {
+            return (const ElementType*) at(msg, index, typeid(ElementType));
+        }
 
     }
 }

@@ -1,41 +1,86 @@
 #include "zio/tens.hpp"
+#include <complex>
+#include <typeinfo>
 
-zio::json zio::tens::metaobj(const cnpy::NpyArray& tensor)
+// #include <iostream>
+
+static
+const char* dtype(const std::type_info& t)
 {
-    return zio::json({{"shape", tensor.shape}, {"word", tensor.word_size}});
+    // std::cerr << t.name() << " " << typeid(float).name() << std::endl;
+
+    if(t == typeid(float) ) return "f";
+    if(t == typeid(double) ) return "f";
+    if(t == typeid(long double) ) return "f";
+
+    if(t == typeid(int) ) return "i";
+    if(t == typeid(char) ) return "i";
+    if(t == typeid(short) ) return "i";
+    if(t == typeid(long) ) return "i";
+    if(t == typeid(long long) ) return "i";
+
+    if(t == typeid(unsigned char) ) return "u";
+    if(t == typeid(unsigned short) ) return "u";
+    if(t == typeid(unsigned long) ) return "u";
+    if(t == typeid(unsigned long long) ) return "u";
+    if(t == typeid(unsigned int) ) return "u";
+
+    if(t == typeid(bool) ) return "b";
+
+    if(t == typeid(std::complex<float>) ) return "c";
+    if(t == typeid(std::complex<double>) ) return "c";
+    if(t == typeid(std::complex<long double>) ) return "c";
+
+    else return "?";
 }
 
-void zio::tens::init(zio::Message& msg)
+
+void zio::tens::append(zio::Message& msg, std::byte* data, const std::vector<size_t>& shape,
+                       size_t word_size, const std::type_info& ti)
 {
     msg.set_form(zio::tens::form);
-    msg.set_label_object({{zio::tens::form, json::value_t::array}});
-}
+    zio::json lobj = zio::json::value_t::object;
+    std::string label = msg.label();
+    if (! label.empty()) {
+        lobj = zio::json::parse(label);
+    }
+    zio::json md = {{"shape", shape},
+                    {"word", word_size},
+                    {"dtype", dtype(ti)}};
+    lobj[zio::tens::form].push_back(md);
 
-void zio::tens::append(zio::Message& msg, const zio::cnpy::NpyArray& tensor)
-{
-    auto lobj = msg.label_object();
-    auto& ta = lobj[zio::tens::form];
-    ta.push_back(metaobj(tensor));
+    size_t nbytes = word_size;
+    for (size_t one : shape) {
+        nbytes *= one;
+    }
+
     msg.set_label_object(lobj);
-    msg.add(zio::message_t(tensor.data<std::byte>(), tensor.num_bytes()));
+    msg.add(zio::message_t(data, nbytes));
 }
 
-zio::cnpy::NpyArray zio::tens::at(const zio::Message& msg, size_t index)
+const std::byte* zio::tens::at(const Message& msg, size_t index, const std::type_info& ti)
 {
     if (msg.form() != zio::tens::form) {
-        return zio::cnpy::NpyArray();
+        return nullptr;
     }
     auto lobj = msg.label_object();
     auto ta = lobj[zio::tens::form];
     auto md = ta[index];
 
-    std::vector<size_t> shape = md["shape"].get< std::vector<size_t> >();
-    size_t word = md["word"].get<size_t>();
+    if (md.is_null()) {
+        return nullptr;
+    }
+    if (md["dtype"] != dtype(ti)) {
+        return nullptr;
+    }
+    size_t nbytes = md["word"].get<size_t>();
+    for (auto one : md["shape"]) {
+        nbytes *= one.get<size_t>();
+    }
     
-    zio::cnpy::NpyArray ret(shape, word);
     const auto& spmsg = msg.payload()[index];
-    assert(spmsg.size() == ret.num_bytes());
-    memcpy(ret.data<char>(), spmsg.data(), ret.num_bytes());
-    return ret;
+    if (spmsg.size() != nbytes) {
+        return nullptr;
+    }
+    return (std::byte*) spmsg.data();
 }
-

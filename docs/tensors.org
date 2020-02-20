@@ -26,13 +26,7 @@ The element of the ~TENS~ array is an object with the following attributes
 
 - shape :: a 1D JSON array of integers giving size of each dimension.
 - word :: a JSON integer number giving the bytes for the elements of the tensor.
-
-The *shape* and *word size* is then used in serializing and deserializing
-the corresponding payload part.  This payload is assumed packed as per
-[[https://github.com/rogersce/cnpy][cnpy]].  
-
-Note, ~cnpy~ also characterizes a Numpy array with a "fortran order"
-Boolean.  ~TENS~ assumes this is always ~false~.
+- dtype :: a Numpy like letter to indicate the data type (f, i, u, etc)
 
 * Usage
 
@@ -52,5 +46,4 @@ may be zero size.  This *pointer* can be provided to avoid transfer of
 data an obviously only works for messages sent over ~inproc://~
 transport and for pointers into memory that is constant over the
 lifetime of the usage by the message receiver.
-
 

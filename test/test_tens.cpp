@@ -5,31 +5,30 @@
 int main()
 {
 
-    zio::cnpy::NpyArray tensor({2,3,4}, sizeof(float));
-    std::cout << zio::tens::metaobj(tensor) << std::endl;
+    float tensor[2][3][4] = {0};
+    const float* tensor1 = (float*) tensor;
 
-    zio::Message msg;
-    zio::tens::init(msg);
-    zio::tens::append(msg, tensor);
-    std::cout << msg.prefix().dumps() << std::endl;
+    std::vector<size_t> shape={2,3,4};
+
+    zio::Message msg(zio::tens::form);
+    zio::tens::append(msg, tensor1, shape);
+
+    assert(msg.form() == zio::tens::form);
+    auto lobj = msg.label_object();
+    std::cout << lobj << std::endl;
+    auto md = lobj[zio::tens::form][0];
     
-    zio::cnpy::NpyArray tensor2 = zio::tens::at(msg, 0);
-
-    assert(tensor.word_size == tensor2.word_size);
-    assert(tensor.num_vals == tensor2.num_vals);
-    assert(tensor.shape.size() == tensor2.shape.size());
-    const size_t ndims = tensor.shape.size();
-    for (size_t ind=0; ind < ndims; ++ind) {
-        assert(tensor.shape[ind] == tensor2.shape[ind]);
+    for (int ind=0; ind < 3; ++ind) {
+        assert(shape[ind] == md["shape"][ind].get<size_t>());
     }
 
-    assert(tensor.num_bytes() == tensor2.num_bytes());
-    const size_t nbytes = tensor.num_bytes();
-    const char* t1 = tensor.data<char>();
-    const char* t2 = tensor2.data<char>();
-    for (size_t ind=0; ind<nbytes; ++ind) {
-        assert(t1[ind] == t2[ind]);
+    const float* tensor2 = zio::tens::at<float>(msg, 0);
+    assert(tensor2);
+    for (size_t ind=0; ind<24; ++ind) {
+        std::cout<<ind<<" " << tensor1[ind] << " " <<  tensor2[ind] << std::endl;
+        assert(tensor1[ind] == tensor2[ind]);
     }
+
 
     return 0;
 }

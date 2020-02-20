@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-02-20 Thu 12:10 -->
+<!-- 2020-02-20 Thu 18:31 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>ZIO Tensors</title>
@@ -261,10 +261,10 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgb86fa5b">1. Motivation</a></li>
-<li><a href="#org52927e9">2. Zio <code>TENS</code> message form</a></li>
-<li><a href="#org44cf8a2">3. Usage</a></li>
-<li><a href="#org3a9cc1c">4. Possible extension</a></li>
+<li><a href="#orgcbd778f">1. Motivation</a></li>
+<li><a href="#orge8d1623">2. Zio <code>TENS</code> message form</a></li>
+<li><a href="#orgebd03db">3. Usage</a></li>
+<li><a href="#orgf0c5095">4. Possible extension</a></li>
 </ul>
 </div>
 </div>
@@ -279,8 +279,8 @@ for the JavaScript code in this tag.
 
 </div>
 
-<div id="outline-container-orgb86fa5b" class="outline-2">
-<h2 id="orgb86fa5b"><span class="section-number-2">1</span> Motivation</h2>
+<div id="outline-container-orgcbd778f" class="outline-2">
+<h2 id="orgcbd778f"><span class="section-number-2">1</span> Motivation</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 In some cases, we want to easily send tensors out of WCT and to a "GPU
@@ -295,8 +295,8 @@ it also brings in a new dependency.
 </div>
 </div>
 
-<div id="outline-container-org52927e9" class="outline-2">
-<h2 id="org52927e9"><span class="section-number-2">2</span> Zio <code>TENS</code> message form</h2>
+<div id="outline-container-orge8d1623" class="outline-2">
+<h2 id="orge8d1623"><span class="section-number-2">2</span> Zio <code>TENS</code> message form</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 The ZIO <code>TENS</code> message format is a compromise to provide a subset of
@@ -316,23 +316,13 @@ The element of the <code>TENS</code> array is an object with the following attri
 <dl class="org-dl">
 <dt>shape</dt><dd>a 1D JSON array of integers giving size of each dimension.</dd>
 <dt>word</dt><dd>a JSON integer number giving the bytes for the elements of the tensor.</dd>
+<dt>dtype</dt><dd>a Numpy like letter to indicate the data type (f, i, u, etc)</dd>
 </dl>
-
-<p>
-The <b>shape</b> and <b>word size</b> is then used in serializing and deserializing
-the corresponding payload part.  This payload is assumed packed as per
-<a href="https://github.com/rogersce/cnpy">cnpy</a>.  
-</p>
-
-<p>
-Note, <code>cnpy</code> also characterizes a Numpy array with a "fortran order"
-Boolean.  <code>TENS</code> assumes this is always <code>false</code>.
-</p>
 </div>
 </div>
 
-<div id="outline-container-org44cf8a2" class="outline-2">
-<h2 id="org44cf8a2"><span class="section-number-2">3</span> Usage</h2>
+<div id="outline-container-orgebd03db" class="outline-2">
+<h2 id="orgebd03db"><span class="section-number-2">3</span> Usage</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 See <code>test/test_tens.cpp</code> in the ZIO source.
@@ -340,8 +330,8 @@ See <code>test/test_tens.cpp</code> in the ZIO source.
 </div>
 </div>
 
-<div id="outline-container-org3a9cc1c" class="outline-2">
-<h2 id="org3a9cc1c"><span class="section-number-2">4</span> Possible extension</h2>
+<div id="outline-container-orgf0c5095" class="outline-2">
+<h2 id="orgf0c5095"><span class="section-number-2">4</span> Possible extension</h2>
 <div class="outline-text-2" id="text-4">
 <p>
 The <code>TENS</code> object may be extended in the future to honor
