@@ -35,6 +35,9 @@ int main()
         assert(tensor1[ind] == tensor2[ind]);
     }
 
+    const zio::message_t& spmp = zio::tens::at(msg, 0);
+    assert(spmp.size());
+    assert(!spmp.empty());
 
     return 0;
 }

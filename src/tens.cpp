@@ -5,8 +5,8 @@
 // #include <iostream>
 
 // stolen from cnpy
-static
-const char* dtype(const std::type_info& t)
+
+const char* zio::tens::type_name(const std::type_info& t)
 {
     // std::cerr << t.name() << " " << typeid(float).name() << std::endl;
 
@@ -36,8 +36,9 @@ const char* dtype(const std::type_info& t)
 }
 
 
-void zio::tens::append(zio::Message& msg, std::byte* data, const std::vector<size_t>& shape,
-                       size_t word_size, const std::type_info& ti)
+void zio::tens::append(zio::Message& msg, zio::message_t&& data,
+                       const std::vector<size_t>& shape,
+                       size_t word_size, const char* tn)
 {
     msg.set_form(zio::tens::form);
     zio::json lobj = zio::json::value_t::object;
@@ -48,49 +49,32 @@ void zio::tens::append(zio::Message& msg, std::byte* data, const std::vector<siz
     zio::json md = {
         {"shape", shape},
         {"word", word_size},
-        {"dtype", dtype(ti)},
+        {"dtype", tn},
         {"part", msg.payload().size()}
         // no order as this is C++
     };
     lobj[zio::tens::form].push_back(md);
-
-    size_t nbytes = word_size;
-    for (size_t one : shape) {
-        nbytes *= one;
-    }
-
     msg.set_label_object(lobj);
-    msg.add(zio::message_t(data, nbytes));
+    msg.add(std::move(data));
 }
 
-const std::byte* zio::tens::at(const Message& msg, size_t index, const std::type_info& ti)
+const zio::message_t& zio::tens::at(const Message& msg, size_t index)
 {
-    if (msg.form() != zio::tens::form) {
-        return nullptr;
-    }
+    static const zio::message_t bogus;
+
     auto lobj = msg.label_object();
     auto ta = lobj[zio::tens::form];
     auto md = ta[index];
 
     if (md.is_null()) {
-        return nullptr;
+        return bogus;
     }
-    if (md["dtype"] != dtype(ti)) {
-        return nullptr;
+    size_t part = index;
+    if (md["part"].is_number()) {
+        part = md["part"].get<size_t>();
     }
-    size_t nbytes = md["word"].get<size_t>();
-    for (auto one : md["shape"]) {
-        nbytes *= one.get<size_t>();
-    }
-    
-    size_t part = md["part"].get<size_t>();
     if (part < 0 or part >= msg.payload().size()) {
-        return nullptr;
+        return bogus;
     }
-
-    const auto& spmsg = msg.payload()[part];
-    if (spmsg.size() != nbytes) {
-        return nullptr;
-    }
-    return (std::byte*) spmsg.data();
+    return msg.payload()[part];
 }

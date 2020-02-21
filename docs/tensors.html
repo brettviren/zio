@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-02-21 Fri 12:31 -->
+<!-- 2020-02-21 Fri 16:42 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>ZIO Tensors</title>
@@ -261,12 +261,11 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org6e0ea52">1. Terms</a></li>
-<li><a href="#org56f6e0c">2. Motivation and requirements</a></li>
-<li><a href="#orgabf1782">3. Zio <code>TENS</code> message form</a></li>
-<li><a href="#org3e51499">4. Shape and order</a></li>
-<li><a href="#org049875d">5. Extension</a></li>
-<li><a href="#orgdd806cd">6. C++ API</a></li>
+<li><a href="#orga144f51">1. Motivation and requirements</a></li>
+<li><a href="#orgff810d8">2. Zio <code>TENS</code> message form</a></li>
+<li><a href="#orgcc60e48">3. Application extension</a></li>
+<li><a href="#org53597cf">4. C++ API</a></li>
+<li><a href="#orgf3734bd">5. Use with Boost Multi Array</a></li>
 </ul>
 </div>
 </div>
@@ -281,60 +280,35 @@ for the JavaScript code in this tag.
 
 </div>
 
-<div id="outline-container-org6e0ea52" class="outline-2">
-<h2 id="org6e0ea52"><span class="section-number-2">1</span> Terms</h2>
+<div id="outline-container-orga144f51" class="outline-2">
+<h2 id="orga144f51"><span class="section-number-2">1</span> Motivation and requirements</h2>
 <div class="outline-text-2" id="text-1">
-<p>
-In this document, some terms are use precisely:
-</p>
-
-<dl class="org-dl">
-<dt>array</dt><dd>elements stored contiguous in memory and following some
-order (unless otherwise qualified, eg JSON array is an
-abstract type and does not refer to memory layout).</dd>
-
-<dt>vector</dt><dd>a conceptual one dimensional, ordered set of elements.
-(eg, ignoring memory layout, C++'s <code>std::vector</code>, Python's
-<code>list</code>)</dd>
-
-<dt>tensor</dt><dd>multi-dimensional extension of a vector, set of elements
-with each dimension ordered and overall bounded in a
-rectangular manner.  Tensors are abstract but shall be
-represented in memory in some manner as an array.</dd>
-
-<dt>rank</dt><dd>the number of dimensions a tensor spans (note, not quite the
-mathematical definition).</dd>
-
-<dt>shape</dt><dd>an ordered tuple of length of the rank which gives the size
-of each dimension.</dd>
-</dl>
-</div>
-</div>
-
-<div id="outline-container-org56f6e0c" class="outline-2">
-<h2 id="org56f6e0c"><span class="section-number-2">2</span> Motivation and requirements</h2>
-<div class="outline-text-2" id="text-2">
 <p>
 In some cases, we want to easily send tensors between components.  We
 want to do this in simply and generally so that disparate endpoints
 can communicate without knowing details of each other but so that
-tensors may be faithfully transmitted.
+tensors may be faithfully transmitted.  The requirements, needs and
+allowances are:
 </p>
 
-<p>
-We need not provide means to perform "tensor operations" beyond those
-required for faithful transmission.  We would also like to minimize
-memory copy both internally and at the interface with application
-code.  We may also want to exploit compression and/or sparse
-representation.  We also recognize that small payloads lead to
-inefficient transfers and that some applications require a close
-association between tensors and so would like a way to "batch"
-together multiple tensors into one message.  Splitting very large
-tensors across messages should not be disallowed but as this is
-open-ended, not requirements are raised for this feature.  Finally,
-applications tend to need to associate metadata with tensors and it
-should be possible to transfer these associations.
-</p>
+<ul class="org-ul">
+<li>no tensor operations provided</li>
+
+<li>faithfully transmit tensor</li>
+
+<li>minimize memory copy both internally and at the interface with
+application code.</li>
+
+<li>allow for possible compression and/or sparse representation</li>
+
+<li>support multiple tensors per message</li>
+
+<li>allow spreading single tensor across message</li>
+
+<li>allow association of application metadata</li>
+
+<li>allow other message forms to coexist with tensor message forms.</li>
+</ul>
 
 <p>
 Thus, at a minimum the message representation shall include:
@@ -350,12 +324,12 @@ Thus, at a minimum the message representation shall include:
 </div>
 </div>
 
-<div id="outline-container-orgabf1782" class="outline-2">
-<h2 id="orgabf1782"><span class="section-number-2">3</span> Zio <code>TENS</code> message form</h2>
-<div class="outline-text-2" id="text-3">
+<div id="outline-container-orgff810d8" class="outline-2">
+<h2 id="orgff810d8"><span class="section-number-2">2</span> Zio <code>TENS</code> message form</h2>
+<div class="outline-text-2" id="text-2">
 <p>
-The ZIO <code>TENS</code> message format attempts to provide the above
-requirements.  A <code>TENS</code> message <b>may</b> have a form value of <code>TENS</code> however,
+The ZIO <code>TENS</code> message format attempts to provide the above requirements.
+A <code>TENS</code> message <b>may</b> have a form value of <code>TENS</code> however,
 an application may choose to include <code>TENS</code> form in other messages as
 long as the rest of the specification is followed.  A compatible form
 is <code>FLOW</code>.
@@ -371,34 +345,64 @@ payload to hold packed arrays of elements, one for each given tensor.
 <p>
 The <b>label</b> object shall have a top-level attribute key <code>TENS</code> which holds
 all information required to reconstitute the tensors stored in the
-message.  The value of the <code>TENS</code> item shall be an ordered JSON array
-and each element shall hold information about one tensor.  The
-application may extend an element but must not utilized the reserved
-attributes described next.  The <code>TENS</code> format may extend the list of reserved
-attributes in the future.
+message except the element data itself.  
+</p>
+
+<p>
+The value of the <code>TENS</code> object item shall be an ordered JSON array and
+each element shall be a JSON object that provides information
+describing one tensor.  The application may extend this object but
+must not utilize the reserved attributes described next.  The <code>TENS</code>
+format may extend the list of reserved attributes in the future.
 </p>
 
 <p>
 Each tensor is described with an object with the following reserved
-attributes:
+attributes.  In part, they adopt the conceptual model of Boost multi
+array.  Optional attributes with defaults may be omitted.
+</p>
+
+<p>
+Required:
 </p>
 
 <dl class="org-dl">
-<dt>version</dt><dd>integer, an optional attribute giving the schema version
-of the object.  If missing, it is assumed schema version
-is 0.</dd>
-<dt>part</dt><dd>integer, the message payload part index containing the
-packed tensor element array associated with this metadata
-object.</dd>
-<dt>shape</dt><dd>vector of integers, gives the <b>shape</b> of the tensor.</dd>
-<dt>order</dt><dd>vector of integers, gives the memory layout order of the tensor.</dd>
+<dt>shape</dt><dd>vector of integers of size \(\mathcal{N}_{dim}\), gives the
+size of each dimension.</dd>
 <dt>word</dt><dd>integer, gives the number of bytes used by each element of the tensor.</dd>
+
 <dt>dtype</dt><dd>string, indicate the data type of the elements (for
 numbers, matches the Numpy character: f, i, u, etc).</dd>
+</dl>
+
+
+<p>
+Optional:
+</p>
+
+<dl class="org-dl">
+<dt>part</dt><dd>integer, the message payload part index containing the
+packed tensor element array associated with this metadata
+object.  Defaults to using same payload index as <code>TENS</code>
+array index.</dd>
+
+<dt>order</dt><dd>vector of integers of size \(\mathcal{N}_{dim}\), gives the
+storage order.  Defaults to C ordering.</dd>
+
+<dt>ascend</dt><dd>vector of Boolean of size \(\mathcal{N}_{dim}\), gives true
+if dimension is ascending.  Defaults to all true.</dd>
+</dl>
+
+<p>
+Reserved for possible future use:
+</p>
+
+<dl class="org-dl">
 <dt>packing</dt><dd>string, an optional description of how the tensor
 elements are packed.  If omitted, the default is "dense".
 Future extensions may use this to indicate a sparse
 and/or compressed packing.</dd>
+
 <dt>pointer</dt><dd>integer, optional, indicates a memory location holding
 the tensor array instead of it being delivered in the
 payload.</dd>
@@ -406,69 +410,16 @@ payload.</dd>
 </div>
 </div>
 
-<div id="outline-container-org3e51499" class="outline-2">
-<h2 id="org3e51499"><span class="section-number-2">4</span> Shape and order</h2>
-<div class="outline-text-2" id="text-4">
+<div id="outline-container-orgcc60e48" class="outline-2">
+<h2 id="orgcc60e48"><span class="section-number-2">3</span> Application extension</h2>
+<div class="outline-text-2" id="text-3">
 <p>
-The <b>shape</b> and <b>order</b> are vectors both have length equal to the number
-of dimensions of the tensor and with each element describing a
-dimension.  The <b>shape</b> vector gives the number elements spanned in each
-dimension while the <b>order</b> vector gives the degree of
-memory-contagiousness of the elements along the dimension.  This
-latter deserves additional explanation.
-</p>
-
-<p>
-In the special case of 2-D tensors, there are two common choices for
-their packing into an array in memory: <b>row-major</b> and <b>column-major</b>.  A
-<b>row-major</b> layout places all elements in one row contiguously in
-memory.  That is, for a fixed row index, entries at subsequent column
-indices are next to each other in memory.  Just the opposite is the
-case for <b>column-major</b> packing.
-</p>
-
-<p>
-In C/C++ we may have the code <code>float t[4][5]; float* tp = t;</code>.  As we
-iterate the tensor array in memory using <code>tp</code>, we will first span the 5
-contiguous elements (columns) of the first (<code>t[0]</code>) row.  Once
-exhausting the size of that dimension, we jump to the next row (<code>t[1]</code>).
-This is because C/C++ (and Python) follow <b>row-major</b> packing.  FORTRAN,
-and other obscure languages, choose <b>column-major</b>.
-</p>
-
-<p>
-For 2-D row-major case the <b>order</b> vector is <code>[1,0]</code>.  That is, when
-iterating the tensor array in memory, we are mostly ("majorly")
-scanning over the last dimension (order value <code>0</code>) and more rarely
-("minorly") scanning over the first dimension (order value <code>1</code>).
-</p>
-
-<p>
-Beyond 2-D, the number of possible choices for the <b>order</b> vector grows
-quickly and there are no names for each possible choice.  The C
-standard does not fully address how \(\mathcal{N}\) dimensional tensors
-are stored into an array in memory but does decompose an \(i \times j
-\times ... \times k\) tensor by making the \(i^{th}\) dimension a pointer
-to the reduced \(\mathcal{N}-1\) dimension tensor representation.  Thus
-implying the <b>order</b> vector for C is <code>[N-1,...,1,0]</code>.
-</p>
-
-<p>
-The <code>TENS</code> message form does not restrict a particular <b>order</b> vector but
-instead allows the application to specify it.  If no <b>order</b> is given
-then the C order shall be implied.
-</p>
-</div>
-</div>
-
-<div id="outline-container-org049875d" class="outline-2">
-<h2 id="org049875d"><span class="section-number-2">5</span> Extension</h2>
-<div class="outline-text-2" id="text-5">
-<p>
-Application may extend a <code>TENS</code> message in a number of ways:
+Application may extend a <code>TENS</code> message form in a number of ways:
 </p>
 
 <ul class="org-ul">
+<li>The four byte message form may be other than <code>TENS</code>.</li>
+
 <li>the label object may have additional attributes besides <code>TENS</code>.</li>
 
 <li>the object in the <code>TENS</code> JSON array may be individually extended if
@@ -481,41 +432,52 @@ attribute may be used for purposes other than <code>TENS</code>.</li>
 </div>
 </div>
 
-<div id="outline-container-orgdd806cd" class="outline-2">
-<h2 id="orgdd806cd"><span class="section-number-2">6</span> C++ API</h2>
-<div class="outline-text-2" id="text-6">
+<div id="outline-container-org53597cf" class="outline-2">
+<h2 id="org53597cf"><span class="section-number-2">4</span> C++ API</h2>
+<div class="outline-text-2" id="text-4">
 <p>
 The specification above defines a <code>TENS</code> message.  The <code>zio/tens.hpp</code> C++
 API provides some support for handling <code>TENS</code> messages.  See
 <code>test/test_tens.cpp</code> in the ZIO source for an example of this API being
-exercised.    The API has some caveats:
+exercised.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgf3734bd" class="outline-2">
+<h2 id="orgf3734bd"><span class="section-number-2">5</span> Use with Boost Multi Array</h2>
+<div class="outline-text-2" id="text-5">
+<p>
+As said above, the <code>TENS</code> message form is sympathetic with Boost Multi
+Array (<a href="https://www.boost.org/doc/libs/1_72_0/libs/multi_array/doc/user.html">manual</a> and <a href="https://www.boost.org/doc/libs/1_72_0/libs/multi_array/doc/reference.html">reference</a>).  ZIO does not provide tests against
+Boost in order to minimize dependency but an application may try
+something like the following to cast a <code>TENS</code> part into a Boost MA:
 </p>
 
-<ul class="org-ul">
-<li>As this is C++, it assumes the <b>order</b> is that of C, as described
-above.  As this is the default the specification, it is omitted.  If
-non-C order is needed, the application must handle setting this in
-the <code>TENS</code> object.</li>
+<div class="org-src-container">
+<pre class="src src-c++"><span style="font-weight: bold; text-decoration: underline;">zio</span>::<span style="font-weight: bold; text-decoration: underline;">Message</span> <span style="font-weight: bold; font-style: italic;">msg</span>;
+<span style="font-weight: bold;">const</span> <span style="font-weight: bold; text-decoration: underline;">zio</span>::<span style="font-weight: bold; text-decoration: underline;">message_t</span>&amp; <span style="font-weight: bold; font-style: italic;">data</span> = <span style="font-weight: bold; text-decoration: underline;">zio</span>::<span style="font-weight: bold; text-decoration: underline;">tens</span>::at(msg, 0);
+<span style="font-weight: bold;">auto</span> <span style="font-weight: bold; font-style: italic;">tens</span> = msg.label_object()[<span style="font-style: italic;">"TENS"</span>][0];
+<span style="font-weight: bold;">auto</span> <span style="font-weight: bold; font-style: italic;">shape</span> = tens[<span style="font-style: italic;">"shape"</span>];
+assert(shape.size() == 3);
+<span style="font-weight: bold;">const</span> <span style="font-weight: bold; text-decoration: underline;">float</span>* <span style="font-weight: bold; font-style: italic;">fdata</span> = (<span style="font-weight: bold;">const</span> <span style="font-weight: bold; text-decoration: underline;">float</span>*)data.data();
+<span style="font-weight: bold;">const</span> <span style="font-weight: bold; text-decoration: underline;">size_t</span> <span style="font-weight: bold; font-style: italic;">n1</span>=shape[0].get&lt;<span style="font-weight: bold; text-decoration: underline;">size_t</span>&gt;();
+<span style="font-weight: bold;">const</span> <span style="font-weight: bold; text-decoration: underline;">size_t</span> <span style="font-weight: bold; font-style: italic;">n2</span>=shape[1].get&lt;<span style="font-weight: bold; text-decoration: underline;">size_t</span>&gt;();
+<span style="font-weight: bold;">const</span> <span style="font-weight: bold; text-decoration: underline;">size_t</span> <span style="font-weight: bold; font-style: italic;">n3</span>=shape[2].get&lt;<span style="font-weight: bold; text-decoration: underline;">size_t</span>&gt;();
+<span style="font-weight: bold; text-decoration: underline;">boost</span>::<span style="font-weight: bold; text-decoration: underline;">const_multi_array</span>&lt;<span style="font-weight: bold; text-decoration: underline;">float</span>, 3&gt; <span style="font-weight: bold;">tensor</span>(fdata, <span style="font-weight: bold; text-decoration: underline;">boost</span>::<span style="font-weight: bold; text-decoration: underline;">extents</span>[n1][n2][n3]);
+</pre>
+</div>
 
-<li>The tensor array is provided by the sending application and given to
-the receiving application unmolested.  It is up to the application
-to assure it is packed as stated.  However, tens performs a
-consistency check on the total size of the array matches word size
-and shape.</li>
+<p>
+And, likewise one can fill a message part with something like:
+</p>
 
-<li>Only an <code>append()</code> method is provided for adding a tensor to a
-message.  The <code>part</code> attribute will be correct set based on the number
-of parts prior to the append.</li>
-
-<li>The <code>packing</code> ("dense") and <code>pointer</code> (0) defaults are the only
-supported values and thus are not set in the <code>TENS</code> objects..</li>
-
-<li>The <code>dtype</code> is determined by matching <code>typeid()</code> on a set of known POD.
-Be careful calling the templated methods with non-pointer-to-POD
-types.  Eg, the <code>typeid()</code> for <code>t</code> in <code>float t[4][5]</code> is not a pointer to
-<code>float</code> and will result in a <code>dtype</code> of <code>"?"</code> and instead use <code>float *tp =
-  t</code> and pass <code>tp</code>.</li>
-</ul>
+<div class="org-src-container">
+<pre class="src src-c++"><span style="font-weight: bold; text-decoration: underline;">zio</span>::<span style="font-weight: bold; text-decoration: underline;">Message</span> <span style="font-weight: bold; font-style: italic;">msg</span>;
+<span style="font-weight: bold; text-decoration: underline;">std</span>::<span style="font-weight: bold; text-decoration: underline;">vector</span>&lt;<span style="font-weight: bold; text-decoration: underline;">size_t</span>&gt; <span style="font-weight: bold; font-style: italic;">shape</span>={n1,n2,n3};
+<span style="font-weight: bold; text-decoration: underline;">zio</span>::<span style="font-weight: bold; text-decoration: underline;">tens</span>::append(msg, tensor.data(), shape);
+</pre>
+</div>
 </div>
 </div>
 </div>

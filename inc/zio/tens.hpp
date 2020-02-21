@@ -14,28 +14,39 @@ namespace zio {
         // The default message "form", if none set.
         const char* form = "TENS";
 
-        /*! Generic version of append.  
-         *
-         * Use templated version for easier interface. */
-        void append(Message& msg, std::byte* data, const std::vector<size_t>& shape,
-                    size_t word_size, const std::type_info& t);
+        const char* type_name(const std::type_info& t);
+
+        template<typename Type>
+        const char* dtype() { return type_name(typeid(Type)); }
+
+        /*! Generic version of append. */
+        void append(Message& msg, message_t&& data,
+                    const std::vector<size_t>& shape,
+                    size_t word_size, const char* tn);
 
         /*! Append one array data of given shape to message.
          *
          * - shape :: number of elements in each dimension.
          * 
-         * Note: the ordering of each dimension (ie, row-major vs
-         * column-major for 2D arrays) is not saved to the message.
+         * This performs a copy of data.
          */
         template<typename ElementType>
         void append(Message& msg, const ElementType* data, const std::vector<size_t>& shape) {
-            append(msg, (std::byte*)data, shape, sizeof(ElementType), typeid(ElementType));
+            size_t nbytes = sizeof(ElementType);
+            size_t word = nbytes;
+            for (auto s : shape) { nbytes *= s; }
+            append(msg, zio::message_t((const void*)data, nbytes),
+                   shape, word, type_name(typeid(ElementType)));
         }
                     
-        /*! Generic version of at().  
+        /*! Return the tensor at the given index.  
          *
-         * Use templated version for easier interface. */
-        const std::byte* at(const Message& msg, size_t index, const std::type_info& t);
+         * Index is into the label object TENS JSON array which may
+         * not be the message part index.
+         *
+         * An empty message is returned on error.
+         */
+        const zio::message_t& at(const Message& msg, size_t index);
 
         /*! Return the tensor data at payload index in FORM message.
          *
@@ -45,7 +56,9 @@ namespace zio {
          */
         template<typename ElementType>
         const ElementType* at(const Message& msg, size_t index) {
-            return (const ElementType*) at(msg, index, typeid(ElementType));
+            const zio::message_t& ret = at(msg, index);
+            if (ret.empty()) { return nullptr; }
+            return (const ElementType*) ret.data();
         }
 
     }
