@@ -4,6 +4,7 @@
 
 // #include <iostream>
 
+// stolen from cnpy
 static
 const char* dtype(const std::type_info& t)
 {
@@ -44,9 +45,13 @@ void zio::tens::append(zio::Message& msg, std::byte* data, const std::vector<siz
     if (! label.empty()) {
         lobj = zio::json::parse(label);
     }
-    zio::json md = {{"shape", shape},
-                    {"word", word_size},
-                    {"dtype", dtype(ti)}};
+    zio::json md = {
+        {"shape", shape},
+        {"word", word_size},
+        {"dtype", dtype(ti)},
+        {"part", msg.payload().size()}
+        // no order as this is C++
+    };
     lobj[zio::tens::form].push_back(md);
 
     size_t nbytes = word_size;
@@ -78,7 +83,12 @@ const std::byte* zio::tens::at(const Message& msg, size_t index, const std::type
         nbytes *= one.get<size_t>();
     }
     
-    const auto& spmsg = msg.payload()[index];
+    size_t part = md["part"].get<size_t>();
+    if (part < 0 or part >= msg.payload().size()) {
+        return nullptr;
+    }
+
+    const auto& spmsg = msg.payload()[part];
     if (spmsg.size() != nbytes) {
         return nullptr;
     }

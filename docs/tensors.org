@@ -2,48 +2,182 @@
 #+setupfile: setup.org
 #+include: nav.org
 
-* Motivation
+* Terms
 
-In some cases, we want to easily send tensors out of WCT and to a "GPU
-service".  We want a fairly simple and general way to do this.
+In this document, some terms are use precisely:
 
-One general way is to produce HDF5 "core" (in-memory) files with
-arbitrary HDF5 data.  This gives all the flexible schema of HDF5 but
-it also brings in a new dependency.
+- array :: elements stored contiguous in memory and following some
+           order (unless otherwise qualified, eg JSON array is an
+           abstract type and does not refer to memory layout).
+
+- vector :: a conceptual one dimensional, ordered set of elements.
+            (eg, ignoring memory layout, C++'s ~std::vector~, Python's
+            ~list~)
+
+- tensor :: multi-dimensional extension of a vector, set of elements
+            with each dimension ordered and overall bounded in a
+            rectangular manner.  Tensors are abstract but shall be
+            represented in memory in some manner as an array.
+
+- rank :: the number of dimensions a tensor spans (note, not quite the
+          mathematical definition).
+
+- shape :: an ordered tuple of length of the rank which gives the size
+           of each dimension.
+
+* Motivation and requirements
+
+In some cases, we want to easily send tensors between components.  We
+want to do this in simply and generally so that disparate endpoints
+can communicate without knowing details of each other but so that
+tensors may be faithfully transmitted.
+
+We need not provide means to perform "tensor operations" beyond those
+required for faithful transmission.  We would also like to minimize
+memory copy both internally and at the interface with application
+code.  We may also want to exploit compression and/or sparse
+representation.  We also recognize that small payloads lead to
+inefficient transfers and that some applications require a close
+association between tensors and so would like a way to "batch"
+together multiple tensors into one message.  Splitting very large
+tensors across messages should not be disallowed but as this is
+open-ended, not requirements are raised for this feature.  Finally,
+applications tend to need to associate metadata with tensors and it
+should be possible to transfer these associations.
+
+Thus, at a minimum the message representation shall include:
+
+- conceptual tensor metadata (eg, rank, shape, element type) 
+- memory layout metadata (order, compression, sparseness)
+- the packed tensor element data itself
+- indexing of one tensor in a larger set of tensors
+- means to associate application metadata to tensors.
 
 * Zio ~TENS~ message form
 
-The ZIO ~TENS~ message format is a compromise to provide a subset of
-HDF5 schema with not external software dependency.  It requires a JSON
-encoded prefix header ~label~ attribute named after the form, ~TENS~.
-This attribute is a JSON array of JSON objects.  Each object
-represents the metadata of one tensor and the tensor elements are
-found in the corresponding payload part.  That is, a message with
-$\mathcal{N}$ tensors will have $\mathcal{N}$ elements in the ~TENS~
-array and $\mathcal{N}$ payload parts.
+The ZIO ~TENS~ message format attempts to provide the above
+requirements.  A ~TENS~ message *may* have a form value of ~TENS~ however,
+an application may choose to include ~TENS~ form in other messages as
+long as the rest of the specification is followed.  A compatible form
+is ~FLOW~.
 
-The element of the ~TENS~ array is an object with the following attributes
+As with other forms, the ~zio::Message~ header prefix attribute ~label~
+shall hold structured data as an object encoded as a JSON string.  A
+~TENS~ message may utilize zero or more parts of the ~zio::Message~
+payload to hold packed arrays of elements, one for each given tensor.
 
-- shape :: a 1D JSON array of integers giving size of each dimension.
-- word :: a JSON integer number giving the bytes for the elements of the tensor.
-- dtype :: a Numpy like letter to indicate the data type (f, i, u, etc)
+The *label* object shall have a top-level attribute key ~TENS~ which holds
+all information required to reconstitute the tensors stored in the
+message.  The value of the ~TENS~ item shall be an ordered JSON array
+and each element shall hold information about one tensor.  The
+application may extend an element but must not utilized the reserved
+attributes described next.  The ~TENS~ format may extend the list of reserved
+attributes in the future.
 
-* Usage
+Each tensor is described with an object with the following reserved
+attributes:
 
-See ~test/test_tens.cpp~ in the ZIO source.
+- version :: integer, an optional attribute giving the schema version
+             of the object.  If missing, it is assumed schema version
+             is 0.
+- part :: integer, the message payload part index containing the
+          packed tensor element array associated with this metadata
+          object.
+- shape :: vector of integers, gives the *shape* of the tensor.
+- order :: vector of integers, gives the memory layout order of the tensor.
+- word :: integer, gives the number of bytes used by each element of the tensor.
+- dtype :: string, indicate the data type of the elements (for
+           numbers, matches the Numpy character: f, i, u, etc).
+- packing :: string, an optional description of how the tensor
+             elements are packed.  If omitted, the default is "dense".
+             Future extensions may use this to indicate a sparse
+             and/or compressed packing.
+- pointer :: integer, optional, indicates a memory location holding
+             the tensor array instead of it being delivered in the
+             payload.
 
-* Possible extension
+* Shape and order
 
-The ~TENS~ object may be extended in the future to honor
+The *shape* and *order* are vectors both have length equal to the number
+of dimensions of the tensor and with each element describing a
+dimension.  The *shape* vector gives the number elements spanned in each
+dimension while the *order* vector gives the degree of
+memory-contagiousness of the elements along the dimension.  This
+latter deserves additional explanation.
 
-- pointer :: an optional string holding hexadecimal representation of a pointer (see below). 
+In the special case of 2-D tensors, there are two common choices for
+their packing into an array in memory: *row-major* and *column-major*.  A
+*row-major* layout places all elements in one row contiguously in
+memory.  That is, for a fixed row index, entries at subsequent column
+indices are next to each other in memory.  Just the opposite is the
+case for *column-major* packing.
 
-As a special case, if the *pointer* attribute is provided in the ~TENS~
-object, it will be interpreted as a memory address containing the data
-that would otherwise be provided in the payload part itself.  The
-payload part must still exist but shall be ignored by ~TENS~ form.  It
-may be zero size.  This *pointer* can be provided to avoid transfer of
-data an obviously only works for messages sent over ~inproc://~
-transport and for pointers into memory that is constant over the
-lifetime of the usage by the message receiver.
+In C/C++ we may have the code ~float t[4][5]; float* tp = t;~.  As we
+iterate the tensor array in memory using ~tp~, we will first span the 5
+contiguous elements (columns) of the first (~t[0]~) row.  Once
+exhausting the size of that dimension, we jump to the next row (~t[1]~).
+This is because C/C++ (and Python) follow *row-major* packing.  FORTRAN,
+and other obscure languages, choose *column-major*.
+
+For 2-D row-major case the *order* vector is ~[1,0]~.  That is, when
+iterating the tensor array in memory, we are mostly ("majorly")
+scanning over the last dimension (order value ~0~) and more rarely
+("minorly") scanning over the first dimension (order value ~1~).
+
+Beyond 2-D, the number of possible choices for the *order* vector grows
+quickly and there are no names for each possible choice.  The C
+standard does not fully address how $\mathcal{N}$ dimensional tensors
+are stored into an array in memory but does decompose an $i \times j
+\times ... \times k$ tensor by making the $i^{th}$ dimension a pointer
+to the reduced $\mathcal{N}-1$ dimension tensor representation.  Thus
+implying the *order* vector for C is ~[N-1,...,1,0]~.
+
+The ~TENS~ message form does not restrict a particular *order* vector but
+instead allows the application to specify it.  If no *order* is given
+then the C order shall be implied.
+
+* Extension
+
+Application may extend a ~TENS~ message in a number of ways:
+
+- the label object may have additional attributes besides ~TENS~.
+
+- the object in the ~TENS~ JSON array may be individually extended if
+  honoring the reserved keys.  The ~TENS~ JSON array itself may not be
+  extended.
+
+- message payload parts not referenced by any ~TENS~ object's ~part~
+  attribute may be used for purposes other than ~TENS~.
+
+* C++ API
+
+The specification above defines a ~TENS~ message.  The ~zio/tens.hpp~ C++
+API provides some support for handling ~TENS~ messages.  See
+~test/test_tens.cpp~ in the ZIO source for an example of this API being
+exercised.    The API has some caveats:
+
+- As this is C++, it assumes the *order* is that of C, as described
+  above.  As this is the default the specification, it is omitted.  If
+  non-C order is needed, the application must handle setting this in
+  the ~TENS~ object.
+
+- The tensor array is provided by the sending application and given to
+  the receiving application unmolested.  It is up to the application
+  to assure it is packed as stated.  However, tens performs a
+  consistency check on the total size of the array matches word size
+  and shape.
+
+- Only an ~append()~ method is provided for adding a tensor to a
+  message.  The ~part~ attribute will be correct set based on the number
+  of parts prior to the append.
+
+- The ~packing~ ("dense") and ~pointer~ (0) defaults are the only
+  supported values and thus are not set in the ~TENS~ objects..
+
+- The ~dtype~ is determined by matching ~typeid()~ on a set of known POD.
+  Be careful calling the templated methods with non-pointer-to-POD
+  types.  Eg, the ~typeid()~ for ~t~ in ~float t[4][5]~ is not a pointer to
+  ~float~ and will result in a ~dtype~ of ~"?"~ and instead use ~float *tp =
+  t~ and pass ~tp~.
+
 

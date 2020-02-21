@@ -11,7 +11,7 @@ namespace zio {
 
     namespace tens {
 
-        // The message format.
+        // The default message "form", if none set.
         const char* form = "TENS";
 
         /*! Generic version of append.  

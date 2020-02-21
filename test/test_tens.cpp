@@ -11,7 +11,13 @@ int main()
     std::vector<size_t> shape={2,3,4};
 
     zio::Message msg(zio::tens::form);
+
+    // Add an initial, unrelated message part just to make sure tens
+    // respects it.
+    msg.add(zio::message_t((char*)nullptr,0));
+
     zio::tens::append(msg, tensor1, shape);
+    assert(msg.payload().size() == 2);
 
     assert(msg.form() == zio::tens::form);
     auto lobj = msg.label_object();
