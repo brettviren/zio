@@ -53,7 +53,7 @@ void zio::tens::append(zio::Message& msg, zio::message_t&& data,
         {"part", msg.payload().size()}
         // no order as this is C++
     };
-    lobj[zio::tens::form].push_back(md);
+    lobj[zio::tens::form]["tensors"].push_back(md);
     msg.set_label_object(lobj);
     msg.add(std::move(data));
 }
@@ -64,7 +64,7 @@ const zio::message_t& zio::tens::at(const Message& msg, size_t index)
 
     auto lobj = msg.label_object();
     auto ta = lobj[zio::tens::form];
-    auto md = ta[index];
+    auto md = ta["tensors"][index];
 
     if (md.is_null()) {
         return bogus;

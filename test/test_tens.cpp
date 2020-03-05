@@ -22,7 +22,7 @@ int main()
     assert(msg.form() == zio::tens::form);
     auto lobj = msg.label_object();
     std::cout << lobj << std::endl;
-    auto md = lobj[zio::tens::form][0];
+    auto md = lobj[zio::tens::form]["tensors"][0];
     
     for (int ind=0; ind < 3; ++ind) {
         assert(shape[ind] == md["shape"][ind].get<size_t>());

@@ -90,7 +90,8 @@ int main() {
     std::thread t1(client, "hello from thread 1");
     std::thread t2(client, "hello from thread 2");
     std::thread t3(server);
-    while (1) {
+    int countdown=2;
+    while (countdown--) {
         using namespace std::chrono_literals;
         std::this_thread::sleep_for(1s);
     }

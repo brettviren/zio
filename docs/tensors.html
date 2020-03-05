@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-02-21 Fri 16:42 -->
+<!-- 2020-03-05 Thu 17:29 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>ZIO Tensors</title>
@@ -261,11 +261,16 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orga144f51">1. Motivation and requirements</a></li>
-<li><a href="#orgff810d8">2. Zio <code>TENS</code> message form</a></li>
-<li><a href="#orgcc60e48">3. Application extension</a></li>
-<li><a href="#org53597cf">4. C++ API</a></li>
-<li><a href="#orgf3734bd">5. Use with Boost Multi Array</a></li>
+<li><a href="#org18ed72e">1. Motivation and requirements</a></li>
+<li><a href="#org2649bcd">2. Zio <code>TENS</code> message form</a>
+<ul>
+<li><a href="#org20f08f7">2.1. The "tensors" attribute</a></li>
+<li><a href="#org7aaaf0b">2.2. The "metadata" attribute</a></li>
+</ul>
+</li>
+<li><a href="#org6c7c1a7">3. Application extension</a></li>
+<li><a href="#org91988c0">4. C++ API</a></li>
+<li><a href="#org1a309e8">5. Use with Boost Multi Array</a></li>
 </ul>
 </div>
 </div>
@@ -280,12 +285,12 @@ for the JavaScript code in this tag.
 
 </div>
 
-<div id="outline-container-orga144f51" class="outline-2">
-<h2 id="orga144f51"><span class="section-number-2">1</span> Motivation and requirements</h2>
+<div id="outline-container-org18ed72e" class="outline-2">
+<h2 id="org18ed72e"><span class="section-number-2">1</span> Motivation and requirements</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 In some cases, we want to easily send tensors between components.  We
-want to do this in simply and generally so that disparate endpoints
+want to do this simply and generally so that disparate endpoints
 can communicate without knowing details of each other but so that
 tensors may be faithfully transmitted.  The requirements, needs and
 allowances are:
@@ -316,21 +321,25 @@ Thus, at a minimum the message representation shall include:
 
 <ul class="org-ul">
 <li>conceptual tensor metadata (eg, rank, shape, element type)</li>
+
 <li>memory layout metadata (order, compression, sparseness)</li>
+
 <li>the packed tensor element data itself</li>
+
 <li>indexing of one tensor in a larger set of tensors</li>
+
 <li>means to associate application metadata to tensors.</li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-orgff810d8" class="outline-2">
-<h2 id="orgff810d8"><span class="section-number-2">2</span> Zio <code>TENS</code> message form</h2>
+<div id="outline-container-org2649bcd" class="outline-2">
+<h2 id="org2649bcd"><span class="section-number-2">2</span> Zio <code>TENS</code> message form</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 The ZIO <code>TENS</code> message format attempts to provide the above requirements.
-A <code>TENS</code> message <b>may</b> have a form value of <code>TENS</code> however,
-an application may choose to include <code>TENS</code> form in other messages as
+A <code>TENS</code> message <b>may</b> have a ZIO message <code>form</code> <a href="messages.html">header</a> value of <code>TENS</code> however,
+an application may choose to include the general <code>TENS</code> form in other messages as
 long as the rest of the specification is followed.  A compatible form
 is <code>FLOW</code>.
 </p>
@@ -349,17 +358,44 @@ message except the element data itself.
 </p>
 
 <p>
-The value of the <code>TENS</code> object item shall be an ordered JSON array and
-each element shall be a JSON object that provides information
-describing one tensor.  The application may extend this object but
-must not utilize the reserved attributes described next.  The <code>TENS</code>
-format may extend the list of reserved attributes in the future.
+The value of the <code>TENS</code> object shall have two attributes.  Expressed as
+JSON they are:
 </p>
 
+<div class="org-src-container">
+<pre class="src src-json">{
+  "TENS": {
+    "tensors": [ ... ],
+    "metadata": { ... },
+   }
+}
+</pre>
+</div>
+</div>
+
+<div id="outline-container-org20f08f7" class="outline-3">
+<h3 id="org20f08f7"><span class="section-number-3">2.1</span> The "tensors" attribute</h3>
+<div class="outline-text-3" id="text-2-1">
 <p>
-Each tensor is described with an object with the following reserved
-attributes.  In part, they adopt the conceptual model of Boost multi
-array.  Optional attributes with defaults may be omitted.
+The <code>"tensors"</code> item holds an array of tensor description objects.  For
+example:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-json">{
+  "tensors": [
+    {"shape":[6000,800], "word":4, "dtype":"f", part:1},
+    {"shape":[6000,800], "word":4, "dtype":"f", part:2},
+    {"shape":[6000,960], "word":4, "dtype":"f", part:0},
+  ],
+</pre>
+</div>
+
+<p>
+Thus, each tensor is described with an object that must follow the
+schema with attributes given below.  In doing so, the description
+adopt the conceptual model of Boost multi array and other tensor
+packages.  Optional attributes with defaults may be omitted.
 </p>
 
 <p>
@@ -374,7 +410,6 @@ size of each dimension.</dd>
 <dt>dtype</dt><dd>string, indicate the data type of the elements (for
 numbers, matches the Numpy character: f, i, u, etc).</dd>
 </dl>
-
 
 <p>
 Optional:
@@ -407,33 +442,65 @@ and/or compressed packing.</dd>
 the tensor array instead of it being delivered in the
 payload.</dd>
 </dl>
+
+<p>
+The application may extend these objects but must not utilize the
+reserved attributes described next.  The <code>TENS</code> format may extend the
+list of reserved attributes in the future.
+</p>
 </div>
 </div>
 
-<div id="outline-container-orgcc60e48" class="outline-2">
-<h2 id="orgcc60e48"><span class="section-number-2">3</span> Application extension</h2>
+<div id="outline-container-org7aaaf0b" class="outline-3">
+<h3 id="org7aaaf0b"><span class="section-number-3">2.2</span> The "metadata" attribute</h3>
+<div class="outline-text-3" id="text-2-2">
+<p>
+The "metadata" item in the "TENS" attribute may hold any arbitrary
+JSON object.  One possible use is to associate metadata to each tensor
+by matching the "tensors" array.  For example:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-json">{
+  "metadata" : {
+    "tensor_attributes" : [
+      {"tag":"gauss", "plane":"U"},
+      {"tag":"gauss", "plane":"V"},
+      {"tag":"gauss", "plane":"W"},
+    ],
+  }
+}
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org6c7c1a7" class="outline-2">
+<h2 id="org6c7c1a7"><span class="section-number-2">3</span> Application extension</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 Application may extend a <code>TENS</code> message form in a number of ways:
 </p>
 
 <ul class="org-ul">
-<li>The four byte message form may be other than <code>TENS</code>.</li>
+<li>The four byte message <code>form</code> may be other than <code>TENS</code>.</li>
 
 <li>the label object may have additional attributes besides <code>TENS</code>.</li>
 
-<li>the object in the <code>TENS</code> JSON array may be individually extended if
-honoring the reserved keys.  The <code>TENS</code> JSON array itself may not be
+<li>the <code>TENS</code> JSON object may be extended by novel keys other than the
+reserved keys listed above.  Note the <code>TENS.tensors</code> array may not be
 extended.</li>
 
-<li>message payload parts not referenced by any <code>TENS</code> object's <code>part</code>
-attribute may be used for purposes other than <code>TENS</code>.</li>
+<li>message payload parts other than those referenced by
+<code>TENS.tensors[].part</code> attribute may be used for purposes other than
+<code>TENS</code>.</li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-org53597cf" class="outline-2">
-<h2 id="org53597cf"><span class="section-number-2">4</span> C++ API</h2>
+<div id="outline-container-org91988c0" class="outline-2">
+<h2 id="org91988c0"><span class="section-number-2">4</span> C++ API</h2>
 <div class="outline-text-2" id="text-4">
 <p>
 The specification above defines a <code>TENS</code> message.  The <code>zio/tens.hpp</code> C++
@@ -444,8 +511,8 @@ exercised.
 </div>
 </div>
 
-<div id="outline-container-orgf3734bd" class="outline-2">
-<h2 id="orgf3734bd"><span class="section-number-2">5</span> Use with Boost Multi Array</h2>
+<div id="outline-container-org1a309e8" class="outline-2">
+<h2 id="org1a309e8"><span class="section-number-2">5</span> Use with Boost Multi Array</h2>
 <div class="outline-text-2" id="text-5">
 <p>
 As said above, the <code>TENS</code> message form is sympathetic with Boost Multi
@@ -457,7 +524,7 @@ something like the following to cast a <code>TENS</code> part into a Boost MA:
 <div class="org-src-container">
 <pre class="src src-c++"><span style="font-weight: bold; text-decoration: underline;">zio</span>::<span style="font-weight: bold; text-decoration: underline;">Message</span> <span style="font-weight: bold; font-style: italic;">msg</span>;
 <span style="font-weight: bold;">const</span> <span style="font-weight: bold; text-decoration: underline;">zio</span>::<span style="font-weight: bold; text-decoration: underline;">message_t</span>&amp; <span style="font-weight: bold; font-style: italic;">data</span> = <span style="font-weight: bold; text-decoration: underline;">zio</span>::<span style="font-weight: bold; text-decoration: underline;">tens</span>::at(msg, 0);
-<span style="font-weight: bold;">auto</span> <span style="font-weight: bold; font-style: italic;">tens</span> = msg.label_object()[<span style="font-style: italic;">"TENS"</span>][0];
+<span style="font-weight: bold;">auto</span> <span style="font-weight: bold; font-style: italic;">tens</span> = msg.label_object()[<span style="font-style: italic;">"TENS"</span>][<span style="font-style: italic;">"tensors"</span>][0];
 <span style="font-weight: bold;">auto</span> <span style="font-weight: bold; font-style: italic;">shape</span> = tens[<span style="font-style: italic;">"shape"</span>];
 assert(shape.size() == 3);
 <span style="font-weight: bold;">const</span> <span style="font-weight: bold; text-decoration: underline;">float</span>* <span style="font-weight: bold; font-style: italic;">fdata</span> = (<span style="font-weight: bold;">const</span> <span style="font-weight: bold; text-decoration: underline;">float</span>*)data.data();

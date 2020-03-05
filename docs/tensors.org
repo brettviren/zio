@@ -5,7 +5,7 @@
 * Motivation and requirements
 
 In some cases, we want to easily send tensors between components.  We
-want to do this in simply and generally so that disparate endpoints
+want to do this simply and generally so that disparate endpoints
 can communicate without knowing details of each other but so that
 tensors may be faithfully transmitted.  The requirements, needs and
 allowances are:
@@ -30,16 +30,20 @@ allowances are:
 Thus, at a minimum the message representation shall include:
 
 - conceptual tensor metadata (eg, rank, shape, element type) 
+
 - memory layout metadata (order, compression, sparseness)
+
 - the packed tensor element data itself
+
 - indexing of one tensor in a larger set of tensors
+
 - means to associate application metadata to tensors.
 
 * Zio ~TENS~ message form
 
 The ZIO ~TENS~ message format attempts to provide the above requirements.
-A ~TENS~ message *may* have a form value of ~TENS~ however,
-an application may choose to include ~TENS~ form in other messages as
+A ~TENS~ message *may* have a ZIO message ~form~ [[file:messages.org][header]] value of ~TENS~ however,
+an application may choose to include the general ~TENS~ form in other messages as
 long as the rest of the specification is followed.  A compatible form
 is ~FLOW~.
 
@@ -52,15 +56,36 @@ The *label* object shall have a top-level attribute key ~TENS~ which holds
 all information required to reconstitute the tensors stored in the
 message except the element data itself.  
 
-The value of the ~TENS~ object item shall be an ordered JSON array and
-each element shall be a JSON object that provides information
-describing one tensor.  The application may extend this object but
-must not utilize the reserved attributes described next.  The ~TENS~
-format may extend the list of reserved attributes in the future.
+The value of the ~TENS~ object shall have two attributes.  Expressed as
+JSON they are:
 
-Each tensor is described with an object with the following reserved
-attributes.  In part, they adopt the conceptual model of Boost multi
-array.  Optional attributes with defaults may be omitted.
+#+begin_src json
+{
+  "TENS": {
+    "tensors": [ ... ],
+    "metadata": { ... },
+   }
+}
+#+end_src
+
+** The "tensors" attribute
+
+The ~"tensors"~ item holds an array of tensor description objects.  For
+example:
+
+#+begin_src json
+{
+  "tensors": [
+    {"shape":[6000,800], "word":4, "dtype":"f", part:1},
+    {"shape":[6000,800], "word":4, "dtype":"f", part:2},
+    {"shape":[6000,960], "word":4, "dtype":"f", part:0},
+  ],
+#+end_src
+
+Thus, each tensor is described with an object that must follow the
+schema with attributes given below.  In doing so, the description
+adopt the conceptual model of Boost multi array and other tensor
+packages.  Optional attributes with defaults may be omitted.
 
 Required:
 
@@ -70,7 +95,6 @@ Required:
 
 - dtype :: string, indicate the data type of the elements (for
            numbers, matches the Numpy character: f, i, u, etc).
-
 
 Optional:
 
@@ -96,20 +120,43 @@ Reserved for possible future use:
              the tensor array instead of it being delivered in the
              payload.
 
+The application may extend these objects but must not utilize the
+reserved attributes described next.  The ~TENS~ format may extend the
+list of reserved attributes in the future.
+
+** The "metadata" attribute
+
+The "metadata" item in the "TENS" attribute may hold any arbitrary
+JSON object.  One possible use is to associate metadata to each tensor
+by matching the "tensors" array.  For example:
+
+#+begin_src json
+{
+  "metadata" : {
+    "tensor_attributes" : [
+      {"tag":"gauss", "plane":"U"},
+      {"tag":"gauss", "plane":"V"},
+      {"tag":"gauss", "plane":"W"},
+    ],
+  }
+}
+#+end_src
+
 * Application extension
 
 Application may extend a ~TENS~ message form in a number of ways:
 
-- The four byte message form may be other than ~TENS~.
+- The four byte message ~form~ may be other than ~TENS~.
 
 - the label object may have additional attributes besides ~TENS~.
 
-- the object in the ~TENS~ JSON array may be individually extended if
-  honoring the reserved keys.  The ~TENS~ JSON array itself may not be
+- the ~TENS~ JSON object may be extended by novel keys other than the
+  reserved keys listed above.  Note the ~TENS.tensors~ array may not be
   extended.
 
-- message payload parts not referenced by any ~TENS~ object's ~part~
-  attribute may be used for purposes other than ~TENS~.
+- message payload parts other than those referenced by
+  ~TENS.tensors[].part~ attribute may be used for purposes other than
+  ~TENS~. 
 
 * C++ API
 
@@ -128,7 +175,7 @@ something like the following to cast a ~TENS~ part into a Boost MA:
 #+begin_src c++
   zio::Message msg;
   const zio::message_t& data = zio::tens::at(msg, 0);
-  auto tens = msg.label_object()["TENS"][0];
+  auto tens = msg.label_object()["TENS"]["tensors"][0];
   auto shape = tens["shape"];
   assert(shape.size() == 3);
   const float* fdata = (const float*)data.data();
