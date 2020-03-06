@@ -1,0 +1,79 @@
+digraph offflow {
+        rankdir=LR
+
+        subgraph cluster_wctnominal {
+                label="Nominal, single WCT pipeline"
+                noden[shape=box,label="DNNROI\n(on=CPU or on=GPU)"]
+                sourcen[shape=box,label="FrameSource"]
+                sinkn[shape=box,label="FrameSink"]
+                ngpu[shape=octagon, label="GPU"]
+
+                sourcen->noden->sinkn
+                {rank=same ngpu noden}
+                ngpu->noden[dir=both]
+
+        }
+
+        subgraph cluster_wct1 {
+                label="WCT graph with offloading"
+                source1[shape=box,label="FrameSource"]
+                sink1[shape=box,label="FrameSink"]
+                subgraph cluster_node2 {
+                        label="FrameFilter node offloading\n(hundreds of such nodes)"
+                        pack1
+                        socket1[shape=circle,label="ZIO\nCLIENT\nsocket"]
+                        unpack1
+                        {rank=same pack1 unpack1}
+                        pack1->socket1
+                        unpack1->socket1[dir=back]
+                }
+                source1->pack1
+                sink1->unpack1[dir=back]
+        }
+        subgraph cluster_taskqueue {
+                label="The task queue"
+                subgraph cluster_sync_converter{
+                        label="Adapter"
+                        fe[shape=circle,label="ZIO\nSERVER\nsocket"]
+                        be[shape=circle,label="MDP\nDEALER\nsocket"]
+                        addr[shape=box,label="conversion"]
+                        fe->addr->be[dir=both]
+                }
+                subgraph cluster_majordomo {
+                        label="Majordomo broker"
+                        mdp[shape=circle,label="MDP\nROUTER\nsocket"]
+                }
+        }
+
+
+
+        subgraph cluster_worker {
+                label="Simple worker"
+                wdealer1[shape=circle,label="MDP\nDEALER\nsocket"]
+                walgorithm1[shape=box,label="worker algorithm"]
+                wgpu1[shape=octagon,label="GPU"]
+                {rank=same wgpu1 walgorithm1}
+                wdealer1->walgorithm1->wgpu1[dir=both]
+        }
+        subgraph cluster_wctworker {
+                label="WCT FrameFilter component as worker"
+                wctdealer[shape=circle,label="MDP\nDEALER\nsocket"]
+                wctcode[shape=box,label="convert\nand call"]
+                wctframefilter[shape=box,label="DNNROI"]
+                wctgpu[shape=octagon,label="GPU"]
+                {rank=same wctgpu wctframefilter}
+                wctdealer->wctcode->wctframefilter->wctgpu[dir=both]
+        }
+
+
+        be->mdp[dir=both]
+
+        // workers
+        mdp->wdealer1[dir=both]
+        mdp->wctdealer[dir=both]
+
+
+        socket1->request->fe
+        socket1->reply->fe[dir=back]
+
+}

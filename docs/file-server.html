@@ -1,0 +1,484 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2020-03-06 Fri 16:48 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ZIO Flow Broker File Server</title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="Brett Viren" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { width: 90%; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="org.css"/>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2019 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="org-div-home-and-up">
+ <a accesskey="h" href=""> UP </a>
+ |
+ <a accesskey="H" href="index.html"> HOME </a>
+</div><div id="content">
+<h1 class="title">ZIO Flow Broker File Server</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#orgc310379">1. General usage</a></li>
+<li><a href="#orgc1c620a">2. File Server</a>
+<ul>
+<li><a href="#org478eb6a">2.1. Attribute rules</a></li>
+<li><a href="#orgb79f191">2.2. Testing a rule set</a></li>
+<li><a href="#org07ca2b4">2.3. Example run</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="nav">
+<ul class="org-ul">
+<li><a href="index.html">Main Page</a></li>
+<li><a href="install.html">Installation</a></li>
+<li><a href="tutorial.html">Tutorials</a></li>
+<li><a href="whytos.html">Design documents</a></li>
+<li><a href="api.html">API Reference</a></li>
+</ul>
+
+</div>
+
+<div class="org-center">
+<p>
+Note: this feature has been moved from wire-cell-zpb and not yet been
+fully integrated.
+</p>
+</div>
+
+<p>
+The ZIO Python package modules and <code>zio</code> command line program provides
+flow broker handlers which enact a file server backend.
+</p>
+
+<div id="outline-container-orgc310379" class="outline-2">
+<h2 id="orgc310379"><span class="section-number-2">1</span> General usage</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+Command line access:
+</p>
+
+<pre class="example">
+$ python -m zio --help
+$ zio --help
+</pre>
+
+<p>
+The file server:
+</p>
+
+<pre class="example">
+$ zio file-server --help
+</pre>
+</div>
+</div>
+
+<div id="outline-container-orgc1c620a" class="outline-2">
+<h2 id="orgc1c620a"><span class="section-number-2">2</span> File Server</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+The ZIO flow broker file server allows ZIO <i>data flow protocol</i> clients
+to read message from and write messages to files.  Support for a
+variety of file formats is possible with HDF5 being the only initial
+target.
+</p>
+</div>
+
+<div id="outline-container-org478eb6a" class="outline-3">
+<h3 id="org478eb6a"><span class="section-number-3">2.1</span> Attribute rules</h3>
+<div class="outline-text-3" id="text-2-1">
+<p>
+The flow broker file server brings together ZIO data flow clients with
+file handlers in a decoupled way so that clients need not be
+configured directly with details about the files.  It does this by
+<i>mapping</i> data flows to files and file contents with a set <i>attribute
+rules</i>.
+</p>
+
+<p>
+A set of rules are given to server in a JSON or Jsonnet file:
+</p>
+
+<pre class="example">
+$ zio file-server -r myruleset.jsonnet [...]
+</pre>
+
+<p>
+A single <i>attribute rule</i> in the set is a data structure provided by
+user configuration and has these elements:
+</p>
+
+<dl class="org-dl">
+<dt>rule</dt><dd>an S-expression in terms of a set of attributes and
+operators which should evaluate to a single Boolean value.
+If <b>true</b> then the rule is said to apply as determined stated
+by the remaining items.</dd>
+
+<dt>filepat</dt><dd>a string which may be interpolated against the set of
+attributes to form the name of the file to use.</dd>
+
+<dt>rw</dt><dd>a marker that the file shall be read from or written to.</dd>
+
+<dt>grouppat</dt><dd>a string which may be interpolated against the set of
+attributes in order to form an identifier for the data
+flow to which this rule applies.</dd>
+
+<dt>attr</dt><dd>A dictionary of additional attributes.</dd>
+</dl>
+
+<p>
+The overall attribute set applied to <b>rule</b>, <b>filepath</b> and <b>grouppat</b> is
+formed from two attributes sets.  The first consists of all attributes
+provided by the <i>flow object</i> held as JSON in the "label" field of the
+prefix header of an initial <b>BOT</b> message for a new flow.  The second
+set updates the first and consists of any attributes provided by the
+rule <b>attr</b> item.
+</p>
+
+<p>
+The <b>rule</b> itself is an S-expression (ie, like used in Scheme or LISP
+languages).  For example,
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(<span style="font-weight: bold;">and</span> (== stream <span style="font-style: italic;">"raw"</span>) (== type <span style="font-style: italic;">"frame"</span>))
+</pre>
+</div>
+
+<p>
+In the example, either <code>stream</code> or <code>type</code> may be provided by the <b>BOT</b>
+message or the <b>attr</b> item.
+</p>
+
+<p>
+The entire rule set is an ordered sequence.  When a <b>BOT</b> message is
+received by the file server it is evaluated against each rule in the
+set.  The first to evaluate as Boolean <b>true</b> will be applied to
+servicing that flow.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgb79f191" class="outline-3">
+<h3 id="orgb79f191"><span class="section-number-3">2.2</span> Testing a rule set</h3>
+<div class="outline-text-3" id="text-2-2">
+<p>
+Rulesets may be elaborate and deepened on attributes that are supplied
+only by the <b>BOT</b> message.  To assist in writing valid rule sets they
+may be easily tested with the provided command:
+</p>
+
+<pre class="example">
+$ zio test-ruleset \
+    -r example-ruleset.jsonnet \
+      direction=inject  \
+      jobname=testjob \
+      stream=depos \
+      type=depo
+2020-01-23 12:54:52.555 INFO	#0 FALSE w testjob.hdf:/foo/depos/depo
+2020-01-23 12:54:52.556 INFO	#1 TRUE  r testjob.hdf:/bar/depos/depo
+</pre>
+
+<p>
+The arguments give attributes that might otherwise be provided by the
+<b>BOT</b> message if this rule set were applied in the file server.  In
+this example, the first rule in the test fails against the provided
+attributes while the second rule succeeds.  The rule set tested in
+this example, expressed as Jsonnet, is:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-jsonnet">[
+    {
+	rule: |||
+	    (and (= direction 'extract')
+	     (or (= type 'depo') (= type 'frame')))
+	|||,
+	rw: "w",
+	filepat: "{jobname}.hdf",
+	grouppat: "{extra}/{stream}/{type}",
+	attr: {extra:"foo"}
+    },
+    {
+	rule: |||
+	    (and (= direction 'inject')
+	     (or (= type 'depo') (= type 'frame')))
+	|||,
+	rw: "r",
+	filepat: "{jobname}.hdf",
+	grouppat: "{extra}/{stream}/{type}",
+	attr: {extra:"bar"}
+    },
+]
+</pre>
+</div>
+
+<p>
+Note the inclusion of the <code>extra</code> attribute in the <code>attr</code> field.  It
+is included here in order to demonstrate how the full attribute set is
+a mix of those provided in the rule set and the message (or command
+line in the <code>test-ruleset</code> command).  In this simple case, it would
+also be possible to "hard-code" the <code>extra</code> value into the <code>grouppat</code>.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org07ca2b4" class="outline-3">
+<h3 id="org07ca2b4"><span class="section-number-3">2.3</span> Example run</h3>
+<div class="outline-text-3" id="text-2-3">
+<p>
+Run file server
+</p>
+
+<pre class="example">
+$ wirecell-zpb file-server \
+   -n file-server -p flow -v debug \
+   -b tcp://127.0.0.1:5678 \
+   -r test/test_depos_ruleset.jsonnet
+</pre>
+
+<p>
+and then a WCT job to write
+</p>
+
+<pre class="example">
+$ wire-cell -l stdout -L debug \
+    -c test/test_depos_extract.jsonnet
+</pre>
+
+<p>
+and then test the inverse, even keeping the server running:
+</p>
+
+<pre class="example">
+$ wire-cell -l stdout -L debug \
+    -c test/test_depos_inject.jsonnet
+</pre>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>

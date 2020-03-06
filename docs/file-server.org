@@ -1,0 +1,170 @@
+#+title: ZIO Flow Broker File Server
+#+setupfile: setup.org
+#+include: nav.org
+
+#+begin_center
+Note: this feature has been moved from wire-cell-zpb and not yet been
+fully integrated.
+#+end_center
+
+The ZIO Python package modules and ~zio~ command line program provides
+flow broker handlers which enact a file server backend.
+
+* General usage
+
+Command line access:
+
+  #+begin_example
+  $ python -m zio --help
+  $ zio --help
+  #+end_example
+
+The file server:
+
+  #+begin_example
+  $ zio file-server --help
+  #+end_example
+
+* File Server
+
+The ZIO flow broker file server allows ZIO /data flow protocol/ clients
+to read message from and write messages to files.  Support for a
+variety of file formats is possible with HDF5 being the only initial
+target.
+
+** Attribute rules
+
+The flow broker file server brings together ZIO data flow clients with
+file handlers in a decoupled way so that clients need not be
+configured directly with details about the files.  It does this by
+/mapping/ data flows to files and file contents with a set /attribute
+rules/.
+
+A set of rules are given to server in a JSON or Jsonnet file:
+
+  #+begin_example
+  $ zio file-server -r myruleset.jsonnet [...]
+  #+end_example
+
+A single /attribute rule/ in the set is a data structure provided by
+user configuration and has these elements:
+
+- rule :: an S-expression in terms of a set of attributes and
+          operators which should evaluate to a single Boolean value.
+          If *true* then the rule is said to apply as determined stated
+          by the remaining items.
+
+- filepat :: a string which may be interpolated against the set of
+             attributes to form the name of the file to use.
+
+- rw :: a marker that the file shall be read from or written to.
+
+- grouppat :: a string which may be interpolated against the set of
+              attributes in order to form an identifier for the data
+              flow to which this rule applies.
+
+- attr :: A dictionary of additional attributes.
+
+The overall attribute set applied to *rule*, *filepath* and *grouppat* is
+formed from two attributes sets.  The first consists of all attributes
+provided by the /flow object/ held as JSON in the "label" field of the
+prefix header of an initial *BOT* message for a new flow.  The second
+set updates the first and consists of any attributes provided by the
+rule *attr* item.
+
+The *rule* itself is an S-expression (ie, like used in Scheme or LISP
+languages).  For example,
+
+#+begin_src scheme
+  (and (== stream "raw") (== type "frame"))
+#+end_src
+
+In the example, either ~stream~ or ~type~ may be provided by the *BOT*
+message or the *attr* item.
+
+The entire rule set is an ordered sequence.  When a *BOT* message is
+received by the file server it is evaluated against each rule in the
+set.  The first to evaluate as Boolean *true* will be applied to
+servicing that flow.
+
+** Testing a rule set
+
+Rulesets may be elaborate and deepened on attributes that are supplied
+only by the *BOT* message.  To assist in writing valid rule sets they
+may be easily tested with the provided command:
+
+#+begin_example
+  $ zio test-ruleset \
+      -r example-ruleset.jsonnet \
+        direction=inject  \
+        jobname=testjob \
+        stream=depos \
+        type=depo
+  2020-01-23 12:54:52.555 INFO	#0 FALSE w testjob.hdf:/foo/depos/depo
+  2020-01-23 12:54:52.556 INFO	#1 TRUE  r testjob.hdf:/bar/depos/depo
+#+end_example
+
+The arguments give attributes that might otherwise be provided by the
+*BOT* message if this rule set were applied in the file server.  In
+this example, the first rule in the test fails against the provided
+attributes while the second rule succeeds.  The rule set tested in
+this example, expressed as Jsonnet, is:
+
+#+begin_src jsonnet
+  [
+      {
+          rule: |||
+              (and (= direction 'extract')
+               (or (= type 'depo') (= type 'frame')))
+          |||,
+          rw: "w",
+          filepat: "{jobname}.hdf",
+          grouppat: "{extra}/{stream}/{type}",
+          attr: {extra:"foo"}
+      },
+      {
+          rule: |||
+              (and (= direction 'inject')
+               (or (= type 'depo') (= type 'frame')))
+          |||,
+          rw: "r",
+          filepat: "{jobname}.hdf",
+          grouppat: "{extra}/{stream}/{type}",
+          attr: {extra:"bar"}
+      },
+  ]
+#+end_src
+
+Note the inclusion of the ~extra~ attribute in the ~attr~ field.  It
+is included here in order to demonstrate how the full attribute set is
+a mix of those provided in the rule set and the message (or command
+line in the ~test-ruleset~ command).  In this simple case, it would
+also be possible to "hard-code" the ~extra~ value into the ~grouppat~.
+
+** Example run
+
+Run file server
+
+#+begin_example
+  $ wirecell-zpb file-server \
+     -n file-server -p flow -v debug \
+     -b tcp://127.0.0.1:5678 \
+     -r test/test_depos_ruleset.jsonnet
+#+end_example
+
+and then a WCT job to write
+
+#+begin_example
+  $ wire-cell -l stdout -L debug \
+      -c test/test_depos_extract.jsonnet
+#+end_example
+
+and then test the inverse, even keeping the server running:
+
+#+begin_example
+  $ wire-cell -l stdout -L debug \
+      -c test/test_depos_inject.jsonnet
+#+end_example
+
+
+
