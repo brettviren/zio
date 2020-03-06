@@ -1,0 +1,54 @@
+@startuml
+package "Broader Wire-Cell Graph" {
+        [Some Producers] as prod
+        [Some Consumers] as cons
+}
+
+
+package "Wire-Cell IData" {
+        storage ITensor1
+        storage ITensor2
+}
+package "Wire-Cell/ZIO Converts" {
+        [ZioTensorSink]
+        [ZioTensorSource]
+        [ZioGpuClient]
+}
+cloud "ZIO" {
+        queue "flow\nqueue" as flow
+        queue "work\nqueue" as work
+}
+cloud "ZIO Brokers, handlers, workers" {
+        [Flow Broker] as flowb
+        [Domo Broker] as domob
+        [HDF Reader] as hdfr
+        [HDF Writer] as hdfw
+        [GPU Worker] as gpuw
+
+        flow <--> flowb
+        flowb --> hdfw
+        flowb <-- hdfr
+
+        work <--> domob
+        domob <--> gpuw
+} 
+package "Resources" {
+        database HDF5 as hdf
+        frame GPU
+}        
+prod --> ITensor1
+prod --> ITensor2
+cons <-- ITensor1
+cons <-- ITensor2
+
+ITensor1 --> [ZioTensorSink]
+ITensor2 <-- [ZioTensorSource]
+[ZioTensorSink] --> flow
+[ZioTensorSource] <-- flow
+[ZioGpuClient] <--> work
+ITensor2 --> [ZioGpuClient]
+[ZioGpuClient] --> ITensor1
+hdfr <-- hdf
+hdfw --> hdf
+gpuw <--> GPU
+@enduml
