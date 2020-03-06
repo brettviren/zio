@@ -1,0 +1,45 @@
+#+title: The Big Picture
+#+setupfile: setup.org
+#+include: nav.org
+
+ZIO is a central part of a larger picture which encompasses both
+Wire-Cell Toolkit, DUNE FD DAQ and other asynchronous, distributed
+systems.  
+
+* Wire-Cell Toolkit Example
+
+The Wire-Cell Toolkit part is (badly) illustrated in the following
+diagram which represents *types* of connections and not their instances.
+As you examine this type graph keep in mind that each type of node or
+arrow may represent hundreds or thousands in an equivalent instance
+graph.
+
+[[file:big-picture.svg]]
+
+At the top of the diagram are some WCT components which are consumers
+and producers of data.  They represent a small fraction of a larger,
+arbitrary WCT job graph.  We focus on those that deal with data of
+interface type ~ITensorSet~.  This WCT data type has an equivalent ZIO
+message form ("TENS") and simple and efficient converters between the
+two.  Many WCT data interface types can be converted between
+~ITensorSet~ (eg, ~IFrame~ and ~IDepoSet~).  Such conversion is assumed to
+occur in the top "package" labeled "Broader Wire-Cell Graph".
+
+In order to scale WCT jobs across multiple computers and to access
+thread-unsafe resources in a safe and efficient manner, a mechanism to
+offload WCT data based on ZIO is used.  Two patterns for this offload
+are currently considered.
+
+
+The two patterns are identified by their message queues.
+
+- flow :: one way data transfer either out of or in to the WCT graph
+- domo :: asynchronous request/reply pattern based on Majordomo protocol
+
+In the diagram, the data *flow* queue is used to write data to or read data
+from HDF5 files.  The *domo* work queue is used to send data to the GPU for
+accelerated processing and return the results.  In principle, either
+the backend brokers or the back end workers/handlers can be replaced
+with other WCT graphs.  As with all asynchronous message passing
+systems care is needed to not design in a distributed deadlock.
+

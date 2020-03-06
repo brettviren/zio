@@ -6,19 +6,18 @@ package "Broader Wire-Cell Graph" {
 
 
 package "Wire-Cell IData" {
-        storage ITensor1
-        storage ITensor2
+        storage "ITensorSet" as tensors
 }
 package "Wire-Cell/ZIO Converts" {
         [ZioTensorSink]
         [ZioTensorSource]
         [ZioGpuClient]
 }
-cloud "ZIO" {
-        queue "flow\nqueue" as flow
-        queue "work\nqueue" as work
+cloud "ZIO Message Transfer\n" {
+        queue "flow queue\nFLOW/TENS msg" as flow
+        queue "domo queue\nTENS msg" as work
 }
-cloud "ZIO Brokers, handlers, workers" {
+package "ZIO Brokers, handlers, workers" {
         [Flow Broker] as flowb
         [Domo Broker] as domob
         [HDF Reader] as hdfr
@@ -36,18 +35,15 @@ package "Resources" {
         database HDF5 as hdf
         frame GPU
 }        
-prod --> ITensor1
-prod --> ITensor2
-cons <-- ITensor1
-cons <-- ITensor2
+prod --> tensors
+cons <-- tensors
 
-ITensor1 --> [ZioTensorSink]
-ITensor2 <-- [ZioTensorSource]
+tensors --> [ZioTensorSink]
+tensors <-- [ZioTensorSource]
 [ZioTensorSink] --> flow
 [ZioTensorSource] <-- flow
 [ZioGpuClient] <--> work
-ITensor2 --> [ZioGpuClient]
-[ZioGpuClient] --> ITensor1
+tensors <--> [ZioGpuClient]
 hdfr <-- hdf
 hdfw --> hdf
 gpuw <--> GPU

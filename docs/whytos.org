@@ -5,6 +5,7 @@
 During the course of development, a number of design documents are
 written to help solidify thoughts. 
 
+- An attempt at a [[file:big-picture.org][big picture]].
 - A [[file:node.org][node]] collects [[file:port.org][ports]] to implement a network of ZIO applications as a ported graph.
 - A [[file:peer.org][peer]] provides distributed discovery and presence
 - A [[file:messages.org][message]] schema is used for all ZIO messages.

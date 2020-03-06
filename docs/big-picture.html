@@ -3,10 +3,10 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-03-06 Fri 13:44 -->
+<!-- 2020-03-06 Fri 13:49 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>ZIO design discussion</title>
+<title>The Big Picture</title>
 <meta name="generator" content="Org mode" />
 <meta name="author" content="Brett Viren" />
 <style type="text/css">
@@ -161,6 +161,19 @@
   .footdef  { margin-bottom: 1em; }
   .figure { padding: 1em; }
   .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
   .inlinetask {
     padding: 10px;
     border: 2px solid gray;
@@ -186,7 +199,7 @@
 @licstart  The following is the entire license notice for the
 JavaScript code in this tag.
 
-Copyright (C) 2012-2019 Free Software Foundation, Inc.
+Copyright (C) 2012-2018 Free Software Foundation, Inc.
 
 The JavaScript code in this tag is free software: you can
 redistribute it and/or modify it under the terms of the GNU
@@ -234,7 +247,15 @@ for the JavaScript code in this tag.
  |
  <a accesskey="H" href="index.html"> HOME </a>
 </div><div id="content">
-<h1 class="title">ZIO design discussion</h1>
+<h1 class="title">The Big Picture</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org2bc9457">1. Wire-Cell Toolkit Example</a></li>
+</ul>
+</div>
+</div>
 <div class="nav">
 <ul class="org-ul">
 <li><a href="index.html">Main Page</a></li>
@@ -247,22 +268,67 @@ for the JavaScript code in this tag.
 </div>
 
 <p>
-During the course of development, a number of design documents are
-written to help solidify thoughts. 
+ZIO is a central part of a larger picture which encompasses both
+Wire-Cell Toolkit, DUNE FD DAQ and other asynchronous, distributed
+systems.  
 </p>
 
-<ul class="org-ul">
-<li>An attempt at a <a href="big-picture.html">big picture</a>.</li>
-<li>A <a href="node.html">node</a> collects <a href="port.html">ports</a> to implement a network of ZIO applications as a ported graph.</li>
-<li>A <a href="peer.html">peer</a> provides distributed discovery and presence</li>
-<li>A <a href="messages.html">message</a> schema is used for all ZIO messages.</li>
-<li>An <a href="outbox.html">outbox</a> gives "logger" type interface to emit free text strings or structured metrics</li>
-<li>A protocol called <a href="flow.html">flow</a> provides simpler message transfer than using ports directly</li>
-<li>A <a href="flow-broker.html">flow broker</a> brings flow clients together with server-side flow handlers, such as those that may manage file resources.</li>
-<li>A <a href="task-broker.html">task broker</a> implements a reliable service oriented task queue based on ZeroMQ majordomo design.</li>
+<div id="outline-container-org2bc9457" class="outline-2">
+<h2 id="org2bc9457"><span class="section-number-2">1</span> Wire-Cell Toolkit Example</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+The Wire-Cell Toolkit part is (badly) illustrated in the following
+diagram which represents <b>types</b> of connections and not their instances.
+As you examine this type graph keep in mind that each type of node or
+arrow may represent hundreds or thousands in an equivalent instance
+graph.
+</p>
 
-<li>Utility support to pack <a href="tensors.html">tensors</a> into messages.</li>
-</ul>
+
+<div class="figure">
+<p><object type="image/svg+xml" data="big-picture.svg" class="org-svg">
+Sorry, your browser does not support SVG.</object>
+</p>
+</div>
+
+<p>
+At the top of the diagram are some WCT components which are consumers
+and producers of data.  They represent a small fraction of a larger,
+arbitrary WCT job graph.  We focus on those that deal with data of
+interface type <code>ITensorSet</code>.  This WCT data type has an equivalent ZIO
+message form ("TENS") and simple and efficient converters between the
+two.  Many WCT data interface types can be converted between
+<code>ITensorSet</code> (eg, <code>IFrame</code> and <code>IDepoSet</code>).  Such conversion is assumed to
+occur in the top "package" labeled "Broader Wire-Cell Graph".
+</p>
+
+<p>
+In order to scale WCT jobs across multiple computers and to access
+thread-unsafe resources in a safe and efficient manner, a mechanism to
+offload WCT data based on ZIO is used.  Two patterns for this offload
+are currently considered.
+</p>
+
+
+<p>
+The two patterns are identified by their message queues.
+</p>
+
+<dl class="org-dl">
+<dt>flow</dt><dd>one way data transfer either out of or in to the WCT graph</dd>
+<dt>domo</dt><dd>asynchronous request/reply pattern based on Majordomo protocol</dd>
+</dl>
+
+<p>
+In the diagram, the data <b>flow</b> queue is used to write data to or read data
+from HDF5 files.  The <b>domo</b> work queue is used to send data to the GPU for
+accelerated processing and return the results.  In principle, either
+the backend brokers or the back end workers/handlers can be replaced
+with other WCT graphs.  As with all asynchronous message passing
+systems care is needed to not design in a distributed deadlock.
+</p>
+</div>
+</div>
 </div>
 </body>
 </html>
