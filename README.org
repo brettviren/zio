@@ -1,8 +1,8 @@
-#+title: ZIO - a simplified, high level Python and C++ interface to ZeroMQ and Zyre.
+#+title: ZIO - a high level Python and C++ interface to ZeroMQ, Zyre and others.
 
 ZIO provides a high-level interface to ZeroMQ, Zyre and some patterns
 described in the [[http://zguide.zeromq.org/][zguide]].  It also provides a /ported graph/ model for
-constructing a network topology.
+constructing an application over a network topology.
 
 Documentation is at https://brettviren.github.io/zio.
 

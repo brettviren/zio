@@ -100,7 +100,7 @@ Optional:
 
 - part :: integer, the message payload part index containing the
           packed tensor element array associated with this metadata
-          object.  Defaults to using same payload index as ~TENS~
+          object.  Defaults to using same payload index as ~TENS.tensors~
           array index.
 
 - order :: vector of integers of size $\mathcal{N}_{dim}$, gives the

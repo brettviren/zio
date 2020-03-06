@@ -196,6 +196,17 @@ class Message:
         self.prefix.label = val
 
     @property
+    def label_object(self):
+        if not self.label:
+            return dict()
+        if type(self.label) is bytes:
+            return json.loads(self.decode('utf-8'))
+        return json.loads(self.label)
+    @label.setter
+    def label_object(self, val):
+        self.label = json.dumps(val)
+        
+    @property
     def origin(self):
         return self.coord.origin
     @origin.setter

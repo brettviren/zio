@@ -7,6 +7,8 @@ def objectify(morl):
     Return a flow object.
 
     The morl may be a zio.Message or a zio.Message.label
+
+    See also zio.Message.label_object
     '''
     if not morl:
         return dict()
@@ -39,4 +41,13 @@ def switch_direction(fobj):
         raise KeyError('direction')
     return fobj
 
-        
+def message_to_dict(msg):
+    '''
+    Return a simple dictionary of message header info.
+    '''
+    d = objectify(msg)
+    d['origin'] = msg.origin
+    d['granule'] = msg.granule
+    d['seqno'] = msg.seqno
+    return d
+
