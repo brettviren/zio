@@ -101,8 +101,13 @@ def test_ruleset(ruleset, verbosity, attrs):
               help="Set logging level (debug, info, warning, error, critical)")
 @click.argument("ruleset")
 def file_server(bind, format, name, port, verbosity, ruleset):
-    '''
-    Serve files over ZIO.
+    '''Serve files over ZIO.
+
+    This brings back-end reader and writer handlers to external
+    clients via the flow broker.  A ruleset factory dynamically spawns
+    handlers based on incoming BOT flow messages.  The file format
+    maps to different flavors of handlers.
+
     '''
     import zmq
     from zio import Port, Message, Node
@@ -110,7 +115,8 @@ def file_server(bind, format, name, port, verbosity, ruleset):
     from zio.flow.factories import Ruleset as Factory
     from zio.jsonnet import load as jsonnet_load
 
-    # for now we only support HDF
+    # For now we only support HDF.  In future this may be replaced by
+    # a mapping from supported format to module providing handlers
     from .hdf import writer, reader
     assert(format == "hdf")
 
@@ -122,10 +128,10 @@ def file_server(bind, format, name, port, verbosity, ruleset):
     ctx = zmq.Context()
     factory = Factory(ctx, ruleset, 
                       wactors=((writer.file_handler,
-                                ("inproc://hdfwriter{port}", (pbmod, frompb))),
+                                ("inproc://"+format+"writer{port}")),
                                (writer.client_handler,
                                 (bind,))),
-                      ractor=(reader.handler,(bind, pbmod, topb)))
+                      ractor=(reader.handler,(bind,)))
 
     node = Node(name)
     sport = node.port(port, zmq.SERVER)
@@ -149,3 +155,47 @@ def file_server(bind, format, name, port, verbosity, ruleset):
             break
 
     broker.stop()
+
+@cli.command("gen-tens")
+@click.option("-n","--number",default=10,
+              help="Number of TENS messages to generate")
+@click.option("-c","--connect", default="tcp://127.0.0.1:22351",
+              help="An address to which this client shall connect")
+@click.option("-s","--shape", default="6000,800",
+              help="Comma separated list of integers giving tensor shape")
+@click.argument("attrs", nargs=-1)
+def gen_tens(number, connect, shape, attrs):
+    '''
+    Generate and flow some TENS messages.
+    '''
+    import zmq
+    from zio import Port, Message, Node
+    from zio.flow import Flow
+
+    cnode = Node("client")
+    cport = cnode.port("cport", zmq.CLIENT)
+    cport.connect(connect)
+    cnode.online()
+    cflow = Flow(cport)
+    
+    shape = map(int, shape.split(','))
+    size = 1
+    for s in shape:
+        size *= s
+
+    attr = dict(credit=2, direction="inject")
+    bot = Message(label=json.dumps(attr))
+    cflow.send_bot(bot)
+    bot = cflow.recv_bot(1000);
+    assert(bot)
+
+    tens_attr = dict(shape=shape, word=1, dtype='I')
+    attr["TENS"] = dict(tensors=[tens_attr], metadata=dict(source="gen-tens"))
+    label = json.dumps(attr)
+    payload = [b'X'*size]
+
+    for count in range(number):
+        bot = Message(label=label,payload=payload)
+        cflow.put(bot)
+        
+    cflow.send_eot(Message())

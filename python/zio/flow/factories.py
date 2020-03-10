@@ -40,8 +40,8 @@ class Ruleset:
 
         ruleset: array of dictionary
 
-            A ruleset is a sequence of rule specifications, each of
-            which is a dictionary with these attributes:
+            A ruleset is a sequence of rule specifications (see Rule
+            Attributes below).
 
         wactors : 2-tuple of 2-tuples specifing file writing actors 
 
@@ -51,8 +51,8 @@ class Ruleset:
 
             See below
 
-        The "*actors" args are 2-tuples specifying actor functions an
-        optionally user data arguments for writing and reading.
+        The "*actors" args are 2-tuples specifying actor functions and
+        optional user data arguments for writing and reading.
 
         The head of the 2-tuple is for the file actor which directly
         manages some file resource.  The tail is for the client actor
