@@ -5,6 +5,9 @@ import click
 from .. import rules
 from .cli import cli
 
+import logging
+log = logging.getLogger("zio")
+
 def typeit(v):
     try:
         return int(v)
@@ -17,7 +20,7 @@ def typeit(v):
     return v                    # fixme: should recurs...
 
 @cli.command("test-ruleset")
-@click.option("-r","--ruleset",type=click.Path(),
+@click.option("-r","--ruleset",type=click.Path(), required=True,
               help="A file in JSON or Jsonnet format providing the ruleset")
 @click.option("-v","--verbosity", default="info",
               help="Set logging level (debug, info, warning, error, critical)")
@@ -86,8 +89,6 @@ def test_ruleset(ruleset, verbosity, attrs):
         
 
 @cli.command("file-server")
-@click.option("-r","--ruleset", type=click.Path(), required=True,
-              help="A file in JSON or Jsonnet format providing the ruleset")
 @click.option("-b","--bind", default="tcp://127.0.0.1:22351",
               help="An address to which the server shall bind")
 @click.option("-f","--format", default="hdf", type=click.Choice(["hdf"]),
@@ -98,7 +99,8 @@ def test_ruleset(ruleset, verbosity, attrs):
               help="The port name for the server socket")
 @click.option("-v","--verbosity", default="info",
               help="Set logging level (debug, info, warning, error, critical)")
-def file_server(ruleset, bind, format, name, port, verbosity):
+@click.argument("ruleset")
+def file_server(bind, format, name, port, verbosity, ruleset):
     '''
     Serve files over ZIO.
     '''
