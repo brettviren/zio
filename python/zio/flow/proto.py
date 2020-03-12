@@ -10,7 +10,7 @@ from ..message import Message
 from .util import *
 
 import logging
-log = logging.getLogger("zpb")
+log = logging.getLogger("zio")
 
 from enum import Enum
 class Direction(Enum):
@@ -176,6 +176,7 @@ class Flow:
         msg = Message(form='FLOW', label=stringify('PAY', credit=nsent))
         self.send_seqno += 1
         msg.seqno = self.send_seqno
+        msg.routing_id = self.routing_id
         log.debug(f'flush_pay: {self.send_seqno} {msg}')
         if self.send_seqno < 0:
             raise RuntimeError("must recv BOT before PAY")

@@ -10,7 +10,7 @@ import zmq
 import zio
 from .util import objectify, switch_direction
 import logging
-log = logging.getLogger("zpb")
+log = logging.getLogger("zio")
 
 class Broker:
     def __init__(self, server, factory):

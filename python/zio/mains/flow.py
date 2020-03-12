@@ -89,7 +89,7 @@ def test_ruleset(ruleset, verbosity, attrs):
         
 
 @cli.command("file-server")
-@click.option("-b","--bind", default="tcp://127.0.0.1:22351",
+@click.option("-b","--bind", default="tcp://127.0.0.1:5555",
               help="An address to which the server shall bind")
 @click.option("-f","--format", default="hdf", type=click.Choice(["hdf"]),
               help="File format")
@@ -156,15 +156,17 @@ def file_server(bind, format, name, port, verbosity, ruleset):
 
     broker.stop()
 
-@cli.command("gen-tens")
+@cli.command("send-tens")
 @click.option("-n","--number",default=10,
               help="Number of TENS messages to generate")
-@click.option("-c","--connect", default="tcp://127.0.0.1:22351",
+@click.option("-c","--connect", default="tcp://127.0.0.1:5555",
               help="An address to which this client shall connect")
 @click.option("-s","--shape", default="6000,800",
               help="Comma separated list of integers giving tensor shape")
+@click.option("-v","--verbosity", default="info",
+              help="Set logging level (debug, info, warning, error, critical)")
 @click.argument("attrs", nargs=-1)
-def gen_tens(number, connect, shape, attrs):
+def send_tens(number, connect, shape, verbosity, attrs):
     '''
     Generate and flow some TENS messages.
     '''
@@ -172,21 +174,24 @@ def gen_tens(number, connect, shape, attrs):
     from zio import Port, Message, Node
     from zio.flow import Flow
 
+    log.level = getattr(logging, verbosity.upper(), "INFO")
+
     cnode = Node("client")
     cport = cnode.port("cport", zmq.CLIENT)
     cport.connect(connect)
     cnode.online()
     cflow = Flow(cport)
     
-    shape = map(int, shape.split(','))
+    shape = list(map(int, shape.split(',')))
     size = 1
     for s in shape:
         size *= s
 
-    attr = dict(credit=2, direction="inject")
+    attr = dict(credit=2, direction="extract")
     bot = Message(label=json.dumps(attr))
     cflow.send_bot(bot)
-    bot = cflow.recv_bot(1000);
+    bot = cflow.recv_bot(5000);
+    log.debug('send-tens: BOT handshake done')
     assert(bot)
 
     tens_attr = dict(shape=shape, word=1, dtype='I')
@@ -195,7 +200,62 @@ def gen_tens(number, connect, shape, attrs):
     payload = [b'X'*size]
 
     for count in range(number):
-        bot = Message(label=label,payload=payload)
-        cflow.put(bot)
+        msg = Message(label=label,payload=payload)
+        cflow.put(msg)
+        log.debug(f'send-tens: {count}: {msg}')
         
+    log.debug(f'send-tens: send EOT')
     cflow.send_eot(Message())
+    log.debug(f'send-tens: recv EOT (waiting)')
+    cflow.recv_eot()
+    log.debug(f'send-tens: going offline')
+    cnode.offline()
+    log.debug(f'send-tens: end')
+    
+
+
+@cli.command("recv-tens")
+@click.option("-n","--number",default=10,
+              help="Number of TENS messages to generate")
+@click.option("-b","--bind", default="tcp://127.0.0.1:5555",
+              help="An address to which this client shall bind")
+@click.option("-s","--shape", default="6000,800",
+              help="Comma separated list of integers giving tensor shape")
+@click.option("-v","--verbosity", default="info",
+              help="Set logging level (debug, info, warning, error, critical)")
+@click.argument("attrs", nargs=-1)
+def recv_tens(number, bind, shape, verbosity, attrs):
+    '''
+    Catch some TENS messages from flow and dump them.
+    '''
+    import zmq
+    from zio import Port, Message, Node
+    from zio.flow import Flow
+
+    log.level = getattr(logging, verbosity.upper(), "INFO")
+
+    snode = Node("server")
+    sport = snode.port("sport", zmq.SERVER)
+    sport.bind(bind)
+    snode.online()
+    sflow = Flow(sport)
+
+    bot = sflow.recv_bot();
+    assert (bot)
+    lobj = bot.label_object
+    lobj["direction"] = "inject"
+    bot.label_object = lobj
+    sflow.send_bot(bot)
+    log.debug('recv-tens: BOT handshake done')
+    sflow.flush_pay()
+    log.debug('recv-tens: looping')
+    while True:
+        msg = sflow.get(1000)
+        log.info(f'recv-tens: {msg}')
+        if not msg or 'EOT' == msg.label_object['flow']:
+            log.debug('recv-tens: got EOT')
+            sflow.send_eot()     # answer
+            break
+        
+    snode.offline()
+    log.debug(f'recv-tens: end')    

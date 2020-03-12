@@ -4,6 +4,7 @@ Python interface to ZIO messages
 '''
 
 import zmq
+import json
 import struct
 from collections import namedtuple
 
@@ -202,7 +203,8 @@ class Message:
         if type(self.label) is bytes:
             return json.loads(self.decode('utf-8'))
         return json.loads(self.label)
-    @label.setter
+
+    @label_object.setter
     def label_object(self, val):
         self.label = json.dumps(val)
         
