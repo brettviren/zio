@@ -116,12 +116,11 @@ class Broker:
             return
 
         # factory refuses
-        log.debug (f"broker factory rejects {msg.label}")
         fobj['flow'] = 'EOT'
         msg.label = json.dumps(fobj)
         msg.routing_id = rid
         self.server.send(msg)
-        raise RuntimeError('broker factory rejects {msg.label}')
+        raise RuntimeError('broker factory rejects ' + str(msg.label))
 
 
     def stop(self):

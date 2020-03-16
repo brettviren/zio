@@ -115,7 +115,7 @@ class Ruleset:
 
         attr : dictionary
         
-            An extra dictionary of attributes updated on the
+            An optional, extra dictionary of attributes updated on the
             dictionary of message attributes prior to applying to the
             rule or either patterns.
 
@@ -134,7 +134,7 @@ class Ruleset:
         '''
         attr = message_to_dict(bot)
         
-        cid = attr['cid']
+        cid = attr['cid']       # required
         log.info('factory Ruleset called %d, have %d rules' % (
             (cid, len(self.ruleset))))
         for maybe in self.ruleset:
@@ -145,7 +145,7 @@ class Ruleset:
             if not tf:
                 log.debug ("rule does not apply")
                 continue
-            rattr = dict(maybe["attr"], **attr)
+            rattr = dict(maybe.get("attr",{}), **attr)
             filename = maybe["filepat"].format(**rattr)
             rw = maybe["rw"][0]
             log.debug(f'{filename} ({rw})')
@@ -176,7 +176,7 @@ class Ruleset:
             wfile = self.writers[filename]
         except KeyError:
             wactor, wargs = self.wactors[0]
-            wfile = ZActor(self.ctx, wactor, filename, *wargs)
+            wfile = ZActor(self.ctx, wactor, filename, wargs)
             waddr = wfile.pipe.recv_string()
             if not waddr:
                 err = f"failed to bind any {self.addrpat} for {filename}"

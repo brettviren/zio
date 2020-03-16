@@ -45,13 +45,17 @@ class TensWriter:
     def save(self, msg):
 #        log.debug(f'save: {msg}')
         fobj = msg.label_object
+        if fobj["flow"] == "BOT":
+            return
+
         try:
-            tens = fobj["TENS"]
-            tensors = tens["tensors"]
+            tens = fobj.pop("TENS")
+            tensors = tens.pop("tensors")
         except KeyError:
             log.error('No TENS label attribute')
-            log.error('{msg}')
+            log.error(f'{msg}')
             return
+        user_md = tens.get("metadata",{})
 
         gn = self.seqno_interp % msg.seqno
         seq = self.group.get(gn, None)
@@ -64,29 +68,42 @@ class TensWriter:
 
         seq.attrs["origin"] = msg.origin
         seq.attrs["granule"] = msg.granule
+
         for k,v in fobj.items():
             if k in ["direction"]:
                 continue
-            seq.attrs[k] = v
-        
+            try:
+                seq.attrs[k] = v
+            except TypeError as te:
+                ot = type(v)
+                log.error(f'can not serialize type {ot} for key {k}')
+                continue
+                
         parts = msg.toparts()
+        parts = parts[2:]       # skip headers
+        nparts = len(parts)
         for tenind, tenmd in enumerate(tensors):
-            part = tenmd.get('part', tenind)
+            part = int(tenmd.get('part', tenind))
             ten = parts[part]
             
             # required
-            word = tenmd['word']
-            shape = tenmd['shape']
-            dtype = tenmd['dtype']
+            sword = str(tenmd['word'])
+            shape = list(tenmd['shape'])
+            dtype = str(tenmd['dtype'])
 
-            data = numpy.frombuffer(parts[part], dtype=dtype+word).reshape(shape)
+            log.debug(f'TENS PART: {tenind}/{nparts} {dtype} {sword} {shape}')
+
+            data = numpy.frombuffer(ten, dtype=dtype+sword).reshape(shape)
             ds = seq.create_dataset(self.part_interp % part,
                                     data = data,
                                     chunks = True)
 
+        if user_md:
+            ds = seq.create_dataset("metadata", data = numpy.zeros((0,)))
+            ds.attrs.update(user_md)
 
 
-def file_handler(ctx, pipe, filename, addrpat, wargs):
+def file_handler(ctx, pipe, filename, *wargs):
     '''An actor that marshals messages from socket to file.
 
     Parameters
@@ -96,7 +113,9 @@ def file_handler(ctx, pipe, filename, addrpat, wargs):
 
         Name of an HDF file in which to write
 
-    addrpat : string
+    wargs : tuple of args
+
+    wargs[0] : string (address pattern)
 
         An f-string formatted with a "port" parameter that should
         resolve to a legal ZeroMQ socket address.  When a successful
@@ -104,11 +123,9 @@ def file_handler(ctx, pipe, filename, addrpat, wargs):
         returned through the pipe.  If no successful address can be
         bound, an empty string is returned as an error indicator.
 
-    wargs : tuple
-
-        Args passed to Writer.
-
     '''
+    wargs = list(wargs)
+    addrpat = wargs.pop(0)
     log.debug(f'actor: writer("{filename}", "{addrpat}")')
     fp = h5py.File(filename,'w')
     log.debug(f'opened {filename}')
@@ -131,10 +148,10 @@ def file_handler(ctx, pipe, filename, addrpat, wargs):
 
     while True:
         for which,_ in poller.poll():
-            if not which:
-                return
-            if which == pipe: # signal exit
+
+            if not which or which == pipe: # signal exit
                 log.debug(f'writer for {filename} exiting')
+                fp.close()
                 return
 
             # o.w. we have flow
@@ -151,9 +168,13 @@ def file_handler(ctx, pipe, filename, addrpat, wargs):
             fw = flow_writer.get(path, None)
             if fw is None:
                 sg = fp.get(path, None) or fp.create_group(path)
-                fw = flow_writer[path] = Writer(sg, *wargs)
+                # note: in principle/future, TensWriter type can be
+                # made an arg to support other message formats.
+                fw = flow_writer[path] = TensWriter(sg, *wargs)
 
             fw.save(msg)
+            log.debug(f'flush {filename}')
+            fp.flush()
                 
     return
 
@@ -182,8 +203,8 @@ def client_handler(ctx, pipe, bot, rule_object, writer_addr, broker_addr):
     '''
     # An HDF path to be added to every message we send to writer.
     mattr = message_to_dict(bot)
-    rattr = dict(rule_object["attr"], **mattr)
-    base_path =  rule_object["grouppat"].format(**rattr)
+    rattr = dict(rule_object.get("attr",{}), **mattr)
+    base_path =  rule_object.get("grouppat","/").format(**rattr)
     log.debug(f'client_handler(msg, "{base_path}", "{broker_addr}", "{writer_addr}")')
     log.debug(bot)
     pipe.signal()

@@ -47,11 +47,7 @@ def test_ruleset(ruleset, verbosity, attrs):
         log.debug(f'attr: {attr}')
 
         def dump(errtype, err):
-            log.error(f'{errtype} "{err}"')
-            log.error('\n%s' % (robj['rule'],))
-            log.error('\n%s' % (robj['attr'],))
-            log.error('\n%s' % (attr,))
-            
+            log.error(f'{errtype} "{err}"\n{rule}\n{attr}')
 
         # do parsing
         try:
@@ -117,7 +113,7 @@ def file_server(bind, format, name, port, verbosity, ruleset):
 
     # For now we only support HDF.  In future this may be replaced by
     # a mapping from supported format to module providing handlers
-    from .hdf import writer, reader
+    from zio.flow.hdf import writer, reader
     assert(format == "hdf")
 
     log.level = getattr(logging, verbosity.upper(), "INFO")
@@ -139,6 +135,7 @@ def file_server(bind, format, name, port, verbosity, ruleset):
     node.online()    
     log.info(f'broker {name}:{port} online at {bind}')
 
+    # this may throw
     broker = Broker(sport, factory)
 
     log.info(f'broker {name} entering loop')
@@ -150,9 +147,8 @@ def file_server(bind, format, name, port, verbosity, ruleset):
             log.debug(f'broker {name} is lonely')
             log.debug(node.peer.peers)
         except Exception as e:
-            log.critical(e)
-            raise
-            break
+            log.error(e)
+            continue
 
     broker.stop()
 
@@ -194,7 +190,7 @@ def send_tens(number, connect, shape, verbosity, attrs):
     log.debug('send-tens: BOT handshake done')
     assert(bot)
 
-    tens_attr = dict(shape=shape, word=1, dtype='I')
+    tens_attr = dict(shape=shape, word=1, dtype='u') # unsigned char
     attr["TENS"] = dict(tensors=[tens_attr], metadata=dict(source="gen-tens"))
     label = json.dumps(attr)
     payload = [b'X'*size]
