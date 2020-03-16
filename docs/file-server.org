@@ -138,7 +138,9 @@ a mix of those provided in the rule set and the message (or command
 line in the ~test-ruleset~ command).  In this simple case, it would
 also be possible to "hard-code" the ~extra~ value into the ~grouppat~.
 
-** Example run
+* Example runs
+
+** Single client
 
 Run the file server in one terminal:
 
@@ -161,6 +163,8 @@ When that competes, this test will stream the content back
 Note that ~stream=stream~ command line argument sets an additional
 attribute required by the rule sets in ~file-server.jsonnet~.  The rules
 use ~stream~ to set a portion of the HDF5 group path.
+
+** Multiple clients
 
 A larger test using [[http://www.chrismytton.uk/shoreman/][shoreman]] to run many writers.
 

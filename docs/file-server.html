@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-03-16 Mon 14:59 -->
+<!-- 2020-03-16 Mon 15:55 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>ZIO Flow Broker File Server</title>
@@ -252,12 +252,17 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org1a5d527">1. Getting started</a></li>
-<li><a href="#org75e760c">2. Attribute rules</a>
+<li><a href="#orgec64764">1. Getting started</a></li>
+<li><a href="#org6375313">2. Attribute rules</a>
 <ul>
-<li><a href="#orgaeda2a9">2.1. Overview</a></li>
-<li><a href="#orgb406cf8">2.2. Testing a rule set</a></li>
-<li><a href="#org0b70b87">2.3. Example run</a></li>
+<li><a href="#org797f7a1">2.1. Overview</a></li>
+<li><a href="#org0a6e4e3">2.2. Testing a rule set</a></li>
+</ul>
+</li>
+<li><a href="#orgefa5064">3. Example runs</a>
+<ul>
+<li><a href="#org09d5380">3.1. Single client</a></li>
+<li><a href="#org04c3740">3.2. Multiple clients</a></li>
 </ul>
 </li>
 </ul>
@@ -282,8 +287,8 @@ clients need not know what file technology or detailed schema is
 employed by the back end handlers.
 </p>
 
-<div id="outline-container-org1a5d527" class="outline-2">
-<h2 id="org1a5d527"><span class="section-number-2">1</span> Getting started</h2>
+<div id="outline-container-orgec64764" class="outline-2">
+<h2 id="orgec64764"><span class="section-number-2">1</span> Getting started</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 Command line access to the file server is via the <code>zio</code> Python module
@@ -310,8 +315,8 @@ to be run from inside other Python applications.
 </div>
 </div>
 
-<div id="outline-container-org75e760c" class="outline-2">
-<h2 id="org75e760c"><span class="section-number-2">2</span> Attribute rules</h2>
+<div id="outline-container-org6375313" class="outline-2">
+<h2 id="org6375313"><span class="section-number-2">2</span> Attribute rules</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 The flow broker file server brings together ZIO data flow clients with
@@ -322,8 +327,8 @@ rules</i>.
 </p>
 </div>
 
-<div id="outline-container-orgaeda2a9" class="outline-3">
-<h3 id="orgaeda2a9"><span class="section-number-3">2.1</span> Overview</h3>
+<div id="outline-container-org797f7a1" class="outline-3">
+<h3 id="org797f7a1"><span class="section-number-3">2.1</span> Overview</h3>
 <div class="outline-text-3" id="text-2-1">
 <p>
 A set of rules are given to the server in a JSON or Jsonnet file:
@@ -389,8 +394,8 @@ applied to servicing that flow.
 </div>
 </div>
 
-<div id="outline-container-orgb406cf8" class="outline-3">
-<h3 id="orgb406cf8"><span class="section-number-3">2.2</span> Testing a rule set</h3>
+<div id="outline-container-org0a6e4e3" class="outline-3">
+<h3 id="org0a6e4e3"><span class="section-number-3">2.2</span> Testing a rule set</h3>
 <div class="outline-text-3" id="text-2-2">
 <p>
 Rulesets may be elaborate and deepened on attributes that are supplied
@@ -452,10 +457,15 @@ also be possible to "hard-code" the <code>extra</code> value into the <code>grou
 </p>
 </div>
 </div>
+</div>
 
-<div id="outline-container-org0b70b87" class="outline-3">
-<h3 id="org0b70b87"><span class="section-number-3">2.3</span> Example run</h3>
-<div class="outline-text-3" id="text-2-3">
+<div id="outline-container-orgefa5064" class="outline-2">
+<h2 id="orgefa5064"><span class="section-number-2">3</span> Example runs</h2>
+<div class="outline-text-2" id="text-3">
+</div>
+<div id="outline-container-org09d5380" class="outline-3">
+<h3 id="org09d5380"><span class="section-number-3">3.1</span> Single client</h3>
+<div class="outline-text-3" id="text-3-1">
 <p>
 Run the file server in one terminal:
 </p>
@@ -485,7 +495,12 @@ Note that <code>stream=stream</code> command line argument sets an additional
 attribute required by the rule sets in <code>file-server.jsonnet</code>.  The rules
 use <code>stream</code> to set a portion of the HDF5 group path.
 </p>
+</div>
+</div>
 
+<div id="outline-container-org04c3740" class="outline-3">
+<h3 id="org04c3740"><span class="section-number-3">3.2</span> Multiple clients</h3>
+<div class="outline-text-3" id="text-3-2">
 <p>
 A larger test using <a href="http://www.chrismytton.uk/shoreman/">shoreman</a> to run many writers.
 </p>
