@@ -204,6 +204,7 @@ def client_handler(ctx, pipe, bot, rule_object, writer_addr, broker_addr):
     # An HDF path to be added to every message we send to writer.
     mattr = message_to_dict(bot)
     rattr = dict(rule_object.get("attr",{}), **mattr)
+    log.info(f'{rattr}')
     base_path =  rule_object.get("grouppat","/").format(**rattr)
     log.debug(f'client_handler(msg, "{base_path}", "{broker_addr}", "{writer_addr}")')
     log.debug(bot)

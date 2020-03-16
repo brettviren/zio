@@ -19,6 +19,20 @@ def typeit(v):
         pass
     return v                    # fixme: should recurs...
 
+def attrify(attrs):
+    '''
+    Return dictionary of attribute values parsed from list of "k=v" strings.
+    '''
+    ret = dict()
+    for attr in attrs:
+        try:
+            k,v = attr.split('=', 1)
+        except ValueError:
+            log.error(f'failed to parse {attr}')
+            continue
+        ret[k] = typeit(v)
+    return ret
+
 @cli.command("test-ruleset")
 @click.option("-r","--ruleset",type=click.Path(), required=True,
               help="A file in JSON or Jsonnet format providing the ruleset")
@@ -31,14 +45,7 @@ def test_ruleset(ruleset, verbosity, attrs):
     '''
     log.level = getattr(logging, verbosity.upper(), "INFO")
 
-    msg_attr = dict()
-    for attr in attrs:
-        try:
-            k,v = attr.split('=', 1)
-        except ValueError:
-            log.error(f'failed to parse {attr}')
-            continue
-        msg_attr[k] = typeit(v)
+    msg_attr = attrify(attrs)
 
     rs = jsonnet.load(ruleset)
     # fixme: move this to a module
@@ -172,6 +179,8 @@ def send_tens(number, connect, shape, verbosity, attrs):
 
     log.level = getattr(logging, verbosity.upper(), "INFO")
 
+    msg_attr = attrify(attrs)
+
     cnode = Node("client")
     cport = cnode.port("cport", zmq.CLIENT)
     cport.connect(connect)
@@ -183,7 +192,7 @@ def send_tens(number, connect, shape, verbosity, attrs):
     for s in shape:
         size *= s
 
-    attr = dict(credit=2, direction="extract")
+    attr = dict(credit=2, direction="extract", **msg_attr)
     bot = Message(label=json.dumps(attr))
     cflow.send_bot(bot)
     bot = cflow.recv_bot(5000);
@@ -229,6 +238,8 @@ def recv_tens(number, bind, shape, verbosity, attrs):
     from zio.flow import Flow
 
     log.level = getattr(logging, verbosity.upper(), "INFO")
+
+    msg_attr = attrify(attrs)
 
     snode = Node("server")
     sport = snode.port("sport", zmq.SERVER)
