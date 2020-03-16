@@ -21,6 +21,11 @@ class TensReader:
     details.
 
     '''
+
+    # needs to match TensWriter
+    seqno_interp = "%04d"
+    part_interp = "%02d"
+
     def __init__(self, group):
         assert(group)
         self.group = group
@@ -28,13 +33,17 @@ class TensReader:
 
     def read(self):
         'Read and return a message'
-        gn = str(self.seqno)
+        # start at 1 because writer doesn't save anything for BOT
         self.seqno += 1         # fixme: should iterate seqnos over subgroups?
+        gn = self.seqno_interp % self.seqno
         seq = self.group.get(gn)
         if not seq:
-            log.error(f'failed to get {gn} from {self.group}')
+            log.error(f'TensReader: failed to get {gn} from {self.group}')
             return
-        attrs = dict(seq.attrs)
+
+        tens = seq.get("tensors")
+
+        attrs = dict(tens.attrs)
         msg = Message(form='FLOW', 
                       origin = attrs.pop("origin"),
                       granule = attrs.pop("granule"),
@@ -42,22 +51,28 @@ class TensReader:
         for k,v in attrs.items():
             if type(v) == numpy.int64:
                 attrs[k] = int(v)
+
+        umd = seq.get("metadata")
+        if umd:
+            attrs["metadata"] = dict(umd)
         msg.label_object = attrs
 
-        partnums = [int(p) for p in seq.keys()]
+        partnums = [int(p) for p in tens.keys()]
         ntens = len(partnums)
         maxpart = max(partnums)
         payload = [None]*(maxpart+1)
         tensors = list()
-        for part, ds in seq.items():
+        for part, ds in tens.items():
             part = int(part)
             # fixme there are more TENS attr which might be needed if
             # the file wasn't written by writer.TensWriter!
             md = dict(ds.attrs)
+            dtype = str(ds.dtype)
+            log.debug(f'TENS part {part} {dtype} {type(ds.dtype)} {ds.shape}')
             md.update(dict(
                 shape = ds.shape,
-                dtype = ds.dtype[0],
-                word = ds.dtype[1],
+                dtype = ds.dtype.kind,
+                word = ds.dtype.alignment,
                 part = part))
             tensors.append(md)
             payload[part] = ds[:].tostring()
@@ -67,12 +82,13 @@ class TensReader:
 
 
 def handler(ctx, pipe, bot, rule_object, filename, broker_addr, *rargs):
+
     log.debug(f'actor: reader "{filename}"')
     fp = h5py.File(filename,'r')
     
     mattr = message_to_dict(bot)
-    rattr = dict(rule_object["attr"], **mattr)
-    base_path =  rule_object["grouppat"].format(**rattr)
+    rattr = dict(rule_object.get("attr",{}), **mattr)
+    base_path =  rule_object.get("grouppat","/").format(**rattr)
     log.debug(f'reader(msg, "{base_path}", "{broker_addr}")')
     log.debug(bot)
     pipe.signal()
@@ -88,7 +104,7 @@ def handler(ctx, pipe, bot, rule_object, filename, broker_addr, *rargs):
     if not sg:
         log.error(f'reader failed to get {base_path} from {filename}')
         return
-    fr = Reader(sg, *rargs)
+    fr = TensReader(sg, *rargs)
     obot = fr.read()
 
     # fixme: something should be done to compare old and new and

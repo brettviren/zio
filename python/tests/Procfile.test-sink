@@ -1,4 +1,4 @@
-server: zio file-server python/tests/file-sink.jsonnet
+server: zio file-server python/tests/file-server.jsonnet
 client0: zio send-tens stream=stream0
 client1: zio send-tens stream=stream1
 client2: zio send-tens stream=stream2

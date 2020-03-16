@@ -181,8 +181,8 @@ def send_tens(number, connect, shape, verbosity, attrs):
 
     msg_attr = attrify(attrs)
 
-    cnode = Node("client")
-    cport = cnode.port("cport", zmq.CLIENT)
+    cnode = Node("send-tens")
+    cport = cnode.port("output", zmq.CLIENT)
     cport.connect(connect)
     cnode.online()
     cflow = Flow(cport)
@@ -217,9 +217,64 @@ def send_tens(number, connect, shape, verbosity, attrs):
     cnode.offline()
     log.debug(f'send-tens: end')
     
-
-
 @cli.command("recv-tens")
+@click.option("-n","--number",default=10,
+              help="Number of TENS messages to recv before exiting, 0=forever")
+@click.option("-c","--connect", default="tcp://127.0.0.1:5555",
+              help="An address to which this client shall connect")
+@click.option("-v","--verbosity", default="info",
+              help="Set logging level (debug, info, warning, error, critical)")
+@click.argument("attrs", nargs=-1)
+def recv_tens(number, connect, verbosity, attrs):
+    '''
+    Client to recv flow of TENS messages.
+    '''
+    import zmq
+    from zio import Port, Message, Node
+    from zio.flow import Flow
+
+    log.level = getattr(logging, verbosity.upper(), "INFO")
+
+    msg_attr = attrify(attrs)
+
+    cnode = Node("recv-tens")
+    cport = cnode.port("input", zmq.CLIENT)
+    cport.connect(connect)
+    cnode.online()
+    cflow = Flow(cport)
+    
+    attr = dict(credit=2, direction="inject", **msg_attr)
+    bot = Message(label=json.dumps(attr))
+    cflow.send_bot(bot)
+    bot = cflow.recv_bot(5000);
+    log.debug('recv-tens: BOT handshake done')
+    assert(bot)
+
+    count = 0
+    while True:
+        if number > 0 and count == number:
+            break
+        ++count
+        msg = cflow.get()
+        log.info(f'recv-tens: {count}: {msg}')
+        if msg is None:
+            cflow.send_eot()
+            cnode.offline()
+            log.debug('recv-tens: EOT whille receiving')
+            return
+        
+    log.debug(f'recv-tens: send EOT')
+    cflow.send_eot(Message())
+    log.debug(f'recv-tens: recv EOT (waiting)')
+    cflow.recv_eot()
+    log.debug(f'recv-tens: going offline')
+    cnode.offline()
+    log.debug(f'recv-tens: end')
+    
+
+
+
+@cli.command("recv-server")
 @click.option("-n","--number",default=10,
               help="Number of TENS messages to generate")
 @click.option("-b","--bind", default="tcp://127.0.0.1:5555",
@@ -229,9 +284,9 @@ def send_tens(number, connect, shape, verbosity, attrs):
 @click.option("-v","--verbosity", default="info",
               help="Set logging level (debug, info, warning, error, critical)")
 @click.argument("attrs", nargs=-1)
-def recv_tens(number, bind, shape, verbosity, attrs):
+def recv_server(number, bind, shape, verbosity, attrs):
     '''
-    Catch some TENS messages from flow and dump them.
+    A simplel server to catch some TENS messages from flow and dump them.
     '''
     import zmq
     from zio import Port, Message, Node

@@ -65,15 +65,16 @@ class TensWriter:
             log.error(f'HDF5 TENS writer cowardly refusing to use existing group {gn}')
             log.error(f'{msg}')
             return
+        tens = seq.create_group("tensors")
 
-        seq.attrs["origin"] = msg.origin
-        seq.attrs["granule"] = msg.granule
+        tens.attrs["origin"] = msg.origin
+        tens.attrs["granule"] = msg.granule
 
         for k,v in fobj.items():
             if k in ["direction"]:
                 continue
             try:
-                seq.attrs[k] = v
+                tens.attrs[k] = v
             except TypeError as te:
                 ot = type(v)
                 log.error(f'can not serialize type {ot} for key {k}')
@@ -94,13 +95,13 @@ class TensWriter:
             log.debug(f'TENS PART: {tenind}/{nparts} {dtype} {sword} {shape}')
 
             data = numpy.frombuffer(ten, dtype=dtype+sword).reshape(shape)
-            ds = seq.create_dataset(self.part_interp % part,
-                                    data = data,
-                                    chunks = True)
+            ds = tens.create_dataset(self.part_interp % part,
+                                     data = data,
+                                     chunks = True)
 
         if user_md:
-            ds = seq.create_dataset("metadata", data = numpy.zeros((0,)))
-            ds.attrs.update(user_md)
+            md = seq.create_group("metadata")
+            md.attrs.update(user_md)
 
 
 def file_handler(ctx, pipe, filename, *wargs):
