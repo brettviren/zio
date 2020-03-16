@@ -2,48 +2,45 @@
 #+setupfile: setup.org
 #+include: nav.org
 
-#+begin_center
-Note: this feature has been moved from wire-cell-zpb and not yet been
-fully integrated.
-#+end_center
+ZIO Python provides a broker which allows data to flow to and from
+numerous asynchronous clients and synchronous resources such as files.
+Clients and back end file handlers are decoupled.  In particular,
+clients need not know what file technology or detailed schema is
+employed by the back end handlers.
 
-The ZIO Python package modules and ~zio~ command line program provides
-flow broker handlers which enact a file server backend.
+* Getting started
 
-* General usage
-
-Command line access:
+Command line access to the file server is via the ~zio~ Python module
+or the ~zio~ CLI program:
 
   #+begin_example
   $ python -m zio --help
   $ zio --help
   #+end_example
 
-The file server:
+The file server exists as a sub-command, eg:
 
   #+begin_example
   $ zio file-server --help
   #+end_example
 
-* File Server
+The file server broker and factory are factored to allow a file server
+to be run from inside other Python applications.
 
-The ZIO flow broker file server allows ZIO /data flow protocol/ clients
-to read message from and write messages to files.  Support for a
-variety of file formats is possible with HDF5 being the only initial
-target.
-
-** Attribute rules
+* Attribute rules
 
 The flow broker file server brings together ZIO data flow clients with
 file handlers in a decoupled way so that clients need not be
 configured directly with details about the files.  It does this by
 /mapping/ data flows to files and file contents with a set /attribute
-rules/.
+rules/.  
 
-A set of rules are given to server in a JSON or Jsonnet file:
+** Overview
+
+A set of rules are given to the server in a JSON or Jsonnet file:
 
   #+begin_example
-  $ zio file-server -r myruleset.jsonnet [...]
+  $ zio file-server [...] myruleset.jsonnet 
   #+end_example
 
 A single /attribute rule/ in the set is a data structure provided by
@@ -63,14 +60,14 @@ user configuration and has these elements:
               attributes in order to form an identifier for the data
               flow to which this rule applies.
 
-- attr :: A dictionary of additional attributes.
+- attr :: An optional dictionary of additional attributes.
 
 The overall attribute set applied to *rule*, *filepath* and *grouppat* is
-formed from two attributes sets.  The first consists of all attributes
-provided by the /flow object/ held as JSON in the "label" field of the
-prefix header of an initial *BOT* message for a new flow.  The second
-set updates the first and consists of any attributes provided by the
-rule *attr* item.
+formed from two distinct attributes sets.  The first consists of all
+attributes provided by the /flow object/ held as JSON in the "label"
+field of the prefix header of an initial *BOT* message for a new flow.
+The second set updates the first and consists of any attributes
+provided by the rule *attr* item.
 
 The *rule* itself is an S-expression (ie, like used in Scheme or LISP
 languages).  For example,
@@ -82,10 +79,10 @@ languages).  For example,
 In the example, either ~stream~ or ~type~ may be provided by the *BOT*
 message or the *attr* item.
 
-The entire rule set is an ordered sequence.  When a *BOT* message is
-received by the file server it is evaluated against each rule in the
-set.  The first to evaluate as Boolean *true* will be applied to
-servicing that flow.
+The entire rule set is an ordered sequence.  When a client's *BOT*
+message is received by the file server broker it is evaluated against
+each rule in the set.  The first to evaluate as Boolean *true* will be
+applied to servicing that flow.
 
 ** Testing a rule set
 
@@ -143,28 +140,38 @@ also be possible to "hard-code" the ~extra~ value into the ~grouppat~.
 
 ** Example run
 
-Run file server
+Run the file server in one terminal:
 
 #+begin_example
-  $ wirecell-zpb file-server \
-     -n file-server -p flow -v debug \
-     -b tcp://127.0.0.1:5678 \
-     -r test/test_depos_ruleset.jsonnet
+  $ zio file-server python/tests/file-server.jsonnet
 #+end_example
 
-and then a WCT job to write
+And in another send some test tensors:
 
 #+begin_example
-  $ wire-cell -l stdout -L debug \
-      -c test/test_depos_extract.jsonnet
+  $ zio send-tens stream=stream1
 #+end_example
 
-and then test the inverse, even keeping the server running:
+When that competes, this test will stream the content back
 
 #+begin_example
-  $ wire-cell -l stdout -L debug \
-      -c test/test_depos_inject.jsonnet
+  $ zio send-tens stream=stream1
 #+end_example
 
+Note that ~stream=stream~ command line argument sets an additional
+attribute required by the rule sets in ~file-server.jsonnet~.  The rules
+use ~stream~ to set a portion of the HDF5 group path.
 
+A larger test using [[http://www.chrismytton.uk/shoreman/][shoreman]] to run many writers.
 
+#+begin_example
+  $ shoreman python/tests/Procfile.test-sink
+#+end_example
+
+After it calms down after a few seconds, hit ~Ctrl-c~ as the broker runs
+forever.  You can then stream these flows back to multiple clients
+with the sibling test:
+
+#+begin_example
+  $ shoreman python/tests/Procfile.test-source
+#+end_example
