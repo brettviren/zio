@@ -54,13 +54,14 @@ class TensReader:
 
         umd = seq.get("metadata")
         if umd:
-            attrs["metadata"] = dict(umd)
+            attrs["metadata"] = dict(umd.attrs)
         msg.label_object = attrs
 
         partnums = [int(p) for p in tens.keys()]
         ntens = len(partnums)
         maxpart = max(partnums)
-        payload = [None]*(maxpart+1)
+        nparts = maxpart+1
+        payload = [None]*nparts
         tensors = list()
         for part, ds in tens.items():
             part = int(part)
@@ -68,7 +69,7 @@ class TensReader:
             # the file wasn't written by writer.TensWriter!
             md = dict(ds.attrs)
             dtype = str(ds.dtype)
-            log.debug(f'TENS part {part} {dtype} {type(ds.dtype)} {ds.shape}')
+            log.debug(f'TENS part {part}/{nparts} {dtype} {type(ds.dtype)} {ds.shape}')
             md.update(dict(
                 shape = ds.shape,
                 dtype = ds.dtype.kind,
@@ -105,13 +106,6 @@ def handler(ctx, pipe, bot, rule_object, filename, broker_addr, *rargs):
         log.error(f'reader failed to get {base_path} from {filename}')
         return
     fr = TensReader(sg, *rargs)
-    obot = fr.read()
-
-    # fixme: something should be done to compare old and new and
-    # assert on any important differences.  For now, we effectively
-    # drop the old one and send back the new.
-    # log.debug(f'new BOT: {bot}')
-    # log.debug(f'old BOT: {obot}')
 
     flow.send_bot(bot)          # this introduces us to the server
     bot = flow.recv_bot()
