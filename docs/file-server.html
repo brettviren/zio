@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-03-06 Fri 16:48 -->
+<!-- 2020-03-16 Mon 14:59 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>ZIO Flow Broker File Server</title>
@@ -161,6 +161,19 @@
   .footdef  { margin-bottom: 1em; }
   .figure { padding: 1em; }
   .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
   .inlinetask {
     padding: 10px;
     border: 2px solid gray;
@@ -186,7 +199,7 @@
 @licstart  The following is the entire license notice for the
 JavaScript code in this tag.
 
-Copyright (C) 2012-2019 Free Software Foundation, Inc.
+Copyright (C) 2012-2018 Free Software Foundation, Inc.
 
 The JavaScript code in this tag is free software: you can
 redistribute it and/or modify it under the terms of the GNU
@@ -239,12 +252,12 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgc310379">1. General usage</a></li>
-<li><a href="#orgc1c620a">2. File Server</a>
+<li><a href="#org1a5d527">1. Getting started</a></li>
+<li><a href="#org75e760c">2. Attribute rules</a>
 <ul>
-<li><a href="#org478eb6a">2.1. Attribute rules</a></li>
-<li><a href="#orgb79f191">2.2. Testing a rule set</a></li>
-<li><a href="#org07ca2b4">2.3. Example run</a></li>
+<li><a href="#orgaeda2a9">2.1. Overview</a></li>
+<li><a href="#orgb406cf8">2.2. Testing a rule set</a></li>
+<li><a href="#org0b70b87">2.3. Example run</a></li>
 </ul>
 </li>
 </ul>
@@ -261,23 +274,20 @@ for the JavaScript code in this tag.
 
 </div>
 
-<div class="org-center">
 <p>
-Note: this feature has been moved from wire-cell-zpb and not yet been
-fully integrated.
-</p>
-</div>
-
-<p>
-The ZIO Python package modules and <code>zio</code> command line program provides
-flow broker handlers which enact a file server backend.
+ZIO Python provides a broker which allows data to flow to and from
+numerous asynchronous clients and synchronous resources such as files.
+Clients and back end file handlers are decoupled.  In particular,
+clients need not know what file technology or detailed schema is
+employed by the back end handlers.
 </p>
 
-<div id="outline-container-orgc310379" class="outline-2">
-<h2 id="orgc310379"><span class="section-number-2">1</span> General usage</h2>
+<div id="outline-container-org1a5d527" class="outline-2">
+<h2 id="org1a5d527"><span class="section-number-2">1</span> Getting started</h2>
 <div class="outline-text-2" id="text-1">
 <p>
-Command line access:
+Command line access to the file server is via the <code>zio</code> Python module
+or the <code>zio</code> CLI program:
 </p>
 
 <pre class="example">
@@ -286,43 +296,41 @@ $ zio --help
 </pre>
 
 <p>
-The file server:
+The file server exists as a sub-command, eg:
 </p>
 
 <pre class="example">
 $ zio file-server --help
 </pre>
-</div>
-</div>
 
-<div id="outline-container-orgc1c620a" class="outline-2">
-<h2 id="orgc1c620a"><span class="section-number-2">2</span> File Server</h2>
-<div class="outline-text-2" id="text-2">
 <p>
-The ZIO flow broker file server allows ZIO <i>data flow protocol</i> clients
-to read message from and write messages to files.  Support for a
-variety of file formats is possible with HDF5 being the only initial
-target.
+The file server broker and factory are factored to allow a file server
+to be run from inside other Python applications.
 </p>
 </div>
+</div>
 
-<div id="outline-container-org478eb6a" class="outline-3">
-<h3 id="org478eb6a"><span class="section-number-3">2.1</span> Attribute rules</h3>
-<div class="outline-text-3" id="text-2-1">
+<div id="outline-container-org75e760c" class="outline-2">
+<h2 id="org75e760c"><span class="section-number-2">2</span> Attribute rules</h2>
+<div class="outline-text-2" id="text-2">
 <p>
 The flow broker file server brings together ZIO data flow clients with
 file handlers in a decoupled way so that clients need not be
 configured directly with details about the files.  It does this by
 <i>mapping</i> data flows to files and file contents with a set <i>attribute
-rules</i>.
+rules</i>.  
 </p>
+</div>
 
+<div id="outline-container-orgaeda2a9" class="outline-3">
+<h3 id="orgaeda2a9"><span class="section-number-3">2.1</span> Overview</h3>
+<div class="outline-text-3" id="text-2-1">
 <p>
-A set of rules are given to server in a JSON or Jsonnet file:
+A set of rules are given to the server in a JSON or Jsonnet file:
 </p>
 
 <pre class="example">
-$ zio file-server -r myruleset.jsonnet [...]
+$ zio file-server [...] myruleset.jsonnet 
 </pre>
 
 <p>
@@ -345,16 +353,16 @@ attributes to form the name of the file to use.</dd>
 attributes in order to form an identifier for the data
 flow to which this rule applies.</dd>
 
-<dt>attr</dt><dd>A dictionary of additional attributes.</dd>
+<dt>attr</dt><dd>An optional dictionary of additional attributes.</dd>
 </dl>
 
 <p>
 The overall attribute set applied to <b>rule</b>, <b>filepath</b> and <b>grouppat</b> is
-formed from two attributes sets.  The first consists of all attributes
-provided by the <i>flow object</i> held as JSON in the "label" field of the
-prefix header of an initial <b>BOT</b> message for a new flow.  The second
-set updates the first and consists of any attributes provided by the
-rule <b>attr</b> item.
+formed from two distinct attributes sets.  The first consists of all
+attributes provided by the <i>flow object</i> held as JSON in the "label"
+field of the prefix header of an initial <b>BOT</b> message for a new flow.
+The second set updates the first and consists of any attributes
+provided by the rule <b>attr</b> item.
 </p>
 
 <p>
@@ -363,7 +371,7 @@ languages).  For example,
 </p>
 
 <div class="org-src-container">
-<pre class="src src-scheme">(<span style="font-weight: bold;">and</span> (== stream <span style="font-style: italic;">"raw"</span>) (== type <span style="font-style: italic;">"frame"</span>))
+<pre class="src src-scheme">(<span style="color: #b4fa70;">and</span> (== stream <span style="color: #e9b96e;">"raw"</span>) (== type <span style="color: #e9b96e;">"frame"</span>))
 </pre>
 </div>
 
@@ -373,16 +381,16 @@ message or the <b>attr</b> item.
 </p>
 
 <p>
-The entire rule set is an ordered sequence.  When a <b>BOT</b> message is
-received by the file server it is evaluated against each rule in the
-set.  The first to evaluate as Boolean <b>true</b> will be applied to
-servicing that flow.
+The entire rule set is an ordered sequence.  When a client's <b>BOT</b>
+message is received by the file server broker it is evaluated against
+each rule in the set.  The first to evaluate as Boolean <b>true</b> will be
+applied to servicing that flow.
 </p>
 </div>
 </div>
 
-<div id="outline-container-orgb79f191" class="outline-3">
-<h3 id="orgb79f191"><span class="section-number-3">2.2</span> Testing a rule set</h3>
+<div id="outline-container-orgb406cf8" class="outline-3">
+<h3 id="orgb406cf8"><span class="section-number-3">2.2</span> Testing a rule set</h3>
 <div class="outline-text-3" id="text-2-2">
 <p>
 Rulesets may be elaborate and deepened on attributes that are supplied
@@ -412,24 +420,24 @@ this example, expressed as Jsonnet, is:
 <div class="org-src-container">
 <pre class="src src-jsonnet">[
     {
-	rule: |||
-	    (and (= direction 'extract')
-	     (or (= type 'depo') (= type 'frame')))
-	|||,
-	rw: "w",
-	filepat: "{jobname}.hdf",
-	grouppat: "{extra}/{stream}/{type}",
-	attr: {extra:"foo"}
+        rule: |||
+            (and (= direction <span style="color: #e9b96e;">'extract'</span>)
+             (or (= type <span style="color: #e9b96e;">'depo'</span>) (= type <span style="color: #e9b96e;">'frame'</span>)))
+        |||,
+        rw: <span style="color: #e9b96e;">"w"</span>,
+        filepat: <span style="color: #e9b96e;">"{jobname}.hdf"</span>,
+        grouppat: <span style="color: #e9b96e;">"{extra}/{stream}/{type}"</span>,
+        attr: {extra:<span style="color: #e9b96e;">"foo"</span>}
     },
     {
-	rule: |||
-	    (and (= direction 'inject')
-	     (or (= type 'depo') (= type 'frame')))
-	|||,
-	rw: "r",
-	filepat: "{jobname}.hdf",
-	grouppat: "{extra}/{stream}/{type}",
-	attr: {extra:"bar"}
+        rule: |||
+            (and (= direction <span style="color: #e9b96e;">'inject'</span>)
+             (or (= type <span style="color: #e9b96e;">'depo'</span>) (= type <span style="color: #e9b96e;">'frame'</span>)))
+        |||,
+        rw: <span style="color: #e9b96e;">"r"</span>,
+        filepat: <span style="color: #e9b96e;">"{jobname}.hdf"</span>,
+        grouppat: <span style="color: #e9b96e;">"{extra}/{stream}/{type}"</span>,
+        attr: {extra:<span style="color: #e9b96e;">"bar"</span>}
     },
 ]
 </pre>
@@ -445,36 +453,55 @@ also be possible to "hard-code" the <code>extra</code> value into the <code>grou
 </div>
 </div>
 
-<div id="outline-container-org07ca2b4" class="outline-3">
-<h3 id="org07ca2b4"><span class="section-number-3">2.3</span> Example run</h3>
+<div id="outline-container-org0b70b87" class="outline-3">
+<h3 id="org0b70b87"><span class="section-number-3">2.3</span> Example run</h3>
 <div class="outline-text-3" id="text-2-3">
 <p>
-Run file server
+Run the file server in one terminal:
 </p>
 
 <pre class="example">
-$ wirecell-zpb file-server \
-   -n file-server -p flow -v debug \
-   -b tcp://127.0.0.1:5678 \
-   -r test/test_depos_ruleset.jsonnet
+$ zio file-server python/tests/file-server.jsonnet
 </pre>
 
 <p>
-and then a WCT job to write
+And in another send some test tensors:
 </p>
 
 <pre class="example">
-$ wire-cell -l stdout -L debug \
-    -c test/test_depos_extract.jsonnet
+$ zio send-tens stream=stream1
 </pre>
 
 <p>
-and then test the inverse, even keeping the server running:
+When that competes, this test will stream the content back
 </p>
 
 <pre class="example">
-$ wire-cell -l stdout -L debug \
-    -c test/test_depos_inject.jsonnet
+$ zio send-tens stream=stream1
+</pre>
+
+<p>
+Note that <code>stream=stream</code> command line argument sets an additional
+attribute required by the rule sets in <code>file-server.jsonnet</code>.  The rules
+use <code>stream</code> to set a portion of the HDF5 group path.
+</p>
+
+<p>
+A larger test using <a href="http://www.chrismytton.uk/shoreman/">shoreman</a> to run many writers.
+</p>
+
+<pre class="example">
+$ shoreman python/tests/Procfile.test-sink
+</pre>
+
+<p>
+After it calms down after a few seconds, hit <code>Ctrl-c</code> as the broker runs
+forever.  You can then stream these flows back to multiple clients
+with the sibling test:
+</p>
+
+<pre class="example">
+$ shoreman python/tests/Procfile.test-source
 </pre>
 </div>
 </div>
