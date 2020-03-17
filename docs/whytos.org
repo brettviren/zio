@@ -12,7 +12,7 @@ written to help solidify thoughts.
 - An [[file:outbox.org][outbox]] gives "logger" type interface to emit free text strings or structured metrics
 - A protocol called [[file:flow.org][flow]] provides simpler message transfer than using ports directly 
 - A [[file:flow-broker.org][flow broker]] brings flow clients together with server-side flow handlers, such as those that may manage file resources.
-- A [[file:task-broker.org][task broker]] implements a reliable service oriented task queue based on ZeroMQ majordomo design.
+- A [[file:task-broker.org][task broker]] implements (as [[file:domo.org][domo]]) a reliable service oriented task queue based on ZeroMQ majordomo design.
 
 - Utility support to pack [[file:tensors.org][tensors]] into messages.
 

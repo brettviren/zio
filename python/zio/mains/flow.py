@@ -3,10 +3,17 @@ import json
 from .. import jsonnet
 import click
 from .. import rules
-from .cli import cli
 
 import logging
 log = logging.getLogger("zio")
+
+@click.group("flow")
+@click.pass_context
+def cli(ctx):
+    '''
+    ZIO FLOW command line interface
+    '''
+
 
 def typeit(v):
     try:
@@ -91,7 +98,7 @@ def test_ruleset(ruleset, verbosity, attrs):
         log.info(f'#{ind} {tf:5s} {rw} {path}:/{group}')
         
 
-@cli.command("file-server")
+@cli.command("flow-file-server")
 @click.option("-b","--bind", default="tcp://127.0.0.1:5555",
               help="An address to which the server shall bind")
 @click.option("-f","--format", default="hdf", type=click.Choice(["hdf"]),
@@ -104,7 +111,7 @@ def test_ruleset(ruleset, verbosity, attrs):
               help="Set logging level (debug, info, warning, error, critical)")
 @click.argument("ruleset")
 def file_server(bind, format, name, port, verbosity, ruleset):
-    '''Serve files over ZIO.
+    '''Source and sink ZIO flow protocol to file
 
     This brings back-end reader and writer handlers to external
     clients via the flow broker.  A ruleset factory dynamically spawns
@@ -140,18 +147,18 @@ def file_server(bind, format, name, port, verbosity, ruleset):
     sport = node.port(port, zmq.SERVER)
     sport.bind(bind)
     node.online()    
-    log.info(f'broker {name}:{port} online at {bind}')
+    log.info(f'domo-broker {name}:{port} online at {bind}')
 
     # this may throw
     broker = Broker(sport, factory)
 
-    log.info(f'broker {name} entering loop')
+    log.info(f'domo-broker {name} entering loop')
     while True:
         try:
             broker.poll(10000)
         except TimeoutError:
             node.peer.drain()
-            log.debug(f'broker {name} is lonely')
+            log.debug(f'domo-broker {name} is lonely')
             log.debug(node.peer.peers)
         except Exception as e:
             log.error(e)
@@ -159,7 +166,7 @@ def file_server(bind, format, name, port, verbosity, ruleset):
 
     broker.stop()
 
-@cli.command("send-tens")
+@cli.command("flow-send-tens")
 @click.option("-n","--number",default=10,
               help="Number of TENS messages to generate")
 @click.option("-c","--connect", default="tcp://127.0.0.1:5555",
@@ -181,7 +188,7 @@ def send_tens(number, connect, shape, verbosity, attrs):
 
     msg_attr = attrify(attrs)
 
-    cnode = Node("send-tens")
+    cnode = Node("flow-send-tens")
     cport = cnode.port("output", zmq.CLIENT)
     cport.connect(connect)
     cnode.online()
@@ -196,7 +203,7 @@ def send_tens(number, connect, shape, verbosity, attrs):
     bot = Message(label=json.dumps(attr))
     cflow.send_bot(bot)
     bot = cflow.recv_bot(5000);
-    log.debug('send-tens: BOT handshake done')
+    log.debug('flow-send-tens: BOT handshake done')
     assert(bot)
 
     tens_attr = dict(shape=shape, word=1, dtype='u') # unsigned char
@@ -207,17 +214,17 @@ def send_tens(number, connect, shape, verbosity, attrs):
     for count in range(number):
         msg = Message(label=label,payload=payload)
         cflow.put(msg)
-        log.debug(f'send-tens: {count}: {msg}')
+        log.debug(f'flow-send-tens: {count}: {msg}')
         
-    log.debug(f'send-tens: send EOT')
+    log.debug(f'flow-send-tens: send EOT')
     cflow.send_eot(Message())
-    log.debug(f'send-tens: recv EOT (waiting)')
+    log.debug(f'flow-send-tens: recv EOT (waiting)')
     cflow.recv_eot()
-    log.debug(f'send-tens: going offline')
+    log.debug(f'flow-send-tens: going offline')
     cnode.offline()
-    log.debug(f'send-tens: end')
+    log.debug(f'flow-send-tens: end')
     
-@cli.command("recv-tens")
+@cli.command("flow-recv-tens")
 @click.option("-n","--number",default=10,
               help="Number of TENS messages to recv before exiting, 0=forever")
 @click.option("-c","--connect", default="tcp://127.0.0.1:5555",
@@ -237,7 +244,7 @@ def recv_tens(number, connect, verbosity, attrs):
 
     msg_attr = attrify(attrs)
 
-    cnode = Node("recv-tens")
+    cnode = Node("flow-recv-tens")
     cport = cnode.port("input", zmq.CLIENT)
     cport.connect(connect)
     cnode.online()
@@ -247,7 +254,7 @@ def recv_tens(number, connect, verbosity, attrs):
     bot = Message(label=json.dumps(attr))
     cflow.send_bot(bot)
     bot = cflow.recv_bot(5000);
-    log.debug('recv-tens: BOT handshake done')
+    log.debug('flow-recv-tens: BOT handshake done')
     assert(bot)
 
     count = 0
@@ -256,25 +263,25 @@ def recv_tens(number, connect, verbosity, attrs):
             break
         ++count
         msg = cflow.get()
-        log.info(f'recv-tens: {count}: {msg}')
+        log.info(f'flow-recv-tens: {count}: {msg}')
         if msg is None:
             cflow.send_eot()
             cnode.offline()
-            log.debug('recv-tens: EOT whille receiving')
+            log.debug('flow-recv-tens: EOT whille receiving')
             return
         
-    log.debug(f'recv-tens: send EOT')
+    log.debug(f'flow-recv-tens: send EOT')
     cflow.send_eot(Message())
-    log.debug(f'recv-tens: recv EOT (waiting)')
+    log.debug(f'flow-recv-tens: recv EOT (waiting)')
     cflow.recv_eot()
-    log.debug(f'recv-tens: going offline')
+    log.debug(f'flow-recv-tens: going offline')
     cnode.offline()
-    log.debug(f'recv-tens: end')
+    log.debug(f'flow-recv-tens: end')
     
 
 
 
-@cli.command("recv-server")
+@cli.command("flow-recv-server")
 @click.option("-n","--number",default=10,
               help="Number of TENS messages to generate")
 @click.option("-b","--bind", default="tcp://127.0.0.1:5555",
@@ -286,7 +293,7 @@ def recv_tens(number, connect, verbosity, attrs):
 @click.argument("attrs", nargs=-1)
 def recv_server(number, bind, shape, verbosity, attrs):
     '''
-    A simplel server to catch some TENS messages from flow and dump them.
+    A simple server to catch some TENS messages from flow and dump them.
     '''
     import zmq
     from zio import Port, Message, Node
@@ -308,16 +315,16 @@ def recv_server(number, bind, shape, verbosity, attrs):
     lobj["direction"] = "inject"
     bot.label_object = lobj
     sflow.send_bot(bot)
-    log.debug('recv-tens: BOT handshake done')
+    log.debug('flow-recv-server: BOT handshake done')
     sflow.flush_pay()
-    log.debug('recv-tens: looping')
+    log.debug('flow-recv-server: looping')
     while True:
         msg = sflow.get(1000)
-        log.info(f'recv-tens: {msg}')
+        log.info(f'flow-recv-server: {msg}')
         if not msg or 'EOT' == msg.label_object['flow']:
-            log.debug('recv-tens: got EOT')
+            log.debug('flow-recv-server: got EOT')
             sflow.send_eot()     # answer
             break
         
     snode.offline()
-    log.debug(f'recv-tens: end')    
+    log.debug(f'flow-recv-server: end')    

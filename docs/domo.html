@@ -3,10 +3,10 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-03-17 Tue 15:06 -->
+<!-- 2020-03-17 Tue 15:08 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>ZIO Flow Broker File Server</title>
+<title>ZIO Domo Protocol</title>
 <meta name="generator" content="Org mode" />
 <meta name="author" content="Brett Viren" />
 <style type="text/css">
@@ -234,27 +234,7 @@ for the JavaScript code in this tag.
  |
  <a accesskey="H" href="index.html"> HOME </a>
 </div><div id="content">
-<h1 class="title">ZIO Flow Broker File Server</h1>
-<div id="table-of-contents">
-<h2>Table of Contents</h2>
-<div id="text-table-of-contents">
-<ul>
-<li><a href="#org1a0459d">1. Getting started</a></li>
-<li><a href="#orgbc805cb">2. Attribute rules</a>
-<ul>
-<li><a href="#orgc37d20e">2.1. Overview</a></li>
-<li><a href="#org3e8ceaf">2.2. Testing a rule set</a></li>
-</ul>
-</li>
-<li><a href="#orgd64ee81">3. Example runs</a>
-<ul>
-<li><a href="#org9a4775a">3.1. Single client</a></li>
-<li><a href="#orgaea3791">3.2. Multiple clients</a></li>
-</ul>
-</li>
-</ul>
-</div>
-</div>
+<h1 class="title">ZIO Domo Protocol</h1>
 <div class="nav">
 <ul class="org-ul">
 <li><a href="index.html">Main Page</a></li>
@@ -267,250 +247,23 @@ for the JavaScript code in this tag.
 </div>
 
 <p>
-ZIO Python provides a broker which allows data to flow to and from
-numerous asynchronous clients and synchronous resources such as files.
-Clients and back end file handlers are decoupled.  In particular,
-clients need not know what file technology or detailed schema is
-employed by the back end handlers.
-</p>
-
-<div id="outline-container-org1a0459d" class="outline-2">
-<h2 id="org1a0459d"><span class="section-number-2">1</span> Getting started</h2>
-<div class="outline-text-2" id="text-1">
-<p>
-Command line access to the file server is via the <code>zio</code> Python module
-or the <code>zio</code> CLI program:
-</p>
-
-<pre class="example">
-$ python -m zio --help
-$ zio --help
-</pre>
-
-<p>
-The file server exists as a sub-command, eg:
-</p>
-
-<pre class="example">
-$ zio flow-file-server --help
-</pre>
-
-<p>
-The file server broker and factory are factored to allow a file server
-to be run from inside other Python applications.
-</p>
-</div>
-</div>
-
-<div id="outline-container-orgbc805cb" class="outline-2">
-<h2 id="orgbc805cb"><span class="section-number-2">2</span> Attribute rules</h2>
-<div class="outline-text-2" id="text-2">
-<p>
-The flow broker file server brings together ZIO data flow clients with
-file handlers in a decoupled way so that clients need not be
-configured directly with details about the files.  It does this by
-<i>mapping</i> data flows to files and file contents with a set <i>attribute
-rules</i>.  
-</p>
-</div>
-
-<div id="outline-container-orgc37d20e" class="outline-3">
-<h3 id="orgc37d20e"><span class="section-number-3">2.1</span> Overview</h3>
-<div class="outline-text-3" id="text-2-1">
-<p>
-A set of rules are given to the server in a JSON or Jsonnet file:
-</p>
-
-<pre class="example">
-$ zio flow-file-server [...] myruleset.jsonnet 
-</pre>
-
-<p>
-A single <i>attribute rule</i> in the set is a data structure provided by
-user configuration and has these elements:
-</p>
-
-<dl class="org-dl">
-<dt>rule</dt><dd>an S-expression in terms of a set of attributes and
-operators which should evaluate to a single Boolean value.
-If <b>true</b> then the rule is said to apply as determined stated
-by the remaining items.</dd>
-
-<dt>filepat</dt><dd>a string which may be interpolated against the set of
-attributes to form the name of the file to use.</dd>
-
-<dt>rw</dt><dd>a marker that the file shall be read from or written to.</dd>
-
-<dt>grouppat</dt><dd>a string which may be interpolated against the set of
-attributes in order to form an identifier for the data
-flow to which this rule applies.</dd>
-
-<dt>attr</dt><dd>An optional dictionary of additional attributes.</dd>
-</dl>
-
-<p>
-The overall attribute set applied to <b>rule</b>, <b>filepath</b> and <b>grouppat</b> is
-formed from two distinct attributes sets.  The first consists of all
-attributes provided by the <i>flow object</i> held as JSON in the "label"
-field of the prefix header of an initial <b>BOT</b> message for a new flow.
-The second set updates the first and consists of any attributes
-provided by the rule <b>attr</b> item.
+ZIO domo protocol is a generalization of ZeroMQ Majordomo v1 (RFC
+7/MDP) to use either CLIENT/SERVER or DEALER/ROUTER sockets.  A C++
+and Python implementation of the broker and the client and worker APIs
+are provided.
 </p>
 
 <p>
-The <b>rule</b> itself is an S-expression (ie, like used in Scheme or LISP
-languages).  For example,
-</p>
-
-<div class="org-src-container">
-<pre class="src src-scheme">(<span style="font-weight: bold;">and</span> (== stream <span style="font-style: italic;">"raw"</span>) (== type <span style="font-style: italic;">"frame"</span>))
-</pre>
-</div>
-
-<p>
-In the example, either <code>stream</code> or <code>type</code> may be provided by the <b>BOT</b>
-message or the <b>attr</b> item.
+The ZIO domo code is largely an import of the initial prototype in 
+<a href="https://github.com/brettviren/generaldomo">https://github.com/brettviren/generaldomo</a>
 </p>
 
 <p>
-The entire rule set is an ordered sequence.  When a client's <b>BOT</b>
-message is received by the file server broker it is evaluated against
-each rule in the set.  The first to evaluate as Boolean <b>true</b> will be
-applied to servicing that flow.
+For now, see it's documentation.  The <code>generaldomo::</code> namespace becomes
+<code>zio::domo::</code> here.  The sub commands from the command line Python
+program <code>generaldomo</code> becomes sub commands under the command line Python
+program <code>zio</code>.
 </p>
-</div>
-</div>
-
-<div id="outline-container-org3e8ceaf" class="outline-3">
-<h3 id="org3e8ceaf"><span class="section-number-3">2.2</span> Testing a rule set</h3>
-<div class="outline-text-3" id="text-2-2">
-<p>
-Rulesets may be elaborate and deepened on attributes that are supplied
-only by the <b>BOT</b> message.  To assist in writing valid rule sets they
-may be easily tested with the provided command:
-</p>
-
-<pre class="example">
-$ zio test-ruleset \
-    -r example-ruleset.jsonnet \
-      direction=inject  \
-      jobname=testjob \
-      stream=depos \
-      type=depo
-2020-01-23 12:54:52.555 INFO	#0 FALSE w testjob.hdf:/foo/depos/depo
-2020-01-23 12:54:52.556 INFO	#1 TRUE  r testjob.hdf:/bar/depos/depo
-</pre>
-
-<p>
-The arguments give attributes that might otherwise be provided by the
-<b>BOT</b> message if this rule set were applied in the file server.  In
-this example, the first rule in the test fails against the provided
-attributes while the second rule succeeds.  The rule set tested in
-this example, expressed as Jsonnet, is:
-</p>
-
-<div class="org-src-container">
-<pre class="src src-jsonnet">[
-    {
-	rule: |||
-	    (and (= direction 'extract')
-	     (or (= type 'depo') (= type 'frame')))
-	|||,
-	rw: "w",
-	filepat: "{jobname}.hdf",
-	grouppat: "{extra}/{stream}/{type}",
-	attr: {extra:"foo"}
-    },
-    {
-	rule: |||
-	    (and (= direction 'inject')
-	     (or (= type 'depo') (= type 'frame')))
-	|||,
-	rw: "r",
-	filepat: "{jobname}.hdf",
-	grouppat: "{extra}/{stream}/{type}",
-	attr: {extra:"bar"}
-    },
-]
-</pre>
-</div>
-
-<p>
-Note the inclusion of the <code>extra</code> attribute in the <code>attr</code> field.  It
-is included here in order to demonstrate how the full attribute set is
-a mix of those provided in the rule set and the message (or command
-line in the <code>test-ruleset</code> command).  In this simple case, it would
-also be possible to "hard-code" the <code>extra</code> value into the <code>grouppat</code>.
-</p>
-</div>
-</div>
-</div>
-
-<div id="outline-container-orgd64ee81" class="outline-2">
-<h2 id="orgd64ee81"><span class="section-number-2">3</span> Example runs</h2>
-<div class="outline-text-2" id="text-3">
-</div>
-<div id="outline-container-org9a4775a" class="outline-3">
-<h3 id="org9a4775a"><span class="section-number-3">3.1</span> Single client</h3>
-<div class="outline-text-3" id="text-3-1">
-<p>
-Run the file server in one terminal:
-</p>
-
-<pre class="example">
-$ zio flow-file-server python/tests/file-server.jsonnet
-</pre>
-
-<p>
-And in another send some test tensors:
-</p>
-
-<pre class="example">
-$ zio flow-send-tens stream=stream1
-</pre>
-
-<p>
-When that competes, this test will stream the content back
-</p>
-
-<pre class="example">
-$ zio flow-recv-tens stream=stream1
-</pre>
-
-<p>
-Note that the <code>stream=stream1</code> command line argument sets an additional
-attribute required by the rule sets in <code>file-server.jsonnet</code>.  The rules
-use <code>stream</code> to set a portion of the HDF5 group path.  In a "real"
-application, this additional attribute would be provided by the
-messages extracted from the flow client or by injected messages
-created from information previously saved into a file.
-</p>
-</div>
-</div>
-
-<div id="outline-container-orgaea3791" class="outline-3">
-<h3 id="orgaea3791"><span class="section-number-3">3.2</span> Multiple clients</h3>
-<div class="outline-text-3" id="text-3-2">
-<p>
-A larger test using <a href="http://www.chrismytton.uk/shoreman/">shoreman</a> to run many writers.
-</p>
-
-<pre class="example">
-$ shoreman python/tests/Procfile.test-sink
-</pre>
-
-<p>
-After it calms down after a few seconds, hit <code>Ctrl-c</code> as the broker runs
-forever.  You can then stream these flows back to multiple clients
-with the sibling test:
-</p>
-
-<pre class="example">
-$ shoreman python/tests/Procfile.test-source
-</pre>
-</div>
-</div>
-</div>
 </div>
 </body>
 </html>

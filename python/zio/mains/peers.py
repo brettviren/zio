@@ -4,7 +4,13 @@ import zio
 import sys
 import time
 import click
-from .cli import cli
+
+@click.group("peers")
+@click.pass_context
+def cli(ctx):
+    '''
+    ZIO PEERS command line interface
+    '''
 
 @cli.command("peers")
 @click.option("-t","--timeout", default=1000,

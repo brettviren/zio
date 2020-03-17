@@ -2,6 +2,7 @@
 '''
 Main CLI to ZIO 
 '''
+import click
 
 import logging
 logging.basicConfig(level=logging.INFO,
@@ -9,8 +10,8 @@ logging.basicConfig(level=logging.INFO,
                     datefmt='%Y-%m-%d %H:%M:%S')
 log = logging.getLogger("zio")
 
-from .mains import  *
-
+from .mains import  peers, flow, domo
+cli = click.CommandCollection(sources=[peers.cli, flow.cli, domo.cli])
 
 def main():
     cli(obj=dict())

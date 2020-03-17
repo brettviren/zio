@@ -21,7 +21,7 @@ or the ~zio~ CLI program:
 The file server exists as a sub-command, eg:
 
   #+begin_example
-  $ zio file-server --help
+  $ zio flow-file-server --help
   #+end_example
 
 The file server broker and factory are factored to allow a file server
@@ -40,7 +40,7 @@ rules/.
 A set of rules are given to the server in a JSON or Jsonnet file:
 
   #+begin_example
-  $ zio file-server [...] myruleset.jsonnet 
+  $ zio flow-file-server [...] myruleset.jsonnet 
   #+end_example
 
 A single /attribute rule/ in the set is a data structure provided by
@@ -145,19 +145,19 @@ also be possible to "hard-code" the ~extra~ value into the ~grouppat~.
 Run the file server in one terminal:
 
 #+begin_example
-  $ zio file-server python/tests/file-server.jsonnet
+  $ zio flow-file-server python/tests/file-server.jsonnet
 #+end_example
 
 And in another send some test tensors:
 
 #+begin_example
-  $ zio send-tens stream=stream1
+  $ zio flow-send-tens stream=stream1
 #+end_example
 
 When that competes, this test will stream the content back
 
 #+begin_example
-  $ zio recv-tens stream=stream1
+  $ zio flow-recv-tens stream=stream1
 #+end_example
 
 Note that the ~stream=stream1~ command line argument sets an additional

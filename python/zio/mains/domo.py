@@ -3,12 +3,19 @@ import json
 from .. import jsonnet
 import click
 from .. import rules
-from .cli import cli
 
 import logging
 log = logging.getLogger("zio")
 
 import zmq
+
+@click.group("domo")
+@click.pass_context
+def cli(ctx):
+    '''
+    ZIO DOMO command line interface
+    '''
+
 
 sock_name2type = dict(router=zmq.ROUTER,
                       dealer=zmq.DEALER,
@@ -16,7 +23,7 @@ sock_name2type = dict(router=zmq.ROUTER,
                       client=zmq.CLIENT)
 
 
-@cli.command()
+@cli.command('domo-tripping')
 @click.option("--verbose/--no-verbose", default=False,
               help="Provide extra output")
 @click.option("-n", "--number", default=10000,
@@ -40,7 +47,7 @@ def tripping(verbose, number, frontend, backend):
     main(fes_type, bes_type, number, verbose)
 
 
-@cli.command()
+@cli.command('domo-broker')
 @click.option("--verbose/--no-verbose", default=False,
               help="Provide extra output")
 @click.option("-s", "--socket",
@@ -57,7 +64,7 @@ def broker(verbose, socket, address):
     broker.bind(address)
     broker.mediate()
 
-@cli.command()
+@cli.command('domo-echo-worker')
 @click.option("--verbose/--no-verbose", default=False,
               help="Provide extra output")
 @click.option("-s", "--socket",
@@ -78,7 +85,7 @@ def echo(verbose, socket, address):
             break
         reply = request # Echo is complex... :D
 
-@cli.command()
+@cli.command('domo-echo-client')
 @click.option("--verbose/--no-verbose", default=False,
               help="Provide extra output")
 @click.option("-s", "--socket",
@@ -92,7 +99,7 @@ def echo(verbose, socket, address):
 @click.argument("args", nargs=-1)
 def client(verbose, socket, number, address, service, args):
     '''
-    Run a client providing an echo service
+    Run a client exercising an echo service
     '''
     from zio.domo.client import Client
     client = Client(address, sock_name2type[socket], verbose)

@@ -1,0 +1,16 @@
+#+title: ZIO Domo Protocol
+#+setupfile: setup.org
+#+include: nav.org
+
+ZIO domo protocol is a generalization of ZeroMQ Majordomo v1 (RFC
+7/MDP) to use either CLIENT/SERVER or DEALER/ROUTER sockets.  A C++
+and Python implementation of the broker and the client and worker APIs
+are provided.
+
+The ZIO domo code is largely an import of the initial prototype in 
+https://github.com/brettviren/generaldomo
+
+For now, see it's documentation.  The ~generaldomo::~ namespace becomes
+~zio::domo::~ here.  The sub commands from the command line Python
+program ~generaldomo~ becomes sub commands under the command line Python
+program ~zio~.
