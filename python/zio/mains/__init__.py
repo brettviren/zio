@@ -2,3 +2,4 @@
 from .cli import cli
 from .peers import *
 from .flow import *
+from .domo import *
