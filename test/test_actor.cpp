@@ -1,8 +1,8 @@
 /*! cppzmq does not directly provide an actor pattern.
  * this tests a simple one. */
 
-#include "zmq.hpp"
-#include "zmq_actor.hpp"
+#include "zio/zmq.hpp"
+#include "zio/zmq_actor.hpp"
 
 
 #include <thread>

@@ -51,6 +51,7 @@ void Broker::proc_one()
 {
     zmq::multipart_t mmsg;
     remote_identity_t sender = recv(m_sock, mmsg);
+    assert(mmsg.size() > 0);
     std::string header = mmsg.popstr(); // 7/MDP frame 1
     if (header == mdp::client::ident) {
         m_log.debug("zio::domo::Broker process client");
@@ -303,6 +304,7 @@ void Broker::client_process(remote_identity_t client_id, zmq::multipart_t& mmsg)
 void zio::domo::broker_actor(zmq::socket_t& pipe, std::string address, int socktype)
 {
     console_log log;
+    log.level = console_log::log_level::debug;
 
     zmq::context_t ctx;
     zmq::socket_t sock(ctx, socktype);

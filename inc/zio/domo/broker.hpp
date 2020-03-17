@@ -3,8 +3,8 @@
 
 #include "zio/util.hpp"
 #include "zio/logging.hpp"
-#include <zmq.hpp>
-#include <zmq_addon.hpp>
+#include "zio/zmq.hpp"
+#include "zio/zmq_addon.hpp"
 #include <unordered_map>
 #include <unordered_set>
 #include <deque>

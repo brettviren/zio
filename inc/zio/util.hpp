@@ -1,7 +1,7 @@
 #ifndef ZIO_UTIL_HPP_SEEN
 #define ZIO_UTIL_HPP_SEEN
 
-#include <zmq_addon.hpp>
+#include "zio/zmq_addon.hpp"
 
 #include <string>
 
@@ -81,6 +81,8 @@ namespace zio {
 
     /*! Current system time in milliseconds. */
     std::chrono::milliseconds now_ms();
+    /*! Current system time in microseconds. */
+    std::chrono::microseconds now_us();
 
     /*! Sleep a while */
     void sleep_ms(std::chrono::milliseconds zzz);

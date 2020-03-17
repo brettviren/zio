@@ -4,12 +4,13 @@
 #include "zio/json.hpp"
 #include "zio/zmq.hpp"
 #include "zio/zmq_addon.hpp"
+#include "zio/zmq_actor.hpp"
 
 namespace zio {
     // The great Nlohmann's JSON.
     using json = nlohmann::json;
 
-    // Intern cppzmq
+    // Dubiously intern cppzmq namespace
     using namespace zmq;
 
     /// Return the ZeroMQ socket type number for the socket.

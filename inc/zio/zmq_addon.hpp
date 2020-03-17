@@ -24,39 +24,37 @@
 #ifndef __ZMQ_ADDON_HPP_INCLUDED__
 #define __ZMQ_ADDON_HPP_INCLUDED__
 
-#include "zmq.hpp"
+#include "zio/zmq.hpp"
 
 #include <deque>
 #include <iomanip>
 #include <sstream>
 #include <stdexcept>
 #ifdef ZMQ_CPP11
+#include <limits>
 #include <functional>
 #include <unordered_map>
 #endif
 
 namespace zmq
 {
-
 #ifdef ZMQ_CPP11
 
 namespace detail
 {
 template<bool CheckN, class OutputIt>
-recv_result_t recv_multipart_n(socket_ref s, OutputIt out, size_t n,
-                               recv_flags flags)
+recv_result_t
+recv_multipart_n(socket_ref s, OutputIt out, size_t n, recv_flags flags)
 {
     size_t msg_count = 0;
     message_t msg;
-    while (true)
-    {
-        if (CheckN)
-        {
+    while (true) {
+        if (CheckN) {
             if (msg_count >= n)
-                throw std::runtime_error("Too many message parts in recv_multipart_n");
+                throw std::runtime_error(
+                  "Too many message parts in recv_multipart_n");
         }
-        if (!s.recv(msg, flags))
-        {
+        if (!s.recv(msg, flags)) {
             // zmq ensures atomic delivery of messages
             assert(msg_count == 0);
             return {};
@@ -84,9 +82,9 @@ recv_result_t recv_multipart_n(socket_ref s, OutputIt out, size_t n,
     message parts. It is adviced to close this socket in that event.
 */
 template<class OutputIt>
-ZMQ_NODISCARD
-recv_result_t recv_multipart(socket_ref s, OutputIt out,
-                             recv_flags flags = recv_flags::none)
+ZMQ_NODISCARD recv_result_t recv_multipart(socket_ref s,
+                                           OutputIt out,
+                                           recv_flags flags = recv_flags::none)
 {
     return detail::recv_multipart_n<false>(s, std::move(out), 0, flags);
 }
@@ -106,9 +104,10 @@ recv_result_t recv_multipart(socket_ref s, OutputIt out,
     message parts. It is adviced to close this socket in that event.
 */
 template<class OutputIt>
-ZMQ_NODISCARD
-recv_result_t recv_multipart_n(socket_ref s, OutputIt out, size_t n,
-                               recv_flags flags = recv_flags::none)
+ZMQ_NODISCARD recv_result_t recv_multipart_n(socket_ref s,
+                                             OutputIt out,
+                                             size_t n,
+                                             recv_flags flags = recv_flags::none)
 {
     return detail::recv_multipart_n<true>(s, std::move(out), n, flags);
 }
@@ -125,26 +124,28 @@ recv_result_t recv_multipart_n(socket_ref s, OutputIt out, size_t n,
     by the msgs range will be propagated and the message
     may have been only partially sent. It is adviced to close this socket in that event.
 */
-template<class Range,
-             typename = typename std::enable_if<
-               detail::is_range<Range>::value
-               && (std::is_same<detail::range_value_t<Range>, message_t>::value
-               || detail::is_buffer<detail::range_value_t<Range>>::value)
-               >::type>
-send_result_t send_multipart(socket_ref s, Range&& msgs,
-                             send_flags flags = send_flags::none)
+template<class Range
+#ifndef ZMQ_CPP11_PARTIAL
+         ,
+         typename = typename std::enable_if<
+           detail::is_range<Range>::value
+           && (std::is_same<detail::range_value_t<Range>, message_t>::value
+               || detail::is_buffer<detail::range_value_t<Range>>::value)>::type
+#endif
+         >
+send_result_t
+send_multipart(socket_ref s, Range &&msgs, send_flags flags = send_flags::none)
 {
     using std::begin;
     using std::end;
     auto it = begin(msgs);
     const auto end_it = end(msgs);
     size_t msg_count = 0;
-    while (it != end_it)
-    {
+    while (it != end_it) {
         const auto next = std::next(it);
-        const auto msg_flags = flags | (next == end_it ? send_flags::none : send_flags::sndmore);
-        if (!s.send(*it, msg_flags))
-        {
+        const auto msg_flags =
+          flags | (next == end_it ? send_flags::none : send_flags::sndmore);
+        if (!s.send(*it, msg_flags)) {
             // zmq ensures atomic delivery of messages
             assert(it == begin(msgs));
             return {};
@@ -155,7 +156,122 @@ send_result_t send_multipart(socket_ref s, Range&& msgs,
     return msg_count;
 }
 
+/* Encode a multipart message.
+
+   The range must be a ForwardRange of zmq::message_t.  A
+   zmq::multipart_t or STL container may be passed for encoding.
+
+   Returns: a zmq::message_t holding the encoded multipart data.
+
+   Throws: std::range_error is thrown if the size of any single part
+   can not fit in an unsigned 32 bit integer.
+
+   The encoding is compatible with that used by the CZMQ function
+   zmsg_encode().  Each part consists of a size followed by the data.
+   These are placed contiguously into the output message.  A part of
+   size less than 255 bytes will have a single byte size value.
+   Larger parts will have a five byte size value with the first byte
+   set to 0xFF and the remaining four bytes holding the size of the
+   part's data.
+*/
+template<class Range
+#ifndef ZMQ_CPP11_PARTIAL
+         ,
+         typename = typename std::enable_if<
+           detail::is_range<Range>::value
+           && (std::is_same<detail::range_value_t<Range>, message_t>::value
+               || detail::is_buffer<detail::range_value_t<Range>>::value)>::type
 #endif
+         >
+message_t encode(const Range &parts)
+{
+    size_t mmsg_size = 0;
+
+    // First pass check sizes
+    for (const auto &part : parts) {
+        size_t part_size = part.size();
+        if (part_size > std::numeric_limits<std::uint32_t>::max()) {
+            // Size value must fit into uint32_t.
+            throw std::range_error("Invalid size, message part too large");
+        }
+        size_t count_size = 5;
+        if (part_size < std::numeric_limits<std::uint8_t>::max()) {
+            count_size = 1;
+        }
+        mmsg_size += part_size + count_size;
+    }
+
+    message_t encoded(mmsg_size);
+    unsigned char *buf = encoded.data<unsigned char>();
+    for (const auto &part : parts) {
+        uint32_t part_size = part.size();
+        const unsigned char *part_data =
+          static_cast<const unsigned char *>(part.data());
+
+        // small part
+        if (part_size < std::numeric_limits<std::uint8_t>::max()) {
+            *buf++ = (unsigned char) part_size;
+            memcpy(buf, part_data, part_size);
+            buf += part_size;
+            continue;
+        }
+
+        // big part
+        *buf++ = std::numeric_limits<uint8_t>::max();
+        *buf++ = (part_size >> 24) & std::numeric_limits<std::uint8_t>::max();
+        *buf++ = (part_size >> 16) & std::numeric_limits<std::uint8_t>::max();
+        *buf++ = (part_size >> 8) & std::numeric_limits<std::uint8_t>::max();
+        *buf++ = part_size & std::numeric_limits<std::uint8_t>::max();
+        memcpy(buf, part_data, part_size);
+        buf += part_size;
+    }
+    return encoded;
+}
+
+/*  Decode an encoded message to multiple parts.
+
+    The given output iterator must be a ForwardIterator to a container
+    holding zmq::message_t such as a zmq::multipart_t or various STL
+    containers.
+
+    Returns the ForwardIterator advanced once past the last decoded
+    part.
+
+    Throws: a std::out_of_range is thrown if the encoded part sizes
+    lead to exceeding the message data bounds.
+
+    The decoding assumes the message is encoded in the manner
+    performed by zmq::encode().
+ */
+template<class OutputIt> OutputIt decode(const message_t &encoded, OutputIt out)
+{
+    const unsigned char *source = encoded.data<unsigned char>();
+    const unsigned char *const limit = source + encoded.size();
+
+    while (source < limit) {
+        size_t part_size = *source++;
+        if (part_size == std::numeric_limits<std::uint8_t>::max()) {
+            if (source > limit - 4) {
+                throw std::out_of_range(
+                  "Malformed encoding, overflow in reading size");
+            }
+            part_size = ((uint32_t) source[0] << 24) + ((uint32_t) source[1] << 16)
+                        + ((uint32_t) source[2] << 8) + (uint32_t) source[3];
+            source += 4;
+        }
+
+        if (source > limit - part_size) {
+            throw std::out_of_range("Malformed encoding, overflow in reading part");
+        }
+        *out = message_t(source, part_size);
+        ++out;
+        source += part_size;
+    }
+    return out;
+}
+
+#endif
+
 
 #ifdef ZMQ_HAS_RVALUE_REFS
 
@@ -172,6 +288,8 @@ class multipart_t
     std::deque<message_t> m_parts;
 
   public:
+    typedef std::deque<message_t>::value_type value_type;
+
     typedef std::deque<message_t>::iterator iterator;
     typedef std::deque<message_t>::const_iterator const_iterator;
 
@@ -250,13 +368,13 @@ class multipart_t
         bool more = true;
         while (more) {
             message_t message;
-            #ifdef ZMQ_CPP11
+#ifdef ZMQ_CPP11
             if (!socket.recv(message, static_cast<recv_flags>(flags)))
                 return false;
-            #else
+#else
             if (!socket.recv(&message, flags))
                 return false;
-            #endif
+#endif
             more = message.more();
             add(std::move(message));
         }
@@ -271,14 +389,14 @@ class multipart_t
         while (more) {
             message_t message = pop();
             more = size() > 0;
-            #ifdef ZMQ_CPP11
-            if (!socket.send(message,
-                             static_cast<send_flags>((more ? ZMQ_SNDMORE : 0) | flags)))
+#ifdef ZMQ_CPP11
+            if (!socket.send(message, static_cast<send_flags>(
+                                        (more ? ZMQ_SNDMORE : 0) | flags)))
                 return false;
-            #else
+#else
             if (!socket.send(message, (more ? ZMQ_SNDMORE : 0) | flags))
                 return false;
-            #endif
+#endif
         }
         clear();
         return true;
@@ -344,6 +462,9 @@ class multipart_t
     // Push message part to back
     void add(message_t &&message) { m_parts.push_back(std::move(message)); }
 
+    // Alias to allow std::back_inserter()
+    void push_back(message_t &&message) { m_parts.push_back(std::move(message)); }
+
     // Pop string from front
     std::string popstr()
     {
@@ -382,16 +503,10 @@ class multipart_t
     }
 
     // get message part from front
-    const message_t &front()
-    {
-        return m_parts.front();
-    }
+    const message_t &front() { return m_parts.front(); }
 
     // get message part from back
-    const message_t &back()
-    {
-        return m_parts.back();
-    }
+    const message_t &back() { return m_parts.back(); }
 
     // Get pointer to a specific message part
     const message_t *peek(size_t index) const { return &m_parts[index]; }
@@ -476,6 +591,27 @@ class multipart_t
         return true;
     }
 
+#ifdef ZMQ_CPP11
+
+    // Return single part message_t encoded from this multipart_t.
+    message_t encode() const { return zmq::encode(*this); }
+
+    // Decode encoded message into multiple parts and append to self.
+    void decode_append(const message_t &encoded)
+    {
+        zmq::decode(encoded, std::back_inserter(*this));
+    }
+
+    // Return a new multipart_t containing the decoded message_t.
+    static multipart_t decode(const message_t &encoded)
+    {
+        multipart_t tmp;
+        zmq::decode(encoded, std::back_inserter(tmp));
+        return tmp;
+    }
+
+#endif
+
   private:
     // Disable implicit copying (moving is more efficient)
     multipart_t(const multipart_t &other) ZMQ_DELETED_FUNCTION;
@@ -508,9 +644,8 @@ class active_poller_t
     {
         auto it = decltype(handlers)::iterator{};
         auto inserted = bool{};
-        std::tie(it, inserted) =
-          handlers.emplace(socket,
-                           std::make_shared<handler_type>(std::move(handler)));
+        std::tie(it, inserted) = handlers.emplace(
+          socket, std::make_shared<handler_type>(std::move(handler)));
         try {
             base_poller.add(socket, events,
                             inserted && *(it->second) ? it->second.get() : nullptr);
@@ -549,7 +684,8 @@ class active_poller_t
             need_rebuild = false;
         }
         const auto count = base_poller.wait_all(poller_events, timeout);
-        std::for_each(poller_events.begin(), poller_events.begin() + static_cast<ptrdiff_t>(count),
+        std::for_each(poller_events.begin(),
+                      poller_events.begin() + static_cast<ptrdiff_t>(count),
                       [](decltype(base_poller)::event_type &event) {
                           if (event.user_data != nullptr)
                               (*event.user_data)(event.events);

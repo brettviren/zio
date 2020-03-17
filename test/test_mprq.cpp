@@ -1,6 +1,6 @@
 // zio::domo needs a way to queue multipart messages.
 
-#include <zmq_addon.hpp>
+#include "zio/zmq_addon.hpp"
 #include <deque>
 #include <cassert>
 

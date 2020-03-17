@@ -34,7 +34,7 @@ remote_identity_t zio::recv_server(zmq::socket_t& server_socket,
     rid.push_back((0x000000ff&routing_id));
 
 
-    mmsg.decode(msg);
+    mmsg.decode_append(msg);
     {
         std::stringstream ss;
         ss << "zio::recv SERVER msg size " << msg.size()
@@ -45,6 +45,7 @@ remote_identity_t zio::recv_server(zmq::socket_t& server_socket,
            // << " '" << (int)rid[2] << "'"
            // << " '" << (int)rid[3] << "'";
         console_log log;
+        log.level = console_log::log_level::debug;
         log.debug(ss.str());
     }
     return rid;
@@ -61,7 +62,7 @@ remote_identity_t zio::recv_router(zmq::socket_t& router_socket,
 
 
 void zio::send_serverish(zmq::socket_t& sock,
-                                 zmq::multipart_t& mmsg, remote_identity_t rid)
+                         zmq::multipart_t& mmsg, remote_identity_t rid)
 {
     int stype = sock.getsockopt<int>(ZMQ_TYPE);
     if (ZMQ_SERVER == stype) {
@@ -74,7 +75,7 @@ void zio::send_serverish(zmq::socket_t& sock,
 }
 
 void zio::send_server(zmq::socket_t& server_socket,
-                              zmq::multipart_t& mmsg, remote_identity_t rid)
+                      zmq::multipart_t& mmsg, remote_identity_t rid)
 {
     zmq::message_t msg = mmsg.encode();
     uint32_t routing_id =
@@ -127,7 +128,7 @@ void zio::recv_client(zmq::socket_t& client_socket,
 {
     zmq::message_t msg;
     auto res = client_socket.recv(msg, zmq::recv_flags::none);
-    mmsg.decode(msg);
+    mmsg.decode_append(msg);
     {
         std::stringstream ss;
         ss << "zio::recv CLIENT msg size " << msg.size()
@@ -188,6 +189,10 @@ void zio::send_dealer(zmq::socket_t& dealer_socket,
 std::chrono::milliseconds zio::now_ms()
 {
     return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+}
+std::chrono::microseconds zio::now_us()
+{
+    return std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch());
 }
 
 void zio::sleep_ms(std::chrono::milliseconds zzz)

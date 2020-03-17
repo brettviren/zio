@@ -26,8 +26,8 @@
 #include "zio/domo/broker.hpp"
 #include "zio/domo/client.hpp"
 #include "zio/domo/worker.hpp"
-
-#include <zmq_actor.hpp>
+#include "zio/logging.hpp"
+#include "zio/zmq_actor.hpp"
 
 using namespace zio::domo;
 

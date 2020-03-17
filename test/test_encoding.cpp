@@ -1,4 +1,5 @@
 #include <czmq.h>
+#include "zio/zmq_addon.hpp"
 #include <string>
 #include <vector>
 #include <iostream>
@@ -14,6 +15,14 @@ int main()
     zmsg_addmem(msg, &xyz, sizeof(XYZ));
     zframe_t* frame = zmsg_encode(msg);
     std::vector<std::uint8_t> ret(zframe_data(frame), zframe_data(frame) + zframe_size(frame));
+
+    {
+        zmq::message_t cppmsg(zframe_data(frame), zframe_size(frame));
+        zmq::multipart_t cppmmsg = zmq::multipart_t::decode(cppmsg);
+        assert(cppmmsg.size() == 2);
+        assert(cppmmsg.at(0).to_string() == prefix);
+    }
+
     zframe_destroy(&frame);
     zmsg_destroy(&msg);
 

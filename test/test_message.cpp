@@ -34,15 +34,15 @@ int main()
         cerr << ind << "[" << c << "] (" << (int)c << ")\n";
     }
 
-    msg.decode(spmsg);
+    zio::Message msg2;
+    msg2.decode(spmsg);
 
-
-    assert (msg.level() == 4);
-    assert (msg.form() == "TEXT");
-    assert (msg.seqno() == 0);
-    assert(!msg.payload().empty());
+    assert (msg2.level() == 4);
+    assert (msg2.form() == "TEXT");
+    assert (msg2.seqno() == 0);
+    assert(!msg2.payload().empty());
     {
-        std::string s(msg.payload()[0].data<const char>(),msg.payload()[0].size());
+        std::string s(msg2.payload()[0].data<const char>(),msg2.payload()[0].size());
         assert(s == spl);
     }
 
