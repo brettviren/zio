@@ -157,12 +157,15 @@ And in another send some test tensors:
 When that competes, this test will stream the content back
 
 #+begin_example
-  $ zio send-tens stream=stream1
+  $ zio recv-tens stream=stream1
 #+end_example
 
-Note that ~stream=stream~ command line argument sets an additional
+Note that the ~stream=stream1~ command line argument sets an additional
 attribute required by the rule sets in ~file-server.jsonnet~.  The rules
-use ~stream~ to set a portion of the HDF5 group path.
+use ~stream~ to set a portion of the HDF5 group path.  In a "real"
+application, this additional attribute would be provided by the
+messages extracted from the flow client or by injected messages
+created from information previously saved into a file.
 
 ** Multiple clients
 
