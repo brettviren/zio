@@ -22,7 +22,7 @@ ZIO provides include:
   applications that follow the /data flow programming/ paradigm ([[file:node.org][node]]
   and [[file:port.org][port]]).
 
-- A [[file:api.org][C++ API]] and matching [[file:python.org][Python package]]
+- A [[file:api.org][C++ API]] (also see [[file:doxy/html/][doxygen]]) and matching [[file:python.org][Python package]]
 
 - A Python [[file:flow-broker.org][flow broker]] bringing together flow clients and flow
   handlers in a pluggable manner.
