@@ -5,7 +5,6 @@ testdata
 cut
 waf
 *.ipc
-
 ltximg
 venv
 *.egg-info
