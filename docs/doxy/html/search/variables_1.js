@@ -1,8 +1,5 @@
 var searchData=
 [
-  ['ack',['ack',['../da/dc4/structflow__protocol_1_1ev__eot.html#ae3c7aa04f91a0c738c24ce6f47f1e76f',1,'flow_protocol::ev_eot']]],
-  ['addr',['addr',['../d0/dab/namespacetest__ugly.html#aab38a432a16e67db96efc2e51d97ba06',1,'test_ugly.addr()'],['../dc/d47/test__tcs_8cpp.html#a5642146bf8774069f4d9f5de656aed90',1,'addr():&#160;test_tcs.cpp']]],
-  ['address',['address',['../d7/d8a/classtest__flowbroker_1_1_factory.html#a5c1a2dbd6ee6750de557627347fcc6ea',1,'test_flowbroker.Factory.address()'],['../d4/d71/struct_direct_binder.html#a9b44d177ec73884afdbd54ea99fd9f2a',1,'DirectBinder::address()']]],
-  ['author',['author',['../dd/dc4/namespacesetup.html#a3a57a4772d418a06835249cbade0d86a',1,'setup']]],
-  ['author_5femail',['author_email',['../dd/dc4/namespacesetup.html#a5b08034343aa2be607722a8b315f3625',1,'setup']]]
+  ['bound',['bound',['../dc/dac/classzio_1_1port_1_1_port.html#a3df03f955eb7ad088527ec566913b832',1,'zio::port::Port']]],
+  ['broker',['broker',['../d4/da9/classzio_1_1domo_1_1client_1_1_client.html#af8433f1e8e7692a95c3c339f372b0d85',1,'zio::domo.client.Client.broker()'],['../d8/d8f/classzio_1_1domo_1_1worker_1_1_worker.html#a93a95b2b1c713fcb352bbb5931e95fd3',1,'zio::domo.worker.Worker.broker()']]]
 ];

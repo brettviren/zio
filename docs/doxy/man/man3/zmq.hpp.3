@@ -1,4 +1,4 @@
-.TH "inc/zio/zmq.hpp" 3 "Tue Feb 4 2020" "ZIO" \" -*- nroff -*-
+.TH "inc/zio/zmq.hpp" 3 "Wed Mar 18 2020" "ZIO" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -94,10 +94,13 @@ inc/zio/zmq.hpp
 .RI "#define \fBZMQ_CONSTEXPR_VAR\fP   const"
 .br
 .ti -1c
+.RI "#define \fBZMQ_CPP11_DEPRECATED\fP(msg)"
+.br
+.ti -1c
 .RI "#define \fBCPPZMQ_VERSION_MAJOR\fP   4"
 .br
 .ti -1c
-.RI "#define \fBCPPZMQ_VERSION_MINOR\fP   6"
+.RI "#define \fBCPPZMQ_VERSION_MINOR\fP   7"
 .br
 .ti -1c
 .RI "#define \fBCPPZMQ_VERSION_PATCH\fP   0"
@@ -187,7 +190,7 @@ inc/zio/zmq.hpp
 
 .in +1c
 .ti -1c
-.RI "\fBZMQ_CONSTEXPR_VAR\fP from_handle_t \fBzmq::from_handle\fP = from_handle_t(from_handle_t::_private())"
+.RI "\fBZMQ_CONSTEXPR_VAR\fP from_handle_t \fBzmq::from_handle\fP"
 .br
 .in -1c
 .SH "Macro Definition Documentation"
@@ -200,63 +203,67 @@ ZMQ_MAKE_VERSION(CPPZMQ_VERSION_MAJOR, CPPZMQ_VERSION_MINOR,                    
                      CPPZMQ_VERSION_PATCH)
 .fi
 .PP
-Definition at line 108 of file zmq\&.hpp\&.
+Definition at line 120 of file zmq\&.hpp\&.
 .SS "#define CPPZMQ_VERSION_MAJOR   4"
 
 .PP
-Definition at line 104 of file zmq\&.hpp\&.
-.SS "#define CPPZMQ_VERSION_MINOR   6"
+Definition at line 116 of file zmq\&.hpp\&.
+.SS "#define CPPZMQ_VERSION_MINOR   7"
 
 .PP
-Definition at line 105 of file zmq\&.hpp\&.
+Definition at line 117 of file zmq\&.hpp\&.
 .SS "#define CPPZMQ_VERSION_PATCH   0"
 
 .PP
-Definition at line 106 of file zmq\&.hpp\&.
+Definition at line 118 of file zmq\&.hpp\&.
 .SS "#define ZMQ_ASSERT(expression)   assert(expression)"
 
 .PP
-Definition at line 178 of file zmq\&.hpp\&.
+Definition at line 190 of file zmq\&.hpp\&.
 .SS "#define ZMQ_CONSTEXPR_FN"
 
 .PP
-Definition at line 68 of file zmq\&.hpp\&.
+Definition at line 79 of file zmq\&.hpp\&.
 .SS "#define ZMQ_CONSTEXPR_VAR   const"
 
 .PP
-Definition at line 69 of file zmq\&.hpp\&.
+Definition at line 80 of file zmq\&.hpp\&.
+.SS "#define ZMQ_CPP11_DEPRECATED(msg)"
+
+.PP
+Definition at line 81 of file zmq\&.hpp\&.
 .SS "#define ZMQ_DELETED_FUNCTION"
 
 .PP
-Definition at line 134 of file zmq\&.hpp\&.
+Definition at line 146 of file zmq\&.hpp\&.
 .SS "#define ZMQ_EXPLICIT"
 
 .PP
-Definition at line 65 of file zmq\&.hpp\&.
+Definition at line 76 of file zmq\&.hpp\&.
 .SS "#define ZMQ_HAS_PROXY_STEERABLE"
 
 .PP
-Definition at line 160 of file zmq\&.hpp\&.
+Definition at line 172 of file zmq\&.hpp\&.
 .SS "#define ZMQ_NEW_MONITOR_EVENT_LAYOUT"
 
 .PP
-Definition at line 156 of file zmq\&.hpp\&.
+Definition at line 168 of file zmq\&.hpp\&.
 .SS "#define ZMQ_NODISCARD"
 
 .PP
-Definition at line 53 of file zmq\&.hpp\&.
+Definition at line 63 of file zmq\&.hpp\&.
 .SS "#define ZMQ_NOTHROW   throw()"
 
 .PP
-Definition at line 64 of file zmq\&.hpp\&.
+Definition at line 75 of file zmq\&.hpp\&.
 .SS "#define ZMQ_NULLPTR   0"
 
 .PP
-Definition at line 67 of file zmq\&.hpp\&.
+Definition at line 78 of file zmq\&.hpp\&.
 .SS "#define ZMQ_OVERRIDE"
 
 .PP
-Definition at line 66 of file zmq\&.hpp\&.
+Definition at line 77 of file zmq\&.hpp\&.
 .SH "Author"
 .PP 
 Generated automatically by Doxygen for ZIO from the source code\&.

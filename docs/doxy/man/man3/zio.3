@@ -1,4 +1,4 @@
-.TH "zio" 3 "Tue Feb 4 2020" "ZIO" \" -*- nroff -*-
+.TH "zio" 3 "Wed Mar 18 2020" "ZIO" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -14,11 +14,23 @@ zio \- implementation of ZIO data flow protocol endpoints
 .RI " \fB__main__\fP"
 .br
 .ti -1c
+.RI " \fBdomo\fP"
+.br
+.ti -1c
 .RI " \fBflow\fP"
 .br
 .RI "ZIO data flow\&. "
 .ti -1c
+.RI " \fBjsonnet\fP"
+.br
+.ti -1c
 .RI " \fBlevel\fP"
+.br
+.ti -1c
+.RI " \fBlispish\fP"
+.br
+.ti -1c
+.RI " \fBmains\fP"
 .br
 .ti -1c
 .RI " \fBmessage\fP"
@@ -31,6 +43,12 @@ zio \- implementation of ZIO data flow protocol endpoints
 .br
 .ti -1c
 .RI " \fBport\fP"
+.br
+.ti -1c
+.RI " \fBrules\fP"
+.br
+.ti -1c
+.RI " \fBtens\fP"
 .br
 .ti -1c
 .RI " \fButil\fP"
@@ -83,6 +101,9 @@ zio \- implementation of ZIO data flow protocol endpoints
 .RI "class \fBsocket_error\fP"
 .br
 .RI "exception indicating a socket error "
+.ti -1c
+.RI "class \fBzactor_t\fP"
+.br
 .in -1c
 .SS "Typedefs"
 
@@ -135,10 +156,19 @@ zio \- implementation of ZIO data flow protocol endpoints
 .RI "typedef std::shared_ptr< \fBPort\fP > \fBportptr_t\fP"
 .br
 .RI "The context can't be copied and ports like to be shared\&. "
+.ti -1c
+.RI "typedef std::chrono::milliseconds \fBtime_unit_t\fP"
+.br
+.ti -1c
+.RI "typedef std::string \fBremote_identity_t\fP"
+.br
 .in -1c
 .SS "Functions"
 
 .in +1c
+.ti -1c
+.RI "std::pair< \fBsocket_t\fP, \fBsocket_t\fP > \fBcreate_linked_pairs\fP (\fBcontext_t\fP &ctx)"
+.br
 .ti -1c
 .RI "int \fBsock_type\fP (const \fBsocket_t\fP &sock)"
 .br
@@ -146,12 +176,95 @@ zio \- implementation of ZIO data flow protocol endpoints
 .ti -1c
 .RI "std::string \fBsock_type_name\fP (int stype)"
 .br
+.ti -1c
+.RI "void \fBinit_signals\fP ()"
+.br
+.ti -1c
+.RI "void \fBinit_logging\fP ()"
+.br
+.ti -1c
+.RI "void \fBinit_all\fP ()"
+.br
+.ti -1c
+.RI "\fBremote_identity_t\fP \fBrecv_serverish\fP (\fBsocket_t\fP &socket, multipart_t &mmsg)"
+.br
+.ti -1c
+.RI "\fBremote_identity_t\fP \fBrecv_server\fP (\fBsocket_t\fP &server_socket, multipart_t &mmsg)"
+.br
+.ti -1c
+.RI "\fBremote_identity_t\fP \fBrecv_router\fP (\fBsocket_t\fP &router_socket, multipart_t &mmsg)"
+.br
+.ti -1c
+.RI "void \fBsend_serverish\fP (\fBsocket_t\fP &socket, multipart_t &mmsg, \fBremote_identity_t\fP rid)"
+.br
+.ti -1c
+.RI "void \fBsend_server\fP (\fBsocket_t\fP &server_socket, multipart_t &mmsg, \fBremote_identity_t\fP rid)"
+.br
+.ti -1c
+.RI "void \fBsend_router\fP (\fBsocket_t\fP &router_socket, multipart_t &mmsg, \fBremote_identity_t\fP rid)"
+.br
+.ti -1c
+.RI "void \fBrecv_clientish\fP (\fBsocket_t\fP &socket, multipart_t &mmsg)"
+.br
+.ti -1c
+.RI "void \fBrecv_client\fP (\fBsocket_t\fP &client_socket, multipart_t &mmsg)"
+.br
+.ti -1c
+.RI "void \fBrecv_dealer\fP (\fBsocket_t\fP &dealer_socket, multipart_t &mmsg)"
+.br
+.ti -1c
+.RI "void \fBsend_clientish\fP (\fBsocket_t\fP &socket, multipart_t &mmsg)"
+.br
+.ti -1c
+.RI "void \fBsend_client\fP (\fBsocket_t\fP &client_socket, multipart_t &mmsg)"
+.br
+.ti -1c
+.RI "void \fBsend_dealer\fP (\fBsocket_t\fP &dealer_socket, multipart_t &mmsg)"
+.br
+.ti -1c
+.RI "std::chrono::milliseconds \fBnow_ms\fP ()"
+.br
+.ti -1c
+.RI "std::chrono::microseconds \fBnow_us\fP ()"
+.br
+.ti -1c
+.RI "void \fBsleep_ms\fP (std::chrono::milliseconds zzz)"
+.br
+.ti -1c
+.RI "bool \fBinterrupted\fP ()"
+.br
+.ti -1c
+.RI "void \fBcatch_signals\fP ()"
+.br
+.in -1c
+.SS "Variables"
+
+.in +1c
+.ti -1c
+.RI "const int \fBHEARTBEAT_LIVENESS\fP = 3"
+.br
+.ti -1c
+.RI "const \fBtime_unit_t\fP \fBHEARTBEAT_INTERVAL\fP {2500}"
+.br
+.ti -1c
+.RI "const \fBtime_unit_t\fP \fBHEARTBEAT_EXPIRY\fP {\fBHEARTBEAT_INTERVAL\fP * \fBHEARTBEAT_LIVENESS\fP}"
+.br
 .in -1c
 .SH "Detailed Description"
 .PP 
 implementation of ZIO data flow protocol endpoints 
 
+An actor is a function running in a thread with a control link to the parent thread\&.
+.PP
+This actor implements the 'mini protocol' for startup/shutdown used by CZMQ
+.PP
+ZIO domo protocol constants
+.PP
+This header holds 7/MDP constants\&.
+.PP
 Functions to manage message data including send and receiving with a socket\&.
+.PP
+Handle TENS message form\&.
 .PP
 .PP
 .nf
@@ -201,7 +314,7 @@ Definition at line 22 of file peer\&.hpp\&.
 .SS "using \fBzio::json\fP = typedef nlohmann::json"
 
 .PP
-Definition at line 10 of file interned\&.hpp\&.
+Definition at line 9 of file interned\&.hpp\&.
 .SS "typedef \fBOutbox\fP<std::string> \fBzio::Logger\fP"
 
 .PP
@@ -234,10 +347,18 @@ Definition at line 36 of file peer\&.hpp\&.
 The context can't be copied and ports like to be shared\&. 
 .PP
 Definition at line 148 of file port\&.hpp\&.
+.SS "typedef std::string \fBzio::remote_identity_t\fP"
+
+.PP
+Definition at line 24 of file util\&.hpp\&.
 .SS "typedef uint64_t \fBzio::seqno_t\fP"
 
 .PP
 Definition at line 38 of file message\&.hpp\&.
+.SS "typedef std::chrono::milliseconds \fBzio::time_unit_t\fP"
+
+.PP
+Definition at line 11 of file util\&.hpp\&.
 .SS "typedef std::string \fBzio::uuid_t\fP"
 
 .PP
@@ -246,6 +367,74 @@ Uniquely identify a peer\&.
 Definition at line 14 of file peer\&.hpp\&.
 .SH "Function Documentation"
 .PP 
+.SS "void zio::catch_signals ()"
+Catch signals and set interrupted to true\&.
+.PP
+This should be called from \fBmain()\fP\&. For higher level interface, see \fBzio::init_signals()\fP or \fBzio::init_all()\fP from \fBzio/main\&.hpp\fP\&. 
+.PP
+Definition at line 200 of file util\&.cpp\&.
+.SS "std::pair<\fBsocket_t\fP, \fBsocket_t\fP> zio::create_linked_pairs (\fBcontext_t\fP & ctx)\fC [inline]\fP"
+Return a linked pair of PAIR sockets\&.
+.PP
+First is bound and second is connected via inproc:// 
+.PP
+Definition at line 22 of file actor\&.hpp\&.
+.SS "void zio::init_all ()"
+
+.PP
+Definition at line 22 of file main\&.cpp\&.
+.SS "void zio::init_logging ()"
+
+.PP
+Definition at line 13 of file main\&.cpp\&.
+.SS "void zio::init_signals ()"
+
+.PP
+Definition at line 8 of file main\&.cpp\&.
+.SS "bool zio::interrupted ()"
+Return true when a signal has been sent to the application\&.
+.PP
+Exit main loop if ever true\&.
+.PP
+The \fBcatch_signals()\fP function must be called in \fBmain()\fP for this to ever return true\&. 
+.PP
+Definition at line 194 of file util\&.cpp\&.
+.SS "std::chrono::milliseconds zio::now_ms ()"
+Current system time in milliseconds\&. 
+.PP
+Definition at line 174 of file util\&.cpp\&.
+.SS "std::chrono::microseconds zio::now_us ()"
+Current system time in microseconds\&. 
+.PP
+Definition at line 178 of file util\&.cpp\&.
+.SS "void zio::recv_client (\fBsocket_t\fP & client_socket, multipart_t & mmsg)"
+
+.SS "void zio::recv_clientish (\fBsocket_t\fP & socket, multipart_t & mmsg)"
+
+.SS "void zio::recv_dealer (\fBsocket_t\fP & dealer_socket, multipart_t & mmsg)"
+
+.SS "\fBremote_identity_t\fP zio::recv_router (\fBsocket_t\fP & router_socket, multipart_t & mmsg)"
+
+.SS "\fBremote_identity_t\fP zio::recv_server (\fBsocket_t\fP & server_socket, multipart_t & mmsg)"
+
+.SS "\fBremote_identity_t\fP zio::recv_serverish (\fBsocket_t\fP & socket, multipart_t & mmsg)"
+
+.SS "void zio::send_client (\fBsocket_t\fP & client_socket, multipart_t & mmsg)"
+
+.SS "void zio::send_clientish (\fBsocket_t\fP & socket, multipart_t & mmsg)"
+
+.SS "void zio::send_dealer (\fBsocket_t\fP & dealer_socket, multipart_t & mmsg)"
+
+.SS "void zio::send_router (\fBsocket_t\fP & router_socket, multipart_t & mmsg, \fBremote_identity_t\fP rid)"
+
+.SS "void zio::send_server (\fBsocket_t\fP & server_socket, multipart_t & mmsg, \fBremote_identity_t\fP rid)"
+
+.SS "void zio::send_serverish (\fBsocket_t\fP & socket, multipart_t & mmsg, \fBremote_identity_t\fP rid)"
+
+.SS "void zio::sleep_ms (std::chrono::milliseconds zzz)"
+Sleep a while 
+.PP
+Definition at line 183 of file util\&.cpp\&.
 .SS "int zio::sock_type (const \fBsocket_t\fP & sock)"
 
 .PP
@@ -256,6 +445,20 @@ Definition at line 6 of file interned\&.cpp\&.
 
 .PP
 Definition at line 11 of file interned\&.cpp\&.
+.SH "Variable Documentation"
+.PP 
+.SS "const \fBtime_unit_t\fP zio::HEARTBEAT_EXPIRY {\fBHEARTBEAT_INTERVAL\fP * \fBHEARTBEAT_LIVENESS\fP}"
+
+.PP
+Definition at line 16 of file util\&.hpp\&.
+.SS "const \fBtime_unit_t\fP zio::HEARTBEAT_INTERVAL {2500}"
+
+.PP
+Definition at line 15 of file util\&.hpp\&.
+.SS "const int zio::HEARTBEAT_LIVENESS = 3"
+
+.PP
+Definition at line 14 of file util\&.hpp\&.
 .SH "Author"
 .PP 
 Generated automatically by Doxygen for ZIO from the source code\&.

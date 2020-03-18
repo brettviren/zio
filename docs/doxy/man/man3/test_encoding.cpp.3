@@ -1,4 +1,4 @@
-.TH "test/test_encoding.cpp" 3 "Tue Feb 4 2020" "ZIO" \" -*- nroff -*-
+.TH "test/test_encoding.cpp" 3 "Wed Mar 18 2020" "ZIO" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -6,13 +6,17 @@ test/test_encoding.cpp
 .SH SYNOPSIS
 .br
 .PP
+\fC#include 'zio/cppzmq\&.hpp'\fP
+.br
+\fC#include 'zio/main\&.hpp'\fP
+.br
+\fC#include 'zio/logging\&.hpp'\fP
+.br
 \fC#include <czmq\&.h>\fP
 .br
 \fC#include <string>\fP
 .br
 \fC#include <vector>\fP
-.br
-\fC#include <iostream>\fP
 .br
 
 .SS "Functions"
@@ -25,9 +29,9 @@ test/test_encoding.cpp
 .SH "Function Documentation"
 .PP 
 .SS "int main (void)"
-
+Test compatibility of cppzmq and CZMQ single/multipart codec\&. 
 .PP
-Definition at line 5 of file test_encoding\&.cpp\&.
+Definition at line 11 of file test_encoding\&.cpp\&.
 .SH "Author"
 .PP 
 Generated automatically by Doxygen for ZIO from the source code\&.

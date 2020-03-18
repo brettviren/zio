@@ -1,4 +1,4 @@
-.TH "zmq" 3 "Tue Feb 4 2020" "ZIO" \" -*- nroff -*-
+.TH "zmq" 3 "Wed Mar 18 2020" "ZIO" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -107,7 +107,7 @@ zmq
 
 .in +1c
 .ti -1c
-.RI "\fBZMQ_CONSTEXPR_VAR\fP \fBfrom_handle_t\fP \fBfrom_handle\fP = \fBfrom_handle_t\fP(\fBfrom_handle_t::_private\fP())"
+.RI "\fBZMQ_CONSTEXPR_VAR\fP \fBfrom_handle_t\fP \fBfrom_handle\fP"
 .br
 .in -1c
 .SH "Typedef Documentation"
@@ -115,87 +115,92 @@ zmq
 .SS "typedef zmq_free_fn \fBzmq::free_fn\fP"
 
 .PP
-Definition at line 234 of file zmq\&.hpp\&.
+Definition at line 242 of file zmq\&.hpp\&.
 .SS "typedef zmq_pollitem_t \fBzmq::pollitem_t\fP"
 
 .PP
-Definition at line 235 of file zmq\&.hpp\&.
+Definition at line 243 of file zmq\&.hpp\&.
 .SH "Function Documentation"
 .PP 
 .SS "bool zmq::operator!= (\fBsocket_ref\fP a, \fBsocket_ref\fP b)\fC [inline]\fP"
 
 .PP
-Definition at line 1496 of file zmq\&.hpp\&.
+Definition at line 1583 of file zmq\&.hpp\&.
 .SS "bool zmq::operator< (\fBsocket_ref\fP a, \fBsocket_ref\fP b)\fC [inline]\fP"
 
 .PP
-Definition at line 1500 of file zmq\&.hpp\&.
+Definition at line 1587 of file zmq\&.hpp\&.
 .SS "std::ostream& zmq::operator<< (std::ostream & os, const \fBmessage_t\fP & msg)\fC [inline]\fP"
 
 .PP
-Definition at line 2097 of file zmq\&.hpp\&.
+Definition at line 2172 of file zmq\&.hpp\&.
 .SS "bool zmq::operator<= (\fBsocket_ref\fP a, \fBsocket_ref\fP b)\fC [inline]\fP"
 
 .PP
-Definition at line 1508 of file zmq\&.hpp\&.
+Definition at line 1595 of file zmq\&.hpp\&.
 .SS "bool zmq::operator== (\fBsocket_ref\fP a, \fBsocket_ref\fP b)\fC [inline]\fP"
 
 .PP
-Definition at line 1492 of file zmq\&.hpp\&.
+Definition at line 1579 of file zmq\&.hpp\&.
 .SS "bool zmq::operator> (\fBsocket_ref\fP a, \fBsocket_ref\fP b)\fC [inline]\fP"
 
 .PP
-Definition at line 1504 of file zmq\&.hpp\&.
+Definition at line 1591 of file zmq\&.hpp\&.
 .SS "bool zmq::operator>= (\fBsocket_ref\fP a, \fBsocket_ref\fP b)\fC [inline]\fP"
 
 .PP
-Definition at line 1512 of file zmq\&.hpp\&.
+Definition at line 1599 of file zmq\&.hpp\&.
 .SS "int zmq::poll (zmq_pollitem_t * items_, size_t nitems_, long timeout_ = \fC\-1\fP)\fC [inline]\fP"
 
 .PP
-Definition at line 248 of file zmq\&.hpp\&.
+Definition at line 259 of file zmq\&.hpp\&.
 .SS "int zmq::poll (zmq_pollitem_t const * items_, size_t nitems_, long timeout_ = \fC\-1\fP)\fC [inline]\fP"
 
 .PP
-Definition at line 257 of file zmq\&.hpp\&.
+Definition at line 268 of file zmq\&.hpp\&.
 .SS "void zmq::proxy (void * frontend, void * backend, void * capture)\fC [inline]\fP"
 
 .PP
-Definition at line 1624 of file zmq\&.hpp\&.
+Definition at line 1703 of file zmq\&.hpp\&.
 .SS "void zmq::proxy (\fBsocket_ref\fP frontend, \fBsocket_ref\fP backend, \fBsocket_ref\fP capture = \fC\fBsocket_ref\fP()\fP)\fC [inline]\fP"
 
 .PP
-Definition at line 1632 of file zmq\&.hpp\&.
+Definition at line 1711 of file zmq\&.hpp\&.
 .SS "void zmq::proxy_steerable (void * frontend, void * backend, void * capture, void * control)\fC [inline]\fP"
 
 .PP
-Definition at line 1642 of file zmq\&.hpp\&.
+Definition at line 1721 of file zmq\&.hpp\&.
 .SS "void zmq::proxy_steerable (\fBsocket_ref\fP frontend, \fBsocket_ref\fP backend, \fBsocket_ref\fP capture, \fBsocket_ref\fP control)\fC [inline]\fP"
 
 .PP
-Definition at line 1649 of file zmq\&.hpp\&.
+Definition at line 1728 of file zmq\&.hpp\&.
 .SS "void zmq::swap (\fBmessage_t\fP & a, \fBmessage_t\fP & b)\fC [inline]\fP"
 
 .PP
-Definition at line 613 of file zmq\&.hpp\&.
+Definition at line 636 of file zmq\&.hpp\&.
 .SS "void zmq::swap (\fBcontext_t\fP & a, \fBcontext_t\fP & b)\fC [inline]\fP"
 
 .PP
-Definition at line 699 of file zmq\&.hpp\&.
+Definition at line 797 of file zmq\&.hpp\&.
 .SS "void zmq::swap (\fBsocket_t\fP & a, \fBsocket_t\fP & b)\fC [inline]\fP"
 
 .PP
-Definition at line 1619 of file zmq\&.hpp\&.
+Definition at line 1697 of file zmq\&.hpp\&.
 .SS "void zmq::version (int * major_, int * minor_, int * patch_)\fC [inline]\fP"
 
 .PP
-Definition at line 302 of file zmq\&.hpp\&.
+Definition at line 315 of file zmq\&.hpp\&.
 .SH "Variable Documentation"
 .PP 
-.SS "\fBZMQ_CONSTEXPR_VAR\fP \fBfrom_handle_t\fP zmq::from_handle = \fBfrom_handle_t\fP(\fBfrom_handle_t::_private\fP())"
-
+.SS "\fBZMQ_CONSTEXPR_VAR\fP \fBfrom_handle_t\fP zmq::from_handle"
+\fBInitial value:\fP
 .PP
-Definition at line 1458 of file zmq\&.hpp\&.
+.nf
+=
+  from_handle_t(from_handle_t::_private())
+.fi
+.PP
+Definition at line 1542 of file zmq\&.hpp\&.
 .SH "Author"
 .PP 
 Generated automatically by Doxygen for ZIO from the source code\&.

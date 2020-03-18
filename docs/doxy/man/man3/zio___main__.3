@@ -1,4 +1,4 @@
-.TH "zio.__main__" 3 "Tue Feb 4 2020" "ZIO" \" -*- nroff -*-
+.TH "zio.__main__" 3 "Wed Mar 18 2020" "ZIO" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -10,13 +10,26 @@ zio.__main__
 
 .in +1c
 .ti -1c
-.RI "def \fBcli\fP (ctx)"
-.br
-.ti -1c
-.RI "def \fBpeers\fP (\fBtimeout\fP, wait_for, pre_sleep, post_sleep, name, headers)"
-.br
-.ti -1c
 .RI "def \fBmain\fP ()"
+.br
+.in -1c
+.SS "Variables"
+
+.in +1c
+.ti -1c
+.RI "\fBlevel\fP"
+.br
+.ti -1c
+.RI "\fBformat\fP"
+.br
+.ti -1c
+.RI "\fBdatefmt\fP"
+.br
+.ti -1c
+.RI "\fBlog\fP = logging\&.getLogger('zio')"
+.br
+.ti -1c
+.RI "\fBcli\fP = click\&.CommandCollection(sources=[peers\&.cli, flow\&.cli, domo\&.cli])"
 .br
 .in -1c
 .SH "Detailed Description"
@@ -31,32 +44,32 @@ Main CLI to ZIO
  
 .SH "Function Documentation"
 .PP 
-.SS "def zio\&.__main__\&.cli ( ctx)"
-
-.PP
-.nf
-ZIO command line interface
-
-.fi
-.PP
- 
-.PP
-Definition at line 14 of file __main__\&.py\&.
 .SS "def zio\&.__main__\&.main (void)"
 
 .PP
-Definition at line 56 of file __main__\&.py\&.
-.SS "def zio\&.__main__\&.peers ( timeout,  wait_for,  pre_sleep,  post_sleep,  name,  headers)"
+Definition at line 16 of file __main__\&.py\&.
+.SH "Variable Documentation"
+.PP 
+.SS "zio\&.__main__\&.cli = click\&.CommandCollection(sources=[peers\&.cli, flow\&.cli, domo\&.cli])"
 
 .PP
-.nf
-Join Zyre and discover peers.
+Definition at line 14 of file __main__\&.py\&.
+.SS "zio\&.__main__\&.datefmt"
 
-.fi
 .PP
- 
+Definition at line 10 of file __main__\&.py\&.
+.SS "zio\&.__main__\&.format"
+
 .PP
-Definition at line 31 of file __main__\&.py\&.
+Definition at line 9 of file __main__\&.py\&.
+.SS "zio\&.__main__\&.level"
+
+.PP
+Definition at line 8 of file __main__\&.py\&.
+.SS "zio\&.__main__\&.log = logging\&.getLogger('zio')"
+
+.PP
+Definition at line 11 of file __main__\&.py\&.
 .SH "Author"
 .PP 
 Generated automatically by Doxygen for ZIO from the source code\&.

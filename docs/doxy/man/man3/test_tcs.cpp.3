@@ -1,4 +1,4 @@
-.TH "test/test_tcs.cpp" 3 "Tue Feb 4 2020" "ZIO" \" -*- nroff -*-
+.TH "test/test_tcs.cpp" 3 "Wed Mar 18 2020" "ZIO" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -6,15 +6,19 @@ test/test_tcs.cpp
 .SH SYNOPSIS
 .br
 .PP
-\fC#include 'zio/interned\&.hpp'\fP
+\fC#include 'zio/cppzmq\&.hpp'\fP
+.br
+\fC#include 'zio/logging\&.hpp'\fP
+.br
+\fC#include 'zio/main\&.hpp'\fP
 .br
 \fC#include <unistd\&.h>\fP
 .br
 \fC#include <chrono>\fP
 .br
-\fC#include <czmq\&.h>\fP
-.br
 \fC#include <thread>\fP
+.br
+\fC#include <map>\fP
 .br
 
 .SS "Typedefs"
@@ -50,13 +54,13 @@ test/test_tcs.cpp
 .SS "typedef std::chrono::duration<int64_t,std::micro> \fBmicroseconds_type\fP"
 
 .PP
-Definition at line 15 of file test_tcs\&.cpp\&.
+Definition at line 18 of file test_tcs\&.cpp\&.
 .SH "Function Documentation"
 .PP 
 .SS "int main (void)"
 
 .PP
-Definition at line 153 of file test_tcs\&.cpp\&.
+Definition at line 156 of file test_tcs\&.cpp\&.
 .SH "Variable Documentation"
 .PP 
 .SS "const char* addr = 'ipc://test_tcs\&.ipc'"
@@ -64,15 +68,15 @@ Definition at line 153 of file test_tcs\&.cpp\&.
 .PP
 inproc hangs\&. no messages ever get received by server\&. tcp/ipc okay\&. 
 .PP
-Definition at line 13 of file test_tcs\&.cpp\&.
+Definition at line 16 of file test_tcs\&.cpp\&.
 .SS "const int client_type = ZMQ_CLIENT"
 
 .PP
-Definition at line 8 of file test_tcs\&.cpp\&.
+Definition at line 11 of file test_tcs\&.cpp\&.
 .SS "const int server_type = ZMQ_SERVER"
 
 .PP
-Definition at line 7 of file test_tcs\&.cpp\&.
+Definition at line 10 of file test_tcs\&.cpp\&.
 .SH "Author"
 .PP 
 Generated automatically by Doxygen for ZIO from the source code\&.

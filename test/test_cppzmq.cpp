@@ -1,4 +1,6 @@
-#include "zio/zio.hpp"
+#include "zio/cppzmq.hpp"
+#include "zio/main.hpp"
+#include "zio/logging.hpp"
 
 #ifndef ZMQ_CPP11
 #error c++11 should be defined
@@ -13,11 +15,11 @@
 #endif
 
 #include <unistd.h>
-#include <iostream>
 using namespace std;
 
 int main()
 {
+    zio::init_all();
 
     zio::context_t ctx;
     zio::socket_t s(ctx, ZMQ_SERVER);
@@ -29,7 +31,7 @@ int main()
 
     const std::string hw = "Hello World!";
 
-    cerr << "sending " << hw << endl;
+    zio::debug("sending {}", hw);
     zio::message_t smsg(hw.data(), hw.size());
     auto ses = c.send(smsg, zio::send_flags::none);
     assert (ses);
@@ -37,7 +39,7 @@ int main()
     assert (ses.value() == hw.size());
 
 
-    cerr << "receiving\n";
+    zio::debug("receiving");
     zio::message_t rmsg;
     auto res = s.recv(rmsg);
     assert (res);

@@ -1,4 +1,5 @@
 #include "zio/node.hpp"
+#include "zio/logging.hpp"
 
 static
 std::string get_hostname()
@@ -64,11 +65,9 @@ void zio::Node::online(const headerset_t& extra_headers)
         headerset_t hs = np.second->do_binds();
         headers.insert(hs.begin(), hs.end());
     }
-    if (m_verbose) {
-        zsys_debug("[node %s] going online with:", m_nick.c_str());
-        for (const auto& hh : headers) {
-            zsys_debug("\t%s = %s", hh.first.c_str(), hh.second.c_str());
-        }
+    zio::debug("[node {}] going online with:", m_nick.c_str());
+    for (const auto& hh : headers) {
+        zio::debug("\t{} = {}", hh.first.c_str(), hh.second.c_str());
     }
     m_peer = new Peer(m_nick, headers, m_verbose);
     for (auto& np : m_ports) {

@@ -1,4 +1,4 @@
-.TH "zio::flow::Flow" 3 "Tue Feb 4 2020" "ZIO" \" -*- nroff -*-
+.TH "zio::flow::Flow" 3 "Wed Mar 18 2020" "ZIO" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -70,11 +70,11 @@ Definition at line 21 of file flow\&.hpp\&.
 .PP
 create a flow\&. 
 .PP
-Definition at line 3 of file flow\&.cpp\&.
+Definition at line 4 of file flow\&.cpp\&.
 .SS "zio::flow::Flow::~Flow ()"
 
 .PP
-Definition at line 11 of file flow\&.cpp\&.
+Definition at line 12 of file flow\&.cpp\&.
 .SH "Member Function Documentation"
 .PP 
 .SS "int zio::flow::Flow::credit () const\fC [inline]\fP"
@@ -86,7 +86,7 @@ Definition at line 109 of file flow\&.hpp\&.
 .PP
 send any accumulated credit as a PAY A recver will flush pay prior to any get but the application may do this at any time after BOT\&. Number of credits sent is returned\&. This does not block\&. 
 .PP
-Definition at line 192 of file flow\&.cpp\&.
+Definition at line 193 of file flow\&.cpp\&.
 .SS "bool zio::flow::Flow::get (\fBzio::Message\fP & dat, int timeout = \fC\-1\fP)"
 
 .PP
@@ -94,7 +94,7 @@ get a payload message from the flow Return false immediately if an EOT was recei
 .PP
 Negative timeout waits forever, otherwise gives timeout in milliseconds to wait for a FLOW message\&. 
 .PP
-Definition at line 211 of file flow\&.cpp\&.
+Definition at line 212 of file flow\&.cpp\&.
 .SS "bool zio::flow::Flow::is_sender () const\fC [inline]\fP"
 
 .PP
@@ -104,7 +104,7 @@ Definition at line 108 of file flow\&.hpp\&.
 .PP
 put a payload message into the flow Return false if an EOT was received in the process\&. 
 .PP
-Definition at line 152 of file flow\&.cpp\&.
+Definition at line 153 of file flow\&.cpp\&.
 .SS "bool zio::flow::Flow::recv_bot (\fBzio::Message\fP & bot, int timeout = \fC\-1\fP)"
 
 .PP
@@ -112,7 +112,7 @@ receive a BOT A timeout, -1 waits forever\&. Return false if timeout occurs\&.
 .PP
 Server calls \fBsend_bot()\fP first, client calls \fBsend_bot()\fP second; 
 .PP
-Definition at line 58 of file flow\&.cpp\&.
+Definition at line 59 of file flow\&.cpp\&.
 .SS "bool zio::flow::Flow::recv_eot (\fBMessage\fP & msg, int timeout = \fC\-1\fP)"
 
 .PP
@@ -120,25 +120,25 @@ Receive an EOT\&. Return false if no EOT was received, otherwise set msg to that
 .PP
 Note: an app only needs to call \fBrecv_eot()\fP if they explicitly initiated with \fBsend_eot()\fP\&. 
 .PP
-Definition at line 251 of file flow\&.cpp\&.
+Definition at line 252 of file flow\&.cpp\&.
 .SS "void zio::flow::Flow::send_bot (\fBzio::Message\fP & bot)"
 
 .PP
 send a BOT Client calls \fBsend_bot()\fP first, server calls \fBsend_bot()\fP second; 
 .PP
-Definition at line 38 of file flow\&.cpp\&.
+Definition at line 39 of file flow\&.cpp\&.
 .SS "void zio::flow::Flow::send_eot (\fBMessage\fP & msg)"
 
 .PP
 send EOT\&. If a \fBget()\fP or a \fBput()\fP was interupted by an EOT the app should call \fBsend_eot()\fP as an acknowledgement and should not call \fBrecv_eot()\fP\&. If app explicitly initates EOT with \fBsend_eot()\fP then the app should call \fBrecv_eot()\fP to wait for an ack from the other end\&. 
 .PP
-Definition at line 237 of file flow\&.cpp\&.
+Definition at line 238 of file flow\&.cpp\&.
 .SS "int zio::flow::Flow::slurp_pay (int timeout)"
 
 .PP
 recv any waiting PAY messages A sender will slurp prior to a send of a DAT but the application may call this at any time after BOT\&. Number of credits slurped is returned\&. A -1 indicates EOT, which if app calls should respond\&. A -2 indicates protocol error\&. 
 .PP
-Definition at line 117 of file flow\&.cpp\&.
+Definition at line 118 of file flow\&.cpp\&.
 .SS "int zio::flow::Flow::total_credit () const\fC [inline]\fP"
 
 .PP

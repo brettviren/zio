@@ -1,13 +1,15 @@
 #include "zio/port.hpp"
 #include "zio/peer.hpp"
+#include "zio/main.hpp"
+#include "zio/logging.hpp"
+
 #include <iostream>
 using namespace std;
 
-#include <czmq.h>
 
 int main()
 {
-    zsys_init();
+    zio::init_all();
 
     // this test generally pretends to be the guts of a node.
 
@@ -20,8 +22,8 @@ int main()
     // bind all ports first, collecting their headers
     auto hh = port.do_binds();
     for (const auto& one : hh) {
-        cerr << "test: not advertising bind: " << one.first
-             << " = " << one.second << endl;
+        zio::debug("test: not advertising bind: {} = {}",
+                   one.first, one.second);
     }
 
     // advertise those

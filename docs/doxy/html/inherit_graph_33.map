@@ -1,3 +1,7 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$d8/d62/classzio_1_1flow_1_1broker_1_1_broker.html" title="zio.flow.broker.Broker" alt="" coords="5,5,155,32"/>
+<area shape="rect" id="node2" href="$d4/d6b/classzio_1_1domo_1_1broker_1_1_broker.html" title="zio.domo.broker.Broker" alt="" coords="114,5,271,32"/>
+<area shape="rect" id="node3" href="$d3/dc7/classzio_1_1domo_1_1broker_1_1_service.html" title="zio.domo.broker.Service" alt="" coords="111,56,274,83"/>
+<area shape="rect" id="node4" href="$dc/d8d/classzio_1_1domo_1_1broker_1_1_worker.html" title="zio.domo.broker.Worker" alt="" coords="112,107,273,133"/>
+<area shape="rect" id="node5" href="$d4/da9/classzio_1_1domo_1_1client_1_1_client.html" title="zio.domo.client.Client" alt="" coords="119,157,267,184"/>
+<area shape="rect" id="node6" href="$d8/d8f/classzio_1_1domo_1_1worker_1_1_worker.html" title="zio.domo.worker.Worker" alt="" coords="111,208,275,235"/>
 </map>

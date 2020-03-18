@@ -11,8 +11,6 @@
 
 #include <thread>
 
-#include <iostream>             // temp debug
-
 namespace zio {
 
     /*! Return a linked pair of PAIR sockets.
@@ -106,7 +104,6 @@ namespace zio {
             // The default contract with the actor function is that it
             // shall notify us with a "signal" message that we may
             // continue.
-            std::cerr << "zactor_t::startup()\n";
             message_t rmsg; 
             auto res = link().recv(rmsg);
         }
@@ -116,11 +113,9 @@ namespace zio {
             // notify it to terminate.  If sending that message is
             // successful we wait for the built-in confirmation
             // message.
-            std::cerr << "zactor_t::shutdown() send $TERM\n";
             auto sres = link().send(message_t("$TERM",5), send_flags::dontwait);
             if (sres) {
                 message_t rmsg;
-                std::cerr << "zactor_t::shutdown() wait for reply\n";
                 auto res = link().recv(rmsg, recv_flags::none);
             }
         }

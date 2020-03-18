@@ -16,12 +16,13 @@ def configure(cfg):
     cfg.check_cfg(package='libzmq', uselib_store='ZMQ', **p);
     cfg.check_cfg(package='libczmq', uselib_store='CZMQ', **p);
     cfg.check_cfg(package='libzyre', uselib_store='ZYRE', **p);
-    # cfg.check_cfg(package='protobuf', uselib_store='PROTOBUF', **p);
+    cfg.check_cfg(package='spdlog', uselib_store='SPDLOG', **p);
+
     cfg.write_config_header('config.h')
     cfg.check(features='cxx cxxprogram', lib=['pthread'], uselib_store='PTHREAD')
 
 def build(bld):
-    uses='ZMQ CZMQ ZYRE'.split()
+    uses='ZMQ CZMQ ZYRE SPDLOG'.split()
 
     rpath = [bld.env["PREFIX"] + '/lib', bld.path.find_or_declare(bld.out_dir)]
     rpath += [bld.env["LIBPATH_%s"%u][0] for u in uses]
@@ -38,7 +39,7 @@ def build(bld):
                     source = [tmain], target = tmain.name.replace('.cpp',''),
                     ut_cwd = bld.path,
                     install_path = None,
-                    includes = ['inc','build','test'],
+                    includes = 'inc build test',
                     rpath = rpath,
                     use = ['zio'] + uses + ['PTHREAD'])
     csources = bld.path.ant_glob('test/check*.cpp')
@@ -47,7 +48,7 @@ def build(bld):
                     source = [cmain], target = cmain.name.replace('.cpp',''),
                     ut_cwd = bld.path,
                     install_path = None,
-                    includes = ['inc','build','test'],
+                    includes = 'inc build test',
                     rpath = rpath,
                     use = ['zio'] + uses)
 

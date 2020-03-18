@@ -1,0 +1,45 @@
+#+title: ZIO Logging
+#+setupfile: setup.org
+#+include: nav.org
+
+ZIO uses [[https://github.com/gabime/spdlog][spdlog]] for logging.
+
+* Usage
+
+In library code:
+
+  #+begin_src c++
+#include "zio/logging.hpp"
+
+void my_func() {
+    if (bad) zio::error("Oh no!");
+}
+  #+end_src
+
+In "main" code (code providing ~main()~ or app embedding ZIO)
+
+#+begin_src c++
+#include "zio/main.hpp"
+
+void main() {
+    // more fine grained init functions available
+    zio::init_all();
+}
+#+end_src
+
+Given the above initialization the user may control what log level is
+selected.
+
+#+begin_example
+  $ export SPDLOG_LEVEL=debug
+#+end_example
+
+
+* Possible future changes
+
+Currently, ZIO logs into the default front end of ~spdlog~ and only the
+console backend is activated.
+
+- [ ] use more loggers to allow different verbosity for different parts of ZIO library
+- [ ] add hooks to set up file and syslog logging (or leave to user ~main()~)
+- [ ] consider a ZeroMQ backend for ~spdlog~

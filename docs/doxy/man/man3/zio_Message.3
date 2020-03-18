@@ -1,4 +1,4 @@
-.TH "zio::Message" 3 "Tue Feb 4 2020" "ZIO" \" -*- nroff -*-
+.TH "zio::Message" 3 "Wed Mar 18 2020" "ZIO" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -51,6 +51,13 @@ zio::Message \- a ZIO message
 .br
 .ti -1c
 .RI "void \fBset_label\fP (const std::string &\fBlabel\fP)"
+.br
+.ti -1c
+.RI "\fBzio::json\fP \fBlabel_object\fP () const"
+.br
+.RI "Helper, when label holds a JSON object\&. "
+.ti -1c
+.RI "void \fBset_label_object\fP (const \fBzio::json\fP &lobj)"
 .br
 .ti -1c
 .RI "const \fBPrefixHeader\fP & \fBprefix\fP () const"
@@ -149,15 +156,15 @@ Definition at line 47 of file message\&.cpp\&.
 .SS "void zio::Message::add (\fBmessage_t\fP && spmsg)\fC [inline]\fP"
 
 .PP
-Definition at line 106 of file message\&.hpp\&.
+Definition at line 112 of file message\&.hpp\&.
 .SS "void zio::Message::clear_payload ()\fC [inline]\fP"
 
 .PP
-Definition at line 105 of file message\&.hpp\&.
+Definition at line 111 of file message\&.hpp\&.
 .SS "const \fBCoordHeader\fP& zio::Message::coord () const\fC [inline]\fP"
 
 .PP
-Definition at line 77 of file message\&.hpp\&.
+Definition at line 83 of file message\&.hpp\&.
 .SS "void zio::Message::decode (const \fBmessage_t\fP & dat)"
 Set self based on encoded single-part message\&. If it has a routing ID, it will be kept\&. 
 .PP
@@ -165,11 +172,11 @@ Definition at line 128 of file message\&.cpp\&.
 .SS "\fBzio::message_t\fP zio::Message::encode () const"
 Encode self to single-part message\&. If self has a routing ID, it will be set on the produced message\&. 
 .PP
-Definition at line 107 of file message\&.cpp\&.
+Definition at line 118 of file message\&.cpp\&.
 .SS "std::string zio::Message::form () const"
 
 .PP
-Definition at line 79 of file message\&.cpp\&.
+Definition at line 90 of file message\&.cpp\&.
 .SS "void zio::Message::fromparts (const multipart_t & allparts)"
 
 .PP
@@ -177,11 +184,17 @@ Set self from multipart\&. Nullifyies routing ID\&.
 .SS "\fBgranule_t\fP zio::Message::granule () const\fC [inline]\fP"
 
 .PP
-Definition at line 79 of file message\&.hpp\&.
+Definition at line 85 of file message\&.hpp\&.
 .SS "std::string zio::Message::label () const"
 
 .PP
-Definition at line 91 of file message\&.cpp\&.
+Definition at line 102 of file message\&.cpp\&.
+.SS "\fBzio::json\fP zio::Message::label_object () const"
+
+.PP
+Helper, when label holds a JSON object\&. 
+.PP
+Definition at line 80 of file message\&.cpp\&.
 .SS "\fBzio::level::MessageLevel\fP zio::Message::level () const"
 
 .PP
@@ -189,39 +202,43 @@ Definition at line 67 of file message\&.cpp\&.
 .SS "\fBorigin_t\fP zio::Message::origin () const\fC [inline]\fP"
 
 .PP
-Definition at line 78 of file message\&.hpp\&.
+Definition at line 84 of file message\&.hpp\&.
 .SS "const multipart_t& zio::Message::payload () const\fC [inline]\fP"
 
 .PP
 Access payload(s) 
 .PP
-Definition at line 104 of file message\&.hpp\&.
+Definition at line 110 of file message\&.hpp\&.
 .SS "const \fBPrefixHeader\fP& zio::Message::prefix () const\fC [inline]\fP"
 
 .PP
-Definition at line 76 of file message\&.hpp\&.
+Definition at line 82 of file message\&.hpp\&.
 .SS "\fBrouting_id_t\fP zio::Message::routing_id () const\fC [inline]\fP"
 
 .PP
 Return routing ID if we have one\&. 
 .PP
-Definition at line 109 of file message\&.hpp\&.
+Definition at line 115 of file message\&.hpp\&.
 .SS "\fBseqno_t\fP zio::Message::seqno () const\fC [inline]\fP"
 
 .PP
-Definition at line 80 of file message\&.hpp\&.
+Definition at line 86 of file message\&.hpp\&.
 .SS "void zio::Message::set_coord (\fBorigin_t\fP origin = \fC0\fP, \fBgranule_t\fP gran = \fC0\fP)"
 Prepare for sending, advance seqno automatically, set granule (if 0 use time), origin (if 0, leave as is)\&. 
 .PP
-Definition at line 95 of file message\&.cpp\&.
+Definition at line 106 of file message\&.cpp\&.
 .SS "void zio::Message::set_form (const std::string & form)"
 
 .PP
-Definition at line 82 of file message\&.cpp\&.
+Definition at line 93 of file message\&.cpp\&.
 .SS "void zio::Message::set_label (const std::string & label)"
 
 .PP
 Definition at line 75 of file message\&.cpp\&.
+.SS "void zio::Message::set_label_object (const \fBzio::json\fP & lobj)"
+
+.PP
+Definition at line 84 of file message\&.cpp\&.
 .SS "void zio::Message::set_level (\fBlevel::MessageLevel\fP level)"
 
 .PP
@@ -231,19 +248,19 @@ Definition at line 71 of file message\&.cpp\&.
 .PP
 Set routing ID\&. 
 .PP
-Definition at line 112 of file message\&.hpp\&.
+Definition at line 118 of file message\&.hpp\&.
 .SS "void zio::Message::set_seqno (int seqno)\fC [inline]\fP"
 
 .PP
 Explicit set\&. 
 .PP
-Definition at line 87 of file message\&.hpp\&.
+Definition at line 93 of file message\&.hpp\&.
 .SS "zio::multipart_t zio::Message::toparts () const"
 
 .PP
 Serialize self to multipart\&. 
 .PP
-Definition at line 149 of file message\&.cpp\&.
+Definition at line 134 of file message\&.cpp\&.
 
 .SH "Author"
 .PP 

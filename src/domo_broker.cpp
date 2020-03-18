@@ -5,6 +5,7 @@
 #include "zio/domo/broker.hpp"
 #include "zio/domo/protocol.hpp"
 #include "zio/util.hpp"
+#include "zio/logging.hpp"
 #include <sstream>
 
 using namespace zio::domo;
@@ -14,21 +15,20 @@ Broker::Service::~Service () {
 }
 
 
-Broker::Broker(zio::socket_t& sock, logbase_t& log)
+Broker::Broker(zio::socket_t& sock)
     : m_sock(sock)
-    , m_log(log)
 {
     int stype = m_sock.getsockopt<int>(ZMQ_TYPE);
     if (ZMQ_SERVER == stype) {
         recv = recv_server;
         send = send_server;
-        m_log.info("zio::domo::Broker with SERVER starting");
+        zio::debug("zio::domo::Broker with SERVER starting");
         return;
     }
     if(ZMQ_ROUTER == stype) {
         recv = recv_router;
         send = send_router;
-        m_log.info("zio::domo::Broker with ROUTER starting");
+        zio::debug("zio::domo::Broker with ROUTER starting");
         return;
     }
     throw std::runtime_error("zio::domo::Broker requires SERVER or ROUTER socket");
@@ -54,15 +54,15 @@ void Broker::proc_one()
     assert(mmsg.size() > 0);
     std::string header = mmsg.popstr(); // 7/MDP frame 1
     if (header == mdp::client::ident) {
-        m_log.debug("zio::domo::Broker process client");
+        zio::debug("zio::domo::Broker process client");
         client_process(sender, mmsg);
     }
     else if (header == mdp::worker::ident) {
-        m_log.debug("zio::domo::Broker process worker");
+        zio::debug("zio::domo::Broker process worker");
         worker_process(sender, mmsg);
     }
     else {
-        m_log.error("zio::domo::Broker invalid message from " + sender);
+        zio::warn("zio::domo::Broker invalid message from " + sender);
     }
 }
 
@@ -74,7 +74,7 @@ void Broker::proc_heartbeat(time_unit_t heartbeat_at)
     }
     purge_workers();
     for (auto& wrk : m_waiting) {
-        m_log.debug("zio::domo::Broker heartbeat to worker");
+        zio::debug("zio::domo::Broker heartbeat to worker");
         zio::multipart_t mmsg;
         mmsg.pushstr(mdp::worker::heartbeat);
         mmsg.pushstr(mdp::worker::ident);
@@ -118,7 +118,7 @@ void Broker::purge_workers()
         }
     }
     for (auto wrk : dead) {
-        m_log.debug("zio::domo::Broker deleting expired worker: " + wrk->identity);
+        zio::debug("zio::domo::Broker deleting expired worker: " + wrk->identity);
         worker_delete(wrk,0);   // operates on m_waiting set
     }
 }
@@ -129,7 +129,7 @@ Broker::Service* Broker::service_require(std::string name)
     if (!srv) {
         srv = new Service{name};
         m_services[name] = srv;
-        m_log.debug("zio::domo::Broker registering new service: " + name);
+        zio::debug("zio::domo::Broker registering new service: " + name);
     }
     return srv;
 }
@@ -169,7 +169,7 @@ void Broker::service_dispatch(Service* srv)
         }
             
         zio::multipart_t& mmsg = srv->requests.front();
-        m_log.debug("zio::domo::Broker send work");        
+        zio::debug("zio::domo::Broker send work");        
         send(m_sock, mmsg, (*wrk_it)->identity);
         srv->requests.pop_front();
         m_waiting.erase(*wrk_it);
@@ -184,7 +184,7 @@ Broker::Worker* Broker::worker_require(remote_identity_t identity)
     if (!wrk) {
         wrk = new Worker{identity};
         m_workers[identity] = wrk;
-        m_log.debug("zio::domo::Broker registering new worker");
+        zio::debug("zio::domo::Broker registering new worker");
     }
     return wrk;
 }
@@ -195,7 +195,7 @@ void Broker::worker_delete(Broker::Worker*& wrk, int disconnect)
         zio::multipart_t mmsg;
         mmsg.pushstr(mdp::worker::disconnect);
         mmsg.pushstr(mdp::worker::ident);
-        m_log.debug("zio::domo::Broker disconnect worker");
+        zio::debug("zio::domo::Broker disconnect worker");
         send(m_sock, mmsg, wrk->identity);
     }
     if (wrk->service) {
@@ -225,12 +225,12 @@ void Broker::worker_process(remote_identity_t sender, zio::multipart_t& mmsg)
 
     if (mdp::worker::ready == command) {
         if (worker_ready) {     // protocol error
-            m_log.error("zio::domo::Broker protocol error (double ready) from: " + sender);
+            zio::error("zio::domo::Broker protocol error (double ready) from: " + sender);
             worker_delete(wrk, 1);
             return;
         }
         if (sender.size() >= 4 && sender.find_first_of("mmi.") == 0) {
-            m_log.error("zio::domo::Broker protocol error (worker mmi) from: " + sender);
+            zio::error("zio::domo::Broker protocol error (worker mmi) from: " + sender);
             worker_delete(wrk, 1);
             return;
         }
@@ -250,7 +250,7 @@ void Broker::worker_process(remote_identity_t sender, zio::multipart_t& mmsg)
         mmsg.pop();
         mmsg.pushstr(wrk->service->name);
         mmsg.pushstr(mdp::client::ident);
-        m_log.debug("zio::domo::Broker reply to client");
+        zio::debug("zio::domo::Broker reply to client");
         send(m_sock, mmsg, client_id);
         worker_waiting(wrk);
         return;
@@ -267,7 +267,7 @@ void Broker::worker_process(remote_identity_t sender, zio::multipart_t& mmsg)
         worker_delete(wrk, 0);
         return;
     }
-    m_log.error("zio::domo::Broker invalid input message " + command);
+    zio::error("zio::domo::Broker invalid input message " + command);
 }
 
 
@@ -303,14 +303,11 @@ void Broker::client_process(remote_identity_t client_id, zio::multipart_t& mmsg)
 
 void zio::domo::broker_actor(zio::socket_t& link, std::string address, int socktype)
 {
-    console_log log;
-    log.level = console_log::log_level::debug;
-
     zio::context_t ctx;
     zio::socket_t sock(ctx, socktype);
     sock.bind(address);
 
-    Broker broker(sock, log);
+    Broker broker(sock);
     link.send(zio::message_t{}, zio::send_flags::none);
 
     // basically the guts of start() but we also poll on link as well as sock
@@ -329,29 +326,29 @@ void zio::domo::broker_actor(zio::socket_t& link, std::string address, int sockt
             timeout = heartbeat_at - now;
         }
 
-        log.debug("broker actor wait");
+        zio::debug("broker actor wait");
         std::vector< zio::poller_event<> > events(2);
         int nevents = poller.wait_all(events, timeout);
         for (int iev=0; iev < nevents; ++iev) {
 
             if (events[iev].socket == sock) {
-                log.debug("broker actor sock hit");
+                zio::debug("broker actor sock hit");
                 broker.proc_one();
             }
 
             if (events[iev].socket == link) {
-                log.debug("broker actor link hit");
+                zio::debug("broker actor link hit");
                 zio::message_t msg;
                 auto res = events[0].socket.recv(msg, zio::recv_flags::dontwait);
                 assert(res);
                 std::stringstream ss;
                 ss << "msg: " << msg.size();
-                log.debug("broker actor link " + ss.str());
+                zio::debug("broker actor link " + ss.str());
                 return;         // terminated
             }
         }
         if (!nevents) {
-            log.debug("broker actor timeout");
+            zio::debug("broker actor timeout");
         }
         broker.proc_heartbeat(heartbeat_at);
 

@@ -1,7 +1,8 @@
 #include "zio/cppzmq.hpp"
+#include "zio/logging.hpp"
+#include "zio/main.hpp"
 #include <unistd.h>
 #include <chrono>
-#include <czmq.h>
 #include <thread>
 
 #include <map>
@@ -25,7 +26,7 @@ void server(zio::socket_t& s)
 
     zio::poller_t<> poller;
     poller.add(s, zio::event_flags::pollin);
-    zsys_info("server: loop starts");
+    zio::info("server: loop starts");
     const auto wait = std::chrono::milliseconds{2000};
     
     int64_t ttot=0, tmin=0, tmax=0;
@@ -34,17 +35,17 @@ void server(zio::socket_t& s)
     int dead = 0;
 
     while (true) {
-        zsys_info("server: polling %d", count);
+        zio::info("server: polling {}", count);
         auto t0 = std::chrono::high_resolution_clock::now();
         std::vector<zio::poller_event<>> events(1);
         try {
             int rc = poller.wait_all(events, wait);
             if (rc == 0) {
-                zsys_info("server: poll times out");
+                zio::info("server: poll times out");
                 break;
             }
         } catch (zio::error_t e) {
-            zsys_info("server: poller exception: %s", e.what());
+            zio::info("server: poller exception: {}", e.what());
             return;
         }
         auto t1 = std::chrono::high_resolution_clock::now();
@@ -60,7 +61,7 @@ void server(zio::socket_t& s)
         }
         count += 1;
         ttot += dt;
-        zsys_info("server: #%d [%d, %d] <%d> tot=%d dt=%d [us]", count,
+        zio::info("server: #{} [{}, {}] <{}> tot={} dt={} [us]", count,
                 tmin, tmax, (ttot/count), ttot, dt);
             
 
@@ -80,7 +81,7 @@ void server(zio::socket_t& s)
         // the "message"
         int them = *static_cast<int*>(msg.data());
 
-        zsys_debug("server: recvd %d %d", rid, them);
+        zio::debug("server: recvd {} {}", rid, them);
 
         if (rids.empty()) {
             rids[rid]=0;
@@ -116,63 +117,63 @@ void server(zio::socket_t& s)
 static
 void client(zio::socket_t& c, int me)
 {
-    zsys_debug("client %d: starts", me);
+    zio::debug("client {}: starts", me);
 
     zio::poller_t<> poller;
     poller.add(c, zio::event_flags::pollin);
     const auto wait = std::chrono::milliseconds{2000};
 
     int zzz = 1000000;
-    zsys_warning("client %d: sleeps for %d", me, zzz);
+    zio::info("client {}: sleeps for {}", me, zzz);
     usleep(zzz);
     for (int count=0; count<2000; ++count) {
         zio::message_t msg(&me, sizeof(int));        
-        zsys_debug("client %d: send", me);
+        zio::debug("client {}: send", me);
         c.send(msg, zio::send_flags::none);
 
-        zsys_debug("client %d: polling", me);
+        zio::debug("client {}: polling", me);
         std::vector<zio::poller_event<>> events(1);
         try {
             int rc = poller.wait_all(events, wait);
             if (rc == 0) {
-                zsys_info("client: poll times out");
+                zio::info("client: poll times out");
                 return;
             }
         } catch (zio::error_t e) {
-            zsys_info("client: poller exception: %s", e.what());
+            zio::info("client: poller exception: {}", e.what());
             return;
         }
 
-        zsys_debug("client %d: recv", me);
+        zio::debug("client {}: recv", me);
         auto res = c.recv(msg);
         assert(res);
         int them = *static_cast<int*>(msg.data());
-        zsys_debug("client %d: got %d", me, them);
+        zio::debug("client {}: got {}", me, them);
     }
-    zsys_debug("client %d: send final", me);
+    zio::debug("client {}: send final", me);
     c.send(zio::message_t(), zio::send_flags::none);
 }
 int main()
 {
-    zsys_init();
-    zsys_info("test_tcs starting");
+    zio::init_all();
+    zio::info("test_tcs starting");
 
     zio::context_t ctx;
     zio::socket_t s(ctx, server_type);
     s.bind(addr);
 
     std::thread ser(server, std::ref(s));
-    zsys_warning("sleeping between server and client thread starts");
+    zio::info("sleeping between server and client thread starts");
     usleep(100000);
 
 
     zio::socket_t c1(ctx, client_type);
     c1.connect(addr);
-    zsys_debug("client 1: connected");
+    zio::debug("client 1: connected");
 
     zio::socket_t c2(ctx, client_type);
     c2.connect(addr);
-    zsys_debug("client 2: connected");
+    zio::debug("client 2: connected");
 
     std::thread cli1(client, std::ref(c1), 1);
     std::thread cli2(client, std::ref(c2), 2);    

@@ -1,13 +1,13 @@
 #include "zio/flow.hpp"
 #include "zio/node.hpp"
-
-#include <iostream>
+#include "zio/main.hpp"
+#include "zio/logging.hpp"
 
 using namespace std;
 
 int main()
 {
-    zsys_init();
+    zio::init_all();
 
     zio::Node snode("server", 1);
     snode.set_verbose();
@@ -27,7 +27,7 @@ int main()
     cport->connect(addr);
     cnode.online();
 
-    zsys_debug("create flows");
+    zio::debug("create flows");
 
     // flow normally acts as a client but can act as a server
     zio::flow::Flow sflow(sport);
@@ -44,15 +44,15 @@ int main()
 
     bool ok;
 
-    zsys_debug("cflow send BOT");
+    zio::debug("cflow send BOT");
     cflow.send_bot(msg);
 
-    zsys_debug("sflow recv BOT");
+    zio::debug("sflow recv BOT");
     ok = sflow.recv_bot(msg);
     assert(ok);
-    zsys_debug("sflow recv'ed");
+    zio::debug("sflow recv'ed");
     auto rid = msg.routing_id();
-    zsys_debug("sflow msg.label: %s, rid: %d", msg.label().c_str(), rid);
+    zio::debug("sflow msg.label: {}, rid: {}", msg.label().c_str(), rid);
     assert(rid);
 
 
@@ -62,15 +62,15 @@ int main()
     fobj["direction"] = "inject";
     msg.set_label(fobj.dump());
     int credit = fobj["credit"];
-    cerr <<"sflow credit:"<<credit << " rid:"<< rid
-         <<" stype:" << zio::sock_type(sport->socket()) << endl;
+    zio::debug("sflow credit: {}, rid: {}, stype:{}",
+               credit, rid, zio::sock_type(sport->socket()));
 
     assert (!sflow.is_sender());
-    cerr <<"sflow msg.label: " <<  msg.label() << endl;
-    cerr << "sflow send BOT\n";
+    zio::debug("sflow msg.label: {}", msg.label());
+    zio::debug("sflow send BOT");
     assert(msg.routing_id() == rid);
     sflow.send_bot(msg);
-    cerr << "cflow recv BOT\n";
+    zio::debug("cflow recv BOT");
     ok = cflow.recv_bot(msg);
     assert(ok);
 
@@ -84,27 +84,27 @@ int main()
     assert (credits_in_play == sflow.total_credit());
     assert (0 == sflow.credit());
     
-    cerr <<"cflow send DAT\n";
+    zio::debug("cflow send DAT");
     zio::json lobj{{"flow","DAT"}};
     msg.set_label(lobj.dump());
     ok = cflow.put(msg);
     assert(ok);
     assert(cflow.total_credit() - cflow.credit() == 1);
 
-    zsys_debug("sflow recv DAT, credit %d/%d",
+    zio::debug("sflow recv DAT, credit {}/{}",
                sflow.credit(), sflow.total_credit());
     assert(0 == sflow.credit());
     ok = sflow.get(msg);
     assert(ok);
     assert(sflow.credit() == 1);    
     
-    cerr <<"sflow send EOT\n";
+    zio::debug("sflow send EOT");
     sflow.send_eot(msg);
-    cerr <<"cflow send EOT\n";
+    zio::debug("cflow send EOT");
     ok = cflow.recv_eot(msg);
     assert(ok);
     cflow.send_eot(msg);
     sflow.recv_eot(msg);
-    cerr<<"done\n";    
+    zio::debug("done");    
     return 0;
 }

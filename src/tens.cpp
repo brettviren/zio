@@ -2,14 +2,9 @@
 #include <complex>
 #include <typeinfo>
 
-// #include <iostream>
-
 // stolen from cnpy
-
 const char* zio::tens::type_name(const std::type_info& t)
 {
-    // std::cerr << t.name() << " " << typeid(float).name() << std::endl;
-
     if(t == typeid(float) ) return "f";
     if(t == typeid(double) ) return "f";
     if(t == typeid(long double) ) return "f";

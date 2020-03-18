@@ -3,12 +3,16 @@
 
 #include "zio/cppzmq.hpp"
 #include "zio/util.hpp"
+#include "zio/main.hpp"
+#include "zio/logging.hpp"
 #include <vector>
 
-#include <iostream>
+
 
 int main()
 {
+    zio::init_all();
+
     const int HEADERSIZE=32;
     char* header[HEADERSIZE] = {0};
     const int NTRY = 10000;
@@ -28,14 +32,12 @@ int main()
         }
         const auto t2 = zio::now_us();
         const auto dt = (t2-t1).count();
-        std::cerr << "size: " << size
-                  << " in " << dt
-                  << " usec " << (1000.0*NTRY)/dt << " kHz\n";
+        zio::debug("size: {} in {} usec {} kHz", size, dt,  (1000.0*NTRY)/dt);
         size *= 2;
     }
     const auto t3 = zio::now_us();
     const auto tott = 1e-6*(t3-t0).count();
-    std::cerr << tott << " sec\n";
+    zio::debug("{} sec", tott);
 
     return 0;
 }

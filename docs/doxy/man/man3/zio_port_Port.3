@@ -1,4 +1,4 @@
-.TH "zio.port.Port" 3 "Tue Feb 4 2020" "ZIO" \" -*- nroff -*-
+.TH "zio.port.Port" 3 "Wed Mar 18 2020" "ZIO" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -82,7 +82,7 @@ zio.port.Port
 .in -1c
 .SH "Detailed Description"
 .PP 
-Definition at line 33 of file port\&.py\&.
+Definition at line 52 of file port\&.py\&.
 .SH "Constructor & Destructor Documentation"
 .PP 
 .SS "def zio\&.port\&.Port\&.__init__ ( self,  name,  sock,  hostname = \fC'127\&.0\&.0\&.1'\fP)"
@@ -98,13 +98,13 @@ application code but instead through a managing zio.Node
 .PP
  
 .PP
-Definition at line 34 of file port\&.py\&.
+Definition at line 53 of file port\&.py\&.
 .SH "Member Function Documentation"
 .PP 
 .SS "def zio\&.port\&.Port\&.__str__ ( self)"
 
 .PP
-Definition at line 58 of file port\&.py\&.
+Definition at line 77 of file port\&.py\&.
 .SS "def zio\&.port\&.Port\&.add_headers ( self,  args,  kwargs)"
 
 .PP
@@ -122,7 +122,7 @@ The self.headers collects these.
 .PP
  
 .PP
-Definition at line 104 of file port\&.py\&.
+Definition at line 123 of file port\&.py\&.
 .SS "def zio\&.port\&.Port\&.bind ( self,  spec)"
 
 .PP
@@ -137,7 +137,7 @@ If spec is a tuple ithen it is a (hostname,portnumber).
 .PP
  
 .PP
-Definition at line 64 of file port\&.py\&.
+Definition at line 83 of file port\&.py\&.
 .SS "def zio\&.port\&.Port\&.connect ( self,  spec)"
 
 .PP
@@ -151,7 +151,7 @@ If two strings are given they are (nodename, portname).
 .PP
  
 .PP
-Definition at line 81 of file port\&.py\&.
+Definition at line 100 of file port\&.py\&.
 .SS "def zio\&.port\&.Port\&.do_binds ( self)"
 
 .PP
@@ -168,7 +168,7 @@ intended to be used by a zio.Node which holds this zio.Port.
 .PP
  
 .PP
-Definition at line 121 of file port\&.py\&.
+Definition at line 140 of file port\&.py\&.
 .SS "def zio\&.port\&.Port\&.offline ( self)"
 
 .PP
@@ -181,7 +181,7 @@ This unbinds and disconnects and forgets their addresses
 .PP
  
 .PP
-Definition at line 185 of file port\&.py\&.
+Definition at line 204 of file port\&.py\&.
 .SS "def zio\&.port\&.Port\&.online ( self,  peer = \fCNone\fP)"
 
 .PP
@@ -197,7 +197,7 @@ zio.Port.
 .PP
  
 .PP
-Definition at line 145 of file port\&.py\&.
+Definition at line 164 of file port\&.py\&.
 .SS "def zio\&.port\&.Port\&.recv ( self,  timeout = \fCNone\fP)"
 
 .PP
@@ -210,7 +210,7 @@ If timeout is reached then None is returned.
 .PP
  
 .PP
-Definition at line 220 of file port\&.py\&.
+Definition at line 239 of file port\&.py\&.
 .SS "def zio\&.port\&.Port\&.send ( self,  msg)"
 
 .PP
@@ -224,7 +224,7 @@ if this port has one.
 .PP
  
 .PP
-Definition at line 200 of file port\&.py\&.
+Definition at line 219 of file port\&.py\&.
 .SS "def zio\&.port\&.Port\&.subscribe ( self,  prefix = \fC''\fP)"
 
 .PP
@@ -238,53 +238,53 @@ it MUST be called if messages are expected to be received.
 .PP
  
 .PP
-Definition at line 92 of file port\&.py\&.
+Definition at line 111 of file port\&.py\&.
 .SH "Member Data Documentation"
 .PP 
 .SS "zio\&.port\&.Port\&.bound"
 
 .PP
-Definition at line 54 of file port\&.py\&.
+Definition at line 73 of file port\&.py\&.
 .SS "zio\&.port\&.Port\&.connected"
 
 .PP
-Definition at line 53 of file port\&.py\&.
+Definition at line 72 of file port\&.py\&.
 .SS "zio\&.port\&.Port\&.ctx"
 
 .PP
-Definition at line 44 of file port\&.py\&.
+Definition at line 63 of file port\&.py\&.
 .SS "zio\&.port\&.Port\&.headers"
 
 .PP
-Definition at line 51 of file port\&.py\&.
+Definition at line 70 of file port\&.py\&.
 .SS "zio\&.port\&.Port\&.is_online"
 
 .PP
-Definition at line 52 of file port\&.py\&.
+Definition at line 71 of file port\&.py\&.
 .SS "zio\&.port\&.Port\&.name"
 
 .PP
-Definition at line 41 of file port\&.py\&.
+Definition at line 60 of file port\&.py\&.
 .SS "zio\&.port\&.Port\&.origin"
 
 .PP
-Definition at line 48 of file port\&.py\&.
+Definition at line 67 of file port\&.py\&.
 .SS "zio\&.port\&.Port\&.poller"
 
 .PP
-Definition at line 55 of file port\&.py\&.
+Definition at line 74 of file port\&.py\&.
 .SS "zio\&.port\&.Port\&.sock"
 
 .PP
-Definition at line 45 of file port\&.py\&.
+Definition at line 64 of file port\&.py\&.
 .SS "zio\&.port\&.Port\&.to_bind"
 
 .PP
-Definition at line 49 of file port\&.py\&.
+Definition at line 68 of file port\&.py\&.
 .SS "zio\&.port\&.Port\&.to_conn"
 
 .PP
-Definition at line 50 of file port\&.py\&.
+Definition at line 69 of file port\&.py\&.
 
 .SH "Author"
 .PP 

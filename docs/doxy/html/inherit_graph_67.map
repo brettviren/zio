@@ -1,3 +1,3 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$d7/d4d/structnlohmann_1_1detail_1_1is__constructible__string__type__impl_3_01_basic_json_type_00_01_con83e8ebfe9593f851a60fdb8360df1512.html" title="nlohmann::detail::is\l_constructible_string\l_type_impl\&lt; BasicJsonType,\l ConstructibleStringType,\l enable_if_t\&lt; is_detected\l_exact\&lt; typename BasicJsonType\l::string_t::value_type, value\l_type_t, ConstructibleStringType\l \&gt;::value \&gt; \&gt;" alt="" coords="5,5,229,149"/>
+<area shape="rect" id="node1" href="$d8/d15/classzmq_1_1monitor__t.html" title="zmq::monitor_t" alt="" coords="5,5,115,32"/>
 </map>

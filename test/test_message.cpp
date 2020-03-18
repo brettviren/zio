@@ -1,14 +1,12 @@
 #include "zio/message.hpp"
-#include <czmq.h>
+#include "zio/main.hpp"
+#include "zio/logging.hpp"
+
 #include <cassert>
-
-#include <iostream>
-
-using namespace std;
 
 int main()
 {
-
+    zio::init_all();
 
     std::string label = "Extra spicy";
 
@@ -31,7 +29,7 @@ int main()
     size_t raw_size = spmsg.size();
     for (size_t ind=0; ind<raw_size; ++ind) {
         char c = raw[ind];
-        cerr << ind << "[" << c << "] (" << (int)c << ")\n";
+        zio::debug("{}[{}] ({})", ind, c, (int)c);
     }
 
     zio::Message msg2;
@@ -52,11 +50,11 @@ int main()
     assert(obj["flow"] == "EOT");
     assert(obj["direction"] == "extract");
     obj["direction"] = "inject";
-    cerr <<msg.label()<< endl;
+    zio::debug(msg.label());
     msg.set_label(obj.dump());
     obj = zio::json::parse(msg.label());
     assert(obj["direction"] == "inject");
-    cerr <<msg.label()<< endl;
+    zio::debug(msg.label());
 
     {
         zio::Message empty;

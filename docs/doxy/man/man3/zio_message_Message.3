@@ -1,4 +1,4 @@
-.TH "zio.message.Message" 3 "Tue Feb 4 2020" "ZIO" \" -*- nroff -*-
+.TH "zio.message.Message" 3 "Wed Mar 18 2020" "ZIO" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -29,6 +29,12 @@ zio.message.Message
 .br
 .ti -1c
 .RI "def \fBlabel\fP (self, val)"
+.br
+.ti -1c
+.RI "def \fBlabel_object\fP (self)"
+.br
+.ti -1c
+.RI "def \fBlabel_object\fP (self, val)"
 .br
 .ti -1c
 .RI "def \fBorigin\fP (self)"
@@ -129,7 +135,7 @@ It is equivalent to a C++ zio::Message.
 .PP
  
 .PP
-Definition at line 109 of file message\&.py\&.
+Definition at line 110 of file message\&.py\&.
 .SH "Constructor & Destructor Documentation"
 .PP 
 .SS "def zio\&.message\&.Message\&.__init__ ( self,  level = \fCNone\fP,  form = \fCNone\fP,  label = \fCNone\fP,  routing_id = \fCNone\fP,  origin = \fCNone\fP,  granule = \fCNone\fP,  seqno = \fCNone\fP,  prefix = \fCNone\fP,  coord = \fCNone\fP,  payload = \fCNone\fP,  parts = \fCNone\fP,  encoded = \fCNone\fP,  frame = \fCNone\fP)"
@@ -156,13 +162,13 @@ set.
 .PP
  
 .PP
-Definition at line 127 of file message\&.py\&.
+Definition at line 128 of file message\&.py\&.
 .SH "Member Function Documentation"
 .PP 
 .SS "def zio\&.message\&.Message\&.__str__ ( self)"
 
 .PP
-Definition at line 277 of file message\&.py\&.
+Definition at line 290 of file message\&.py\&.
 .SS "def zio\&.message\&.Message\&.decode ( self,  encoded)"
 
 .PP
@@ -173,7 +179,7 @@ Decode to self.
 .PP
  
 .PP
-Definition at line 253 of file message\&.py\&.
+Definition at line 266 of file message\&.py\&.
 .SS "def zio\&.message\&.Message\&.encode ( self)"
 
 .PP
@@ -186,15 +192,15 @@ It is suitable for use as the data arg to a zmq.Frame
 .PP
  
 .PP
-Definition at line 244 of file message\&.py\&.
+Definition at line 257 of file message\&.py\&.
 .SS "def zio\&.message\&.Message\&.form ( self)"
 
 .PP
-Definition at line 178 of file message\&.py\&.
+Definition at line 179 of file message\&.py\&.
 .SS "def zio\&.message\&.Message\&.form ( self,  val)"
 
 .PP
-Definition at line 181 of file message\&.py\&.
+Definition at line 182 of file message\&.py\&.
 .SS "def zio\&.message\&.Message\&.fromframe ( self,  frame)"
 
 .PP
@@ -205,7 +211,7 @@ Set self from a frame
 .PP
  
 .PP
-Definition at line 237 of file message\&.py\&.
+Definition at line 250 of file message\&.py\&.
 .SS "def zio\&.message\&.Message\&.fromparts ( self,  parts)"
 
 .PP
@@ -216,55 +222,63 @@ Set self from multipart message / array of encoded data.
 .PP
  
 .PP
-Definition at line 267 of file message\&.py\&.
+Definition at line 280 of file message\&.py\&.
 .SS "def zio\&.message\&.Message\&.granule ( self)"
 
 .PP
-Definition at line 206 of file message\&.py\&.
+Definition at line 219 of file message\&.py\&.
 .SS "def zio\&.message\&.Message\&.granule ( self,  val)"
 
 .PP
-Definition at line 209 of file message\&.py\&.
+Definition at line 222 of file message\&.py\&.
 .SS "def zio\&.message\&.Message\&.label ( self)"
 
 .PP
-Definition at line 192 of file message\&.py\&.
+Definition at line 193 of file message\&.py\&.
 .SS "def zio\&.message\&.Message\&.label ( self,  val)"
 
 .PP
-Definition at line 195 of file message\&.py\&.
+Definition at line 196 of file message\&.py\&.
+.SS "def zio\&.message\&.Message\&.label_object ( self)"
+
+.PP
+Definition at line 200 of file message\&.py\&.
+.SS "def zio\&.message\&.Message\&.label_object ( self,  val)"
+
+.PP
+Definition at line 208 of file message\&.py\&.
 .SS "def zio\&.message\&.Message\&.level ( self)"
 
 .PP
-Definition at line 185 of file message\&.py\&.
+Definition at line 186 of file message\&.py\&.
 .SS "def zio\&.message\&.Message\&.level ( self,  val)"
 
 .PP
-Definition at line 188 of file message\&.py\&.
+Definition at line 189 of file message\&.py\&.
 .SS "def zio\&.message\&.Message\&.origin ( self)"
 
 .PP
-Definition at line 199 of file message\&.py\&.
+Definition at line 212 of file message\&.py\&.
 .SS "def zio\&.message\&.Message\&.origin ( self,  val)"
 
 .PP
-Definition at line 202 of file message\&.py\&.
+Definition at line 215 of file message\&.py\&.
 .SS "def zio\&.message\&.Message\&.payload ( self)"
 
 .PP
-Definition at line 221 of file message\&.py\&.
+Definition at line 234 of file message\&.py\&.
 .SS "def zio\&.message\&.Message\&.payload ( self,  pl)"
 
 .PP
-Definition at line 225 of file message\&.py\&.
+Definition at line 238 of file message\&.py\&.
 .SS "def zio\&.message\&.Message\&.seqno ( self)"
 
 .PP
-Definition at line 213 of file message\&.py\&.
+Definition at line 226 of file message\&.py\&.
 .SS "def zio\&.message\&.Message\&.seqno ( self,  val)"
 
 .PP
-Definition at line 216 of file message\&.py\&.
+Definition at line 229 of file message\&.py\&.
 .SS "def zio\&.message\&.Message\&.toframe ( self)"
 
 .PP
@@ -275,7 +289,7 @@ Return self as a frame.
 .PP
  
 .PP
-Definition at line 228 of file message\&.py\&.
+Definition at line 241 of file message\&.py\&.
 .SS "def zio\&.message\&.Message\&.toparts ( self)"
 
 .PP
@@ -286,53 +300,53 @@ Return self as a multipart set of encoded data
 .PP
  
 .PP
-Definition at line 261 of file message\&.py\&.
+Definition at line 274 of file message\&.py\&.
 .SH "Member Data Documentation"
 .PP 
 .SS "zio\&.message\&.Message\&.coord = None\fC [static]\fP"
 
 .PP
-Definition at line 120 of file message\&.py\&.
+Definition at line 121 of file message\&.py\&.
 .SS "zio\&.message\&.Message\&.form"
 
 .PP
-Definition at line 166 of file message\&.py\&.
+Definition at line 167 of file message\&.py\&.
 .SS "zio\&.message\&.Message\&.granule"
 
 .PP
-Definition at line 172 of file message\&.py\&.
+Definition at line 173 of file message\&.py\&.
 .SS "zio\&.message\&.Message\&.label"
 
 .PP
-Definition at line 164 of file message\&.py\&.
+Definition at line 165 of file message\&.py\&.
 .SS "zio\&.message\&.Message\&.level"
 
 .PP
-Definition at line 168 of file message\&.py\&.
+Definition at line 169 of file message\&.py\&.
 .SS "zio\&.message\&.Message\&.origin"
 
 .PP
-Definition at line 170 of file message\&.py\&.
+Definition at line 171 of file message\&.py\&.
 .SS "zio\&.message\&.Message\&.payload"
 
 .PP
-Definition at line 156 of file message\&.py\&.
+Definition at line 157 of file message\&.py\&.
 .SS "zio\&.message\&.Message\&.prefix = None\fC [static]\fP"
 
 .PP
-Definition at line 119 of file message\&.py\&.
+Definition at line 120 of file message\&.py\&.
 .SS "int zio\&.message\&.Message\&.routing_id = 0\fC [static]\fP"
 
 .PP
-Definition at line 118 of file message\&.py\&.
+Definition at line 119 of file message\&.py\&.
 .SS "zio\&.message\&.Message\&.routing_id"
 
 .PP
-Definition at line 162 of file message\&.py\&.
+Definition at line 163 of file message\&.py\&.
 .SS "zio\&.message\&.Message\&.seqno"
 
 .PP
-Definition at line 174 of file message\&.py\&.
+Definition at line 175 of file message\&.py\&.
 
 .SH "Author"
 .PP 

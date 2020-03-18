@@ -8,7 +8,7 @@ var searchData=
   ['ev_5fdisconnect',['ev_disconnect',['../da/de4/structclient__protocol_1_1ev__disconnect.html',1,'client_protocol']]],
   ['ev_5fdisconnected',['ev_disconnected',['../d0/d0e/structclient__protocol_1_1ev__disconnected.html',1,'client_protocol']]],
   ['ev_5feot',['ev_eot',['../da/dc4/structflow__protocol_1_1ev__eot.html',1,'flow_protocol']]],
-  ['ev_5ferror',['ev_error',['../d6/d75/structflow__protocol_1_1ev__error.html',1,'flow_protocol::ev_error'],['../de/d73/structclient__protocol_1_1ev__error.html',1,'client_protocol::ev_error']]],
+  ['ev_5ferror',['ev_error',['../de/d73/structclient__protocol_1_1ev__error.html',1,'client_protocol::ev_error'],['../d6/d75/structflow__protocol_1_1ev__error.html',1,'flow_protocol::ev_error']]],
   ['ev_5ffin',['ev_fin',['../db/df0/structclient__protocol_1_1ev__fin.html',1,'client_protocol']]],
   ['ev_5fhandshake_5fack',['ev_handshake_ack',['../d0/d7b/structclient__protocol_1_1ev__handshake__ack.html',1,'client_protocol']]],
   ['ev_5fmsg',['ev_msg',['../de/daf/structflow__protocol_1_1ev__msg.html',1,'flow_protocol']]],

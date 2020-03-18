@@ -1,4 +1,4 @@
-.TH "zio::Port" 3 "Tue Feb 4 2020" "ZIO" \" -*- nroff -*-
+.TH "zio::Port" 3 "Wed Mar 18 2020" "ZIO" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -130,11 +130,11 @@ Create a port of given name and socket type\&. The hostname sets the default for
 .PP
 A port is typically only constructed via a \fBzio::Node\fP\&. 
 .PP
-Definition at line 55 of file port\&.cpp\&.
+Definition at line 56 of file port\&.cpp\&.
 .SS "zio::Port::~Port ()"
 
 .PP
-Definition at line 60 of file port\&.cpp\&.
+Definition at line 61 of file port\&.cpp\&.
 .SH "Member Function Documentation"
 .PP 
 .SS "void zio::Port::bind ()"
@@ -142,7 +142,7 @@ Definition at line 60 of file port\&.cpp\&.
 .PP
 Request a default bind\&. This is for application to call\&. 
 .PP
-Definition at line 68 of file port\&.cpp\&.
+Definition at line 69 of file port\&.cpp\&.
 .SS "void zio::Port::bind (const std::string & hostname, int tcpportnum)"
 
 .PP
@@ -150,19 +150,19 @@ Request a bind to a specific TCP/IP host and port\&. TCP port number 0 implies t
 .PP
 This is for application to call\&. 
 .PP
-Definition at line 74 of file port\&.cpp\&.
+Definition at line 75 of file port\&.cpp\&.
 .SS "void zio::Port::bind (const \fBaddress_t\fP & address)"
 
 .PP
 Request bind to fully qualified ZeroMQ address string\&. This is for application to call\&. 
 .PP
-Definition at line 82 of file port\&.cpp\&.
+Definition at line 83 of file port\&.cpp\&.
 .SS "void zio::Port::connect (const \fBaddress_t\fP & address)"
 
 .PP
 Request connect to fully qualified ZeroMQ address string\&. This is for application to call\&. 
 .PP
-Definition at line 89 of file port\&.cpp\&.
+Definition at line 90 of file port\&.cpp\&.
 .SS "void zio::Port::connect (const \fBnodename_t\fP & node, const \fBportname_t\fP & port)"
 
 .PP
@@ -170,7 +170,7 @@ Request connect to abstract node/port names\&. This will resolve to a direct add
 .PP
 This is for application to call\&. 
 .PP
-Definition at line 94 of file port\&.cpp\&.
+Definition at line 95 of file port\&.cpp\&.
 .SS "\fBzio::headerset_t\fP zio::Port::do_binds ()"
 
 .PP
@@ -178,7 +178,7 @@ Perform any requested binds\&. The corresponding Zyre headers for any ports that
 .PP
 This method is intended for the \fBzio::Node\fP to call\&. 
 .PP
-Definition at line 112 of file port\&.cpp\&.
+Definition at line 113 of file port\&.cpp\&.
 .SS "const std::string& zio::Port::name () const\fC [inline]\fP"
 
 .PP
@@ -190,7 +190,7 @@ Definition at line 48 of file port\&.hpp\&.
 .PP
 Disconnect and unbind\&. This method is intended for the \fBzio::Node\fP to call 
 .PP
-Definition at line 194 of file port\&.cpp\&.
+Definition at line 195 of file port\&.cpp\&.
 .SS "void zio::Port::online (\fBzio::Peer\fP & peer)"
 
 .PP
@@ -198,7 +198,7 @@ Make any previously requested connections\&. The peer will be used to resolve an
 .PP
 This method is intended for the \fBzio::Node\fP to call 
 .PP
-Definition at line 136 of file port\&.cpp\&.
+Definition at line 137 of file port\&.cpp\&.
 .SS "bool zio::Port::recv (\fBMessage\fP & msg, int timeout = \fC\-1\fP)"
 
 .PP
@@ -210,13 +210,13 @@ Definition at line 239 of file port\&.cpp\&.
 .PP
 Send a message\&. The \fBzio::Message\fP is modified to set its coordinates\&. 
 .PP
-Definition at line 219 of file port\&.cpp\&.
+Definition at line 220 of file port\&.cpp\&.
 .SS "void zio::Port::set_header (const std::string & leafname, const std::string & value)"
 
 .PP
 Set an extra port header\&. The header is of the form: \fBzio\&.port\fP\&.<portname>\&.<leafname> = 
 .PP
-Definition at line 106 of file port\&.cpp\&.
+Definition at line 107 of file port\&.cpp\&.
 .SS "void zio::Port::set_origin (\fBorigin_t\fP origin)\fC [inline]\fP"
 
 .PP
@@ -240,7 +240,7 @@ Subscribe to a PUB topic\&. This is only meaningful when the underlying socket i
 .PP
 This is for application to call\&. 
 .PP
-Definition at line 99 of file port\&.cpp\&.
+Definition at line 100 of file port\&.cpp\&.
 
 .SH "Author"
 .PP 

@@ -1,4 +1,4 @@
-.TH "zio::Node" 3 "Tue Feb 4 2020" "ZIO" \" -*- nroff -*-
+.TH "zio::Node" 3 "Wed Mar 18 2020" "ZIO" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -83,11 +83,11 @@ Definition at line 30 of file node\&.hpp\&.
 .PP
 Create a node\&. 
 .PP
-Definition at line 18 of file node\&.cpp\&.
+Definition at line 19 of file node\&.cpp\&.
 .SS "zio::Node::~Node ()"
 
 .PP
-Definition at line 30 of file node\&.cpp\&.
+Definition at line 31 of file node\&.cpp\&.
 .SH "Member Function Documentation"
 .PP 
 .SS "\fBnickname_t\fP zio::Node::nick () const\fC [inline]\fP"
@@ -101,13 +101,13 @@ Definition at line 48 of file node\&.hpp\&.
 .PP
 Bring the node offline\&. 
 .PP
-Definition at line 79 of file node\&.cpp\&.
+Definition at line 78 of file node\&.cpp\&.
 .SS "void zio::Node::online (const \fBheaderset_t\fP & extra_headers = \fC{}\fP)"
 
 .PP
 Bring the node online\&. The extra headers are merged with those provided by this nodes \fBzio::Peer\fP\&. 
 .PP
-Definition at line 58 of file node\&.cpp\&.
+Definition at line 59 of file node\&.cpp\&.
 .SS "\fBorigin_t\fP zio::Node::origin () const\fC [inline]\fP"
 
 .PP
@@ -119,13 +119,13 @@ Definition at line 50 of file node\&.hpp\&.
 .PP
 Create a named port with the given socket type\&. If port of given name exits, return it\&. 
 .PP
-Definition at line 36 of file node\&.cpp\&.
+Definition at line 37 of file node\&.cpp\&.
 .SS "\fBzio::portptr_t\fP zio::Node::port (const std::string & name)"
 
 .PP
 Return a previously created port\&. 
 .PP
-Definition at line 48 of file node\&.cpp\&.
+Definition at line 49 of file node\&.cpp\&.
 .SS "const std::vector<std::string>& zio::Node::portnames () const\fC [inline]\fP"
 
 .PP
@@ -143,13 +143,13 @@ Definition at line 57 of file node\&.hpp\&.
 .PP
 Set the node origin\&. 
 .PP
-Definition at line 90 of file node\&.cpp\&.
+Definition at line 89 of file node\&.cpp\&.
 .SS "void zio::Node::set_verbose (bool verbose = \fCtrue\fP)"
 
 .PP
 Set verbose for underlying Zyre and internal debug messages\&. 
 .PP
-Definition at line 97 of file node\&.cpp\&.
+Definition at line 96 of file node\&.cpp\&.
 .SS "bool zio::Node::verbose () const\fC [inline]\fP"
 
 .PP

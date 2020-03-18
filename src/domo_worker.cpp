@@ -1,17 +1,17 @@
 #include "zio/domo/worker.hpp"
 #include "zio/domo/protocol.hpp"
+#include "zio/logging.hpp"
 
 
 using namespace zio::domo;
 
 Worker::Worker(zio::socket_t& sock, std::string broker_address,
-               std::string service, logbase_t& log)
+               std::string service)
     : m_sock(sock)
     , m_address(broker_address)
     , m_service(service)
-    , m_log(log)
 {
-    m_log.debug("zio::domo::Worker constructing on " + m_address);
+    zio::debug("zio::domo::Worker constructing on " + m_address);
     int stype = m_sock.getsockopt<int>(ZMQ_TYPE);
     if (ZMQ_CLIENT == stype) {
         really_recv = recv_client;
@@ -30,14 +30,14 @@ Worker::Worker(zio::socket_t& sock, std::string broker_address,
 
 Worker::~Worker()
 {
-    m_log.debug("zio::domo::Worker destructing");
+    zio::debug("zio::domo::Worker destructing");
     m_sock.disconnect(m_address);
 }
 
 void Worker::connect_to_broker(bool reconnect)
 {
     if (reconnect) {
-        m_log.debug("zio::domo::Worker disconnect from " + m_address);
+        zio::debug("zio::domo::Worker disconnect from " + m_address);
         m_sock.disconnect(m_address);
     }
 
@@ -45,7 +45,7 @@ void Worker::connect_to_broker(bool reconnect)
     m_sock.setsockopt(ZMQ_LINGER, linger);
     // set socket routing ID?
     m_sock.connect(m_address);
-    m_log.debug("zio::domo::Worker connect to " + m_address);
+    zio::debug("zio::domo::Worker connect to " + m_address);
 
     zio::multipart_t mmsg;
     mmsg.pushstr(m_service);          // 3
@@ -96,13 +96,13 @@ void Worker::recv(zio::multipart_t& request)
             connect_to_broker();
         }
         else {
-            m_log.error("zio::domo::Worker invalid command: " + command);
+            zio::warn("zio::domo::Worker invalid command: " + command);
         }
     }
     else {                  // timeout
         --m_liveness;
         if (m_liveness == 0) {
-            m_log.debug("zio::domo::Worker disconnect from broker - retrying...");
+            zio::debug("zio::domo::Worker disconnect from broker - retrying...");
         }
         sleep_ms(m_reconnect);
         connect_to_broker();
@@ -131,7 +131,7 @@ zio::multipart_t Worker::work(zio::multipart_t& reply)
         return request;
     }
     if (interrupted()) {
-        m_log.info("zio::domo::Worker interupt received, killing worker");
+        zio::info("zio::domo::Worker interupt received, killing worker");
     }
     
     return zio::multipart_t{};
@@ -140,14 +140,11 @@ zio::multipart_t Worker::work(zio::multipart_t& reply)
 
 void zio::domo::echo_worker(zio::socket_t& link, std::string address, int socktype)
 {
-    // fixme: should get this from a more global spot.
-    console_log log;
-
     // fixme: should implement BIND actor protocol 
     zio::context_t ctx;
     zio::socket_t sock(ctx, socktype);
-    Worker worker(sock, address, "echo", log);
-    log.debug("worker echo created on " + address);
+    Worker worker(sock, address, "echo");
+    zio::debug("worker echo created on " + address);
 
     zio::poller_t<> poller;
     poller.add(link, zio::event_flags::pollin);
@@ -160,26 +157,26 @@ void zio::domo::echo_worker(zio::socket_t& link, std::string address, int sockty
 
     link.send(zio::message_t{}, zio::send_flags::none); // ready
 
-    log.debug("worker echo starting");
+    zio::debug("worker echo starting");
     zio::multipart_t reply;
     while ( ! interrupted() ) {
 
-        log.debug("worker check link");
+        zio::debug("worker check link");
         std::vector< zio::poller_event<> > events(2);
         int nevents = poller.wait_all(events, poll_resolution);
         for (int iev=0; iev < nevents; ++iev) {
 
             if (events[iev].socket == link) {
-                log.debug("worker link hit");
+                zio::debug("worker link hit");
                 return;
             }
 
             if (events[iev].socket == sock) {
-                log.debug("worker echo work");
+                zio::debug("worker echo work");
                 zio::multipart_t request;
                 worker.recv(request);
                 if (request.empty()) {
-                    log.debug("worker echo got null request");
+                    zio::warn("worker echo got null request");
                     break;
                 }
                 reply = std::move(request);
@@ -188,8 +185,8 @@ void zio::domo::echo_worker(zio::socket_t& link, std::string address, int sockty
         }
     }
     // fixme: should poll on link to check for early shutdown
-    log.debug("worker echo wait for term");    
+    zio::debug("worker echo wait for term");    
     zio::message_t die;
     auto res = link.recv(die, zio::recv_flags::none);
-    log.debug("worker echo wait for exit");    
+    zio::debug("worker echo wait for exit");    
 }

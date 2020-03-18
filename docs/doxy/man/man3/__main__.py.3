@@ -1,4 +1,4 @@
-.TH "python/zio/__main__.py" 3 "Tue Feb 4 2020" "ZIO" \" -*- nroff -*-
+.TH "python/zio/__main__.py" 3 "Wed Mar 18 2020" "ZIO" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -17,13 +17,26 @@ python/zio/__main__.py
 
 .in +1c
 .ti -1c
-.RI "def \fBzio\&.__main__\&.cli\fP (ctx)"
-.br
-.ti -1c
-.RI "def \fBzio\&.__main__\&.peers\fP (\fBtimeout\fP, wait_for, pre_sleep, post_sleep, name, headers)"
-.br
-.ti -1c
 .RI "def \fBzio\&.__main__\&.main\fP ()"
+.br
+.in -1c
+.SS "Variables"
+
+.in +1c
+.ti -1c
+.RI "\fBzio\&.__main__\&.level\fP"
+.br
+.ti -1c
+.RI "\fBzio\&.__main__\&.format\fP"
+.br
+.ti -1c
+.RI "\fBzio\&.__main__\&.datefmt\fP"
+.br
+.ti -1c
+.RI "\fBzio\&.__main__\&.log\fP = logging\&.getLogger('zio')"
+.br
+.ti -1c
+.RI "\fBzio\&.__main__\&.cli\fP = click\&.CommandCollection(sources=[peers\&.cli, flow\&.cli, domo\&.cli])"
 .br
 .in -1c
 .SH "Author"

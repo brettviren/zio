@@ -1,13 +1,12 @@
 #include "zio/domo/client.hpp"
 #include "zio/domo/protocol.hpp"
+#include "zio/logging.hpp"
 
 using namespace zio::domo;
 
-Client::Client(zio::socket_t& sock, std::string broker_address,
-               logbase_t& log)
+Client::Client(zio::socket_t& sock, std::string broker_address)
     : m_sock(sock)
     , m_address(broker_address)
-    , m_log(log)
 {
     int stype = m_sock.getsockopt<int>(ZMQ_TYPE);
     if (ZMQ_CLIENT == stype) {
@@ -38,7 +37,7 @@ void Client::connect_to_broker(bool reconnect)
     m_sock.setsockopt(ZMQ_LINGER, linger);
     // set socket routing ID?
     m_sock.connect(m_address);
-    m_log.debug("zio::domo::Client connect to " + m_address);
+    zio::debug("zio::domo::Client connect to " + m_address);
 }
 
 
@@ -46,7 +45,7 @@ void Client::send(std::string service, zio::multipart_t& request)
 {
     request.pushstr(service);            // frame 2
     request.pushstr(mdp::client::ident); // frame 1
-    m_log.debug("zio::domo::Client send request for " + service);
+    zio::debug("zio::domo::Client send request for " + service);
     really_send(m_sock, request);
 }
 
@@ -71,10 +70,10 @@ void Client::recv(zio::multipart_t& reply)
         return;                 // success
     }
     if ( interrupted() ) {
-        m_log.error("zio::domo::Client interupted on recv");
+        zio::error("zio::domo::Client interupted on recv");
     }
     else {
-        m_log.error("zio::domo::Client timeout");
+        zio::error("zio::domo::Client timeout");
     }
     reply.clear();
     return;

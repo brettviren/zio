@@ -3,6 +3,7 @@ var searchData=
   ['zmq_5fassert',['ZMQ_ASSERT',['../da/d3f/zmq_8hpp.html#a188bda73be51e867c8d99f148a51938d',1,'zmq.hpp']]],
   ['zmq_5fconstexpr_5ffn',['ZMQ_CONSTEXPR_FN',['../da/d3f/zmq_8hpp.html#a9a0766b1680e98d30ba7dcbc0c99f8a7',1,'zmq.hpp']]],
   ['zmq_5fconstexpr_5fvar',['ZMQ_CONSTEXPR_VAR',['../da/d3f/zmq_8hpp.html#ae2c455e5dc53b370a40bb65a6e3aff8b',1,'zmq.hpp']]],
+  ['zmq_5fcpp11_5fdeprecated',['ZMQ_CPP11_DEPRECATED',['../da/d3f/zmq_8hpp.html#aef5fc0afac422bea2fb5de97aacf9749',1,'zmq.hpp']]],
   ['zmq_5fdeleted_5ffunction',['ZMQ_DELETED_FUNCTION',['../da/d3f/zmq_8hpp.html#a7d4ac120b73fef58d8e9a92180025d45',1,'zmq.hpp']]],
   ['zmq_5fexplicit',['ZMQ_EXPLICIT',['../da/d3f/zmq_8hpp.html#a45c2a63f53f51580d5ed30c4d07ef5ed',1,'zmq.hpp']]],
   ['zmq_5fhas_5fproxy_5fsteerable',['ZMQ_HAS_PROXY_STEERABLE',['../da/d3f/zmq_8hpp.html#ad1e288f05295e6cb30529bbaabc2b10d',1,'zmq.hpp']]],

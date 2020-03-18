@@ -1,5 +1,5 @@
 #include "zio/util.hpp"
-#include "zio/logging.hpp"
+// #include "zio/logging.hpp"
 #include <chrono>
 #include <thread>
 #include <signal.h>
@@ -35,19 +35,12 @@ remote_identity_t zio::recv_server(zio::socket_t& server_socket,
 
 
     mmsg.decode_append(msg);
-    {
-        std::stringstream ss;
-        ss << "zio::recv SERVER msg size " << msg.size()
-           << ", " << mmsg.size() << " parts \"" << rid << "\"";
-        // << " " << (void*)routing_id 
-        // << " '" << (int)rid[0] << "'"
-        // << " '" << (int)rid[1] << "'"
-        // << " '" << (int)rid[2] << "'"
-        // << " '" << (int)rid[3] << "'";
-        console_log log;
-        log.level = console_log::log_level::debug;
-        log.debug(ss.str());
-    }
+    // {
+    //     std::stringstream ss;
+    //     ss << "zio::recv SERVER msg size " << msg.size()
+    //        << ", " << mmsg.size() << " parts \"" << rid << "\"";
+    //     zio::debug(ss.str());
+    // }
     return rid;
 }
 
@@ -84,18 +77,12 @@ void zio::send_server(zio::socket_t& server_socket,
         0x0000ff00&(rid[2] << 8) |
         0x000000ff&rid[3];
     msg.set_routing_id(routing_id);
-    {
-        std::stringstream ss;
-        ss << "zio::send SERVER msg size " << msg.size()
-           << ", " << mmsg.size() << " parts \"" << rid << "\"";
-        // << " " << (void*)routing_id 
-        // << " '" << (int)rid[0] << "'"
-        // << " '" << (int)rid[1] << "'"
-        // << " '" << (int)rid[2] << "'"
-        // << " '" << (int)rid[3] << "'";
-        console_log log;
-        log.debug(ss.str());
-    }
+    // {
+    //     std::stringstream ss;
+    //     ss << "zio::send SERVER msg size " << msg.size()
+    //        << ", " << mmsg.size() << " parts \"" << rid << "\"";
+    //     zio::debug(ss.str());
+    // }
     server_socket.send(msg, zio::send_flags::none);
 }
 
@@ -129,13 +116,12 @@ void zio::recv_client(zio::socket_t& client_socket,
     zio::message_t msg;
     auto res = client_socket.recv(msg, zio::recv_flags::none);
     mmsg.decode_append(msg);
-    {
-        std::stringstream ss;
-        ss << "zio::recv CLIENT msg size " << msg.size()
-           << ", " << mmsg.size() << " parts";
-        console_log log;
-        log.debug(ss.str());
-    }
+    // {
+    //     std::stringstream ss;
+    //     ss << "zio::recv CLIENT msg size " << msg.size()
+    //        << ", " << mmsg.size() << " parts";
+    //     zio::debug(ss.str());
+    // }
     return;
 }
 
@@ -168,13 +154,12 @@ void zio::send_client(zio::socket_t& client_socket,
                       zio::multipart_t& mmsg)
 {
     zio::message_t msg = mmsg.encode();
-    {
-        std::stringstream ss;
-        ss << "zio::send CLIENT msg size " << msg.size()
-           << ", " << mmsg.size() << " parts";
-        console_log log;
-        log.debug(ss.str());
-    }
+    // {
+    //     std::stringstream ss;
+    //     ss << "zio::send CLIENT msg size " << msg.size()
+    //        << ", " << mmsg.size() << " parts";
+    //     zio::debug(ss.str());
+    // }
     client_socket.send(msg, zio::send_flags::none);
 }
 

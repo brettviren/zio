@@ -1,4 +1,4 @@
-.TH "zio.flow.util" 3 "Tue Feb 4 2020" "ZIO" \" -*- nroff -*-
+.TH "zio.flow.util" 3 "Wed Mar 18 2020" "ZIO" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -18,9 +18,23 @@ zio.flow.util
 .ti -1c
 .RI "def \fBswitch_direction\fP (fobj)"
 .br
+.ti -1c
+.RI "def \fBmessage_to_dict\fP (msg)"
+.br
 .in -1c
 .SH "Function Documentation"
 .PP 
+.SS "def zio\&.flow\&.util\&.message_to_dict ( msg)"
+
+.PP
+.nf
+Return a simple dictionary of message header info.
+
+.fi
+.PP
+ 
+.PP
+Definition at line 44 of file util\&.py\&.
 .SS "def zio\&.flow\&.util\&.objectify ( morl)"
 
 .PP
@@ -28,6 +42,8 @@ zio.flow.util
 Return a flow object.
 
 The morl may be a zio.Message or a zio.Message.label
+
+See also zio.Message.label_object
 
 .fi
 .PP
@@ -45,11 +61,11 @@ parameters.
 .PP
  
 .PP
-Definition at line 19 of file util\&.py\&.
+Definition at line 21 of file util\&.py\&.
 .SS "def zio\&.flow\&.util\&.switch_direction ( fobj)"
 
 .PP
-Definition at line 29 of file util\&.py\&.
+Definition at line 31 of file util\&.py\&.
 .SH "Author"
 .PP 
 Generated automatically by Doxygen for ZIO from the source code\&.

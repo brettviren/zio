@@ -13,12 +13,15 @@ ZIO installs in the usual [[https://waf.io][Waf]] way.
 
 To build, these software dependencies will be located via [[https://www.freedesktop.org/wiki/Software/pkg-config/][pkg-config]].
 
-- [[https://github.com/zeromq/libzmq][libzmq]] (with draft sockets built)
-- [[https://github.com/zeromq/czmq][CZMQ]]
-- [[https://github.com/zeromq/zyre][Zyre]]
+- [[https://github.com/zeromq/zyre][Zyre]] which needs:
+- [[https://github.com/zeromq/czmq][CZMQ]] which needs:
+- [[https://github.com/zeromq/libzmq][libzmq]] (ZIO needs this built with "draft" sockets)
+- [[https://github.com/gabime/spdlog#install][spdlog]]
 
-In addition, ZIO uses [[https://github.com/zeromq/cppzmq][cppzmq]] and [[https://github.com/nlohmann/json][nlohmann/json]] and includes copies of
-these header-only packages.
+In addition, ZIO uses [[https://github.com/zeromq/cppzmq][cppzmq]] and [[https://github.com/nlohmann/json][nlohmann/json]] and directly includes
+copies of these header-only packages.
+
+See also [[Installation Details]] for info on installing the software dependencies.
 
 * Tests
 
@@ -86,4 +89,28 @@ At some point ZIO may be placed in PyPI.  Currently there is an
 unsurprising name conflict with "ZIO".  For now, just know that the
 [[https://pypi.org/project/zio/][four year untouched package currently holding the name ZIO]] is totally
 unrelated to this here project.
+
+* Installation Details
+
+** cppzmq
+
+ZIO uses cppzmq *after* 1.5.0 which may mean installing from tip of its
+git ~master~ branch.
+
+#+begin_example
+$ git clone https://github.com/gabime/spdlog.git
+$ mkdir spdog/build && cd spdog/build
+$ cmake .. \
+   -DCMAKE_INSTALL_PREFIX=$HOME/opt/spdlog \
+   -DCMAKE_POSITION_INDEPENDENT_CODE=ON
+$ make -j
+$ make install
+#+end_example
+
+For ZIO to find ~cppzmq~ be sure that you add its ~pkg-config~ directory
+to the proper variable (along with others).  Eg:
+
+#+begin_example
+$ export PKG_CONFIG_PATH=$HOME/opt/spdlog/lib/pkgconfig:$HOME/opt/zmq/lib/pkgconfig
+#+end_example
 

@@ -96,7 +96,11 @@ namespace zio {
      */
     bool interrupted();
 
-    /*! Catch signals and set interrupted to true. */
+    /*! Catch signals and set interrupted to true.
+     *
+     *  This should be called from main().  For higher level
+     *  interface, see zio::init_signals() or zio::init_all() from
+     *  zio/main.hpp. */
     void catch_signals ();
 
 

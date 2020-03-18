@@ -1,4 +1,4 @@
-.TH "zio.util" 3 "Tue Feb 4 2020" "ZIO" \" -*- nroff -*-
+.TH "zio.util" 3 "Wed Mar 18 2020" "ZIO" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -41,17 +41,39 @@ Utilities
 .SS "def zio\&.util\&.byteify_list ( lst)"
 
 .PP
-Definition at line 46 of file util\&.py\&.
+.nf
+Encode to bytes elements of a list
+
+:param lst: list of things that can be converted to bytes
+:returns: list of bytes
+:rtype: list
+.fi
+.PP
+ 
+.PP
+Definition at line 56 of file util\&.py\&.
 .SS "def zio\&.util\&.guess_hostname ()"
 
 .PP
-Definition at line 42 of file util\&.py\&.
+.nf
+Guess the local hostname
+
+:returns: host name
+:rtype: string
+.fi
+.PP
+ 
+.PP
+Definition at line 46 of file util\&.py\&.
 .SS "def zio\&.util\&.needs_codec ( stype)"
 
 .PP
 .nf
-Return True if socket type stype requires single-part messages
+Determine if socket needs codec
 
+:param stype: a ZeroMQ socket type number
+:returns: True if socket type stype requires single-part messages
+:rtype: bool
 .fi
 .PP
  

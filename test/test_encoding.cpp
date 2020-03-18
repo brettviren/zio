@@ -1,13 +1,17 @@
 /** Test compatibility of cppzmq and CZMQ single/multipart codec. 
  */
 
-#include <czmq.h>
 #include "zio/cppzmq.hpp"
+#include "zio/main.hpp"
+#include "zio/logging.hpp"
+#include <czmq.h>               // normally we don't use this directly in ZIO
 #include <string>
 #include <vector>
-#include <iostream>
+
 int main()
 {
+    zio::init_all();
+
     const std::string prefix="ZIO4TEXTTo be or not to be that ?"; // length 33, ascii 33 is !
 
     zmsg_t* msg = zmsg_new();
@@ -29,10 +33,10 @@ int main()
     zframe_destroy(&frame);
     zmsg_destroy(&msg);
 
-    std::cout << prefix.size() << " " << prefix << std::endl;
+    zio::debug("{} {}", prefix.size(), prefix);
 
     for (size_t ind=0; ind<ret.size(); ++ind) {
-        std::cout << ind << ": " << ret[ind] << " (" << (int)ret[ind] << ")" << std::endl;
+        zio::debug("{}: {} ({})", ind, ret[ind], (int)ret[ind]);
     }
 
     return 0;

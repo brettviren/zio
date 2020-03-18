@@ -1,4 +1,4 @@
-.TH "zmq::monitor_t" 3 "Tue Feb 4 2020" "ZIO" \" -*- nroff -*-
+.TH "zmq::monitor_t" 3 "Wed Mar 18 2020" "ZIO" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -83,103 +83,103 @@ zmq::monitor_t
 .in -1c
 .SH "Detailed Description"
 .PP 
-Definition at line 1661 of file zmq\&.hpp\&.
+Definition at line 1740 of file zmq\&.hpp\&.
 .SH "Constructor & Destructor Documentation"
 .PP 
 .SS "zmq::monitor_t::monitor_t ()\fC [inline]\fP"
 
 .PP
-Definition at line 1664 of file zmq\&.hpp\&.
+Definition at line 1743 of file zmq\&.hpp\&.
 .SS "virtual zmq::monitor_t::~monitor_t ()\fC [inline]\fP, \fC [virtual]\fP"
 
 .PP
-Definition at line 1666 of file zmq\&.hpp\&.
+Definition at line 1745 of file zmq\&.hpp\&.
 .SH "Member Function Documentation"
 .PP 
 .SS "bool zmq::monitor_t::check_event (int timeout = \fC0\fP)\fC [inline]\fP"
 
 .PP
-Definition at line 1721 of file zmq\&.hpp\&.
+Definition at line 1797 of file zmq\&.hpp\&.
 .SS "void zmq::monitor_t::init (\fBsocket_t\fP & socket, std::string const & addr, int events = \fCZMQ_EVENT_ALL\fP)\fC [inline]\fP"
 
 .PP
-Definition at line 1703 of file zmq\&.hpp\&.
+Definition at line 1779 of file zmq\&.hpp\&.
 .SS "void zmq::monitor_t::init (\fBsocket_t\fP & socket, const char * addr_, int events = \fCZMQ_EVENT_ALL\fP)\fC [inline]\fP"
 
 .PP
-Definition at line 1708 of file zmq\&.hpp\&.
+Definition at line 1784 of file zmq\&.hpp\&.
 .SS "void zmq::monitor_t::monitor (\fBsocket_t\fP & socket, std::string const & addr, int events = \fCZMQ_EVENT_ALL\fP)\fC [inline]\fP"
 
 .PP
-Definition at line 1690 of file zmq\&.hpp\&.
+Definition at line 1766 of file zmq\&.hpp\&.
 .SS "void zmq::monitor_t::monitor (\fBsocket_t\fP & socket, const char * addr_, int events = \fCZMQ_EVENT_ALL\fP)\fC [inline]\fP"
 
 .PP
-Definition at line 1695 of file zmq\&.hpp\&.
+Definition at line 1771 of file zmq\&.hpp\&.
 .SS "virtual void zmq::monitor_t::on_event_accept_failed (const \fBzmq_event_t\fP & event_, const char * addr_)\fC [inline]\fP, \fC [virtual]\fP"
 
 .PP
-Definition at line 1887 of file zmq\&.hpp\&.
+Definition at line 1963 of file zmq\&.hpp\&.
 .SS "virtual void zmq::monitor_t::on_event_accepted (const \fBzmq_event_t\fP & event_, const char * addr_)\fC [inline]\fP, \fC [virtual]\fP"
 
 .PP
-Definition at line 1882 of file zmq\&.hpp\&.
+Definition at line 1958 of file zmq\&.hpp\&.
 .SS "virtual void zmq::monitor_t::on_event_bind_failed (const \fBzmq_event_t\fP & event_, const char * addr_)\fC [inline]\fP, \fC [virtual]\fP"
 
 .PP
-Definition at line 1877 of file zmq\&.hpp\&.
+Definition at line 1953 of file zmq\&.hpp\&.
 .SS "virtual void zmq::monitor_t::on_event_close_failed (const \fBzmq_event_t\fP & event_, const char * addr_)\fC [inline]\fP, \fC [virtual]\fP"
 
 .PP
-Definition at line 1897 of file zmq\&.hpp\&.
+Definition at line 1973 of file zmq\&.hpp\&.
 .SS "virtual void zmq::monitor_t::on_event_closed (const \fBzmq_event_t\fP & event_, const char * addr_)\fC [inline]\fP, \fC [virtual]\fP"
 
 .PP
-Definition at line 1892 of file zmq\&.hpp\&.
+Definition at line 1968 of file zmq\&.hpp\&.
 .SS "virtual void zmq::monitor_t::on_event_connect_delayed (const \fBzmq_event_t\fP & event_, const char * addr_)\fC [inline]\fP, \fC [virtual]\fP"
 
 .PP
-Definition at line 1860 of file zmq\&.hpp\&.
+Definition at line 1936 of file zmq\&.hpp\&.
 .SS "virtual void zmq::monitor_t::on_event_connect_retried (const \fBzmq_event_t\fP & event_, const char * addr_)\fC [inline]\fP, \fC [virtual]\fP"
 
 .PP
-Definition at line 1866 of file zmq\&.hpp\&.
+Definition at line 1942 of file zmq\&.hpp\&.
 .SS "virtual void zmq::monitor_t::on_event_connected (const \fBzmq_event_t\fP & event_, const char * addr_)\fC [inline]\fP, \fC [virtual]\fP"
 
 .PP
-Definition at line 1855 of file zmq\&.hpp\&.
+Definition at line 1931 of file zmq\&.hpp\&.
 .SS "virtual void zmq::monitor_t::on_event_disconnected (const \fBzmq_event_t\fP & event_, const char * addr_)\fC [inline]\fP, \fC [virtual]\fP"
 
 .PP
-Definition at line 1902 of file zmq\&.hpp\&.
+Definition at line 1978 of file zmq\&.hpp\&.
 .SS "virtual void zmq::monitor_t::on_event_handshake_failed_auth (const \fBzmq_event_t\fP & event_, const char * addr_)\fC [inline]\fP, \fC [virtual]\fP"
 
 .PP
-Definition at line 1920 of file zmq\&.hpp\&.
+Definition at line 1996 of file zmq\&.hpp\&.
 .SS "virtual void zmq::monitor_t::on_event_handshake_failed_no_detail (const \fBzmq_event_t\fP & event_, const char * addr_)\fC [inline]\fP, \fC [virtual]\fP"
 
 .PP
-Definition at line 1908 of file zmq\&.hpp\&.
+Definition at line 1984 of file zmq\&.hpp\&.
 .SS "virtual void zmq::monitor_t::on_event_handshake_failed_protocol (const \fBzmq_event_t\fP & event_, const char * addr_)\fC [inline]\fP, \fC [virtual]\fP"
 
 .PP
-Definition at line 1914 of file zmq\&.hpp\&.
+Definition at line 1990 of file zmq\&.hpp\&.
 .SS "virtual void zmq::monitor_t::on_event_handshake_succeeded (const \fBzmq_event_t\fP & event_, const char * addr_)\fC [inline]\fP, \fC [virtual]\fP"
 
 .PP
-Definition at line 1926 of file zmq\&.hpp\&.
+Definition at line 2002 of file zmq\&.hpp\&.
 .SS "virtual void zmq::monitor_t::on_event_listening (const \fBzmq_event_t\fP & event_, const char * addr_)\fC [inline]\fP, \fC [virtual]\fP"
 
 .PP
-Definition at line 1872 of file zmq\&.hpp\&.
+Definition at line 1948 of file zmq\&.hpp\&.
 .SS "virtual void zmq::monitor_t::on_event_unknown (const \fBzmq_event_t\fP & event_, const char * addr_)\fC [inline]\fP, \fC [virtual]\fP"
 
 .PP
-Definition at line 1946 of file zmq\&.hpp\&.
+Definition at line 2022 of file zmq\&.hpp\&.
 .SS "virtual void zmq::monitor_t::on_monitor_started ()\fC [inline]\fP, \fC [virtual]\fP"
 
 .PP
-Definition at line 1854 of file zmq\&.hpp\&.
+Definition at line 1930 of file zmq\&.hpp\&.
 
 .SH "Author"
 .PP 

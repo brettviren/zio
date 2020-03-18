@@ -2,7 +2,6 @@
 #define ZIO_DOMO_BROKER_HPP_SEEN
 
 #include "zio/util.hpp"
-#include "zio/logging.hpp"
 #include <unordered_map>
 #include <unordered_set>
 #include <deque>
@@ -21,7 +20,7 @@ namespace domo {
         /// Create a broker with a ROUTER or SERVER socket already
         /// bound.  Caller must keep socket, eg to mix with others in
         /// an actor's poller.
-        Broker(zio::socket_t& sock, logbase_t& log);
+        Broker(zio::socket_t& sock);
         ~Broker();
 
         /// Begin brokering (run forever).  The guts of this method
@@ -91,7 +90,6 @@ namespace domo {
     private:
 
         zio::socket_t& m_sock;
-        logbase_t& m_log;
 
         // fixme: make configurable
         time_unit_t m_hb_interval{HEARTBEAT_INTERVAL};

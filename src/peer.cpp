@@ -1,4 +1,5 @@
 #include "zio/peer.hpp"
+#include "zio/logging.hpp"
 
 zio::headerset_t zio::peer_info_t::branch(const std::string& prefix)
 {
@@ -27,7 +28,7 @@ zio::Peer::Peer(const nickname_t& nickname, const headerset_t& headers,
     }
     for (const auto& header : headers) {
         if (verbose)
-            zsys_debug("[peer %s]: header %s = %s",
+            zio::debug("[peer {}]: header {} = {}",
                        m_nick.c_str(),
                        header.first.c_str(), header.second.c_str());
         zyre_set_header(m_zyre, header.first.c_str(), "%s", header.second.c_str());
@@ -41,8 +42,7 @@ zio::Peer::Peer(const nickname_t& nickname, const headerset_t& headers,
 }
 zio::Peer::~Peer()
 {
-    if (m_verbose)
-        zsys_debug("[peer %s]: stop and destroy", m_nick.c_str());
+    zio::debug("[peer {}]: stop and destroy", m_nick.c_str());
     zyre_stop(m_zyre);
     zyre_destroy(&m_zyre);
 }
@@ -56,25 +56,22 @@ bool zio::Peer::poll(timeout_t timeout)
     while (true) {
         void* which = zpoller_wait(poller, timeout);
         if (!which) {
-            zsys_debug("[peer %s]: poll timeout", m_nick.c_str());
+            zio::debug("[peer {}]: poll timeout", m_nick.c_str());
             break;              // timeout
         }
         zyre_event_t *event = zyre_event_new (m_zyre);
         if (!event) {
-            zsys_debug("[peer %s]: no zyre event", m_nick.c_str());
+            zio::debug("[peer {}]: no zyre event", m_nick.c_str());
             break;              // timeout
         }
         const char* event_type = zyre_event_type(event);
-        if (m_verbose) {
-            zsys_debug("[peer %s]: poll event '%s'",
-                       m_nick.c_str(), event_type);
-            zyre_event_print(event);
-        }
+        zio::debug("[peer {}]: poll event '{}'",
+                   m_nick.c_str(), event_type);
+        zyre_event_print(event);
         if (streq(event_type, "ENTER")) {
             uuid_t uuid = zyre_event_peer_uuid(event);
-            if (m_verbose)
-                zsys_debug("[peer %s]: poll ENTER peer \"%s\"",
-                           m_nick.c_str(),uuid.c_str());
+            zio::debug("[peer {}]: poll ENTER peer \"{}\"",
+                       m_nick.c_str(),uuid.c_str());
             peer_info_t pi;
             pi.nick = zyre_event_peer_name(event);
             zhash_t* hh = zyre_event_headers(event);
@@ -85,17 +82,16 @@ bool zio::Peer::poll(timeout_t timeout)
                 header_key_t key = static_cast<char*>(cursor);
                 header_value_t val = static_cast<char*>(vptr);
                 pi.headers[key] = val;
-                zsys_debug("[peer %s]: poll add %s header %s=%s",
+                zio::debug("[peer {}]: poll add {} header {}={}",
                            m_nick.c_str(), pi.nick.c_str(),
                            key.c_str(), val.c_str());
                 cursor = zlist_next(keys);
             }
             m_known_peers[uuid] = pi;
             zlist_destroy (&keys);
-            if (m_verbose)
-                zsys_debug("[peer %s]: poll add \"%s\" (%s), know %ld",
-                           m_nick.c_str(), pi.nick.c_str(), uuid.c_str(),
-                           m_known_peers.size());
+            zio::debug("[peer {}]: poll add \"{}\" ({}), know {}",
+                       m_nick.c_str(), pi.nick.c_str(), uuid.c_str(),
+                       m_known_peers.size());
             got_one = true;
         }
         else
@@ -105,9 +101,8 @@ bool zio::Peer::poll(timeout_t timeout)
             if (maybe != m_known_peers.end()) {
                 m_known_peers.erase(maybe);
             }
-            if (m_verbose)
-                zsys_debug("[peer %s]: poll remove %s, know %ld",
-                           m_nick.c_str(), uuid.c_str(), m_known_peers.size());
+            zio::debug("[peer {}]: poll remove {}, know {}",
+                       m_nick.c_str(), uuid.c_str(), m_known_peers.size());
             got_one = true;
         }
         zyre_event_destroy(&event);
@@ -115,21 +110,18 @@ bool zio::Peer::poll(timeout_t timeout)
         // Ignore other events but keep going if we've not yet reached timeout
         if (!got_one) {
             if (timeout < 0) {
-                if (m_verbose)
-                    zsys_debug("[peer %s]: poll again with infinite wait",
-                               m_nick.c_str());
+                zio::debug("[peer {}]: poll again with infinite wait",
+                           m_nick.c_str());
                 continue;
             }
             auto timeleft = zclock_usecs() / 1000 - start - timeout;
             if (timeleft > 0) {
-                if (m_verbose)
-                    zsys_debug("[peer %s]: poll again with %ld msec left",
-                               m_nick.c_str(), timeleft);
+                zio::debug("[peer {}]: poll again with {} msec left",
+                           m_nick.c_str(), timeleft);
                 continue;
             }
         }
-        if (m_verbose) 
-            zsys_debug("[peer %s]: poll done", m_nick.c_str());
+        zio::debug("[peer {}]: poll done", m_nick.c_str());
         break;
     }
     zpoller_destroy(&poller);   // fixme: retain poller?
@@ -141,14 +133,14 @@ std::vector<zio::uuid_t> zio::Peer::nickmatch(const nickname_t& nickname)
 {
     std::vector<uuid_t> ret;
     for (const auto& pp : m_known_peers) {
-        zsys_debug("[peer %s]: check nick '%s' against '%s'",
+        zio::debug("[peer {}]: check nick '{}' against '{}'",
                    m_nick.c_str(),
                    nickname.c_str(), pp.second.nick.c_str());
         if (pp.second.nick == nickname) {
             ret.push_back(pp.first);
         }
     }
-    zsys_debug("[peer %s]: nickmatch found %ld instances of %s",
+    zio::debug("[peer {}]: nickmatch found {} instances of {}",
                m_nick.c_str(), ret.size(), nickname.c_str());
     return ret;
 }
@@ -160,16 +152,14 @@ std::vector<zio::uuid_t> zio::Peer::waitfor(const nickname_t& nickname,
     std::vector<uuid_t> maybe = nickmatch(nickname);
 
     while (maybe.empty()) {
-        if (m_verbose)
-            zsys_debug("[peer %s]: waitfor peer \"%s\" to come online",
-                       m_nick.c_str(), nickname.c_str());
+        zio::debug("[peer {}]: waitfor peer \"{}\" to come online",
+                   m_nick.c_str(), nickname.c_str());
         bool ok = poll(timeout);
         maybe = nickmatch(nickname);
-        if (m_verbose)
-            zsys_debug("[peer %s]: waitfor see \"%s\" after %ld ms, have %ld match",
-                       m_nick.c_str(), nickname.c_str(),
-                       zclock_usecs() / 1000 - start,
-                       maybe.size());
+        zio::debug("[peer {}]: waitfor see \"{}\" after {} ms, have {} match",
+                   m_nick.c_str(), nickname.c_str(),
+                   zclock_usecs() / 1000 - start,
+                   maybe.size());
 
         if (maybe.size()) {
             break;
@@ -206,7 +196,7 @@ zio::peer_info_t zio::Peer::peer_info(const uuid_t& uuid)
     drain();
     peerset_t::iterator maybe = m_known_peers.find(uuid);
     if (maybe == m_known_peers.end()) {
-        zsys_debug("[peer %s]: failed to find peer %s out of %ld",
+        zio::debug("[peer {}]: failed to find peer {} out of {}",
                    m_nick.c_str(), uuid.c_str(), m_known_peers.size());
         return peer_info_t{};
     }

@@ -1,4 +1,4 @@
-.TH "zmq::context_t" 3 "Tue Feb 4 2020" "ZIO" \" -*- nroff -*-
+.TH "zmq::context_t" 3 "Wed Mar 18 2020" "ZIO" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -18,16 +18,19 @@ zmq::context_t
 .RI "\fBcontext_t\fP (int io_threads_, int max_sockets_=ZMQ_MAX_SOCKETS_DFLT)"
 .br
 .ti -1c
+.RI "\fB~context_t\fP () \fBZMQ_NOTHROW\fP"
+.br
+.ti -1c
 .RI "int \fBsetctxopt\fP (int option_, int optval_)"
 .br
 .ti -1c
 .RI "int \fBgetctxopt\fP (int option_)"
 .br
 .ti -1c
-.RI "\fB~context_t\fP () \fBZMQ_NOTHROW\fP"
+.RI "void \fBclose\fP () \fBZMQ_NOTHROW\fP"
 .br
 .ti -1c
-.RI "void \fBclose\fP () \fBZMQ_NOTHROW\fP"
+.RI "void \fBshutdown\fP () \fBZMQ_NOTHROW\fP"
 .br
 .ti -1c
 .RI "\fBZMQ_EXPLICIT\fP \fBoperator void *\fP () \fBZMQ_NOTHROW\fP"
@@ -44,51 +47,55 @@ zmq::context_t
 .in -1c
 .SH "Detailed Description"
 .PP 
-Definition at line 618 of file zmq\&.hpp\&.
+Definition at line 686 of file zmq\&.hpp\&.
 .SH "Constructor & Destructor Documentation"
 .PP 
 .SS "zmq::context_t::context_t ()\fC [inline]\fP"
 
 .PP
-Definition at line 621 of file zmq\&.hpp\&.
+Definition at line 689 of file zmq\&.hpp\&.
 .SS "zmq::context_t::context_t (int io_threads_, int max_sockets_ = \fCZMQ_MAX_SOCKETS_DFLT\fP)\fC [inline]\fP, \fC [explicit]\fP"
 
 .PP
-Definition at line 629 of file zmq\&.hpp\&.
+Definition at line 697 of file zmq\&.hpp\&.
 .SS "zmq::context_t::~context_t ()\fC [inline]\fP"
 
 .PP
-Definition at line 662 of file zmq\&.hpp\&.
+Definition at line 720 of file zmq\&.hpp\&.
 .SH "Member Function Documentation"
 .PP 
 .SS "void zmq::context_t::close ()\fC [inline]\fP"
 
 .PP
-Definition at line 664 of file zmq\&.hpp\&.
+Definition at line 754 of file zmq\&.hpp\&.
 .SS "int zmq::context_t::getctxopt (int option_)\fC [inline]\fP"
 
 .PP
-Definition at line 660 of file zmq\&.hpp\&.
+Definition at line 731 of file zmq\&.hpp\&.
 .SS "zmq::context_t::operator bool () const\fC [inline]\fP"
 
 .PP
-Definition at line 685 of file zmq\&.hpp\&.
+Definition at line 786 of file zmq\&.hpp\&.
 .SS "\fBZMQ_EXPLICIT\fP zmq::context_t::operator void * ()\fC [inline]\fP"
 
 .PP
-Definition at line 681 of file zmq\&.hpp\&.
+Definition at line 782 of file zmq\&.hpp\&.
 .SS "\fBZMQ_EXPLICIT\fP zmq::context_t::operator void const * () const\fC [inline]\fP"
 
 .PP
-Definition at line 683 of file zmq\&.hpp\&.
+Definition at line 784 of file zmq\&.hpp\&.
 .SS "int zmq::context_t::setctxopt (int option_, int optval_)\fC [inline]\fP"
 
 .PP
-Definition at line 653 of file zmq\&.hpp\&.
+Definition at line 723 of file zmq\&.hpp\&.
+.SS "void zmq::context_t::shutdown ()\fC [inline]\fP"
+
+.PP
+Definition at line 771 of file zmq\&.hpp\&.
 .SS "void zmq::context_t::swap (\fBcontext_t\fP & other)\fC [inline]\fP"
 
 .PP
-Definition at line 687 of file zmq\&.hpp\&.
+Definition at line 788 of file zmq\&.hpp\&.
 
 .SH "Author"
 .PP 

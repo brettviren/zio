@@ -1,7 +1,6 @@
 #ifndef ZIO_DOMO_WORKER_HPP_SEEN
 #define ZIO_DOMO_WORKER_HPP_SEEN
 
-#include "zio/logging.hpp"
 #include "zio/util.hpp"
 
 namespace zio {
@@ -24,7 +23,7 @@ namespace domo {
         /// Create a worker providing service.  Caller keeps socket eg
         /// so to poll it along with others.
         Worker(zio::socket_t& sock, std::string broker_address,
-               std::string service, logbase_t& log);
+               std::string service);
         ~Worker();
 
         // API methods
@@ -54,7 +53,6 @@ namespace domo {
         zio::socket_t& m_sock;
         std::string m_address;
         std::string m_service;
-        logbase_t& m_log;
         int m_liveness{HEARTBEAT_LIVENESS};
         time_unit_t m_heartbeat{HEARTBEAT_INTERVAL};
         time_unit_t m_reconnect{HEARTBEAT_INTERVAL};

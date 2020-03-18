@@ -1,9 +1,7 @@
 #ifndef ZIO_DOMO_CLIENT_HPP_SEEND
 #define ZIO_DOMO_CLIENT_HPP_SEEND
 
-#include "zio/logging.hpp"
 #include "zio/util.hpp"
-
 
 namespace zio {
 namespace domo {
@@ -25,8 +23,8 @@ namespace domo {
     public:
         /// Create a client requesting service.  Caller keeps socket
         /// eg so to poll it along with others.
-        Client(zio::socket_t& sock, std::string broker_address,
-               logbase_t& log);
+        Client(zio::socket_t& sock, std::string broker_address);
+
         ~Client();
 
         // API methods
@@ -44,7 +42,6 @@ namespace domo {
     private:
         zio::socket_t& m_sock;
         std::string m_address;
-        logbase_t& m_log;
         time_unit_t m_timeout{HEARTBEAT_INTERVAL};
         
     private:

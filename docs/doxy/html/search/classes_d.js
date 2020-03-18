@@ -1,6 +1,7 @@
 var searchData=
 [
   ['sender',['sender',['../d8/dec/structsender.html',1,'']]],
+  ['service',['Service',['../d3/dc7/classzio_1_1domo_1_1broker_1_1_service.html',1,'zio::domo::broker']]],
   ['simpleserver',['SimpleServer',['../d6/df4/classtest__ugly_1_1_simple_server.html',1,'test_ugly']]],
   ['socket_5fbase',['socket_base',['../de/db1/classzmq_1_1detail_1_1socket__base.html',1,'zmq::detail']]],
   ['socket_5ferror',['socket_error',['../d0/ddf/classzio_1_1socket__error.html',1,'zio']]],
