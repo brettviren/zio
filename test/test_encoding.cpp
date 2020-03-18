@@ -1,5 +1,8 @@
+/** Test compatibility of cppzmq and CZMQ single/multipart codec. 
+ */
+
 #include <czmq.h>
-#include "zio/zmq_addon.hpp"
+#include "zio/cppzmq.hpp"
 #include <string>
 #include <vector>
 #include <iostream>
@@ -17,8 +20,8 @@ int main()
     std::vector<std::uint8_t> ret(zframe_data(frame), zframe_data(frame) + zframe_size(frame));
 
     {
-        zmq::message_t cppmsg(zframe_data(frame), zframe_size(frame));
-        zmq::multipart_t cppmmsg = zmq::multipart_t::decode(cppmsg);
+        zio::message_t cppmsg(zframe_data(frame), zframe_size(frame));
+        zio::multipart_t cppmmsg = zio::multipart_t::decode(cppmsg);
         assert(cppmmsg.size() == 2);
         assert(cppmmsg.at(0).to_string() == prefix);
     }

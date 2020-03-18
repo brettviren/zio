@@ -7,8 +7,8 @@
 using namespace zio;
 
 
-remote_identity_t zio::recv_serverish(zmq::socket_t& sock,
-                                      zmq::multipart_t& mmsg)
+remote_identity_t zio::recv_serverish(zio::socket_t& sock,
+                                      zio::multipart_t& mmsg)
 {
     int stype = sock.getsockopt<int>(ZMQ_TYPE);
     if (ZMQ_SERVER == stype) {
@@ -21,11 +21,11 @@ remote_identity_t zio::recv_serverish(zmq::socket_t& sock,
 }
 
 
-remote_identity_t zio::recv_server(zmq::socket_t& server_socket,
-                                   zmq::multipart_t& mmsg)
+remote_identity_t zio::recv_server(zio::socket_t& server_socket,
+                                   zio::multipart_t& mmsg)
 {
-    zmq::message_t msg;
-    auto res = server_socket.recv(msg, zmq::recv_flags::none);
+    zio::message_t msg;
+    auto res = server_socket.recv(msg, zio::recv_flags::none);
     uint32_t routing_id = msg.routing_id();
     remote_identity_t rid;
     rid.push_back((0xff000000&routing_id) >> 24);
@@ -39,11 +39,11 @@ remote_identity_t zio::recv_server(zmq::socket_t& server_socket,
         std::stringstream ss;
         ss << "zio::recv SERVER msg size " << msg.size()
            << ", " << mmsg.size() << " parts \"" << rid << "\"";
-           // << " " << (void*)routing_id 
-           // << " '" << (int)rid[0] << "'"
-           // << " '" << (int)rid[1] << "'"
-           // << " '" << (int)rid[2] << "'"
-           // << " '" << (int)rid[3] << "'";
+        // << " " << (void*)routing_id 
+        // << " '" << (int)rid[0] << "'"
+        // << " '" << (int)rid[1] << "'"
+        // << " '" << (int)rid[2] << "'"
+        // << " '" << (int)rid[3] << "'";
         console_log log;
         log.level = console_log::log_level::debug;
         log.debug(ss.str());
@@ -51,8 +51,8 @@ remote_identity_t zio::recv_server(zmq::socket_t& server_socket,
     return rid;
 }
 
-remote_identity_t zio::recv_router(zmq::socket_t& router_socket,
-                                           zmq::multipart_t& mmsg)
+remote_identity_t zio::recv_router(zio::socket_t& router_socket,
+                                   zio::multipart_t& mmsg)
 {
     mmsg.recv(router_socket);
     remote_identity_t rid = mmsg.popstr();
@@ -61,8 +61,8 @@ remote_identity_t zio::recv_router(zmq::socket_t& router_socket,
 }
 
 
-void zio::send_serverish(zmq::socket_t& sock,
-                         zmq::multipart_t& mmsg, remote_identity_t rid)
+void zio::send_serverish(zio::socket_t& sock,
+                         zio::multipart_t& mmsg, remote_identity_t rid)
 {
     int stype = sock.getsockopt<int>(ZMQ_TYPE);
     if (ZMQ_SERVER == stype) {
@@ -74,10 +74,10 @@ void zio::send_serverish(zmq::socket_t& sock,
     throw std::runtime_error("send requires SERVER or ROUTER socket");
 }
 
-void zio::send_server(zmq::socket_t& server_socket,
-                      zmq::multipart_t& mmsg, remote_identity_t rid)
+void zio::send_server(zio::socket_t& server_socket,
+                      zio::multipart_t& mmsg, remote_identity_t rid)
 {
-    zmq::message_t msg = mmsg.encode();
+    zio::message_t msg = mmsg.encode();
     uint32_t routing_id =
         0xff000000&(rid[0] << 24) |
         0x00ff0000&(rid[1] << 16) |
@@ -88,19 +88,19 @@ void zio::send_server(zmq::socket_t& server_socket,
         std::stringstream ss;
         ss << "zio::send SERVER msg size " << msg.size()
            << ", " << mmsg.size() << " parts \"" << rid << "\"";
-           // << " " << (void*)routing_id 
-           // << " '" << (int)rid[0] << "'"
-           // << " '" << (int)rid[1] << "'"
-           // << " '" << (int)rid[2] << "'"
-           // << " '" << (int)rid[3] << "'";
+        // << " " << (void*)routing_id 
+        // << " '" << (int)rid[0] << "'"
+        // << " '" << (int)rid[1] << "'"
+        // << " '" << (int)rid[2] << "'"
+        // << " '" << (int)rid[3] << "'";
         console_log log;
         log.debug(ss.str());
     }
-    server_socket.send(msg, zmq::send_flags::none);
+    server_socket.send(msg, zio::send_flags::none);
 }
 
-void zio::send_router(zmq::socket_t& router_socket,
-                              zmq::multipart_t& mmsg, remote_identity_t rid)
+void zio::send_router(zio::socket_t& router_socket,
+                      zio::multipart_t& mmsg, remote_identity_t rid)
 {
     mmsg.pushmem(NULL, 0);
     mmsg.pushstr(rid);
@@ -108,8 +108,8 @@ void zio::send_router(zmq::socket_t& router_socket,
 }
 
 
-void zio::recv_clientish(zmq::socket_t& socket,
-                                 zmq::multipart_t& mmsg)
+void zio::recv_clientish(zio::socket_t& socket,
+                         zio::multipart_t& mmsg)
 {
     int stype = socket.getsockopt<int>(ZMQ_TYPE);
     if (ZMQ_CLIENT == stype) {
@@ -123,11 +123,11 @@ void zio::recv_clientish(zmq::socket_t& socket,
     throw std::runtime_error("recv requires CLIENT or DEALER socket");
 }
 
-void zio::recv_client(zmq::socket_t& client_socket,
-                              zmq::multipart_t& mmsg)
+void zio::recv_client(zio::socket_t& client_socket,
+                      zio::multipart_t& mmsg)
 {
-    zmq::message_t msg;
-    auto res = client_socket.recv(msg, zmq::recv_flags::none);
+    zio::message_t msg;
+    auto res = client_socket.recv(msg, zio::recv_flags::none);
     mmsg.decode_append(msg);
     {
         std::stringstream ss;
@@ -140,8 +140,8 @@ void zio::recv_client(zmq::socket_t& client_socket,
 }
 
 
-void zio::recv_dealer(zmq::socket_t& dealer_socket,
-                              zmq::multipart_t& mmsg)
+void zio::recv_dealer(zio::socket_t& dealer_socket,
+                      zio::multipart_t& mmsg)
 {
     mmsg.recv(dealer_socket);
     mmsg.pop();                 // fake being REQ
@@ -149,8 +149,8 @@ void zio::recv_dealer(zmq::socket_t& dealer_socket,
 }
     
 
-void zio::send_clientish(zmq::socket_t& socket,
-                                 zmq::multipart_t& mmsg)
+void zio::send_clientish(zio::socket_t& socket,
+                         zio::multipart_t& mmsg)
 {
     int stype = socket.getsockopt<int>(ZMQ_TYPE);
     if (ZMQ_CLIENT == stype) {
@@ -164,10 +164,10 @@ void zio::send_clientish(zmq::socket_t& socket,
     throw std::runtime_error("send requires CLIENT or DEALER socket");
 }
 
-void zio::send_client(zmq::socket_t& client_socket,
-                              zmq::multipart_t& mmsg)
+void zio::send_client(zio::socket_t& client_socket,
+                      zio::multipart_t& mmsg)
 {
-    zmq::message_t msg = mmsg.encode();
+    zio::message_t msg = mmsg.encode();
     {
         std::stringstream ss;
         ss << "zio::send CLIENT msg size " << msg.size()
@@ -175,11 +175,11 @@ void zio::send_client(zmq::socket_t& client_socket,
         console_log log;
         log.debug(ss.str());
     }
-    client_socket.send(msg, zmq::send_flags::none);
+    client_socket.send(msg, zio::send_flags::none);
 }
 
-void zio::send_dealer(zmq::socket_t& dealer_socket,
-                              zmq::multipart_t& mmsg)
+void zio::send_dealer(zio::socket_t& dealer_socket,
+                      zio::multipart_t& mmsg)
 {
     mmsg.pushmem(NULL,0);       // pretend to be REQ
     mmsg.send(dealer_socket);

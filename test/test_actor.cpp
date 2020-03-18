@@ -1,9 +1,8 @@
 /*! cppzmq does not directly provide an actor pattern.
  * this tests a simple one. */
 
-#include "zio/zmq.hpp"
-#include "zio/zmq_actor.hpp"
 
+#include "zio/actor.hpp"
 
 #include <thread>
 #include <sstream>
@@ -14,97 +13,75 @@
 
 
 static
-void myactor(zmq::socket_t& pipe, std::string greeting, bool fast_exit)
+void myactor(zio::socket_t& link, std::string greeting, bool fast_exit)
 {
     std::cerr << greeting << std::endl;
     std::cerr << "myactor says hi" << std::endl;
 
-    pipe.send(zmq::message_t{}, zmq::send_flags::none);
+    // ready
+    link.send(zio::message_t{}, zio::send_flags::none);
 
-    zmq::poller_t<> poller;
-    poller.add(pipe, zmq::event_flags::pollin);
-    std::vector< zmq::poller_event<> > events(1);
-    const std::chrono::milliseconds timeout{500};
-    int rc = poller.wait_all(events, timeout);
-    if (rc) {
-        std::cerr << "there is stuff in the pipe " << rc << std::endl;
-        zmq::message_t msg;
-        auto res = pipe.recv(msg);
-        assert(res);
-        std::cerr << "pipe has message of size " << msg.size() << std::endl;
-    }
-    /// we get this if our owner kills the actor 
-    // assert(rc == 0);            // should be nothing in this pipe
-
+    zio::message_t msg;
+    std::cerr << "myactor: wait for app protocol message" << std::endl;
+    auto res1 = link.recv(msg);
+    assert(res1);
+    std::cerr << "myactor: got protocol message size " << msg.size() << std::endl;
+    assert(msg.size() == 2);
+    assert(msg.to_string() == "hi");
 
     if (fast_exit) {
-        std::cerr << "myactor exit early\n";
+        std::cerr << "myactor: exit early\n";
         return;
     }
 
-    std::cerr << "myactor simulating work, try to Ctrl-c me\n";
+    std::cerr << "myactor: simulating 1 second of work, try to Ctrl-c me\n";
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
 
-    std::cerr << "myactor waiting for death\n";
-
-    zmq::message_t rmsg;
-    auto res = pipe.recv(rmsg);
+    std::cerr << "myactor: waiting for termination message\n";
+    zio::message_t rmsg;
+    auto res2 = link.recv(rmsg);
+    assert(res2);
+    assert(rmsg.to_string() == "$TERM");
+    std::cerr << "myactor: exiting\n";
 }
 
 
-
-// int old_main()
-// {
-//     zmq::context_t ctx;
-//     auto [apipe,mypipe] = zmq::create_pipe(ctx);
-//     std::thread actor(myactor, std::move(apipe), "hello world");
-
-//     std::cerr << "in main, receiving ready\n";
-
-//     zmq::message_t rmsg;
-//     auto res = mypipe.recv(rmsg);
-
-//     std::cerr << "in main, terminating actor\n";
-//     mypipe.send(zmq::message_t{}, zmq::send_flags::none);
-
-//     std::cerr << "in main, joining\n";
-//     actor.join();
-
-//     std::cerr << "in main, exiting\n";
-// }
-
 int main()
 {
-    zmq::context_t ctx;
+    zio::context_t ctx;
 
+    std::cerr << "in main, test 1\n";
     {
-        zmq::actor_t actor(ctx, myactor, "hello world", false);
-        std::cerr << "in main, sleep\n";
+        zio::zactor_t actor(ctx, myactor, "hello world", false);
+        std::cerr << "1 in main, sleep\n";
         std::this_thread::sleep_for(std::chrono::milliseconds(2000));
-        std::cerr << "in main, terminating actor\n";
-        actor.pipe().send(zmq::message_t{}, zmq::send_flags::dontwait);
-        std::cerr << "in main, leaving context\n";
+        std::cerr << "1 in main, send protocol message\n";
+        actor.link().send(zio::message_t{"hi",2}, zio::send_flags::dontwait);
+        std::cerr << "1 in main, leaving context\n";
     }
+    std::cerr << "in main, test 2\n";
     {
-        zmq::actor_t actor(ctx, myactor, "hello world", false);
-        std::cerr << "in main, no sleep, terminating actor\n";
-        actor.pipe().send(zmq::message_t{}, zmq::send_flags::dontwait);
-        std::cerr << "in main, leaving context\n";
+        zio::zactor_t actor(ctx, myactor, "hello world", false);
+        std::cerr << "2 in main, no sleep, send protocol actor\n";
+        actor.link().send(zio::message_t{"hi",2}, zio::send_flags::dontwait);
+        std::cerr << "2 in main, leaving context\n";
     }
+    std::cerr << "in main, test 3\n";
     {
-        zmq::actor_t actor(ctx, myactor, "fast exit", true);
-        std::cerr << "in main, sleep\n";
+        zio::zactor_t actor(ctx, myactor, "fast exit", true);
+        std::cerr << "3 in main, sleep\n";
         std::this_thread::sleep_for(std::chrono::milliseconds(2000));
-        std::cerr << "in main, terminating actor\n";
-        actor.pipe().send(zmq::message_t{}, zmq::send_flags::dontwait);
-        std::cerr << "in main, leaving context\n";
+        std::cerr << "3 in main, send protocol message\n";
+        actor.link().send(zio::message_t{"hi",2}, zio::send_flags::dontwait);
+        std::cerr << "3 in main, leaving context\n";
     }
+    std::cerr << "in main, test 4\n";
     {
-        zmq::actor_t actor(ctx, myactor, "hello world", true);
-        std::cerr << "in main, no sleep, terminating actor\n";
-        actor.pipe().send(zmq::message_t{}, zmq::send_flags::dontwait);
-        std::cerr << "in main, leaving context\n";
+        zio::zactor_t actor(ctx, myactor, "fast exit", true);
+        std::cerr << "4 in main, no sleep, send protocol message\n";
+        actor.link().send(zio::message_t{"hi",2}, zio::send_flags::dontwait);
+        std::cerr << "4 in main, leaving context\n";
     }
 
     std::cerr << "in main, exiting\n";

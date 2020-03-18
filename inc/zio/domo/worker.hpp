@@ -23,7 +23,7 @@ namespace domo {
     public:
         /// Create a worker providing service.  Caller keeps socket eg
         /// so to poll it along with others.
-        Worker(zmq::socket_t& sock, std::string broker_address,
+        Worker(zio::socket_t& sock, std::string broker_address,
                std::string service, logbase_t& log);
         ~Worker();
 
@@ -36,22 +36,22 @@ namespace domo {
         /// reconnect to the broker.  If owner of the Worker needs to
         /// get time to do other things while waiting for a request
         /// then send() and recv() may be used.
-        zmq::multipart_t work(zmq::multipart_t& reply);
+        zio::multipart_t work(zio::multipart_t& reply);
 
         /// Recieve a request.  Note, if no request is pending, this
         /// will wait for at most one heartbeat and return leaving the
         /// request empty.  If the request is not empty a subsequent
         /// send() shall be made.        
-        void recv(zmq::multipart_t& request);
+        void recv(zio::multipart_t& request);
         /// Send a reply.  A reply must only be sent in response to a
         /// request.  Note, unlike using work() it is not required,
         /// but still allowed, to send an initial empty reply.
         /// Empties will simply be ignored.
-        void send(zmq::multipart_t& reply);
+        void send(zio::multipart_t& reply);
 
 
     private:
-        zmq::socket_t& m_sock;
+        zio::socket_t& m_sock;
         std::string m_address;
         std::string m_service;
         logbase_t& m_log;
@@ -64,10 +64,10 @@ namespace domo {
 
     private:
 
-        std::function<void(zmq::socket_t& server_socket,
-                           zmq::multipart_t& mmsg)> really_recv;
-        std::function<void(zmq::socket_t& server_socket,
-                           zmq::multipart_t& mmsg)> really_send;
+        std::function<void(zio::socket_t& server_socket,
+                           zio::multipart_t& mmsg)> really_recv;
+        std::function<void(zio::socket_t& server_socket,
+                           zio::multipart_t& mmsg)> really_send;
 
         void connect_to_broker(bool reconnect = true);
 
@@ -75,7 +75,7 @@ namespace domo {
 
 
     // An echo worker actor function
-    void echo_worker(zmq::socket_t& pipe, std::string address, int socktype);
+    void echo_worker(zio::socket_t& link, std::string address, int socktype);
 
 }
 }

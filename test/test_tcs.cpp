@@ -1,8 +1,10 @@
-#include "zio/interned.hpp"
+#include "zio/cppzmq.hpp"
 #include <unistd.h>
 #include <chrono>
 #include <czmq.h>
 #include <thread>
+
+#include <map>
 
 const int server_type = ZMQ_SERVER;
 const int client_type = ZMQ_CLIENT;
@@ -16,13 +18,13 @@ typedef std::chrono::duration<int64_t,std::micro> microseconds_type;
 
 // a very very ugly server
 static
-void server(zmq::socket_t& s)
+void server(zio::socket_t& s)
 {
     std::map<uint32_t,uint32_t> rids;
     std::map<uint32_t, std::vector<int> > tosend;
 
-    zmq::poller_t<> poller;
-    poller.add(s, zmq::event_flags::pollin);
+    zio::poller_t<> poller;
+    poller.add(s, zio::event_flags::pollin);
     zsys_info("server: loop starts");
     const auto wait = std::chrono::milliseconds{2000};
     
@@ -34,14 +36,14 @@ void server(zmq::socket_t& s)
     while (true) {
         zsys_info("server: polling %d", count);
         auto t0 = std::chrono::high_resolution_clock::now();
-        std::vector<zmq::poller_event<>> events(1);
+        std::vector<zio::poller_event<>> events(1);
         try {
             int rc = poller.wait_all(events, wait);
             if (rc == 0) {
                 zsys_info("server: poll times out");
                 break;
             }
-        } catch (zmq::error_t e) {
+        } catch (zio::error_t e) {
             zsys_info("server: poller exception: %s", e.what());
             return;
         }
@@ -62,7 +64,7 @@ void server(zmq::socket_t& s)
                 tmin, tmax, (ttot/count), ttot, dt);
             
 
-        zmq::message_t msg;
+        zio::message_t msg;
         auto res = s.recv(msg);
         assert(res);
         uint32_t rid = msg.routing_id();
@@ -101,9 +103,9 @@ void server(zmq::socket_t& s)
             uint32_t rid = rid_v.first;
             for (auto them : rid_v.second) {
                 uint32_t orid = rids[rid];
-                zmq::message_t msg(&them, sizeof(int));        
+                zio::message_t msg(&them, sizeof(int));        
                 msg.set_routing_id(orid);
-                auto ses = s.send(msg, zmq::send_flags::none);
+                auto ses = s.send(msg, zio::send_flags::none);
                 assert(ses);
             }
         }
@@ -112,31 +114,31 @@ void server(zmq::socket_t& s)
 }
 
 static
-void client(zmq::socket_t& c, int me)
+void client(zio::socket_t& c, int me)
 {
     zsys_debug("client %d: starts", me);
 
-    zmq::poller_t<> poller;
-    poller.add(c, zmq::event_flags::pollin);
+    zio::poller_t<> poller;
+    poller.add(c, zio::event_flags::pollin);
     const auto wait = std::chrono::milliseconds{2000};
 
     int zzz = 1000000;
     zsys_warning("client %d: sleeps for %d", me, zzz);
     usleep(zzz);
     for (int count=0; count<2000; ++count) {
-        zmq::message_t msg(&me, sizeof(int));        
+        zio::message_t msg(&me, sizeof(int));        
         zsys_debug("client %d: send", me);
-        c.send(msg, zmq::send_flags::none);
+        c.send(msg, zio::send_flags::none);
 
         zsys_debug("client %d: polling", me);
-        std::vector<zmq::poller_event<>> events(1);
+        std::vector<zio::poller_event<>> events(1);
         try {
             int rc = poller.wait_all(events, wait);
             if (rc == 0) {
                 zsys_info("client: poll times out");
                 return;
             }
-        } catch (zmq::error_t e) {
+        } catch (zio::error_t e) {
             zsys_info("client: poller exception: %s", e.what());
             return;
         }
@@ -148,15 +150,15 @@ void client(zmq::socket_t& c, int me)
         zsys_debug("client %d: got %d", me, them);
     }
     zsys_debug("client %d: send final", me);
-    c.send(zmq::message_t(), zmq::send_flags::none);
+    c.send(zio::message_t(), zio::send_flags::none);
 }
 int main()
 {
     zsys_init();
     zsys_info("test_tcs starting");
 
-    zmq::context_t ctx;
-    zmq::socket_t s(ctx, server_type);
+    zio::context_t ctx;
+    zio::socket_t s(ctx, server_type);
     s.bind(addr);
 
     std::thread ser(server, std::ref(s));
@@ -164,11 +166,11 @@ int main()
     usleep(100000);
 
 
-    zmq::socket_t c1(ctx, client_type);
+    zio::socket_t c1(ctx, client_type);
     c1.connect(addr);
     zsys_debug("client 1: connected");
 
-    zmq::socket_t c2(ctx, client_type);
+    zio::socket_t c2(ctx, client_type);
     c2.connect(addr);
     zsys_debug("client 2: connected");
 

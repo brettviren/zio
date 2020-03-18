@@ -4,7 +4,7 @@
 
 using namespace zio::domo;
 
-Worker::Worker(zmq::socket_t& sock, std::string broker_address,
+Worker::Worker(zio::socket_t& sock, std::string broker_address,
                std::string service, logbase_t& log)
     : m_sock(sock)
     , m_address(broker_address)
@@ -47,7 +47,7 @@ void Worker::connect_to_broker(bool reconnect)
     m_sock.connect(m_address);
     m_log.debug("zio::domo::Worker connect to " + m_address);
 
-    zmq::multipart_t mmsg;
+    zio::multipart_t mmsg;
     mmsg.pushstr(m_service);          // 3
     mmsg.pushstr(mdp::worker::ready); // 2
     mmsg.pushstr(mdp::worker::ident); // 1
@@ -57,7 +57,7 @@ void Worker::connect_to_broker(bool reconnect)
     m_heartbeat_at = now_ms() + m_heartbeat;
 }
 
-void Worker::send(zmq::multipart_t& reply)
+void Worker::send(zio::multipart_t& reply)
 {
     if (reply.empty()) {
         return;
@@ -69,15 +69,15 @@ void Worker::send(zmq::multipart_t& reply)
     really_send(m_sock, reply);
 }
 
-void Worker::recv(zmq::multipart_t& request)
+void Worker::recv(zio::multipart_t& request)
 {
-    zmq::poller_t<> poller;
-    poller.add(m_sock, zmq::event_flags::pollin);
+    zio::poller_t<> poller;
+    poller.add(m_sock, zio::event_flags::pollin);
 
-    std::vector< zmq::poller_event<> > events(1);
+    std::vector< zio::poller_event<> > events(1);
     int rc = poller.wait_all(events, m_heartbeat);
     if (rc > 0) {           // got one
-        zmq::multipart_t mmsg;
+        zio::multipart_t mmsg;
         really_recv(m_sock, mmsg);
         m_liveness = HEARTBEAT_LIVENESS;
         std::string header = mmsg.popstr();  // 1
@@ -108,7 +108,7 @@ void Worker::recv(zmq::multipart_t& request)
         connect_to_broker();
     }
     if (now_ms() >= m_heartbeat_at) {
-        zmq::multipart_t mmsg;
+        zio::multipart_t mmsg;
         mmsg.pushstr(mdp::worker::heartbeat); // 2
         mmsg.pushstr(mdp::worker::ident);     // 1
         really_send(m_sock, mmsg);
@@ -118,12 +118,12 @@ void Worker::recv(zmq::multipart_t& request)
     return;
 }
 
-zmq::multipart_t Worker::work(zmq::multipart_t& reply)
+zio::multipart_t Worker::work(zio::multipart_t& reply)
 {
     send(reply);
 
     while (! interrupted() ) {
-        zmq::multipart_t request;
+        zio::multipart_t request;
         recv(request);
         if (request.empty()) {
             continue;
@@ -134,49 +134,49 @@ zmq::multipart_t Worker::work(zmq::multipart_t& reply)
         m_log.info("zio::domo::Worker interupt received, killing worker");
     }
     
-    return zmq::multipart_t{};
+    return zio::multipart_t{};
 }
 
 
-void zio::domo::echo_worker(zmq::socket_t& pipe, std::string address, int socktype)
+void zio::domo::echo_worker(zio::socket_t& link, std::string address, int socktype)
 {
     // fixme: should get this from a more global spot.
     console_log log;
 
     // fixme: should implement BIND actor protocol 
-    zmq::context_t ctx;
-    zmq::socket_t sock(ctx, socktype);
+    zio::context_t ctx;
+    zio::socket_t sock(ctx, socktype);
     Worker worker(sock, address, "echo", log);
     log.debug("worker echo created on " + address);
 
-    zmq::poller_t<> poller;
-    poller.add(pipe, zmq::event_flags::pollin);
-    poller.add(sock, zmq::event_flags::pollin);
+    zio::poller_t<> poller;
+    poller.add(link, zio::event_flags::pollin);
+    poller.add(sock, zio::event_flags::pollin);
 
     // we want to get back to our main loop often enough to check for
-    // our creator to issue a termination (pipe hit) but not so fast
+    // our creator to issue a termination (link hit) but not so fast
     // that the loop spins and wastes CPU.
     time_unit_t poll_resolution{500};
 
-    pipe.send(zmq::message_t{}, zmq::send_flags::none); // ready
+    link.send(zio::message_t{}, zio::send_flags::none); // ready
 
     log.debug("worker echo starting");
-    zmq::multipart_t reply;
+    zio::multipart_t reply;
     while ( ! interrupted() ) {
 
-        log.debug("worker check pipe");
-        std::vector< zmq::poller_event<> > events(2);
+        log.debug("worker check link");
+        std::vector< zio::poller_event<> > events(2);
         int nevents = poller.wait_all(events, poll_resolution);
         for (int iev=0; iev < nevents; ++iev) {
 
-            if (events[iev].socket == pipe) {
-                log.debug("worker pipe hit");
+            if (events[iev].socket == link) {
+                log.debug("worker link hit");
                 return;
             }
 
             if (events[iev].socket == sock) {
                 log.debug("worker echo work");
-                zmq::multipart_t request;
+                zio::multipart_t request;
                 worker.recv(request);
                 if (request.empty()) {
                     log.debug("worker echo got null request");
@@ -187,9 +187,9 @@ void zio::domo::echo_worker(zmq::socket_t& pipe, std::string address, int sockty
             }
         }
     }
-    // fixme: should poll on pipe to check for early shutdown
+    // fixme: should poll on link to check for early shutdown
     log.debug("worker echo wait for term");    
-    zmq::message_t die;
-    auto res = pipe.recv(die, zmq::recv_flags::none);
+    zio::message_t die;
+    auto res = link.recv(die, zio::recv_flags::none);
     log.debug("worker echo wait for exit");    
 }

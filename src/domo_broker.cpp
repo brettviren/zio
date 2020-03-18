@@ -14,7 +14,7 @@ Broker::Service::~Service () {
 }
 
 
-Broker::Broker(zmq::socket_t& sock, logbase_t& log)
+Broker::Broker(zio::socket_t& sock, logbase_t& log)
     : m_sock(sock)
     , m_log(log)
 {
@@ -49,7 +49,7 @@ Broker::~Broker()
 
 void Broker::proc_one()
 {
-    zmq::multipart_t mmsg;
+    zio::multipart_t mmsg;
     remote_identity_t sender = recv(m_sock, mmsg);
     assert(mmsg.size() > 0);
     std::string header = mmsg.popstr(); // 7/MDP frame 1
@@ -75,7 +75,7 @@ void Broker::proc_heartbeat(time_unit_t heartbeat_at)
     purge_workers();
     for (auto& wrk : m_waiting) {
         m_log.debug("zio::domo::Broker heartbeat to worker");
-        zmq::multipart_t mmsg;
+        zio::multipart_t mmsg;
         mmsg.pushstr(mdp::worker::heartbeat);
         mmsg.pushstr(mdp::worker::ident);
         send(m_sock, mmsg, wrk->identity);
@@ -87,15 +87,15 @@ void Broker::start()
     time_unit_t now = now_ms();
     time_unit_t heartbeat_at = now + m_hb_interval;
 
-    zmq::poller_t<> poller;
-    poller.add(m_sock, zmq::event_flags::pollin);
+    zio::poller_t<> poller;
+    poller.add(m_sock, zio::event_flags::pollin);
     while (! interrupted()) {
         time_unit_t timeout{0};
         if (heartbeat_at > now ) {
             timeout = heartbeat_at - now;
         }
 
-        std::vector< zmq::poller_event<> > events(1);
+        std::vector< zio::poller_event<> > events(1);
         int rc = poller.wait_all(events, timeout);
         if (rc > 0) {           // got one
             proc_one();
@@ -134,9 +134,9 @@ Broker::Service* Broker::service_require(std::string name)
     return srv;
 }
 
-void Broker::service_internal(remote_identity_t rid, std::string service_name, zmq::multipart_t& mmsg)
+void Broker::service_internal(remote_identity_t rid, std::string service_name, zio::multipart_t& mmsg)
 {
-    zmq::multipart_t response;
+    zio::multipart_t response;
 
     if (service_name == "mmi.service") {
         std::string sn = mmsg.popstr();
@@ -168,7 +168,7 @@ void Broker::service_dispatch(Service* srv)
             }
         }
             
-        zmq::multipart_t& mmsg = srv->requests.front();
+        zio::multipart_t& mmsg = srv->requests.front();
         m_log.debug("zio::domo::Broker send work");        
         send(m_sock, mmsg, (*wrk_it)->identity);
         srv->requests.pop_front();
@@ -192,7 +192,7 @@ Broker::Worker* Broker::worker_require(remote_identity_t identity)
 void Broker::worker_delete(Broker::Worker*& wrk, int disconnect)
 {
     if (disconnect) {
-        zmq::multipart_t mmsg;
+        zio::multipart_t mmsg;
         mmsg.pushstr(mdp::worker::disconnect);
         mmsg.pushstr(mdp::worker::ident);
         m_log.debug("zio::domo::Broker disconnect worker");
@@ -216,7 +216,7 @@ void Broker::worker_delete(Broker::Worker*& wrk, int disconnect)
     wrk=0;
 }
 // mmsg holds starting with 7/MDP Frame 2.
-void Broker::worker_process(remote_identity_t sender, zmq::multipart_t& mmsg)
+void Broker::worker_process(remote_identity_t sender, zio::multipart_t& mmsg)
 {
     assert(mmsg.size() >= 1);
     const std::string command = mmsg.popstr(); // 0x01, 0x02, ....
@@ -280,7 +280,7 @@ void Broker::worker_waiting(Broker::Worker* wrk)
     service_dispatch(wrk->service);
 }
 
-void Broker::client_process(remote_identity_t client_id, zmq::multipart_t& mmsg)
+void Broker::client_process(remote_identity_t client_id, zio::multipart_t& mmsg)
 {
     std::string service_name = mmsg.popstr(); // Client REQUEST Frame 2 
     Service* srv = service_require(service_name);
@@ -301,27 +301,27 @@ void Broker::client_process(remote_identity_t client_id, zmq::multipart_t& mmsg)
 // An actor function running a Broker.
 
 
-void zio::domo::broker_actor(zmq::socket_t& pipe, std::string address, int socktype)
+void zio::domo::broker_actor(zio::socket_t& link, std::string address, int socktype)
 {
     console_log log;
     log.level = console_log::log_level::debug;
 
-    zmq::context_t ctx;
-    zmq::socket_t sock(ctx, socktype);
+    zio::context_t ctx;
+    zio::socket_t sock(ctx, socktype);
     sock.bind(address);
 
     Broker broker(sock, log);
-    pipe.send(zmq::message_t{}, zmq::send_flags::none);
+    link.send(zio::message_t{}, zio::send_flags::none);
 
-    // basically the guts of start() but we also poll on pipe as well as sock
+    // basically the guts of start() but we also poll on link as well as sock
 
     time_unit_t now = now_ms();
     time_unit_t hb_interval{HEARTBEAT_INTERVAL};
     time_unit_t heartbeat_at = now + hb_interval;
 
-    zmq::poller_t<> poller;
-    poller.add(pipe, zmq::event_flags::pollin);
-    poller.add(sock, zmq::event_flags::pollin);
+    zio::poller_t<> poller;
+    poller.add(link, zio::event_flags::pollin);
+    poller.add(sock, zio::event_flags::pollin);
 
     while (! interrupted()) {
         time_unit_t timeout{0};
@@ -330,7 +330,7 @@ void zio::domo::broker_actor(zmq::socket_t& pipe, std::string address, int sockt
         }
 
         log.debug("broker actor wait");
-        std::vector< zmq::poller_event<> > events(2);
+        std::vector< zio::poller_event<> > events(2);
         int nevents = poller.wait_all(events, timeout);
         for (int iev=0; iev < nevents; ++iev) {
 
@@ -339,14 +339,14 @@ void zio::domo::broker_actor(zmq::socket_t& pipe, std::string address, int sockt
                 broker.proc_one();
             }
 
-            if (events[iev].socket == pipe) {
-                log.debug("broker actor pipe hit");
-                zmq::message_t msg;
-                auto res = events[0].socket.recv(msg, zmq::recv_flags::dontwait);
+            if (events[iev].socket == link) {
+                log.debug("broker actor link hit");
+                zio::message_t msg;
+                auto res = events[0].socket.recv(msg, zio::recv_flags::dontwait);
                 assert(res);
                 std::stringstream ss;
                 ss << "msg: " << msg.size();
-                log.debug("broker actor pipe " + ss.str());
+                log.debug("broker actor link " + ss.str());
                 return;         // terminated
             }
         }
@@ -359,7 +359,7 @@ void zio::domo::broker_actor(zmq::socket_t& pipe, std::string address, int sockt
         now = now_ms();
     }
 
-    zmq::message_t die;
-    auto res = pipe.recv(die);
+    zio::message_t die;
+    auto res = link.recv(die);
 }
 

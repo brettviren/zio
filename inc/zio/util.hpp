@@ -1,7 +1,7 @@
 #ifndef ZIO_UTIL_HPP_SEEN
 #define ZIO_UTIL_HPP_SEEN
 
-#include "zio/zmq_addon.hpp"
+#include "zio/cppzmq.hpp"
 
 #include <string>
 
@@ -25,58 +25,58 @@ namespace zio {
 
 
     // Receive on a ROUTER or SERVER
-    remote_identity_t recv_serverish(zmq::socket_t& socket,
-                                     zmq::multipart_t& mmsg);
+    remote_identity_t recv_serverish(socket_t& socket,
+                                     multipart_t& mmsg);
 
     // Receive on a SERVER
-    remote_identity_t recv_server(zmq::socket_t& server_socket,
-                                  zmq::multipart_t& mmsg);
+    remote_identity_t recv_server(socket_t& server_socket,
+                                  multipart_t& mmsg);
 
     // Receive on a ROUTER
-    remote_identity_t recv_router(zmq::socket_t& router_socket,
-                                  zmq::multipart_t& mmsg);
+    remote_identity_t recv_router(socket_t& router_socket,
+                                  multipart_t& mmsg);
     
 
     // Send on a ROUTER or SERVER
-    void send_serverish(zmq::socket_t& socket,
-                     zmq::multipart_t& mmsg,
+    void send_serverish(socket_t& socket,
+                     multipart_t& mmsg,
                      remote_identity_t rid);
 
     // Send on a SERVER
-    void send_server(zmq::socket_t& server_socket,
-                     zmq::multipart_t& mmsg,
+    void send_server(socket_t& server_socket,
+                     multipart_t& mmsg,
                      remote_identity_t rid);
 
     // Send on a ROUTER
-    void send_router(zmq::socket_t& router_socket,
-                     zmq::multipart_t& mmsg,
+    void send_router(socket_t& router_socket,
+                     multipart_t& mmsg,
                      remote_identity_t rid);
 
 
     // Receive on a DEALER or CLIENT
-    void recv_clientish(zmq::socket_t& socket,
-                        zmq::multipart_t& mmsg);
+    void recv_clientish(socket_t& socket,
+                        multipart_t& mmsg);
 
     // Receive on a CLIENT
-    void recv_client(zmq::socket_t& client_socket,
-                     zmq::multipart_t& mmsg);
+    void recv_client(socket_t& client_socket,
+                     multipart_t& mmsg);
 
     // Receive on a DEALER
-    void  recv_dealer(zmq::socket_t& dealer_socket,
-                      zmq::multipart_t& mmsg);
+    void  recv_dealer(socket_t& dealer_socket,
+                      multipart_t& mmsg);
     
 
     // Send on a DEALER or CLIENT
-    void send_clientish(zmq::socket_t& socket,
-                        zmq::multipart_t& mmsg);
+    void send_clientish(socket_t& socket,
+                        multipart_t& mmsg);
 
     // Send on a CLIENT
-    void send_client(zmq::socket_t& client_socket,
-                     zmq::multipart_t& mmsg);
+    void send_client(socket_t& client_socket,
+                     multipart_t& mmsg);
 
     // Send on a DEALER
-    void send_dealer(zmq::socket_t& dealer_socket,
-                     zmq::multipart_t& mmsg);
+    void send_dealer(socket_t& dealer_socket,
+                     multipart_t& mmsg);
 
 
     /*! Current system time in milliseconds. */

@@ -1,7 +1,7 @@
 // Test the speed of msg churn needed to encode/decode multi frame
 // messages into single frame messages.
 
-#include "zio/zmq_addon.hpp"
+#include "zio/cppzmq.hpp"
 #include "zio/util.hpp"
 #include <vector>
 
@@ -19,12 +19,12 @@ int main()
         const auto t1 = zio::now_us();
         std::vector<char> buf(size);
         for (int count=0; count<NTRY; ++count) {
-            zmq::multipart_t mmsg;
+            zio::multipart_t mmsg;
             mmsg.addmem(header, HEADERSIZE);
             mmsg.addmem(buf.data(), size);
             auto msg = mmsg.encode();
 
-            auto mmsg2 = zmq::multipart_t::decode(msg);
+            auto mmsg2 = zio::multipart_t::decode(msg);
         }
         const auto t2 = zio::now_us();
         const auto dt = (t2-t1).count();

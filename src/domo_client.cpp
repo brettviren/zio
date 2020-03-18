@@ -3,7 +3,7 @@
 
 using namespace zio::domo;
 
-Client::Client(zmq::socket_t& sock, std::string broker_address,
+Client::Client(zio::socket_t& sock, std::string broker_address,
                logbase_t& log)
     : m_sock(sock)
     , m_address(broker_address)
@@ -42,7 +42,7 @@ void Client::connect_to_broker(bool reconnect)
 }
 
 
-void Client::send(std::string service, zmq::multipart_t& request)
+void Client::send(std::string service, zio::multipart_t& request)
 {
     request.pushstr(service);            // frame 2
     request.pushstr(mdp::client::ident); // frame 1
@@ -52,15 +52,15 @@ void Client::send(std::string service, zmq::multipart_t& request)
 
 
 
-void Client::recv(zmq::multipart_t& reply)
+void Client::recv(zio::multipart_t& reply)
 {
-    zmq::poller_t<> poller;
-    poller.add(m_sock, zmq::event_flags::pollin);
+    zio::poller_t<> poller;
+    poller.add(m_sock, zio::event_flags::pollin);
         
-    std::vector< zmq::poller_event<> > events(1);
+    std::vector< zio::poller_event<> > events(1);
     int rc = poller.wait_all(events, m_timeout);
     if (rc > 0) {           // got one
-        zmq::multipart_t mmsg;
+        zio::multipart_t mmsg;
         really_recv(m_sock, mmsg);
 
         std::string header = mmsg.popstr();
