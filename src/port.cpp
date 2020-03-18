@@ -227,7 +227,6 @@ void zio::Port::send(zio::Message& msg)
         zsys_debug("[port %s] send single-part %ld rid:%d",
                    m_name.c_str(), spmsg.size(), spmsg.routing_id());
         auto rc = m_sock.send(spmsg, zio::send_flags::none);
-        assert(rc);
         return;
     }
     zio::multipart_t mpmsg = msg.toparts();

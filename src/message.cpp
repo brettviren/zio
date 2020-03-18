@@ -118,48 +118,17 @@ void zio::Message::set_coord(origin_t origin, granule_t gran)
 zio::message_t zio::Message::encode() const
 {
     auto mmsg = toparts();
-    return mmsg.encode();
-    // auto parts = toparts();
-    // size_t size = 0;
-    // for (auto& part : parts) {
-    //     size += sizeof(int) + part.size();
-    // }
-    // zio::message_t ret(size);
-    // std::uint8_t* out = ret.data<std::uint8_t>();
-    // for (auto& part : parts) {
-    //     int siz = part.size();
-    //     memcpy(out, &siz, sizeof(int));
-    //     out += sizeof(int);
-    //     memcpy(out, part.data(), siz);
-    //     out += siz;
-    // }
-    // if (m_rid>0) 
-    //     ret.set_routing_id(m_rid);
-    // return ret;
+    auto spmsg = mmsg.encode();
+    if (m_rid>0) {
+        spmsg.set_routing_id(m_rid);
+    }
+    return spmsg;
 }
 
 void zio::Message::decode(const zio::message_t& data)
 {
-    m_rid = data.routing_id();
     fromparts(zio::multipart_t::decode(data));
-
-    // const std::uint8_t* dat = data.data<std::uint8_t>();
-    // size_t tot = data.size();
-
-    // zio::multipart_t mpmsg;
-
-    // size_t ind=0;
-    // while (ind < tot) {
-    //     int siz=0;
-    //     memcpy(&siz, dat+ind, sizeof(int));
-    //     ind += sizeof(int);
-    //     //zsys_debug("decoding size %d", siz);
-    //     mpmsg.addmem(dat+ind, siz);
-    //     ind += siz;
-    // }
-    // fromparts(mpmsg);           //  clears rid
-
-    // m_rid = data.routing_id();
+    m_rid = data.routing_id();
 }
         
 zio::multipart_t zio::Message::toparts() const
