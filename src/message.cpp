@@ -1,5 +1,6 @@
 #include "zio/message.hpp"
 #include "zio/exceptions.hpp"
+#include "zio/logging.hpp"
 #include <czmq.h>
 #include <sstream>
 #include <chrono>
@@ -153,6 +154,10 @@ void zio::Message::fromparts(const zio::multipart_t& mpmsg)
     std::string p(static_cast<const char*>(m0.data()), m0.size());
     bool ok = m_header.prefix.loads(p);
     if (!ok) {
+        zio::warn("part 0/{} is {} of size {}", nparts, p, m0.size());
+        for (size_t ind = 0; ind<m0.size(); ++ind) {
+            zio::warn("char {} = {} ({})", ind, p[ind], (int)p[ind]);
+        }
         throw std::runtime_error("failed to parse prefix from parts");
     }
     

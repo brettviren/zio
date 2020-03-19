@@ -293,38 +293,48 @@ class Message:
 
 
 def encode_message(parts):
-    '''
-    Return a binary encoded concatenation of parts in the input
-    sequence.  Result is suitable for use as a single-part message.
-    For ZIO messages the first two parts should be encoded header
-    prefix and coord, respectively.  Subseqent parts can be payload of
-    arbitrary encoding.
+    '''Return an encoded byte string which is the concatenation of all
+    parts of the input sequence with suitable size prefixes.  The
+    encoding is compatible with CZMQ's zmsg_encode().
     '''
     ret = b''
     for p in parts:
-        s = struct.pack('I', len(p))
-        ret += s + p
+        if isinstance(p, zmq.Frame):
+            p = p.bytes
+        siz = len(p)
+        if siz < 255:
+            s = struct.pack('>B', siz)
+        else:
+            s = struct.pack('>BI', 0xFF, siz)
+        one = s + p
+        ret += one
+        
     return ret
 
 def decode_message(encoded):
-    '''
-    Unpack an encoded single-part ZIO message such as returned by
-    socket.recv() on a SERVER socket.  It's the moral opposite of
-    zio::Message::encode().  What is returned is sequence of message
-    parts.
+    '''Unpack an encoded byte string to a list of multiple parts.  This
+    is the inverse of encode_message().
     '''
     tot = len(encoded)
     ret = list()
     beg = 0
     while beg < tot:
-        end = beg + 4
+        end = beg + 1           # small size of 0xFF
         if end >= tot:
-            raise ValueError("corrupt ZIO message in size")
-        size = struct.unpack('i',encoded[beg:end])[0]
+            raise ValueError("corrupt message part in size")
+        size = struct.unpack('>B',encoded[beg:end])[0]
         beg = end
+
+        if size == 0xFF:        # large message
+            end = beg + 4
+            if end >= tot:
+                raise ValueError("corrupt message part in size")
+            size = struct.unpack('>I',encoded[beg:end])[0]
+            beg = end
+
         end = beg + size
         if end > tot:
-            raise ValueError("corrupt ZIO message in data")
+            raise ValueError("corrupt message part in data")
         ret.append(encoded[beg:end])
         beg = end
     return ret

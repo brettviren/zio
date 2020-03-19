@@ -259,6 +259,11 @@ bool zio::Port::recv(Message& msg, int timeout)
     zio::multipart_t mpmsg;
     bool ok = mpmsg.recv(m_sock);
     if (!ok) return false;
+
+    /// fixme: router/dealer broken!.  This code needs to move to using recv_* from util
+    // router has [rid,0], dealer has [0]
+    // std::string rid = mmsg.popstr();
+    
     msg.fromparts(mpmsg);
 
     return true;

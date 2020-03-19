@@ -2,7 +2,6 @@
 import json
 from .. import jsonnet
 import click
-from .. import rules
 
 import logging
 log = logging.getLogger("zio")
