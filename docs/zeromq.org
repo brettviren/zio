@@ -1,4 +1,7 @@
 #+title: ZIO ZeroMQ notes
+#+setupfile: setup.org
+#+include: nav.org
+
 
 * ROUTER/DEALER Multipart Messages
 
@@ -24,7 +27,7 @@ and "(c)" indicates a "clientish" type.
 | ~recv()~ | push(addr) |           | pop(null)  | pop(null)  |
 |--------+------------+-----------+------------+------------|
 
-To understand any message path through two endpoint sockets start with
+ To understand any message path through two endpoint sockets start with
 the ~send()~ row and mentally apply the operation for the given sending
 socket.  Then move to the ~recv()~ row and apply the operation in the
 given receiving socket.
