@@ -199,7 +199,7 @@ def serverish_send(sock, cid, msg, *args, **kwds):
         return sock.send(frame)
 
     if sock.type == zmq.ROUTER:
-        msg = [cid] + msg
+        msg = [cid,b''] + msg
         return sock.send_multipart(msg)
     
     raise ValueError(f'unsupported socket type {sock.type}')
@@ -214,6 +214,7 @@ def clientish_recv(sock, *args, **kwds):
 
     if sock.type == zmq.DEALER:
         msg = sock.recv_multipart(*args, **kwds)
+        msg.pop(0)              # delimiter
         return msg
 
     raise ValueError(f'unsupported socket type {sock.type}')

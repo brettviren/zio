@@ -129,8 +129,9 @@ remote_identity_t zio::recv_router(zio::socket_t& router_socket,
                                    zio::multipart_t& mmsg)
 {
     mmsg.recv(router_socket);
+    zio::debug("recv router: {} parts", mmsg.size());
     remote_identity_t remid = mmsg.popstr();
-    mmsg.pop();                 // empty
+    mmsg.pop();                 // delimiter
     return remid;
 }
 
@@ -169,6 +170,7 @@ void zio::send_router(zio::socket_t& router_socket,
 {
     mmsg.pushmem(NULL, 0);      // delimiter
     mmsg.pushstr(remid);
+    zio::debug("send router: {} parts", mmsg.size());
     mmsg.send(router_socket);
 }
 
@@ -201,6 +203,7 @@ void zio::recv_dealer(zio::socket_t& dealer_socket,
                       zio::multipart_t& mmsg)
 {
     mmsg.recv(dealer_socket);
+    zio::debug("recv dealer: {} parts", mmsg.size());
     mmsg.pop();                 // fake being REQ
     return;
 }
@@ -225,12 +228,6 @@ void zio::send_client(zio::socket_t& client_socket,
                       zio::multipart_t& mmsg)
 {
     zio::message_t msg = mmsg.encode();
-    // {
-    //     std::stringstream ss;
-    //     ss << "zio::send CLIENT msg size " << msg.size()
-    //        << ", " << mmsg.size() << " parts";
-    //     zio::debug(ss.str());
-    // }
     client_socket.send(msg, zio::send_flags::none);
 }
 
@@ -238,6 +235,7 @@ void zio::send_dealer(zio::socket_t& dealer_socket,
                       zio::multipart_t& mmsg)
 {
     mmsg.pushmem(NULL,0);       // pretend to be REQ
+    zio::debug("send dealer: {} parts", mmsg.size());
     mmsg.send(dealer_socket);
 }
 
