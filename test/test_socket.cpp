@@ -1,4 +1,4 @@
-#include "zio/interned.hpp"
+#include "zio/util.hpp"
 
 int main()
 {

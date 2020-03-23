@@ -2,10 +2,18 @@
 #define ZIO_UTIL_HPP_SEEN
 
 #include "zio/cppzmq.hpp"
+#include "zio/json.hpp"
 
 #include <string>
 
 namespace zio {
+
+    // The great Nlohmann's JSON.
+    using json = nlohmann::json;
+
+    /// Return the ZeroMQ socket type number for the socket.
+    int sock_type(const socket_t& sock);
+    std::string sock_type_name(int stype);
 
     // timeouts, heartbeats and other things are in units of millisecond.
     typedef std::chrono::milliseconds time_unit_t;
@@ -16,13 +24,22 @@ namespace zio {
     const time_unit_t HEARTBEAT_EXPIRY{HEARTBEAT_INTERVAL * HEARTBEAT_LIVENESS};
 
 
-    // Erase the difference between SERVER routing ID and ROUTER
-    // envelop stack.  The former is uint32_t which we stuff in to a
-    // string of length 4.  The latter is already a string.  The
-    // remote identity value should be treated as opaque outside of
-    // the send/recv methods.  In general, it is not printable.
+    // SERVER and ROUTER use different "routing IDs" to identify the
+    // peer a message was received from or to which a message should
+    // be sent.  SERVER uses uint32_t and ROUTER uses a message part.
+    // Both are meant to be opaque to the application and we wish to
+    // erase the type differences in some contexts and provide a
+    // common way to in-band them in a messager (besides in an
+    // envelope stack such as in domo).  
     typedef std::string remote_identity_t;
+    remote_identity_t to_remid(uint32_t rid);
+    uint32_t to_rid(const remote_identity_t& remid);
+    std::string binstr(const std::string& s);
 
+    // Return true if socket is like a server 
+    bool is_serverish(zio::socket_t& sock);
+    // Return true if socket is like a client
+    bool is_clientish(zio::socket_t& sock);
 
     // Receive on a ROUTER or SERVER
     remote_identity_t recv_serverish(socket_t& socket,
@@ -39,18 +56,18 @@ namespace zio {
 
     // Send on a ROUTER or SERVER
     void send_serverish(socket_t& socket,
-                     multipart_t& mmsg,
-                     remote_identity_t rid);
+                        multipart_t& mmsg,
+                        const remote_identity_t& remid);
 
     // Send on a SERVER
     void send_server(socket_t& server_socket,
                      multipart_t& mmsg,
-                     remote_identity_t rid);
+                     const remote_identity_t& remid);
 
     // Send on a ROUTER
     void send_router(socket_t& router_socket,
                      multipart_t& mmsg,
-                     remote_identity_t rid);
+                     const remote_identity_t& remid);
 
 
     // Receive on a DEALER or CLIENT

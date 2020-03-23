@@ -2,7 +2,7 @@
 
 import zmq
 import struct
-from generaldomo.zhelpers import encode_message, decode_message
+from zio.util import encode_message, decode_message
 
 def test_codec():
     lil_data = b"ddd"
@@ -23,7 +23,7 @@ def test_codec():
 
     assert(enc[ptr] == 0xFF)
     ptr += 1
-    siz = struct.unpack('=I', enc[ptr:ptr+4])[0]
+    siz = struct.unpack('>I', enc[ptr:ptr+4])[0]
     ptr += 4 
     print ('big data size',siz)
     assert(siz == 512)
@@ -32,7 +32,7 @@ def test_codec():
 
     assert(enc[ptr] == 0xFF)
     ptr += 1
-    siz = struct.unpack('=I', enc[ptr:ptr+4])[0]
+    siz = struct.unpack('>I', enc[ptr:ptr+4])[0]
     assert(siz == 512)
     print ('big frame size',siz)
     ptr += 4

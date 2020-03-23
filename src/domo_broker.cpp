@@ -62,7 +62,7 @@ void Broker::proc_one()
         worker_process(sender, mmsg);
     }
     else {
-        zio::warn("zio::domo::Broker invalid message from " + sender);
+        zio::warn("zio::domo::Broker invalid message from {}", sender);
     }
 }
 
@@ -118,7 +118,7 @@ void Broker::purge_workers()
         }
     }
     for (auto wrk : dead) {
-        zio::debug("zio::domo::Broker deleting expired worker: " + wrk->identity);
+        zio::debug("zio::domo::Broker deleting expired worker: {}", wrk->identity);
         worker_delete(wrk,0);   // operates on m_waiting set
     }
 }
@@ -129,7 +129,7 @@ Broker::Service* Broker::service_require(std::string name)
     if (!srv) {
         srv = new Service{name};
         m_services[name] = srv;
-        zio::debug("zio::domo::Broker registering new service: " + name);
+        zio::debug("zio::domo::Broker registering new service: {}", name);
     }
     return srv;
 }
@@ -225,15 +225,17 @@ void Broker::worker_process(remote_identity_t sender, zio::multipart_t& mmsg)
 
     if (mdp::worker::ready == command) {
         if (worker_ready) {     // protocol error
-            zio::error("zio::domo::Broker protocol error (double ready) from: " + sender);
+            zio::error("zio::domo::Broker protocol error (double ready) from: {}", sender);
             worker_delete(wrk, 1);
             return;
         }
-        if (sender.size() >= 4 && sender.find_first_of("mmi.") == 0) {
-            zio::error("zio::domo::Broker protocol error (worker mmi) from: " + sender);
-            worker_delete(wrk, 1);
-            return;
-        }
+
+        // if (sender.size() >= 4 && sender.find_first_of("mmi.") == 0) {
+        //     zio::error("zio::domo::Broker protocol error (worker mmi) from: {}", sender);
+        //     worker_delete(wrk, 1);
+        //     return;
+        // }
+
         // Attach worker to service and mark as idle
         std::string service_name = mmsg.popstr();
         wrk->service = service_require(service_name);
@@ -267,7 +269,7 @@ void Broker::worker_process(remote_identity_t sender, zio::multipart_t& mmsg)
         worker_delete(wrk, 0);
         return;
     }
-    zio::error("zio::domo::Broker invalid input message " + command);
+    zio::error("zio::domo::Broker invalid input message {}", command);
 }
 
 
@@ -286,15 +288,15 @@ void Broker::client_process(remote_identity_t client_id, zio::multipart_t& mmsg)
     Service* srv = service_require(service_name);
     if (service_name.size() >= 4 and service_name.find_first_of("mmi.") == 0) {
         service_internal(client_id, service_name, mmsg);
+        return;
     }
-    else {
-        mmsg.pushmem(NULL,0);               // frame 4
-        mmsg.pushstr(client_id);            // frame 3
-        mmsg.pushstr(mdp::worker::request); // frame 2
-        mmsg.pushstr(mdp::worker::ident);   // frame 1
-        srv->requests.emplace_back(std::move(mmsg));
-        service_dispatch(srv);
-    }
+
+    mmsg.pushmem(NULL,0);               // frame 4
+    mmsg.pushstr(client_id);            // frame 3
+    mmsg.pushstr(mdp::worker::request); // frame 2
+    mmsg.pushstr(mdp::worker::ident);   // frame 1
+    srv->requests.emplace_back(std::move(mmsg));
+    service_dispatch(srv);
 }
 
 
@@ -343,7 +345,7 @@ void zio::domo::broker_actor(zio::socket_t& link, std::string address, int sockt
                 assert(res);
                 std::stringstream ss;
                 ss << "msg: " << msg.size();
-                zio::debug("broker actor link " + ss.str());
+                zio::debug("broker actor link {}", ss.str());
                 return;         // terminated
             }
         }

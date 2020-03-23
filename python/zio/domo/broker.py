@@ -17,8 +17,9 @@ from binascii import hexlify
 import zmq
 
 # local
-from . import MDP
-from .zhelpers import dump, serverish_recv, serverish_send
+from zio.domo import MDP
+from zio.util import dump
+from zio.util import serverish_recv, serverish_send
 
 def hash_sender(sender):
     if isinstance(sender, int):

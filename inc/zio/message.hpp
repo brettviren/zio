@@ -7,7 +7,7 @@
 #ifndef ZIO_MESSAGE_HPP_SEEN
 #define ZIO_MESSAGE_HPP_SEEN
 
-#include "zio/interned.hpp"
+#include "zio/util.hpp"
 
 #include <vector>
 #include <string>
@@ -59,7 +59,6 @@ namespace zio {
     class Message {
     public:
         typedef Header header_t;
-        typedef uint32_t routing_id_t;
 
         Message();
         Message(const std::string& form, level::MessageLevel lvl = level::undefined);
@@ -92,12 +91,14 @@ namespace zio {
         /// Explicit set
         void set_seqno(int seqno) { m_header.coord.seqno = seqno; }
 
-        /// Encode self to single-part message.  If self has a routing
-        /// ID, it will be set on the produced message.
+        /// Encode self to single-part message.  If self has a remote
+        /// identity, it will be set as a routing ID on the produced
+        /// message.
         message_t encode() const;
 
-        /// Set self based on encoded single-part message.  If it has
-        /// a routing ID, it will be kept.
+        /// Set self based on encoded single-part message.  If the
+        /// message has a routing ID, it will be retained as a remote
+        /// identity.
         void decode(const message_t& dat);
 
         /// Set self from multipart.  Nullifyies routing ID
@@ -111,18 +112,13 @@ namespace zio {
         void clear_payload() { m_payload.clear(); }
         void add(message_t&& spmsg) { m_payload.add(std::move(spmsg)); }
 
-        /// Return routing ID if we have one
-        routing_id_t routing_id() const { return m_rid; }
-        
-        /// Set routing ID
-        void set_routing_id(routing_id_t rid) { m_rid = rid; }
-
-        /// FIXME: how to handle ROUTER addressing?
+        remote_identity_t remote_id() const { return m_remid; }
+        void set_remote_id(remote_identity_t remid) { m_remid = remid; }
 
     private:
         header_t m_header;
         multipart_t m_payload;
-        routing_id_t m_rid;
+        remote_identity_t m_remid;
         
     };
 

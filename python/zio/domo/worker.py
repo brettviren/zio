@@ -13,7 +13,8 @@ import logging
 import time
 import zmq
 
-from .zhelpers import dump, clientish_recv, clientish_send
+from zio.util import dump
+from zio.util import clientish_recv, clientish_send
 # MajorDomo protocol constants:
 from . import MDP
 

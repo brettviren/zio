@@ -7,9 +7,9 @@ import zmq
 import json
 import struct
 from collections import namedtuple
-
-
 from enum import Enum
+from .util import byteify_list, encode_message, decode_message
+
 class MessageLevel(Enum):
     undefined=0
     trace=1
@@ -21,7 +21,6 @@ class MessageLevel(Enum):
     error=7
     fatal=8
 
-from .util import byteify_list
 class PrefixHeader:
     '''
     A ZIO message prefix header.
@@ -291,53 +290,6 @@ class Message:
         return "zio.Message: \"%s\" + %s + [%d]" % \
             (self.prefix, self.coord, len(self.payload))
 
-
-def encode_message(parts):
-    '''Return an encoded byte string which is the concatenation of all
-    parts of the input sequence with suitable size prefixes.  The
-    encoding is compatible with CZMQ's zmsg_encode().
-    '''
-    ret = b''
-    for p in parts:
-        if isinstance(p, zmq.Frame):
-            p = p.bytes
-        siz = len(p)
-        if siz < 255:
-            s = struct.pack('>B', siz)
-        else:
-            s = struct.pack('>BI', 0xFF, siz)
-        one = s + p
-        ret += one
-        
-    return ret
-
-def decode_message(encoded):
-    '''Unpack an encoded byte string to a list of multiple parts.  This
-    is the inverse of encode_message().
-    '''
-    tot = len(encoded)
-    ret = list()
-    beg = 0
-    while beg < tot:
-        end = beg + 1           # small size of 0xFF
-        if end >= tot:
-            raise ValueError("corrupt message part in size")
-        size = struct.unpack('>B',encoded[beg:end])[0]
-        beg = end
-
-        if size == 0xFF:        # large message
-            end = beg + 4
-            if end >= tot:
-                raise ValueError("corrupt message part in size")
-            size = struct.unpack('>I',encoded[beg:end])[0]
-            beg = end
-
-        end = beg + size
-        if end > tot:
-            raise ValueError("corrupt message part in data")
-        ret.append(encoded[beg:end])
-        beg = end
-    return ret
 
 def encode_header_prefix(mform="FLOW", level=0, label=""):
     '''

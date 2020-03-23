@@ -14,10 +14,9 @@ import threading
 import time
 
 import zmq
-
-from .zhelpers import zpipe
-from .zhelpers import serverish_recv, serverish_send
-from .zhelpers import clientish_recv, clientish_send
+from zio.util import zpipe, 
+from zio.util import serverish_recv, serverish_send,
+from zio.util import clientish_recv, clientish_send
 
 
 def client_task (ctx, pipe, stype, requests=10000, verbose=False):

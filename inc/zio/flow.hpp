@@ -113,10 +113,11 @@ namespace zio {
             int m_credit, m_total_credit;
             bool m_sender;      // false if we are recver
 
-            // A Flow can use a SERVER socket.  The BOT in recv() sets
-            // this.  It will be set on the message prior to any
+            // A Flow can use a SERVER or ROUTER socket.  The remote
+            // ID carried by the BOT in recv() sets it on the flow
+            // object.  It will be set on the message prior to any
             // subsequent send()
-            Message::routing_id_t m_rid;
+            remote_identity_t m_remid;
 
             int m_send_seqno{-1};
             int m_recv_seqno{-1};

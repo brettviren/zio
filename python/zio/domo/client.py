@@ -13,8 +13,9 @@ import logging
 
 import zmq
 
-from . import MDP
-from .zhelpers import dump, clientish_recv, clientish_send
+from zio.domo import MDP
+from zio.util import dump
+from zio.util import clientish_recv, clientish_send
 
 class Client(object):
     """Majordomo Protocol Client API, Python version.

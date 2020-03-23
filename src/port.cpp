@@ -1,4 +1,5 @@
 #include "zio/port.hpp"
+#include "zio/util.hpp"
 #include "zio/logging.hpp"
 
 #include <sstream>
@@ -219,21 +220,21 @@ static bool needs_codec(int stype)
 
 void zio::Port::send(zio::Message& msg)
 {
-    zio::debug("[port {}] send {} {} {}",
-               m_name.c_str(), msg.form().c_str(), msg.seqno(), msg.label().c_str());
+    zio::debug("[port {}] send {} {} {} to {}",
+               m_name.c_str(), msg.form().c_str(), msg.seqno(), msg.label().c_str(),
+               zio::binstr(msg.remote_id()));
     msg.set_coord(m_origin);
-    int stype = zio::sock_type(m_sock);
-    if (needs_codec(stype)) {
-        zio::message_t spmsg = msg.encode();
-        zio::debug("[port {}] send single-part {} rid:{}",
-                   m_name.c_str(), spmsg.size(), spmsg.routing_id());
-        auto rc = m_sock.send(spmsg, zio::send_flags::none);
+    zio::multipart_t mmsg = msg.toparts();
+    if (zio::is_serverish(m_sock)) {
+        send_serverish(m_sock, mmsg, msg.remote_id());
         return;
     }
-    zio::multipart_t mpmsg = msg.toparts();
-    zio::debug("[port {}] send multi-part {}",
-               m_name.c_str(), mpmsg.size());
-    mpmsg.send(m_sock);
+    if (zio::is_clientish(m_sock)) {
+        send_clientish(m_sock, mmsg);
+        return;
+    }
+
+    throw std::runtime_error("Port::send: unsupported socket type");
 }
 
 bool zio::Port::recv(Message& msg, int timeout)
@@ -244,29 +245,20 @@ bool zio::Port::recv(Message& msg, int timeout)
     int item = zio::poll(&items[0], 1, timeout);
     if (!item) return false;
 
-    int stype = zio::sock_type(m_sock);
-    if (needs_codec(stype)) {
-        zio::message_t spmsg;
-        auto res = m_sock.recv(spmsg);
-        if (!res) return false;
-        zio::debug("[port {}] recv single-part {} rid:{}",
-                   m_name.c_str(), spmsg.size(), spmsg.routing_id());
-        msg.decode(spmsg);
+    if (zio::is_serverish(m_sock)) {
+        zio::multipart_t mmsg;
+        auto remid = recv_serverish(m_sock, mmsg);
+        msg.fromparts(mmsg);
+        msg.set_remote_id(remid);
         return true;
     }
-
-    zio::debug("[port {}] recving multipart", m_name.c_str());
-    zio::multipart_t mpmsg;
-    bool ok = mpmsg.recv(m_sock);
-    if (!ok) return false;
-
-    /// fixme: router/dealer broken!.  This code needs to move to using recv_* from util
-    // router has [rid,0], dealer has [0]
-    // std::string rid = mmsg.popstr();
-    
-    msg.fromparts(mpmsg);
-
-    return true;
+    if (zio::is_clientish(m_sock)) {
+        zio::multipart_t mmsg;
+        recv_clientish(m_sock, mmsg);
+        msg.fromparts(mmsg);
+        return true;
+    }
+    throw std::runtime_error("Port::recv: unsupported socket type");
 }
 
 

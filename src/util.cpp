@@ -1,11 +1,104 @@
 #include "zio/util.hpp"
-// #include "zio/logging.hpp"
+#include "zio/logging.hpp"
 #include <chrono>
 #include <thread>
+#include <sstream>
 #include <signal.h>
 
 using namespace zio;
 
+
+
+
+int zio::sock_type(const zio::socket_t& sock)
+{
+    return sock.getsockopt<int>(ZMQ_TYPE);
+}
+
+std::string zio::sock_type_name(int stype)
+{
+    static const char* names[] = {
+        "PAIR",
+        "PUB",
+        "SUB",
+        "REQ",
+        "REP",
+        "DEALER",
+        "ROUTER",
+        "PULL",
+        "PUSH",
+        "XPUB",
+        "XSUB",
+        "STREAM",
+        "SERVER",
+        "CLIENT",
+        "RADIO",
+        "DISH",
+        "GATHER",
+        "SCATTER",
+        "DGRAM",
+        0
+    };
+    if (stype < 0 or stype > 11) return "";
+    return names[stype];
+}
+
+
+zio::remote_identity_t zio::to_remid(uint32_t rid)
+{
+    return std::string(reinterpret_cast<const char*>(&rid), sizeof(uint32_t));
+}
+uint32_t zio::to_rid(const zio::remote_identity_t& remid)
+{
+    if (remid.size() != sizeof(uint32_t)) {
+        return 0;
+    }
+    return *reinterpret_cast<const uint32_t*>(remid.data());
+}
+std::string zio::binstr(const std::string& s)
+{
+    std::stringstream ss;
+    for (size_t ind=0; ind<s.size(); ++ind) {
+        ss << std::to_string((uint8_t)s[ind]) << " ";
+    }
+    return ss.str();
+}
+
+// zio::routing_id_t zio::to_routing(const remote_identity_t& remid)
+// {
+//     if (remid.empty()) {
+//         return 0;
+//     }
+//     routing_id_t rid =
+//         0xff000000&((uint8_t)remid[0] << 24) |
+//         0x00ff0000&((uint8_t)remid[1] << 16) |
+//         0x0000ff00&((uint8_t)remid[2] << 8) |
+//         0x000000ff&((uint8_t)remid[3]);
+//     return rid;
+// }
+// zio::remote_identity_t zio::from_routing(routing_id_t rid)
+// {
+//     if (rid == 0) {
+//         return "";
+//     }
+//     std::string remid(5);
+//     remid[0] = ((0xff000000&rid) >> 24);
+//     remid[1] = ((0x00ff0000&rid) >> 16);
+//     remid[2] = ((0x0000ff00&rid) >> 8);
+//     remid[3] = ((0x000000ff&rid));
+//     return remid;
+// }
+
+bool zio::is_serverish(zio::socket_t& sock)
+{
+    int stype = sock.getsockopt<int>(ZMQ_TYPE);
+    return ZMQ_SERVER == stype or ZMQ_ROUTER == stype;
+}
+bool zio::is_clientish(zio::socket_t& sock)
+{
+    int stype = sock.getsockopt<int>(ZMQ_TYPE);
+    return ZMQ_CLIENT == stype or ZMQ_DEALER == stype;
+}
 
 remote_identity_t zio::recv_serverish(zio::socket_t& sock,
                                       zio::multipart_t& mmsg)
@@ -26,74 +119,58 @@ remote_identity_t zio::recv_server(zio::socket_t& server_socket,
 {
     zio::message_t msg;
     auto res = server_socket.recv(msg, zio::recv_flags::none);
-    uint32_t routing_id = msg.routing_id();
-    remote_identity_t rid;
-    rid.push_back((0xff000000&routing_id) >> 24);
-    rid.push_back((0x00ff0000&routing_id) >> 16);
-    rid.push_back((0x0000ff00&routing_id) >> 8);
-    rid.push_back((0x000000ff&routing_id));
-
-
+    remote_identity_t remid = to_remid(msg.routing_id());
+    zio::debug("recv_server: rid={} remid='{}'", msg.routing_id(), zio::binstr(remid));
     mmsg.decode_append(msg);
-    // {
-    //     std::stringstream ss;
-    //     ss << "zio::recv SERVER msg size " << msg.size()
-    //        << ", " << mmsg.size() << " parts \"" << rid << "\"";
-    //     zio::debug(ss.str());
-    // }
-    return rid;
+    return remid;
 }
 
 remote_identity_t zio::recv_router(zio::socket_t& router_socket,
                                    zio::multipart_t& mmsg)
 {
     mmsg.recv(router_socket);
-    remote_identity_t rid = mmsg.popstr();
+    remote_identity_t remid = mmsg.popstr();
     mmsg.pop();                 // empty
-    return rid;
+    return remid;
 }
 
 
 void zio::send_serverish(zio::socket_t& sock,
-                         zio::multipart_t& mmsg, remote_identity_t rid)
+                         zio::multipart_t& mmsg,
+                         const zio::remote_identity_t& remid)
 {
     int stype = sock.getsockopt<int>(ZMQ_TYPE);
     if (ZMQ_SERVER == stype) {
-        return send_server(sock, mmsg, rid);
+        send_server(sock, mmsg, remid);
+        return;
     }
     if(ZMQ_ROUTER == stype) {
-        return send_router(sock, mmsg, rid);
+        send_router(sock, mmsg, remid);
+        return;
     }
     throw std::runtime_error("send requires SERVER or ROUTER socket");
 }
 
 void zio::send_server(zio::socket_t& server_socket,
-                      zio::multipart_t& mmsg, remote_identity_t rid)
+                      zio::multipart_t& mmsg,
+                      const zio::remote_identity_t& remid)
 {
+    if (remid.empty()) {
+        throw std::runtime_error("send server requires a remote identity");
+    }
     zio::message_t msg = mmsg.encode();
-    uint32_t routing_id =
-        0xff000000&(rid[0] << 24) |
-        0x00ff0000&(rid[1] << 16) |
-        0x0000ff00&(rid[2] << 8) |
-        0x000000ff&rid[3];
-    msg.set_routing_id(routing_id);
-    // {
-    //     std::stringstream ss;
-    //     ss << "zio::send SERVER msg size " << msg.size()
-    //        << ", " << mmsg.size() << " parts \"" << rid << "\"";
-    //     zio::debug(ss.str());
-    // }
+    msg.set_routing_id(to_rid(remid));
     server_socket.send(msg, zio::send_flags::none);
 }
 
 void zio::send_router(zio::socket_t& router_socket,
-                      zio::multipart_t& mmsg, remote_identity_t rid)
+                      zio::multipart_t& mmsg,
+                      const zio::remote_identity_t& remid)
 {
-    mmsg.pushmem(NULL, 0);
-    mmsg.pushstr(rid);
+    mmsg.pushmem(NULL, 0);      // delimiter
+    mmsg.pushstr(remid);
     mmsg.send(router_socket);
 }
-
 
 void zio::recv_clientish(zio::socket_t& socket,
                          zio::multipart_t& mmsg)
@@ -116,12 +193,6 @@ void zio::recv_client(zio::socket_t& client_socket,
     zio::message_t msg;
     auto res = client_socket.recv(msg, zio::recv_flags::none);
     mmsg.decode_append(msg);
-    // {
-    //     std::stringstream ss;
-    //     ss << "zio::recv CLIENT msg size " << msg.size()
-    //        << ", " << mmsg.size() << " parts";
-    //     zio::debug(ss.str());
-    // }
     return;
 }
 

@@ -28,13 +28,12 @@ do
         pids="$(jobs -p %%) $pids"
         wait $pids
 
-        # pids=""
-        # $server router &
-        # pids="$(jobs -p %%)"
-        # $client dealer &
-        # pids="$(jobs -p %%) $pids"
-        # wait $pids
-
+        pids=""
+        $server router &
+        pids="$(jobs -p %%)"
+        $client dealer &
+        pids="$(jobs -p %%) $pids"
+        wait $pids
         
     done
 done

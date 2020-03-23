@@ -2,7 +2,9 @@
 
 import zmq
 from zmq.error import ZMQError
-from .util import socket_names, needs_codec
+from zio.util import socket_names
+from zio.util import clientish_recv, clientish_send
+from zio.util import serverish_recv, serverish_send
 from .message import Message
 
 def bind_address(sock, addr):
@@ -225,15 +227,10 @@ class Port:
         '''
         if self.origin is not None:
             msg.coord.origin = self.origin
-        if needs_codec(self.sock.type):
-            data = msg.encode()
-            if (self.sock.type == zmq.SERVER):
-                self.sock.send(data, routing_id = msg.routing_id)
-            else:
-                self.sock.send(data)
-        else:
-            parts = msg.toparts()
-            self.sock.send_multipart(parts)
+        if self.sock.type in (zmq.SERVER, zmq.ROUTER):
+            return serverish_send(self.sock, msg.routing_id, msg.toparts())
+        if self.sock.type in (zmq.CLIENT, zmq.DEALER):
+            return clientish_send(self.sock, msg.toparts())
         return
 
     def recv(self, timeout=None):
@@ -246,18 +243,13 @@ class Port:
         if not self.sock in which:
             return None
 
-        if needs_codec(self.sock.type):
-            if (self.sock.type == zmq.SERVER):
-                frame = self.sock.recv(copy=False)
-                if not frame:
-                    return None
-                return Message(frame=frame)
-            else:
-                data = self.sock.recv(copy=True)
-                return Message(encoded=data)
+        if self.sock.type in (zmq.SERVER, zmq.ROUTER):
+            rid, parts = serverish_recv(self.sock)
+            return Message(routing_id = rid, parts = parts)
+            
+        if self.sock.type in (zmq.CLIENT, zmq.DEALER):
+            parts = clientish_recv(self.sock)
+            return Message(parts = parts)
 
-        parts = self.sock.recv_multipart()
-        if not parts:
-            return None
-        return Message(parts=parts)
+        return None
 

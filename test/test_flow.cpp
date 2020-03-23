@@ -51,9 +51,9 @@ int main()
     ok = sflow.recv_bot(msg);
     assert(ok);
     zio::debug("sflow recv'ed");
-    auto rid = msg.routing_id();
-    zio::debug("sflow msg.label: {}, rid: {}", msg.label().c_str(), rid);
-    assert(rid);
+    auto rid = msg.remote_id();
+    zio::debug("sflow msg.label: {}, rid: {}", msg.label(), zio::binstr(rid));
+    assert(rid.size());
 
 
     fobj = zio::json::parse(msg.label());
@@ -63,12 +63,12 @@ int main()
     msg.set_label(fobj.dump());
     int credit = fobj["credit"];
     zio::debug("sflow credit: {}, rid: {}, stype:{}",
-               credit, rid, zio::sock_type(sport->socket()));
+               credit, zio::binstr(rid), zio::sock_type(sport->socket()));
 
     assert (!sflow.is_sender());
     zio::debug("sflow msg.label: {}", msg.label());
     zio::debug("sflow send BOT");
-    assert(msg.routing_id() == rid);
+    assert(msg.remote_id() == rid);
     sflow.send_bot(msg);
     zio::debug("cflow recv BOT");
     ok = cflow.recv_bot(msg);

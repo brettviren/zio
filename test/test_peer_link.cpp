@@ -1,7 +1,7 @@
 // basic peer discovery and presence with linking up
 
 #include "zio/peer.hpp"
-#include "zio/interned.hpp"
+#include "zio/util.hpp"
 
 #include <iostream>
 using namespace std;

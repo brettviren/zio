@@ -51,13 +51,11 @@ class TestFlow(unittest.TestCase):
         assert(self.sflow.credit == 2)
 
         for count in range(10):
-            # note, seqno normally should sequential
-            self.sflow.put(Message(coord=CoordHeader(seqno=100+count)))
-            self.sflow.put(Message(coord=CoordHeader(seqno=200+count)))
+            self.sflow.put(Message())
             dat = self.cflow.get()
-            assert(dat.seqno == 100+count)
-            dat = self.cflow.get()
-            assert(dat.seqno == 200+count)
+            # flow protocol: BOT=0, DAT=1+
+            assert(dat.seqno == 1+count)
+
         
         # normally, when a flow explicitly sends EOT the other end
         # will recv the EOT when its trying to recv another message

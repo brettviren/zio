@@ -3,7 +3,7 @@
 
 #include "zio/peer.hpp"
 #include "zio/message.hpp"
-#include "zio/interned.hpp"
+#include "zio/util.hpp"
 
 #include <memory>
 #include <map>

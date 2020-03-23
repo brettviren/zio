@@ -41,26 +41,26 @@ bool zio::PrefixHeader::loads(const std::string& p)
 }        
 
 zio::Message::Message()
-    : m_rid(0)
+    : m_remid("")
 {
 }
 
 zio::Message::Message(const header_t h, multipart_t&& pl)
     : m_header(h)
     , m_payload(std::move(pl))
-    , m_rid(0)
+    , m_remid("")
 {
 }
 
 zio::Message::Message(const header_t h)
     : m_header(h)
-    , m_rid(0)
+    , m_remid("")
 {
 }
 
 zio::Message::Message(const std::string& form, level::MessageLevel lvl)
     : m_header({{lvl,"    ",""},{0,0,0}})
-    , m_rid(0)
+    , m_remid("")
 {
     set_form(form);
 }
@@ -120,8 +120,9 @@ zio::message_t zio::Message::encode() const
 {
     auto mmsg = toparts();
     auto spmsg = mmsg.encode();
-    if (m_rid>0) {
-        spmsg.set_routing_id(m_rid);
+    auto rid = to_rid(m_remid);
+    if (rid > 0) {
+        spmsg.set_routing_id(rid);
     }
     return spmsg;
 }
@@ -129,7 +130,7 @@ zio::message_t zio::Message::encode() const
 void zio::Message::decode(const zio::message_t& data)
 {
     fromparts(zio::multipart_t::decode(data));
-    m_rid = data.routing_id();
+    m_remid = to_remid(data.routing_id());
 }
         
 zio::multipart_t zio::Message::toparts() const
@@ -147,7 +148,7 @@ zio::multipart_t zio::Message::toparts() const
 
 void zio::Message::fromparts(const zio::multipart_t& mpmsg)
 {
-    m_rid = 0;
+    m_remid = "";
     const size_t nparts = mpmsg.size();
 
     const auto& m0 = mpmsg[0];
