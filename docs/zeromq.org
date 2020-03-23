@@ -1,0 +1,55 @@
+#+title: ZIO ZeroMQ notes
+
+* ROUTER/DEALER Multipart Messages
+
+Of particular confusion is how ROUTER and DEALER deal with "address
+envelope stacks".  These are identifiers prefixed, in-band to the
+multipart message.  The synchronous REP/REQ sockets also and or remove
+an initial null message.  Both of these manipulations done inside the
+ZeroMQ socket code may be exposed to user code depending on which
+socket types are employed.
+
+The following table summarizes what each socket does internally inside
+their ~send()~ or ~recv()~ method.  See the ~zmq_socket(3)~ man page and
+Zguide for details.  In the table an "addr" is a single frame holding
+an (opaque) identifier and "null" is an empty delimiter frame.  In the
+headline row, a "(s)" indicates the socket is of a "serverish" type
+and "(c)" indicates a "clientish" type.
+
+|--------+------------+-----------+------------+------------|
+| inside | ROUTER(s)  | DEALER(c) | REP(s)     | REQ(c)     |
+|--------+------------+-----------+------------+------------|
+| ~send()~ | pop(addr)  |           | push(null) | push(null) |
+|--------+------------+-----------+------------+------------|
+| ~recv()~ | push(addr) |           | pop(null)  | pop(null)  |
+|--------+------------+-----------+------------+------------|
+
+To understand any message path through two endpoint sockets start with
+the ~send()~ row and mentally apply the operation for the given sending
+socket.  Then move to the ~recv()~ row and apply the operation in the
+given receiving socket.
+
+For example, a REQ->ROUTER exchange starts with a "push(null)" in the
+REQ's ~send()~ , the message is then transferred, and ends with a
+"push(addr)" performed inside the ROUTER's ~recv()~.  The resulting
+message delivered to the ROUTER appication has at least 2 parts in
+addition to any payload parts:
+
+|---------|
+| addr    |
+|---------|
+| null    |
+|---------|
+| payload |
+|---------|
+
+When the ROUTER application wishes to return a message to the client,
+it must assure the "addr" and "null" frames are kept intact.  And,
+depending on any intervening proxies, themselves composed of ROUTER,
+there may be multiple "addr" (thus address envelope *stack*).
+
+Of important note is that an application using DEALER must explicitly
+manipulate the multipart message in order to correctly talk to ROUTER
+or REP.  A DEALER application will receive a message from REP or
+ROUTER that starts with a "null" frame and likewise it must add a null
+frame when sending to either.
