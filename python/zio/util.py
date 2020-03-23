@@ -4,6 +4,7 @@ Utilities
 '''
 
 import zmq
+import sys
 import struct
 
 socket_names = [
