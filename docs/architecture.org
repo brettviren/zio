@@ -1,0 +1,12 @@
+#+title: ZIO Architecture
+#+setupfile: setup.org
+#+include: nav.org
+
+This note attempts to summarize the architecture of ZIO.
+
+* Summary Diagram
+
+The following diagram gives a high-level summary of the major parts of ZIO and how it depends on parts of the greater ZeroMQ ecosystem.
+
+[[file:zioarch.svg]]
+

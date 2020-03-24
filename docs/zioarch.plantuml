@@ -1,0 +1,81 @@
+@startuml
+
+folder ZIO {
+
+folder "ZIO C++" {
+        package cpphigh [
+        domo task broker
+        flow object
+        ]
+        package cppbase [
+        message form
+        node/port/peer
+        iface to CZMQ Zyre
+        typeless send()/recv()
+        ]
+        cpphigh --|> cppbase
+}
+
+folder "ZIO Python" {
+        package pyhigh [
+                domo task broker
+                flow object and broker
+                HDF5 flow handlers
+        ]
+        package pybase [
+        message form
+        node/port/peer
+        iface to Pyre
+        typeless send()/recv()
+        sp/mp codec
+        ]
+        pyhigh --|> pybase
+}
+
+}
+
+folder ZeroMQ {
+        package cppzmq [
+        Modern C++, header only
+        ----
+        single/multipart msg
+        socket poller
+        sp/mp codec, Actor (in PR)
+        (no Zyre iface)
+        ]
+        package pyzmq [
+        Python
+        ----
+        single/multipart msg
+        socket poller
+        (no sp/mp codec)
+        ]
+        package Pyre [
+        Zyre for Python
+        ]
+        package libzmq [
+        sockets (including those in "draft")
+        single/multipart msg
+        ]
+        package CZMQ [
+        High-level C bindings
+        sp/mp msg
+        poller and actor
+        ]
+        package Zyre [
+        distributed
+        network discovery
+        and presence
+        ]
+        Zyre --|> CZMQ
+}
+cppbase --|> Zyre
+cppbase --|> cppzmq
+pybase --|> pyzmq
+pybase --|> Pyre
+
+cppzmq --|> libzmq
+Pyre --|> pyzmq
+pyzmq --|> libzmq
+
+@enduml

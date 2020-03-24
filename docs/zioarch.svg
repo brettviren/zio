@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="828px" preserveAspectRatio="none" style="width:772px;height:828px;" version="1.1" viewBox="0 0 772 828" width="772px" zoomAndPan="magnify"><defs><filter height="300%" id="f5gggfke1hjrf" width="300%" x="-1" y="-1"><feGaussianBlur result="blurOut" stdDeviation="2.0"/><feColorMatrix in="blurOut" result="blurOut2" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .4 0"/><feOffset dx="4.0" dy="4.0" in="blurOut2" result="blurOut3"/><feBlend in="SourceGraphic" in2="blurOut3" mode="normal"/></filter></defs><g><!--MD5=[81d10e2aa0a99a6c77363ad8c1f1d509]
+cluster ZIO--><polygon fill="#FFFFFF" filter="url(#f5gggfke1hjrf)" points="220,16,253,16,260,38.2969,696,38.2969,696,355,220,355,220,16" style="stroke: #000000; stroke-width: 1.5;"/><line style="stroke: #000000; stroke-width: 1.5;" x1="220" x2="260" y1="38.2969" y2="38.2969"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="27" x="224" y="30.9951">ZIO</text><!--MD5=[2d9118cb54b04d888b1ca727e5bf622d]
+cluster ZIO C++--><polygon fill="#FFFFFF" filter="url(#f5gggfke1hjrf)" points="228,51,301,51,308,73.2969,448,73.2969,448,338.5,228,338.5,228,51" style="stroke: #000000; stroke-width: 1.5;"/><line style="stroke: #000000; stroke-width: 1.5;" x1="228" x2="308" y1="73.2969" y2="73.2969"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="67" x="232" y="65.9951">ZIO C++</text><!--MD5=[f05e27109c39e5300b7de77ec406cfb6]
+cluster ZIO Python--><polygon fill="#FFFFFF" filter="url(#f5gggfke1hjrf)" points="462,43,555,43,562,65.2969,688,65.2969,688,347,462,347,462,43" style="stroke: #000000; stroke-width: 1.5;"/><line style="stroke: #000000; stroke-width: 1.5;" x1="462" x2="562" y1="65.2969" y2="65.2969"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="87" x="466" y="57.9951">ZIO Python</text><!--MD5=[1f1ee6432202a34bf899b44239622b75]
+cluster ZeroMQ--><polygon fill="#FFFFFF" filter="url(#f5gggfke1hjrf)" points="14,372,83,372,90,394.2969,750,394.2969,750,816,14,816,14,372" style="stroke: #000000; stroke-width: 1.5;"/><line style="stroke: #000000; stroke-width: 1.5;" x1="14" x2="90" y1="394.2969" y2="394.2969"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="63" x="18" y="386.9951">ZeroMQ</text><!--MD5=[9978e771f181572e74a22964388b3d1d]
+entity cpphigh--><polygon fill="#FEFECE" filter="url(#f5gggfke1hjrf)" points="253,78,322,78,329,100.2969,423,100.2969,423,149.8906,253,149.8906,253,78" style="stroke: #000000; stroke-width: 1.5;"/><line style="stroke: #000000; stroke-width: 1.5;" x1="253" x2="329" y1="100.2969" y2="100.2969"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="63" x="257" y="93.9951">cpphigh</text><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="140" x="263" y="120.292">domo task broker</text><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="88" x="263" y="136.5889">flow object</text><!--MD5=[abce5e8fba17086cf0a97bddd9d24ca6]
+entity cppbase--><polygon fill="#FEFECE" filter="url(#f5gggfke1hjrf)" points="235.5,226.5,308.5,226.5,315.5,248.7969,440.5,248.7969,440.5,330.9844,235.5,330.9844,235.5,226.5" style="stroke: #000000; stroke-width: 1.5;"/><line style="stroke: #000000; stroke-width: 1.5;" x1="235.5" x2="315.5" y1="248.7969" y2="248.7969"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="67" x="239.5" y="242.4951">cppbase</text><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="113" x="245.5" y="268.792">message form</text><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="120" x="245.5" y="285.0889">node/port/peer</text><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="153" x="245.5" y="301.3857">iface to CZMQ Zyre</text><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="175" x="245.5" y="317.6826">typeless send()/recv()</text><!--MD5=[ea166df492119f0c457ee54ade52906f]
+entity pyhigh--><polygon fill="#FEFECE" filter="url(#f5gggfke1hjrf)" points="470,70,529,70,536,92.2969,680,92.2969,680,158.1875,470,158.1875,470,70" style="stroke: #000000; stroke-width: 1.5;"/><line style="stroke: #000000; stroke-width: 1.5;" x1="470" x2="536" y1="92.2969" y2="92.2969"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="53" x="474" y="85.9951">pyhigh</text><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="140" x="480" y="112.292">domo task broker</text><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="180" x="480" y="128.5889">flow object and broker</text><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="154" x="480" y="144.8857">HDF5 flow handlers</text><!--MD5=[a39c037807862d32b8cbcffc8cc7954e]
+entity pybase--><polygon fill="#FEFECE" filter="url(#f5gggfke1hjrf)" points="475.5,218,538.5,218,545.5,240.2969,680.5,240.2969,680.5,338.7813,475.5,338.7813,475.5,218" style="stroke: #000000; stroke-width: 1.5;"/><line style="stroke: #000000; stroke-width: 1.5;" x1="475.5" x2="545.5" y1="240.2969" y2="240.2969"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="57" x="479.5" y="233.9951">pybase</text><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="113" x="485.5" y="260.292">message form</text><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="120" x="485.5" y="276.5889">node/port/peer</text><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="100" x="485.5" y="292.8857">iface to Pyre</text><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="175" x="485.5" y="309.1826">typeless send()/recv()</text><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="101" x="485.5" y="325.4795">sp/mp codec</text><!--MD5=[c5768f8acb55271338b44f1daab41beb]
+entity cppzmq--><polygon fill="#FEFECE" filter="url(#f5gggfke1hjrf)" points="22,547,90,547,97,569.2969,274,569.2969,274,675.7813,22,675.7813,22,547" style="stroke: #000000; stroke-width: 1.5;"/><line style="stroke: #000000; stroke-width: 1.5;" x1="22" x2="97" y1="569.2969" y2="569.2969"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="62" x="26" y="562.9951">cppzmq</text><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="204" x="32" y="589.292">Modern C++, header only</text><line style="stroke: #000000; stroke-width: 1.0;" x1="23" x2="273" y1="592.5938" y2="592.5938"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="160" x="38" y="609.5889">single/multipart msg</text><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="103" x="38" y="625.8857">socket poller</text><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="210" x="38" y="642.1826">sp/mp codec, Actor (in PR)</text><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="117" x="38" y="658.4795">(no Zyre iface)</text><!--MD5=[3ee1fd5286069ccd105c532c3359756e]
+entity pyzmq--><polygon fill="#FEFECE" filter="url(#f5gggfke1hjrf)" points="540,555.5,598,555.5,605,577.7969,742,577.7969,742,667.9844,540,667.9844,540,555.5" style="stroke: #000000; stroke-width: 1.5;"/><line style="stroke: #000000; stroke-width: 1.5;" x1="540" x2="605" y1="577.7969" y2="577.7969"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="52" x="544" y="571.4951">pyzmq</text><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="55" x="550" y="597.792">Python</text><line style="stroke: #000000; stroke-width: 1.0;" x1="541" x2="741" y1="601.0938" y2="601.0938"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="160" x="556" y="618.0889">single/multipart msg</text><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="103" x="556" y="634.3857">socket poller</text><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="138" x="556" y="650.6826">(no sp/mp codec)</text><!--MD5=[d0c56ba10e1f5497bb457f01a46be07d]
+entity Pyre--><polygon fill="#FEFECE" filter="url(#f5gggfke1hjrf)" points="483.5,415,525.5,415,532.5,437.2969,638.5,437.2969,638.5,470.5938,483.5,470.5938,483.5,415" style="stroke: #000000; stroke-width: 1.5;"/><line style="stroke: #000000; stroke-width: 1.5;" x1="483.5" x2="532.5" y1="437.2969" y2="437.2969"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="36" x="487.5" y="430.9951">Pyre</text><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="125" x="493.5" y="457.292">Zyre for Python</text><!--MD5=[e1100487504a4762ea81a2f0dd3991bf]
+entity libzmq--><polygon fill="#FEFECE" filter="url(#f5gggfke1hjrf)" points="229,736,286,736,293,758.2969,535,758.2969,535,807.8906,229,807.8906,229,736" style="stroke: #000000; stroke-width: 1.5;"/><line style="stroke: #000000; stroke-width: 1.5;" x1="229" x2="293" y1="758.2969" y2="758.2969"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="51" x="233" y="751.9951">libzmq</text><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="276" x="239" y="778.292">sockets (including those in "draft")</text><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="160" x="239" y="794.5889">single/multipart msg</text><!--MD5=[214c13c9c9973c6eadb80b443addb26d]
+entity CZMQ--><polygon fill="#FEFECE" filter="url(#f5gggfke1hjrf)" points="309,567.5,362,567.5,369,589.7969,505,589.7969,505,655.6875,309,655.6875,309,567.5" style="stroke: #000000; stroke-width: 1.5;"/><line style="stroke: #000000; stroke-width: 1.5;" x1="309" x2="369" y1="589.7969" y2="589.7969"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="47" x="313" y="583.4951">CZMQ</text><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="166" x="319" y="609.792">High-level C bindings</text><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="86" x="319" y="626.0889">sp/mp msg</text><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="125" x="319" y="642.3857">poller and actor</text><!--MD5=[b01174b55b791080b91c7558a3cee1cd]
+entity Zyre--><polygon fill="#FEFECE" filter="url(#f5gggfke1hjrf)" points="266,399,309,399,316,421.2969,444,421.2969,444,487.1875,266,487.1875,266,399" style="stroke: #000000; stroke-width: 1.5;"/><line style="stroke: #000000; stroke-width: 1.5;" x1="266" x2="316" y1="421.2969" y2="421.2969"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="37" x="270" y="414.9951">Zyre</text><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="86" x="276" y="441.292">distributed</text><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="148" x="276" y="457.5889">network discovery</text><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="109" x="276" y="473.8857">and presence</text><!--MD5=[4f06e8372521fe8f81b119f2413a45c7]
+link cpphigh to cppbase--><path d="M338,150.1002 C338,166.5787 338,186.7113 338,206.1026 " fill="none" id="cpphigh-&gt;cppbase" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="none" points="345.0001,206.2499,338,226.2499,331.0001,206.2498,345.0001,206.2499" style="stroke: #A80036; stroke-width: 1.0;"/><!--MD5=[532c127e67c4154c8f4f970f739a1a10]
+link pyhigh to pybase--><path d="M575.8039,158.083 C576.0264,170.2803 576.2751,183.9165 576.5229,197.507 " fill="none" id="pyhigh-&gt;pybase" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="none" points="583.529,197.7808,576.8949,217.9051,569.5313,198.0361,583.529,197.7808" style="stroke: #A80036; stroke-width: 1.0;"/><!--MD5=[37a79499321ed603292a5de21e84dfbb]
+link Zyre to CZMQ--><path d="M368.6624,487.2714 C374.4019,505.8697 381.1857,527.8518 387.4391,548.1153 " fill="none" id="Zyre-&gt;CZMQ" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="none" points="394.1297,546.0572,393.3387,567.232,380.7522,550.1856,394.1297,546.0572" style="stroke: #A80036; stroke-width: 1.0;"/><!--MD5=[115ba6dfc06730916b96b1f6a8aed4bb]
+link cppbase to Zyre--><path d="M343.3789,330.5488 C344.9637,345.8839 346.7166,362.8455 348.3701,378.8459 " fill="none" id="cppbase-&gt;Zyre" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="none" points="355.3345,378.1411,350.4275,398.7548,341.4086,379.5803,355.3345,378.1411" style="stroke: #A80036; stroke-width: 1.0;"/><!--MD5=[6d15178970946b580ea7707fe4bc26ef]
+link cppbase to cppzmq--><path d="M281.0244,330.9406 C269.1472,343.6298 257.3974,357.6856 248,372 C216.3772,420.1689 191.3943,479.9773 174.3086,527.7768 " fill="none" id="cppbase-&gt;cppzmq" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="none" points="180.8787,530.1957,167.6995,546.7881,167.6549,525.5985,180.8787,530.1957" style="stroke: #A80036; stroke-width: 1.0;"/><!--MD5=[c1102db31ca2a6074d6078dfd5791992]
+link pybase to pyzmq--><path d="M638.3069,339.0892 C645.535,349.3691 651.8231,360.4726 656,372 C675.0007,424.4378 670.0265,487.5285 660.9564,535.7897 " fill="none" id="pybase-&gt;pyzmq" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="none" points="667.7869,537.326,656.8764,555.4909,654.0777,534.4869,667.7869,537.326" style="stroke: #A80036; stroke-width: 1.0;"/><!--MD5=[2781eefd1319a06d63511c6d8db4791d]
+link pybase to Pyre--><path d="M571.7181,339.2864 C569.8323,357.5345 567.7898,377.2982 565.9987,394.6298 " fill="none" id="pybase-&gt;Pyre" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="none" points="572.9496,395.4665,563.9307,414.641,559.0238,394.0273,572.9496,395.4665" style="stroke: #A80036; stroke-width: 1.0;"/><!--MD5=[f1d87417b727a2f805a6481a8dcc9610]
+link cppzmq to libzmq--><path d="M242.1653,676.0877 C265.7301,692.2508 290.5808,709.2958 312.6903,724.4607 " fill="none" id="cppzmq-&gt;libzmq" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="none" points="316.8416,718.8196,329.3753,735.9049,308.9227,730.3648,316.8416,718.8196" style="stroke: #A80036; stroke-width: 1.0;"/><!--MD5=[7060aa251273672c8f50eb50151cd215]
+link Pyre to pyzmq--><path d="M574.3902,471.2031 C582.9541,489.2408 594.4962,513.5514 605.5657,536.8666 " fill="none" id="Pyre-&gt;pyzmq" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="none" points="612.0216,534.1432,614.276,555.2126,599.3746,540.1478,612.0216,534.1432" style="stroke: #A80036; stroke-width: 1.0;"/><!--MD5=[d57f467a6461668f62795bbc8c6f9d5d]
+link pyzmq to libzmq--><path d="M550.4144,667.6351 C519.9498,686.5137 486.3178,707.3552 457.1708,725.4173 " fill="none" id="pyzmq-&gt;libzmq" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="none" points="460.8174,731.3926,440.1297,735.9775,453.4429,719.4923,460.8174,731.3926" style="stroke: #A80036; stroke-width: 1.0;"/><!--MD5=[8abef0e0e92b1f712be80ec4585ba948]
+@startuml
+
+folder ZIO {
+
+folder "ZIO C++" {
+        package cpphigh [
+        domo task broker
+        flow object
+        ]
+        package cppbase [
+        message form
+        node/port/peer
+        iface to CZMQ Zyre
+        typeless send()/recv()
+        ]
+        cpphigh - -|> cppbase
+}
+
+folder "ZIO Python" {
+        package pyhigh [
+                domo task broker
+                flow object and broker
+                HDF5 flow handlers
+        ]
+        package pybase [
+        message form
+        node/port/peer
+        iface to Pyre
+        typeless send()/recv()
+        sp/mp codec
+        ]
+        pyhigh - -|> pybase
+}
+
+}
+
+folder ZeroMQ {
+        package cppzmq [
+        Modern C++, header only
+        - - - -
+        single/multipart msg
+        socket poller
+        sp/mp codec, Actor (in PR)
+        (no Zyre iface)
+        ]
+        package pyzmq [
+        Python
+        - - - -
+        single/multipart msg
+        socket poller
+        (no sp/mp codec)
+        ]
+        package Pyre [
+        Zyre for Python
+        ]
+        package libzmq [
+        sockets (including those in "draft")
+        single/multipart msg
+        ]
+        package CZMQ [
+        High-level C bindings
+        sp/mp msg
+        poller and actor
+        ]
+        package Zyre [
+        distributed
+        network discovery
+        and presence
+        ]
+        Zyre - -|> CZMQ
+}
+cppbase - -|> Zyre
+cppbase - -|> cppzmq
+pybase - -|> pyzmq
+pybase - -|> Pyre
+
+cppzmq - -|> libzmq
+Pyre - -|> pyzmq
+pyzmq - -|> libzmq
+
+@enduml
+
+PlantUML version 1.2020.01(Sun Feb 16 12:40:32 EST 2020)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Java Version: 1.8.0_242-8u242-b08-0ubuntu3~18.04-b08
+Operating System: Linux
+Default Encoding: UTF-8
+Language: en
+Country: US
+--></g></svg>
