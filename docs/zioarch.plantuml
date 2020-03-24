@@ -4,30 +4,36 @@ folder ZIO {
 
 folder "ZIO C++" {
         package cpphigh [
-        domo task broker
-        flow object
-        ]
+                domo task broker
+                domo task worker API
+                domo task client API                
+                flow object
+                ]
         package cppbase [
-        message form
-        node/port/peer
-        iface to CZMQ Zyre
-        typeless send()/recv()
-        ]
+                message form
+                tensor message support
+                node/port/peer
+                iface to CZMQ Zyre
+                typeless send()/recv()
+                ]
         cpphigh --|> cppbase
 }
 
 folder "ZIO Python" {
         package pyhigh [
                 domo task broker
-                flow object and broker
-                HDF5 flow handlers
+                domo task worker API
+                domo task client API                
+                flow object
+                flow broker
+                flow handlers (HDF5)
         ]
         package pybase [
-        message form
-        node/port/peer
-        iface to Pyre
-        typeless send()/recv()
-        sp/mp codec
+                message form
+                node/port/peer
+                iface to Pyre
+                typeless send()/recv()
+                sp/mp codec
         ]
         pyhigh --|> pybase
 }
@@ -54,11 +60,14 @@ folder ZeroMQ {
         Zyre for Python
         ]
         package libzmq [
+        core ZeroMQ library
+        ----
         sockets (including those in "draft")
         single/multipart msg
         ]
         package CZMQ [
         High-level C bindings
+        ----
         sp/mp msg
         poller and actor
         ]
