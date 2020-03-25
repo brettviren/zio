@@ -11,8 +11,8 @@ namespace zio {
 
     namespace tens {
 
-        // The default message "form", if none set.
-        const char* form = "TENS";
+        // The default message "form" (which is "TENS"), if none is set.
+        extern const char* form;
 
         const char* type_name(const std::type_info& t);
 

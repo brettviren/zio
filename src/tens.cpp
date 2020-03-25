@@ -2,6 +2,13 @@
 #include <complex>
 #include <typeinfo>
 
+
+namespace zio {
+    namespace tens {
+        const char* form = "TENS";
+    }
+}
+
 // stolen from cnpy
 const char* zio::tens::type_name(const std::type_info& t)
 {
