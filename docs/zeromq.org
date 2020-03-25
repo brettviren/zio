@@ -2,6 +2,29 @@
 #+setupfile: setup.org
 #+include: nav.org
 
+This document holds some special notes on the underlying ZeroMQ ecosystem
+
+* cppzmq errors
+
+The core ~zmq::socket_t::recv()~ and ~send()~ calls follow an error
+handling protocol which consists of possibly thrown ~zmq::error_t~
+exception or a null return value which may not be discarded.  The
+return value is a ~std::optional~ which will hold a size value if
+successful and will be null if low-level ~libzmq~ call raises ~EAGAIN~
+(ie, a signal interrupted the call).  All other low-level errors cause
+~zmq::error_t~ to be raised.
+
+ZIO's ~zio/util.hpp~ provides high level, type-erased versions of ~send()~
+and ~recv()~.  They provide default flags of ~none~ and so the 
+
+These pass-through cppzmq's ~send_result_t~ or
+~recv_result_t~ which will be empty if a timeout was allowed to occur.
+As the ~send_flags~ or ~recv_flags~ value of ~noflags~ is default, this
+return value is no marked with C++17 ~nodiscard~.  If caller requests
+~nowait~ or otherwise set the socket option it is up to caller to check
+the return.  Note, unrelated to cppzmq error handling, the most
+generic of these high-level functions will throw ~std::runtime_error~ if
+given an unsupported socket type.
 
 * ROUTER/DEALER Multipart Messages
 

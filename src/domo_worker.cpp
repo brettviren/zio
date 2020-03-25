@@ -51,7 +51,7 @@ void Worker::connect_to_broker(bool reconnect)
     mmsg.pushstr(m_service);          // 3
     mmsg.pushstr(mdp::worker::ready); // 2
     mmsg.pushstr(mdp::worker::ident); // 1
-    really_send(m_sock, mmsg);
+    really_send(m_sock, mmsg, zio::send_flags::none);
 
     m_liveness = HEARTBEAT_LIVENESS;
     m_heartbeat_at = now_ms() + m_heartbeat;
@@ -66,7 +66,7 @@ void Worker::send(zio::multipart_t& reply)
     reply.pushstr(m_reply_to);         // 3
     reply.pushstr(mdp::worker::reply); // 2
     reply.pushstr(mdp::worker::ident); // 1
-    really_send(m_sock, reply);
+    really_send(m_sock, reply, zio::send_flags::none);
 }
 
 void Worker::recv(zio::multipart_t& request)
@@ -78,7 +78,7 @@ void Worker::recv(zio::multipart_t& request)
     int rc = poller.wait_all(events, m_heartbeat);
     if (rc > 0) {           // got one
         zio::multipart_t mmsg;
-        really_recv(m_sock, mmsg);
+        really_recv(m_sock, mmsg, zio::recv_flags::none);
         m_liveness = HEARTBEAT_LIVENESS;
         std::string header = mmsg.popstr();  // 1
         assert(header == mdp::worker::ident);
@@ -111,7 +111,7 @@ void Worker::recv(zio::multipart_t& request)
         zio::multipart_t mmsg;
         mmsg.pushstr(mdp::worker::heartbeat); // 2
         mmsg.pushstr(mdp::worker::ident);     // 1
-        really_send(m_sock, mmsg);
+        really_send(m_sock, mmsg, zio::send_flags::none);
         m_heartbeat_at += m_heartbeat;
     }
 
@@ -188,5 +188,6 @@ void zio::domo::echo_worker(zio::socket_t& link, std::string address, int sockty
     zio::debug("worker echo wait for term");    
     zio::message_t die;
     auto res = link.recv(die, zio::recv_flags::none);
+    res = {};                   // don't care
     zio::debug("worker echo wait for exit");    
 }

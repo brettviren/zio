@@ -154,7 +154,7 @@ std::vector<zio::uuid_t> zio::Peer::waitfor(const nickname_t& nickname,
     while (maybe.empty()) {
         zio::debug("[peer {}]: waitfor peer \"{}\" to come online",
                    m_nick.c_str(), nickname.c_str());
-        bool ok = poll(timeout);
+        poll(timeout);
         maybe = nickmatch(nickname);
         zio::debug("[peer {}]: waitfor see \"{}\" after {} ms, have {} match",
                    m_nick.c_str(), nickname.c_str(),

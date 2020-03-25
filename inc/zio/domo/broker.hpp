@@ -35,10 +35,14 @@ namespace domo {
 
     private:
 
-        std::function<remote_identity_t(zio::socket_t& server_socket,
-                                        zio::multipart_t& mmsg)> recv;
-        std::function<void(zio::socket_t& server_socket,
-                           zio::multipart_t& mmsg, remote_identity_t rid)> send;
+        std::function<recv_result_t(zio::socket_t& server_socket,
+                                    zio::multipart_t& mmsg,
+                                    remote_identity_t& remid,
+                                    recv_flags flags)> recv;
+        std::function<send_result_t(zio::socket_t& server_socket,
+                                    zio::multipart_t& mmsg,
+                                    const remote_identity_t& remid,
+                                    send_flags flags)> send;
 
         struct Service;
 

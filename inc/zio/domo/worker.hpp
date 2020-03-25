@@ -62,10 +62,12 @@ namespace domo {
 
     private:
 
-        std::function<void(zio::socket_t& server_socket,
-                           zio::multipart_t& mmsg)> really_recv;
-        std::function<void(zio::socket_t& server_socket,
-                           zio::multipart_t& mmsg)> really_send;
+        std::function<zio::recv_result_t(zio::socket_t& socket,
+                                         zio::multipart_t& mmsg,
+                                         zio::recv_flags flags)> really_recv;
+        std::function<zio::send_result_t(zio::socket_t& socket,
+                                         zio::multipart_t& mmsg,
+                                         send_flags flags)> really_send;
 
         void connect_to_broker(bool reconnect = true);
 

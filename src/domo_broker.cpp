@@ -50,7 +50,8 @@ Broker::~Broker()
 void Broker::proc_one()
 {
     zio::multipart_t mmsg;
-    remote_identity_t sender = recv(m_sock, mmsg);
+    remote_identity_t sender;
+    recv(m_sock, mmsg, sender, zmq::recv_flags::none);
     assert(mmsg.size() > 0);
     std::string header = mmsg.popstr(); // 7/MDP frame 1
     if (header == mdp::client::ident) {
@@ -78,7 +79,7 @@ void Broker::proc_heartbeat(time_unit_t heartbeat_at)
         zio::multipart_t mmsg;
         mmsg.pushstr(mdp::worker::heartbeat);
         mmsg.pushstr(mdp::worker::ident);
-        send(m_sock, mmsg, wrk->identity);
+        send(m_sock, mmsg, wrk->identity, zmq::send_flags::none);
     }
 }
 
@@ -152,7 +153,7 @@ void Broker::service_internal(remote_identity_t rid, std::string service_name, z
         response.pushstr("501");
     }
 
-    send(m_sock, response, rid);
+    send(m_sock, response, rid, zmq::send_flags::none);
 }
 
 void Broker::service_dispatch(Service* srv)
@@ -170,7 +171,7 @@ void Broker::service_dispatch(Service* srv)
             
         zio::multipart_t& mmsg = srv->requests.front();
         zio::debug("zio::domo::Broker send work");        
-        send(m_sock, mmsg, (*wrk_it)->identity);
+        send(m_sock, mmsg, (*wrk_it)->identity, zmq::send_flags::none);
         srv->requests.pop_front();
         m_waiting.erase(*wrk_it);
         srv->waiting.erase(wrk_it);
@@ -196,7 +197,7 @@ void Broker::worker_delete(Broker::Worker*& wrk, int disconnect)
         mmsg.pushstr(mdp::worker::disconnect);
         mmsg.pushstr(mdp::worker::ident);
         zio::debug("zio::domo::Broker disconnect worker");
-        send(m_sock, mmsg, wrk->identity);
+        send(m_sock, mmsg, wrk->identity, zmq::send_flags::none);
     }
     if (wrk->service) {
         for (std::list<Worker*>::iterator it = wrk->service->waiting.begin();
@@ -253,7 +254,7 @@ void Broker::worker_process(remote_identity_t sender, zio::multipart_t& mmsg)
         mmsg.pushstr(wrk->service->name);
         mmsg.pushstr(mdp::client::ident);
         zio::debug("zio::domo::Broker reply to client");
-        send(m_sock, mmsg, client_id);
+        send(m_sock, mmsg, client_id, zmq::send_flags::none);
         worker_waiting(wrk);
         return;
     }
@@ -360,5 +361,6 @@ void zio::domo::broker_actor(zio::socket_t& link, std::string address, int sockt
 
     zio::message_t die;
     auto res = link.recv(die);
+    res = {};                   // don't care
 }
 

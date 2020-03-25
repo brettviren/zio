@@ -41,59 +41,73 @@ namespace zio {
     // Return true if socket is like a client
     bool is_clientish(zio::socket_t& sock);
 
-    // Receive on a ROUTER or SERVER
-    remote_identity_t recv_serverish(socket_t& socket,
-                                     multipart_t& mmsg);
-
-    // Receive on a SERVER
-    remote_identity_t recv_server(socket_t& server_socket,
-                                  multipart_t& mmsg);
-
-    // Receive on a ROUTER
-    remote_identity_t recv_router(socket_t& router_socket,
-                                  multipart_t& mmsg);
-    
-
-    // Send on a ROUTER or SERVER
-    void send_serverish(socket_t& socket,
-                        multipart_t& mmsg,
-                        const remote_identity_t& remid);
-
-    // Send on a SERVER
-    void send_server(socket_t& server_socket,
-                     multipart_t& mmsg,
-                     const remote_identity_t& remid);
-
-    // Send on a ROUTER
-    void send_router(socket_t& router_socket,
-                     multipart_t& mmsg,
-                     const remote_identity_t& remid);
-
-
-    // Receive on a DEALER or CLIENT
-    void recv_clientish(socket_t& socket,
-                        multipart_t& mmsg);
-
-    // Receive on a CLIENT
-    void recv_client(socket_t& client_socket,
-                     multipart_t& mmsg);
-
-    // Receive on a DEALER
-    void  recv_dealer(socket_t& dealer_socket,
-                      multipart_t& mmsg);
-    
-
-    // Send on a DEALER or CLIENT
-    void send_clientish(socket_t& socket,
-                        multipart_t& mmsg);
+    // Send clientish on a DEALER or CLIENT
+    send_result_t send_clientish(socket_t& socket,
+                                 multipart_t& mmsg,
+                                 send_flags flags = send_flags::none);
 
     // Send on a CLIENT
-    void send_client(socket_t& client_socket,
-                     multipart_t& mmsg);
+    send_result_t send_client(socket_t& client_socket,
+                              multipart_t& mmsg,
+                              send_flags flags = send_flags::none);
 
     // Send on a DEALER
-    void send_dealer(socket_t& dealer_socket,
-                     multipart_t& mmsg);
+    send_result_t send_dealer(socket_t& dealer_socket,
+                              multipart_t& mmsg,
+                              send_flags flags = send_flags::none);
+
+    // Send serverish on a ROUTER or SERVER
+    send_result_t send_serverish(socket_t& socket,
+                                 multipart_t& mmsg,
+                                 const remote_identity_t& remid,
+                                 send_flags flags = send_flags::none);
+
+    // Send on a SERVER
+    send_result_t send_server(socket_t& server_socket,
+                              multipart_t& mmsg,
+                              const remote_identity_t& remid,
+                              send_flags flags = send_flags::none);
+
+    // Send on a ROUTER
+    send_result_t send_router(socket_t& router_socket,
+                              multipart_t& mmsg,
+                              const remote_identity_t& remid,
+                              send_flags flags = send_flags::none);
+
+
+    // Receive clientish on a DEALER or CLIENT
+    recv_result_t recv_clientish(socket_t& socket,
+                                 multipart_t& mmsg,
+                                 recv_flags flags = recv_flags::none);
+
+    // Receive on a CLIENT
+    recv_result_t recv_client(socket_t& client_socket,
+                              multipart_t& mmsg,
+                              recv_flags flags = recv_flags::none);
+
+    // Receive on a DEALER
+    recv_result_t recv_dealer(socket_t& dealer_socket,
+                              multipart_t& mmsg,
+                              recv_flags flags = recv_flags::none);
+    
+    // Receive serverish on a ROUTER or SERVER
+    recv_result_t recv_serverish(socket_t& socket,
+                                 multipart_t& mmsg,
+                                 remote_identity_t& remid,
+                                 recv_flags flags = recv_flags::none);
+
+    // Receive on a SERVER
+    recv_result_t recv_server(socket_t& server_socket,
+                              multipart_t& mmsg,
+                              remote_identity_t& remid,
+                              recv_flags flags = recv_flags::none);
+
+    // Receive on a ROUTER
+    recv_result_t recv_router(socket_t& router_socket,
+                              multipart_t& mmsg,
+                              remote_identity_t& remid,
+                              recv_flags flags = recv_flags::none);
+    
 
 
     /*! Current system time in milliseconds. */

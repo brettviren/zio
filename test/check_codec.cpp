@@ -14,7 +14,7 @@ const size_t spaminess = 5;                   // number of doubling
 
 std::string spamify(std::string spam, size_t factor)
 {
-    for (int ind=0; ind<factor; ++ind) {
+    for (size_t ind=0; ind<factor; ++ind) {
         spam += spam;
     }
     return spam;

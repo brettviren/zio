@@ -105,7 +105,8 @@ namespace zio {
             // shall notify us with a "signal" message that we may
             // continue.
             message_t rmsg; 
-            auto res = link().recv(rmsg);
+            auto res = link().recv(rmsg, recv_flags::none);
+            res = {};           // don't care
         }
 
         void shutdown() {
@@ -117,6 +118,7 @@ namespace zio {
             if (sres) {
                 message_t rmsg;
                 auto res = link().recv(rmsg, recv_flags::none);
+                res = {};       // don't care
             }
         }
 

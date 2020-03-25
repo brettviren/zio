@@ -69,7 +69,8 @@ void countdown_echo(zio::socket_t& link, std::string address, int socktype)
     }
     link.send(zio::message_t{}, zio::send_flags::none);
     zio::message_t die;
-    auto res = link.recv(die);
+    auto res = link.recv(die, zio::recv_flags::none);
+    res = {};                   // don't care
     zio::debug("countdown echo exiting");
 }
 
@@ -105,7 +106,8 @@ void doit(int serverish, int clientish, int nclients, int nworkers)
     for (auto client : clients) {
         zio::debug("main wait for client");
         zio::message_t done;
-        auto res = client->link().recv(done);
+        auto res = client->link().recv(done, zio::recv_flags::none);
+        res = {};                   // don't care
     }
 
     // terminate backwards

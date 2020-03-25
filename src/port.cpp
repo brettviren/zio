@@ -208,14 +208,14 @@ void zio::Port::offline()
     m_connected.clear();
 }
 
-static bool needs_codec(int stype)
-{
-    return
-        stype == ZMQ_SERVER ||
-        stype == ZMQ_CLIENT ||
-        stype == ZMQ_RADIO ||
-        stype == ZMQ_DISH;
-}
+// static bool needs_codec(int stype)
+// {
+//     return
+//         stype == ZMQ_SERVER ||
+//         stype == ZMQ_CLIENT ||
+//         stype == ZMQ_RADIO ||
+//         stype == ZMQ_DISH;
+// }
 
 
 void zio::Port::send(zio::Message& msg)
@@ -247,7 +247,8 @@ bool zio::Port::recv(Message& msg, int timeout)
 
     if (zio::is_serverish(m_sock)) {
         zio::multipart_t mmsg;
-        auto remid = recv_serverish(m_sock, mmsg);
+        remote_identity_t remid;
+        recv_serverish(m_sock, mmsg, remid);
         msg.fromparts(mmsg);
         msg.set_remote_id(remid);
         return true;

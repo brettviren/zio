@@ -46,7 +46,7 @@ void Client::send(std::string service, zio::multipart_t& request)
     request.pushstr(service);            // frame 2
     request.pushstr(mdp::client::ident); // frame 1
     zio::debug("zio::domo::Client send request for " + service);
-    really_send(m_sock, request);
+    really_send(m_sock, request, zio::send_flags::none);
 }
 
 
@@ -60,7 +60,7 @@ void Client::recv(zio::multipart_t& reply)
     int rc = poller.wait_all(events, m_timeout);
     if (rc > 0) {           // got one
         zio::multipart_t mmsg;
-        really_recv(m_sock, mmsg);
+        really_recv(m_sock, mmsg, zio::recv_flags::none);
 
         std::string header = mmsg.popstr();
         assert(header == mdp::client::ident);
@@ -71,9 +71,11 @@ void Client::recv(zio::multipart_t& reply)
     }
     if ( interrupted() ) {
         zio::error("zio::domo::Client interupted on recv");
+        throw std::runtime_error("zio::domo::Client interupted on recv");
     }
     else {
         zio::error("zio::domo::Client timeout");
+        throw std::runtime_error("zio::domo::Client timeout");
     }
     reply.clear();
     return;
