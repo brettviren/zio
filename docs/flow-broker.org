@@ -144,8 +144,8 @@ and this alone may pose a bottleneck on bandwidth grounds.
 The *broker* manages its *port* in a single thread and while the operation
 in that thread is very simple, it will only service one message at a
 time.  In particular, the *broker* relies on the call on the *factory* to
-return promptly.  The *factory* must not be designed to directly handle
-the FI protocol or else deadlock is assured.
+return promptly.  Beyond that, the *factory* thread must not directly
+handle the FI protocol or else deadlock is assured.
 
 Depending on the nature of the *factory* dispatch method, handlers will
 typically operate asynchronously from each other. Depending on the

@@ -52,7 +52,10 @@ def build(bld):
                     rpath = rpath,
                     use = ['zio'] + uses)
 
-    bld.install_files('${PREFIX}/include/zio', bld.path.ant_glob("inc/zio/*.hpp"))
+    bld.install_files('${PREFIX}/include/zio', 
+                      bld.path.ant_glob("inc/zio/**/*.hpp"),
+                      cwd=bld.path.find_dir('inc/zio'),
+                      relative_trick=True)
 
     # fake pkg-config
     bld(source='libzio.pc.in', VERSION=VERSION,
