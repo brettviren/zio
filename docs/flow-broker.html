@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-03-24 Tue 16:19 -->
+<!-- 2020-03-26 Thu 17:36 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Flow Broker</title>
@@ -285,7 +285,7 @@ the handling mechanism and this document describes one possible
 solution which is here called a <i>flow broker</i>.
 </p>
 
-<div id="outline-container-orgf345633" class="outline-2">
+<div id="outline-container-org904fa5d" class="outline-2">
 <h2 id="architecture"><span class="section-number-2">1</span> Architecture</h2>
 <div class="outline-text-2" id="text-architecture">
 <p>
@@ -356,7 +356,7 @@ are dropped.</li>
 </div>
 </div>
 
-<div id="outline-container-org2ebca1d" class="outline-2">
+<div id="outline-container-org3881045" class="outline-2">
 <h2 id="addressing"><span class="section-number-2">2</span> Addressing</h2>
 <div class="outline-text-2" id="text-addressing">
 <p>
@@ -371,7 +371,7 @@ socket to bind and any clients to connect.
 </div>
 </div>
 
-<div id="outline-container-org8291ce8" class="outline-2">
+<div id="outline-container-orgf018e95" class="outline-2">
 <h2 id="complexity"><span class="section-number-2">3</span> Broker Complexity</h2>
 <div class="outline-text-2" id="text-complexity">
 <p>
@@ -382,7 +382,7 @@ section outlines what this means.
 </p>
 </div>
 
-<div id="outline-container-orgeffc278" class="outline-3">
+<div id="outline-container-orgd3ea891" class="outline-3">
 <h3 id="mirror"><span class="section-number-3">3.1</span> Broker as mirror</h3>
 <div class="outline-text-3" id="text-mirror">
 <p>
@@ -397,7 +397,7 @@ identically.
 </div>
 </div>
 
-<div id="outline-container-orgbcbd8c6" class="outline-3">
+<div id="outline-container-org5d4bbf6" class="outline-3">
 <h3 id="simplicity"><span class="section-number-3">3.2</span> Handler simplicity</h3>
 <div class="outline-text-3" id="text-simplicity">
 <p>
@@ -409,7 +409,7 @@ new protocol would need to be invented to implement client handlers.
 </div>
 </div>
 
-<div id="outline-container-orgdae87df" class="outline-3">
+<div id="outline-container-org706424e" class="outline-3">
 <h3 id="central"><span class="section-number-3">3.3</span> Centralization</h3>
 <div class="outline-text-3" id="text-central">
 <p>
@@ -439,15 +439,15 @@ and this alone may pose a bottleneck on bandwidth grounds.
 </div>
 </div>
 
-<div id="outline-container-orgf47f8f7" class="outline-2">
+<div id="outline-container-org41d4112" class="outline-2">
 <h2 id="lockstep"><span class="section-number-2">4</span> Handler Synchronicity</h2>
 <div class="outline-text-2" id="text-lockstep">
 <p>
 The <b>broker</b> manages its <b>port</b> in a single thread and while the operation
 in that thread is very simple, it will only service one message at a
 time.  In particular, the <b>broker</b> relies on the call on the <b>factory</b> to
-return promptly.  The <b>factory</b> must not be designed to directly handle
-the FI protocol or else deadlock is assured.
+return promptly.  Beyond that, the <b>factory</b> thread must not directly
+handle the FI protocol or else deadlock is assured.
 </p>
 
 <p>

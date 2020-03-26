@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-03-23 Mon 17:58 -->
+<!-- 2020-03-26 Thu 17:35 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>ZIO ZeroMQ notes</title>
@@ -239,7 +239,8 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org6eab6bb">1. ROUTER/DEALER Multipart Messages</a></li>
+<li><a href="#org1b13c7e">1. cppzmq errors</a></li>
+<li><a href="#orgc5ef9f2">2. ROUTER/DEALER Multipart Messages</a></li>
 </ul>
 </div>
 </div>
@@ -254,10 +255,44 @@ for the JavaScript code in this tag.
 
 </div>
 
+<p>
+This document holds some special notes on the underlying ZeroMQ ecosystem
+</p>
 
-<div id="outline-container-org6eab6bb" class="outline-2">
-<h2 id="org6eab6bb"><span class="section-number-2">1</span> ROUTER/DEALER Multipart Messages</h2>
+<div id="outline-container-org1b13c7e" class="outline-2">
+<h2 id="org1b13c7e"><span class="section-number-2">1</span> cppzmq errors</h2>
 <div class="outline-text-2" id="text-1">
+<p>
+The core <code>zmq::socket_t::recv()</code> and <code>send()</code> calls follow an error
+handling protocol which consists of possibly thrown <code>zmq::error_t</code>
+exception or a null return value which may not be discarded.  The
+return value is a <code>std::optional</code> which will hold a size value if
+successful and will be null if low-level <code>libzmq</code> call raises <code>EAGAIN</code>
+(ie, a signal interrupted the call).  All other low-level errors cause
+<code>zmq::error_t</code> to be raised.
+</p>
+
+<p>
+ZIO's <code>zio/util.hpp</code> provides high level, type-erased versions of <code>send()</code>
+and <code>recv()</code>.  They provide default flags of <code>none</code> and so the 
+</p>
+
+<p>
+These pass-through cppzmq's <code>send_result_t</code> or
+<code>recv_result_t</code> which will be empty if a timeout was allowed to occur.
+As the <code>send_flags</code> or <code>recv_flags</code> value of <code>noflags</code> is default, this
+return value is no marked with C++17 <code>nodiscard</code>.  If caller requests
+<code>nowait</code> or otherwise set the socket option it is up to caller to check
+the return.  Note, unrelated to cppzmq error handling, the most
+generic of these high-level functions will throw <code>std::runtime_error</code> if
+given an unsupported socket type.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgc5ef9f2" class="outline-2">
+<h2 id="orgc5ef9f2"><span class="section-number-2">2</span> ROUTER/DEALER Multipart Messages</h2>
+<div class="outline-text-2" id="text-2">
 <p>
 Of particular confusion is how ROUTER and DEALER deal with "address
 envelope stacks".  These are identifiers prefixed, in-band to the

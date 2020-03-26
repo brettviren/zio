@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-03-18 Wed 14:32 -->
+<!-- 2020-03-26 Thu 17:35 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>ZIO Installation</title>
@@ -239,18 +239,18 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org107a83c">1. Install ZIO</a></li>
-<li><a href="#org6d2310b">2. Tests</a></li>
-<li><a href="#orgaecf610">3. Documentation</a></li>
-<li><a href="#org2fa5f81">4. Python</a>
+<li><a href="#org0fca675">1. Install ZIO</a></li>
+<li><a href="#org7b28ab8">2. Tests</a></li>
+<li><a href="#org798d3eb">3. Documentation</a></li>
+<li><a href="#org9004331">4. Python</a>
 <ul>
-<li><a href="#org3a80b2f">4.1. Install from source</a></li>
-<li><a href="#orgb63f5a3">4.2. Python Package Index</a></li>
+<li><a href="#orgba6a8ce">4.1. Install from source</a></li>
+<li><a href="#orga7496c2">4.2. Python Package Index</a></li>
 </ul>
 </li>
-<li><a href="#org202f2cf">5. Installation Details</a>
+<li><a href="#org610e0c4">5. Installation Details</a>
 <ul>
-<li><a href="#org05744f0">5.1. cppzmq</a></li>
+<li><a href="#org7ca4958">5.1. spdlog</a></li>
 </ul>
 </li>
 </ul>
@@ -267,8 +267,8 @@ for the JavaScript code in this tag.
 
 </div>
 
-<div id="outline-container-org107a83c" class="outline-2">
-<h2 id="org107a83c"><span class="section-number-2">1</span> Install ZIO</h2>
+<div id="outline-container-org0fca675" class="outline-2">
+<h2 id="org0fca675"><span class="section-number-2">1</span> Install ZIO</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 ZIO installs in the usual <a href="https://waf.io">Waf</a> way.
@@ -296,13 +296,13 @@ copies of these header-only packages.
 </p>
 
 <p>
-See also <a href="#org202f2cf">5</a> for info on installing the software dependencies.
+See also <a href="#org610e0c4">5</a> for info on installing the software dependencies.
 </p>
 </div>
 </div>
 
-<div id="outline-container-org6d2310b" class="outline-2">
-<h2 id="org6d2310b"><span class="section-number-2">2</span> Tests</h2>
+<div id="outline-container-org7b28ab8" class="outline-2">
+<h2 id="org7b28ab8"><span class="section-number-2">2</span> Tests</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 The default install target will compile and execute units tests.  To
@@ -319,8 +319,8 @@ Or, to force their running:
 </div>
 </div>
 
-<div id="outline-container-orgaecf610" class="outline-2">
-<h2 id="orgaecf610"><span class="section-number-2">3</span> Documentation</h2>
+<div id="outline-container-org798d3eb" class="outline-2">
+<h2 id="org798d3eb"><span class="section-number-2">3</span> Documentation</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 The generated documentation committed to the repository.  With a
@@ -335,16 +335,16 @@ $ make
 </div>
 </div>
 
-<div id="outline-container-org2fa5f81" class="outline-2">
-<h2 id="org2fa5f81"><span class="section-number-2">4</span> Python</h2>
+<div id="outline-container-org9004331" class="outline-2">
+<h2 id="org9004331"><span class="section-number-2">4</span> Python</h2>
 <div class="outline-text-2" id="text-4">
 <p>
 ZIO also provides a Python package.  
 </p>
 </div>
 
-<div id="outline-container-org3a80b2f" class="outline-3">
-<h3 id="org3a80b2f"><span class="section-number-3">4.1</span> Install from source</h3>
+<div id="outline-container-orgba6a8ce" class="outline-3">
+<h3 id="orgba6a8ce"><span class="section-number-3">4.1</span> Install from source</h3>
 <div class="outline-text-3" id="text-4-1">
 <p>
 The ZIO Python package installs in "the usual way" from source but its
@@ -382,8 +382,8 @@ $ python -m unittest
 </div>
 </div>
 
-<div id="outline-container-orgb63f5a3" class="outline-3">
-<h3 id="orgb63f5a3"><span class="section-number-3">4.2</span> Python Package Index</h3>
+<div id="outline-container-orga7496c2" class="outline-3">
+<h3 id="orga7496c2"><span class="section-number-3">4.2</span> Python Package Index</h3>
 <div class="outline-text-3" id="text-4-2">
 <p>
 At some point ZIO may be placed in PyPI.  Currently there is an
@@ -395,21 +395,23 @@ unrelated to this here project.
 </div>
 </div>
 
-<div id="outline-container-org202f2cf" class="outline-2">
-<h2 id="org202f2cf"><span class="section-number-2">5</span> Installation Details</h2>
+<div id="outline-container-org610e0c4" class="outline-2">
+<h2 id="org610e0c4"><span class="section-number-2">5</span> Installation Details</h2>
 <div class="outline-text-2" id="text-5">
 </div>
-<div id="outline-container-org05744f0" class="outline-3">
-<h3 id="org05744f0"><span class="section-number-3">5.1</span> cppzmq</h3>
+<div id="outline-container-org7ca4958" class="outline-3">
+<h3 id="org7ca4958"><span class="section-number-3">5.1</span> spdlog</h3>
 <div class="outline-text-3" id="text-5-1">
 <p>
-ZIO uses cppzmq <b>after</b> 1.5.0 which may mean installing from tip of its
-git <code>master</code> branch.
+For now, ZIO uses spdlog <b>after</b> (and not including) version 1.5.0 which
+may mean installing from tip of its git <code>master</code> branch.  ZIO will
+likely switch to the next explicit release post-1.5.0 when it is
+available.
 </p>
 
 <pre class="example">
 $ git clone https://github.com/gabime/spdlog.git
-$ mkdir spdog/build &amp;&amp; cd spdog/build
+$ mkdir spdlog/build &amp;&amp; cd spdlog/build
 $ cmake .. \
    -DCMAKE_INSTALL_PREFIX=$HOME/opt/spdlog \
    -DCMAKE_POSITION_INDEPENDENT_CODE=ON
@@ -418,7 +420,7 @@ $ make install
 </pre>
 
 <p>
-For ZIO to find <code>cppzmq</code> be sure that you add its <code>pkg-config</code> directory
+For ZIO to find <code>spdlog</code> be sure that you add its <code>pkg-config</code> directory
 to the proper variable (along with others).  Eg:
 </p>
 

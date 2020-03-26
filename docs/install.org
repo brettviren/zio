@@ -92,14 +92,16 @@ unrelated to this here project.
 
 * Installation Details
 
-** cppzmq
+** spdlog
 
-ZIO uses cppzmq *after* 1.5.0 which may mean installing from tip of its
-git ~master~ branch.
+For now, ZIO uses spdlog *after* (and not including) version 1.5.0 which
+may mean installing from tip of its git ~master~ branch.  ZIO will
+likely switch to the next explicit release post-1.5.0 when it is
+available.
 
 #+begin_example
 $ git clone https://github.com/gabime/spdlog.git
-$ mkdir spdog/build && cd spdog/build
+$ mkdir spdlog/build && cd spdlog/build
 $ cmake .. \
    -DCMAKE_INSTALL_PREFIX=$HOME/opt/spdlog \
    -DCMAKE_POSITION_INDEPENDENT_CODE=ON
@@ -107,7 +109,7 @@ $ make -j
 $ make install
 #+end_example
 
-For ZIO to find ~cppzmq~ be sure that you add its ~pkg-config~ directory
+For ZIO to find ~spdlog~ be sure that you add its ~pkg-config~ directory
 to the proper variable (along with others).  Eg:
 
 #+begin_example
