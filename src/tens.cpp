@@ -21,12 +21,20 @@ const char* zio::tens::type_name(const std::type_info& t)
     if(t == typeid(short) ) return "i";
     if(t == typeid(long) ) return "i";
     if(t == typeid(long long) ) return "i";
+    if(t == typeid(int8_t) ) return "i";
+    if(t == typeid(int16_t) ) return "i";
+    if(t == typeid(int32_t) ) return "i";
+    if(t == typeid(int64_t) ) return "i";
 
     if(t == typeid(unsigned char) ) return "u";
     if(t == typeid(unsigned short) ) return "u";
     if(t == typeid(unsigned long) ) return "u";
     if(t == typeid(unsigned long long) ) return "u";
     if(t == typeid(unsigned int) ) return "u";
+    if(t == typeid(uint8_t) ) return "u";
+    if(t == typeid(uint16_t) ) return "u";
+    if(t == typeid(uint32_t) ) return "u";
+    if(t == typeid(uint64_t) ) return "u";
 
     if(t == typeid(bool) ) return "b";
 
@@ -37,10 +45,10 @@ const char* zio::tens::type_name(const std::type_info& t)
     else return "?";
 }
 
-
 void zio::tens::append(zio::Message& msg, zio::message_t&& data,
                        const std::vector<size_t>& shape,
-                       size_t word_size, const char* tn)
+                       size_t word_size, const char* tn,
+                       const zio::json& metadata)
 {
     msg.set_form(zio::tens::form);
     zio::json lobj = zio::json::value_t::object;
@@ -55,6 +63,9 @@ void zio::tens::append(zio::Message& msg, zio::message_t&& data,
         {"part", msg.payload().size()}
         // no order as this is C++
     };
+    if (! metadata.is_null()) {
+        md["metadata"] = metadata;
+    }
     lobj[zio::tens::form]["tensors"].push_back(md);
     msg.set_label_object(lobj);
     msg.add(std::move(data));

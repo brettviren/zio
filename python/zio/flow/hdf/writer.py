@@ -100,6 +100,7 @@ class TensWriter:
                                      chunks = True)
 
         if user_md:
+            log.debug(f'writer: save with user md: {user_md}')
             md = seq.create_group("metadata")
             md.attrs.update(user_md)
 
@@ -129,15 +130,14 @@ def file_handler(ctx, pipe, filename, *wargs):
     addrpat = wargs.pop(0)
     log.debug(f'actor: writer("{filename}", "{addrpat}")')
     fp = h5py.File(filename,'w')
-    log.debug(f'opened {filename}')
+    log.debug(f'writer: opened {filename}')
     pipe.signal()
-    log.debug('make writer PULL socket')
     pull = ctx.socket(PULL)
     minport,maxport = 49999,65000
     for port in range(minport,maxport):
         writer_addr = addrpat.format(port=port)
         pull.bind(writer_addr)
-        log.debug(f'writer bind to {writer_addr}')
+        log.debug(f'writer: bind to {writer_addr}')
         pipe.send_string(writer_addr)
         break
 
@@ -151,7 +151,7 @@ def file_handler(ctx, pipe, filename, *wargs):
         for which,_ in poller.poll():
 
             if not which or which == pipe: # signal exit
-                log.debug(f'writer for {filename} exiting')
+                log.debug(f'writer: {filename} exiting')
                 fp.close()
                 return
 
@@ -164,7 +164,7 @@ def file_handler(ctx, pipe, filename, *wargs):
             fobj = objectify(msg)
             path = fobj.pop("hdfgroup") # must be supplied
             msg.label = json.dumps(fobj)
-            log.debug(f'{filename}:/{path} writing:\n{msg}')
+            log.debug(f'writer: {filename}:/{path} writing:\n{msg}')
 
             fw = flow_writer.get(path, None)
             if fw is None:
@@ -174,7 +174,7 @@ def file_handler(ctx, pipe, filename, *wargs):
                 fw = flow_writer[path] = TensWriter(sg, *wargs)
 
             fw.save(msg)
-            log.debug(f'flush {filename}')
+            log.debug(f'writer: flush {filename}')
             fp.flush()
                 
     return
@@ -205,8 +205,12 @@ def client_handler(ctx, pipe, bot, rule_object, writer_addr, broker_addr):
     # An HDF path to be added to every message we send to writer.
     mattr = message_to_dict(bot)
     rattr = dict(rule_object.get("attr",{}), **mattr)
-    log.info(f'{rattr}')
-    base_path =  rule_object.get("grouppat","/").format(**rattr)
+    log.info(f'writer: attrs: {rattr}')
+    try:
+        base_path =  rule_object.get("grouppat","/").format(**rattr)
+    except KeyError as e:
+        log.error(f'writer: missing attribute: {e}')
+        raise
     log.debug(f'client_handler(msg, "{base_path}", "{broker_addr}", "{writer_addr}")')
     log.debug(bot)
     pipe.signal()

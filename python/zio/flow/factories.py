@@ -138,30 +138,30 @@ class Ruleset:
         log.info('factory Ruleset called %d, have %d rules' % (
             (cid, len(self.ruleset))))
         for maybe in self.ruleset:
-            log.debug(f'check rule: "{maybe}"')
+            log.debug(f'ruleset: check rule: "{maybe}"')
             parsed = rules.parse(maybe, **attr)
-            log.debug (f'parsed: {parsed}')
+            log.debug (f'ruleset: parsed: {parsed}')
             tf = rules.evaluate(parsed)
             if not tf:
-                log.debug ("rule does not apply")
+                log.debug ("ruleset: reject")
                 continue
             rattr = dict(maybe.get("attr",{}), **attr)
             filename = maybe["filepat"].format(**rattr)
             rw = maybe["rw"][0]
-            log.debug(f'{filename} ({rw})')
+            log.debug(f'ruleset: accept {filename} ({rw})')
 
             if rw == 'r':
                 return self.launch_read(filename, bot, maybe)
             if rw == 'w':
                 return self.launch_write(filename, bot, maybe)
-            log.debug('rule has no "rw" attribute')
+            log.debug('ruleset: rule has no "rw" attribute')
             continue
 
     def launch_read(self, filename, bot, rule):
         # fixme: for now assume file format allows for simultaneous
         # reading so file and client handlers are merged into one.
         ractor, rargs = self.ractor
-        log.debug(f'launch_read: {ractor}, {rargs}')
+        log.debug(f'ruleset: launch_read: {ractor}, {rargs}')
         actor = ZActor(self.ctx, ractor,
                        bot, rule, 
                        filename, *rargs)
@@ -179,11 +179,11 @@ class Ruleset:
             wfile = ZActor(self.ctx, wactor, filename, wargs)
             waddr = wfile.pipe.recv_string()
             if not waddr:
-                err = f"failed to bind any {self.addrpat} for {filename}"
+                err = f"ruleset: failed to bind any {self.addrpat} for {filename}"
                 log.error(err)
                 raise RuntimeError(err)
             wfile.addr = waddr # copascetic?
-            log.debug(f"made writer actor for {filename}")
+            log.debug(f"ruleset: made writer actor for {filename}")
             self.writers[filename] = wfile
 
         # the client handler
@@ -196,9 +196,9 @@ class Ruleset:
         return True
 
     def stop(self):
-        log.debug('stop %d handlers' % len(self.handlers))
+        log.debug('ruleset: stop %d handlers' % len(self.handlers))
         for handler in self.handlers:
             handler.pipe.signal()
         for filename, wactor in self.writers.items():
-            log.debug(f'stop writer for {filename}')
+            log.debug(f'ruleset: stop writer for {filename}')
             wactor.pipe.signal()

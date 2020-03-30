@@ -76,9 +76,9 @@ example:
 #+begin_src json
 {
   "tensors": [
-    {"shape":[6000,800], "word":4, "dtype":"f", part:1},
-    {"shape":[6000,800], "word":4, "dtype":"f", part:2},
-    {"shape":[6000,960], "word":4, "dtype":"f", part:0},
+    {"shape":[6000,800], "word":4, "dtype":"f", "part":1},
+    {"shape":[6000,800], "word":4, "dtype":"f", "part":2},
+    {"shape":[6000,960], "word":4, "dtype":"f", "part":0},
   ],
 #+end_src
 
@@ -109,6 +109,8 @@ Optional:
 - ascend :: vector of Boolean of size $\mathcal{N}_{dim}$, gives true
             if dimension is ascending.  Defaults to all true.
 
+- metadata :: a single level object holding scalar attributes.
+
 Reserved for possible future use:
 
 - packing :: string, an optional description of how the tensor
@@ -127,20 +129,8 @@ list of reserved attributes in the future.
 ** The "metadata" attribute
 
 The "metadata" item in the "TENS" attribute may hold any arbitrary
-JSON object.  One possible use is to associate metadata to each tensor
-by matching the "tensors" array.  For example:
+JSON object.  Any interpretation is *application dependent*.  
 
-#+begin_src json
-{
-  "metadata" : {
-    "tensor_attributes" : [
-      {"tag":"gauss", "plane":"U"},
-      {"tag":"gauss", "plane":"V"},
-      {"tag":"gauss", "plane":"W"},
-    ],
-  }
-}
-#+end_src
 
 * Application extension
 

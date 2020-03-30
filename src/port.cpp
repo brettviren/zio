@@ -220,8 +220,8 @@ void zio::Port::offline()
 
 void zio::Port::send(zio::Message& msg)
 {
-    zio::debug("[port {}] send {} {} {} to {}",
-               m_name.c_str(), msg.form().c_str(), msg.seqno(), msg.label().c_str(),
+    zio::debug("[port {}] send {} {} to {}",
+               m_name.c_str(), msg.form().c_str(), msg.seqno(),
                zio::binstr(msg.remote_id()));
     msg.set_coord(m_origin);
     zio::multipart_t mmsg = msg.toparts();

@@ -22,7 +22,8 @@ namespace zio {
         /*! Generic version of append. */
         void append(Message& msg, message_t&& data,
                     const std::vector<size_t>& shape,
-                    size_t word_size, const char* tn);
+                    size_t word_size, const char* tn,
+                    const zio::json& md = zio::json{});
 
         /*! Append one array data of given shape to message.
          *
@@ -31,12 +32,13 @@ namespace zio {
          * This performs a copy of data.
          */
         template<typename ElementType>
-        void append(Message& msg, const ElementType* data, const std::vector<size_t>& shape) {
+        void append(Message& msg, const ElementType* data,
+                    const std::vector<size_t>& shape, const zio::json& md = zio::json{}) {
             size_t nbytes = sizeof(ElementType);
             size_t word = nbytes;
             for (auto s : shape) { nbytes *= s; }
             append(msg, zio::message_t((const void*)data, nbytes),
-                   shape, word, type_name(typeid(ElementType)));
+                   shape, word, type_name(typeid(ElementType)), md);
         }
                     
         /*! Return the tensor at the given index.  

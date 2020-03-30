@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-03-06 Fri 16:48 -->
+<!-- 2020-03-30 Mon 16:17 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>ZIO Tensors</title>
@@ -261,16 +261,16 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org9445e2a">1. Motivation and requirements</a></li>
-<li><a href="#org649bb47">2. Zio <code>TENS</code> message form</a>
+<li><a href="#org9433b28">1. Motivation and requirements</a></li>
+<li><a href="#orgff9623a">2. Zio <code>TENS</code> message form</a>
 <ul>
-<li><a href="#org351b98b">2.1. The "tensors" attribute</a></li>
-<li><a href="#org37e0d97">2.2. The "metadata" attribute</a></li>
+<li><a href="#org7d6c8d7">2.1. The "tensors" attribute</a></li>
+<li><a href="#org3a23d8c">2.2. The "metadata" attribute</a></li>
 </ul>
 </li>
-<li><a href="#orgb41bafa">3. Application extension</a></li>
-<li><a href="#org74eb734">4. C++ API</a></li>
-<li><a href="#orgf4b2345">5. Use with Boost Multi Array</a></li>
+<li><a href="#org28998fd">3. Application extension</a></li>
+<li><a href="#org909412f">4. C++ API</a></li>
+<li><a href="#orgd7e4890">5. Use with Boost Multi Array</a></li>
 </ul>
 </div>
 </div>
@@ -285,8 +285,8 @@ for the JavaScript code in this tag.
 
 </div>
 
-<div id="outline-container-org9445e2a" class="outline-2">
-<h2 id="org9445e2a"><span class="section-number-2">1</span> Motivation and requirements</h2>
+<div id="outline-container-org9433b28" class="outline-2">
+<h2 id="org9433b28"><span class="section-number-2">1</span> Motivation and requirements</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 In some cases, we want to easily send tensors between components.  We
@@ -333,8 +333,8 @@ Thus, at a minimum the message representation shall include:
 </div>
 </div>
 
-<div id="outline-container-org649bb47" class="outline-2">
-<h2 id="org649bb47"><span class="section-number-2">2</span> Zio <code>TENS</code> message form</h2>
+<div id="outline-container-orgff9623a" class="outline-2">
+<h2 id="orgff9623a"><span class="section-number-2">2</span> Zio <code>TENS</code> message form</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 The ZIO <code>TENS</code> message format attempts to provide the above requirements.
@@ -373,8 +373,8 @@ JSON they are:
 </div>
 </div>
 
-<div id="outline-container-org351b98b" class="outline-3">
-<h3 id="org351b98b"><span class="section-number-3">2.1</span> The "tensors" attribute</h3>
+<div id="outline-container-org7d6c8d7" class="outline-3">
+<h3 id="org7d6c8d7"><span class="section-number-3">2.1</span> The "tensors" attribute</h3>
 <div class="outline-text-3" id="text-2-1">
 <p>
 The <code>"tensors"</code> item holds an array of tensor description objects.  For
@@ -384,9 +384,9 @@ example:
 <div class="org-src-container">
 <pre class="src src-json">{
   "tensors": [
-    {"shape":[6000,800], "word":4, "dtype":"f", part:1},
-    {"shape":[6000,800], "word":4, "dtype":"f", part:2},
-    {"shape":[6000,960], "word":4, "dtype":"f", part:0},
+    {"shape":[6000,800], "word":4, "dtype":"f", "part":1},
+    {"shape":[6000,800], "word":4, "dtype":"f", "part":2},
+    {"shape":[6000,960], "word":4, "dtype":"f", "part":0},
   ],
 </pre>
 </div>
@@ -426,6 +426,8 @@ storage order.  Defaults to C ordering.</dd>
 
 <dt>ascend</dt><dd>vector of Boolean of size \(\mathcal{N}_{dim}\), gives true
 if dimension is ascending.  Defaults to all true.</dd>
+
+<dt>metadata</dt><dd>a single level object holding scalar attributes.</dd>
 </dl>
 
 <p>
@@ -451,33 +453,20 @@ list of reserved attributes in the future.
 </div>
 </div>
 
-<div id="outline-container-org37e0d97" class="outline-3">
-<h3 id="org37e0d97"><span class="section-number-3">2.2</span> The "metadata" attribute</h3>
+<div id="outline-container-org3a23d8c" class="outline-3">
+<h3 id="org3a23d8c"><span class="section-number-3">2.2</span> The "metadata" attribute</h3>
 <div class="outline-text-3" id="text-2-2">
 <p>
 The "metadata" item in the "TENS" attribute may hold any arbitrary
-JSON object.  One possible use is to associate metadata to each tensor
-by matching the "tensors" array.  For example:
+JSON object.  Any interpretation is <b>application dependent</b>.  
 </p>
-
-<div class="org-src-container">
-<pre class="src src-json">{
-  "metadata" : {
-    "tensor_attributes" : [
-      {"tag":"gauss", "plane":"U"},
-      {"tag":"gauss", "plane":"V"},
-      {"tag":"gauss", "plane":"W"},
-    ],
-  }
-}
-</pre>
-</div>
 </div>
 </div>
 </div>
 
-<div id="outline-container-orgb41bafa" class="outline-2">
-<h2 id="orgb41bafa"><span class="section-number-2">3</span> Application extension</h2>
+
+<div id="outline-container-org28998fd" class="outline-2">
+<h2 id="org28998fd"><span class="section-number-2">3</span> Application extension</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 Application may extend a <code>TENS</code> message form in a number of ways:
@@ -499,8 +488,8 @@ extended.</li>
 </div>
 </div>
 
-<div id="outline-container-org74eb734" class="outline-2">
-<h2 id="org74eb734"><span class="section-number-2">4</span> C++ API</h2>
+<div id="outline-container-org909412f" class="outline-2">
+<h2 id="org909412f"><span class="section-number-2">4</span> C++ API</h2>
 <div class="outline-text-2" id="text-4">
 <p>
 The specification above defines a <code>TENS</code> message.  The <code>zio/tens.hpp</code> C++
@@ -511,8 +500,8 @@ exercised.
 </div>
 </div>
 
-<div id="outline-container-orgf4b2345" class="outline-2">
-<h2 id="orgf4b2345"><span class="section-number-2">5</span> Use with Boost Multi Array</h2>
+<div id="outline-container-orgd7e4890" class="outline-2">
+<h2 id="orgd7e4890"><span class="section-number-2">5</span> Use with Boost Multi Array</h2>
 <div class="outline-text-2" id="text-5">
 <p>
 As said above, the <code>TENS</code> message form is sympathetic with Boost Multi
