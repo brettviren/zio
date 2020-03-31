@@ -21,7 +21,7 @@ bool zio::flow::Flow::parse_label(Message& msg, zio::json& lobj)
     if (label.empty()) {
         return true;
     }
-    zio::info("parse_label({})", label.c_str());
+    // zio::info("parse_label({})", label.c_str());
     try {
         lobj = zio::json::parse(label);
     }
