@@ -140,33 +140,25 @@ void zio::Port::online(zio::Peer& peer)
     if (m_online) { return; }
     m_online = true;
 
-    if (m_verbose) {
-        zio::debug("[port {}]: going online with {}({}+{}) connects, {} binds",
-                   m_name, 
-                   m_connect_nodeports.size()+m_connect_addresses.size(),
-                   m_connect_nodeports.size(),
-                   m_connect_addresses.size(),
-                   m_binders.size());
-    }
+    zio::debug("[port {}]: going online with {}({}+{}) connects, {} binds",
+               m_name, 
+               m_connect_nodeports.size()+m_connect_addresses.size(),
+               m_connect_nodeports.size(),
+               m_connect_addresses.size(),
+               m_binders.size());
 
     for (const auto& addr : m_connect_addresses) {
-        if (m_verbose) {
-            zio::debug("[port {}]: connect to {}", m_name, addr);
-        }
+        zio::debug("[port {}]: connect to {}", m_name, addr);
         m_sock.connect(addr);
         m_connected.push_back(addr);
     }
 
     for (const auto& nh : m_connect_nodeports) {
-        if (m_verbose) {
-            zio::debug("[port {}]: wait for {}", m_name, nh.first);
-        }
+        zio::debug("[port {}]: wait for {}", m_name, nh.first);
         auto uuids = peer.waitfor(nh.first);
         assert(uuids.size());
-        if (m_verbose) {
-            zio::debug("[port {}]: {} peers match {}",
-                       m_name, uuids.size(), nh.first);
-        }
+        zio::debug("[port {}]: {} peers match {}",
+                   m_name, uuids.size(), nh.first);
 
         for (auto uuid : uuids) {
             auto pi = peer.peer_info(uuid);
@@ -183,10 +175,8 @@ void zio::Port::online(zio::Peer& peer)
                 if (addr.empty() or addr[0] == ' ') {
                     continue;
                 }
-                if (m_verbose) {
-                    zio::debug("[port {}]: connect to {}:{} at {}",
-                               m_name, nh.first, nh.second, addr);
-                }
+                zio::debug("[port {}]: connect to {}:{} at {}",
+                           m_name, nh.first, nh.second, addr);
                 m_sock.connect(addr);
                 m_connected.push_back(addr);
             }

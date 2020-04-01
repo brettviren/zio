@@ -220,7 +220,7 @@ bool zio::flow::Flow::get(zio::Message& dat, int timeout)
 
     bool ok = m_port->recv(dat, timeout);
     if (!ok) {
-        zio::warn("[flow {}] get: no recv seqno: {}, last seqno: {}, {}",
+        zio::warn("[flow {}] get: recv timeout seqno: {}, last seqno: {}, {}",
                   m_port->name(), dat.seqno(), m_recv_seqno, dat.label());
         return false;
     }
