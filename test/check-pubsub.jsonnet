@@ -1,5 +1,24 @@
 // Generate some test input files for check-pubsub.
 
+// Set rate of msg gen in Hz.  Note: if PUB/SUB used, N sources in one
+// app reports Nx rate, if N sinks in one app, another factor of N
+// should be reported, if downstream SUBs can't keep up, its rate will
+// reflect lost messages.  Note: if PUSH/PULL is used, no messages
+// will be lost and back-pressure will cause upstream to wait and if
+// 1->N pattern is used then downstream reflect round-robin (and not
+// fan-out like PUB/SUB).
+local rate = 500;             
+local msize = 4096; // 65536;
+local nchirp = rate*100;
+local give_sock = "PUB";       // set the "PUB" socket type, can be "PUSH"
+local take_sock = "SUB";       // set the "SUB" socket type, can be "PULL"
+
+// A TCP bind address, change to public IP for actual network traffic.
+// Port number will be selected dynamically.  Connect will use
+// discovery.
+local bind_addr = "127.0.0.1";
+
+
 local zmq = { "PAIR":0, "PUB":1, "SUB":2, "REQ":3, "REP":4,
               "DEALER":5, "ROUTER":6, "PULL":7, "PUSH":8 };
 
@@ -39,23 +58,6 @@ local cfg = {
     },
 };
 
-// Set rate of msg gen in Hz.  Note: if PUB/SUB used, N sources in one
-// app reports Nx rate, if N sinks in one app, another factor of N
-// should be reported, if downstream SUBs can't keep up, its rate will
-// reflect lost messages.  Note: if PUSH/PULL is used, no messages
-// will be lost and back-pressure will cause upstream to wait and if
-// 1->N pattern is used then downstream reflect round-robin (and not
-// fan-out like PUB/SUB).
-local rate = 500;             
-local msize = 4096; // 65536;
-local nchirp = rate*100;
-local give_sock = "PUB";       // set the "PUB" socket type, can be "PUSH"
-local take_sock = "SUB";       // set the "SUB" socket type, can be "PULL"
-
-// A TCP bind address, change to public IP for actual network traffic.
-// Port number will be selected dynamically.  Connect will use
-// discovery.
-local bind_addr = "127.0.0.1";
 
 local proc = {
     source: {

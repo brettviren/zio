@@ -2,6 +2,7 @@
 - [[file:index.org][Main Page]]
 - [[file:install.org][Installation]]
 - [[file:tutorial.org][Tutorials]]
+- [[file:examples.org][Examples]]
 - [[file:whytos.org][Design documents]]
 - [[file:api.org][API Reference]]
 #+END_nav

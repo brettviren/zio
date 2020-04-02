@@ -1,0 +1,473 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2020-04-02 Thu 12:18 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ZIO Example - Distribution</title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="Brett Viren" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { width: 90%; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="org.css"/>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2018 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="org-div-home-and-up">
+ <a accesskey="h" href=""> UP </a>
+ |
+ <a accesskey="H" href="index.html"> HOME </a>
+</div><div id="content">
+<h1 class="title">ZIO Example - Distribution</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org4edd5cb">1. Quick start</a></li>
+<li><a href="#org7ae2b9c">2. Exploring</a></li>
+<li><a href="#org1544de2">3. Going further</a>
+<ul>
+<li><a href="#org917ee3c">3.1. Threaded actors</a></li>
+<li><a href="#org17650cd">3.2. Hybrid topology</a></li>
+<li><a href="#org2105532">3.3. Multi-hosted demo</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="nav">
+<ul class="org-ul">
+<li><a href="index.html">Main Page</a></li>
+<li><a href="install.html">Installation</a></li>
+<li><a href="tutorial.html">Tutorials</a></li>
+<li><a href="examples.html">Examples</a></li>
+<li><a href="whytos.html">Design documents</a></li>
+<li><a href="api.html">API Reference</a></li>
+</ul>
+
+</div>
+
+<p>
+ZIO provides a program <code>check-pubsub</code>.  With various instances of this
+one program you may:
+</p>
+
+<ul class="org-ul">
+<li>construct an arbitrary network topology consisting of a number of
+<b>roles</b> which are categorized as <b>source</b>, <b>sink</b> or <b>proxy</b>.  A
+source generates messages and sink consumes them.  A proxy recvs
+messages and resends them.</li>
+
+<li>each role may utilize multiple sockets to emulate multiple
+instances of a role.  For example a source with 10 sockets emulates
+10 sources with 1 socket.</li>
+
+<li>each role periodically emits a rate measure which can be used to
+benchmark different topology and physical networks.</li>
+
+<li>network topology is quasi-self-organizing as links may be described
+using abstract node and port names.</li>
+
+<li>Both PUB/SUB and PUSH/PULL links are supported to allow easy
+evaluation of their technical trade-offs.</li>
+
+<li>behavior of <code>check-pubsub</code> is highly configurable and a number of
+<b>configuration models</b> are provided as starting points.</li>
+</ul>
+
+<div id="outline-container-org4edd5cb" class="outline-2">
+<h2 id="org4edd5cb"><span class="section-number-2">1</span> Quick start</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+Here you will generate JSON configuration file for <code>check-pubsub</code> and
+then run two instances of the program, one <b>source</b> with 10 PUB
+sockets and one <b>sink</b> with 10 SUB sockets.  Every SUB will connect to
+every PUB by using ZIO discovery.  
+</p>
+
+<pre class="example">
+$ waf install
+$ mkdir junk &amp;&amp; cd junk
+$ ../test/check-pubsub-gencfg.sh
+$ ../scripts/shoreman Procfile.many2many
+...
+11:26:49 sink	| [2020-04-02 11:26:49.011] [console] [info] sink: rate: 46.1681 kHz, &lt;46.3631&gt; kHz
+11:26:49 source	| [2020-04-02 11:26:49.990] [console] [info] source: rate: 4.6374 kHz, &lt;4.6374&gt; kHz
+...
+Ctrl-c
+</pre>
+
+<p>
+In this example, messages were generated at 500 Hz, each message is
+separately sent out to each of the 10 PUB sockets of the <b>source</b>
+(aggregate 5kHz) and each of those messages are fanned out to 10 SUB
+sockets and all received in the one <b>sink</b> (aggregate of 50 kHz).
+</p>
+
+<p>
+The 10x10 links can be change to 10 + 10 by inserting a <b>proxy</b>
+("lightweight broker") between the PUBs and the SUBs.  The proxy has a
+SUB "front end" linked to all <b>source</b> PUBs.  Each message received is
+then sent out its "back end" PUB which fans out to the 10 SUBs of the
+<b>sink</b>.  This can be exercised with:
+</p>
+
+<pre class="example">
+$ ../scripts/shoreman Procfile.many2one2many
+11:55:30 proxy	| [2020-04-02 11:55:30.289] [console] [info] proxy: rate: 4.7529 kHz, &lt;4.7529&gt; kHz
+11:55:30 source	| [2020-04-02 11:55:30.289] [console] [info] source: rate: 4.7547 kHz, &lt;4.7547&gt; kHz
+11:55:30 sink	| [2020-04-02 11:55:30.289] [console] [info] sink: rate: 47.6190 kHz, &lt;47.5421&gt; kHz
+</pre>
+
+<p>
+As before the (approx) 500 Hz of generation of messages is amplified
+by 10x out of the <b>source</b> (5kHz).  The <b>proxy</b> sees and forwards this
+rate and another 10x implication occurs by its PUB socket so the
+<b>sink</b> sees an aggregate 50 kHz.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org7ae2b9c" class="outline-2">
+<h2 id="org7ae2b9c"><span class="section-number-2">2</span> Exploring</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+The single <code>check-pubsub.jsonnet</code> <b>configuration model</b> file generates
+all these demo JSON files.  One may play with it and rerun the
+<code>check-pubsub-gencfg.sh</code> to refresh the JSON files (or make new ones).
+Toward the top of the file are a number of parameters that can be
+modified with out looking deeper at the data structure.  They are
+described:
+</p>
+
+<dl class="org-dl">
+<dt><code>rate</code></dt><dd>Sets the rate of message generation in Hz.  This is the rate
+before any amplification (see example in <a href="#org4edd5cb">1</a>).
+This is an approximate rate which translates into a sleep
+which at best millisecond resolution.  Beyond about 500 Hz,
+the code will simply free run.</dd>
+
+<dt><code>msize</code></dt><dd>Sets the message size in bytes.</dd>
+
+<dt><code>nchirp</code></dt><dd>Sets the frequency of emitting message given in terms of
+the number of messages output.  Eg, if a source has 10
+output sockets and a <code>rate = 500</code> then <code>nchirp = 5000</code>
+produces approximately 1 Hz of rate messages.</dd>
+
+<dt><code>give_sock</code></dt><dd>Sets the socket type for output.  It may be "PUB" or
+"PUSH".  See notes below</dd>
+<dt><code>take_sock</code></dt><dd>Sets the socket type for input.  It may be "SUB" or
+"PULL".  See notes below</dd>
+
+<dt><code>bind_addr</code></dt><dd>Set an IP address for any sockets that will <code>bind()</code>.
+Eg, may set to "127.0.0.1" for local testing or an
+external NIC for testing across a network.</dd>
+</dl>
+
+<p>
+Notes on sockets: Links between PUB/SUB and those between PUSH/PULL
+differ in important ways:
+</p>
+
+<ul class="org-ul">
+<li>PUB/SUB is subject to message loss if downstream can not keep up</li>
+<li>PUSH/PULL is subject to back pressure causing upstream to wait if downstream can not keep up</li>
+
+<li>PUB fans out to all SUBs</li>
+<li>PUSH sends round-robin to all PULLs</li>
+</ul>
+
+<p>
+These features must be taken into account when interpreting rates.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org1544de2" class="outline-2">
+<h2 id="org1544de2"><span class="section-number-2">3</span> Going further</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+Some places to take this demo further are describe.  The first entail
+updating the C++ code of <code>check-pubsub</code> and the remaining involve
+developing the <b>configuration model</b> further.
+</p>
+</div>
+
+<div id="outline-container-org917ee3c" class="outline-3">
+<h3 id="org917ee3c"><span class="section-number-3">3.1</span> Threaded actors</h3>
+<div class="outline-text-3" id="text-3-1">
+<p>
+Currently, only one role per instance of <code>check-pubsub</code> is supported
+and it runs in a single thread.  This means that, eg, a <b>source</b> with
+10 sockets sends 10 message to each in term before sleeping by the
+inverse of the requested rate.  This explains why the observed rate is
+less than "10x500 Hz".  
+</p>
+
+<p>
+For very high rates, this single thread will become starved and a
+maximum source rate will be hit.  Downstream roles may likewise be
+starved which may either lead to dropped messages (PUB/SUB) or causing
+downstream to wait (PUSH/PULL).
+</p>
+</div>
+</div>
+
+<div id="outline-container-org17650cd" class="outline-3">
+<h3 id="org17650cd"><span class="section-number-3">3.2</span> Hybrid topology</h3>
+<div class="outline-text-3" id="text-3-2">
+<p>
+The current <b>configuration model</b> only supports homogeneous choice of
+PUB/SUB or PUSH/PULL.  Different use cases might be emulated.  For
+example a <b>proxy</b> may have a SUB on input and a PUSH on output in
+order to spread the load of downstream message processing.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org2105532" class="outline-3">
+<h3 id="org2105532"><span class="section-number-3">3.3</span> Multi-hosted demo</h3>
+<div class="outline-text-3" id="text-3-3">
+<p>
+The current <b>configuration model</b> only supports having all <code>bind()</code>
+sockets be on one host while <code>connect()</code> sockets may be on any
+depending one where the <b>role</b> is executed.  Extending the model to
+let <code>bind()</code> be ephemeral (automagically pick both the NIC and the IP
+port number) would allow a demo across many hosts.  ZIO supports this,
+one need simply bind with an "address" which is the empty string.
+</p>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>

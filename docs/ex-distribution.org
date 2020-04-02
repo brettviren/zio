@@ -1,0 +1,148 @@
+#+title: ZIO Example - Distribution
+#+setupfile: setup.org
+#+include: nav.org
+
+ZIO provides a program ~check-pubsub~.  With various instances of this
+one program you may:
+
+ - construct an arbitrary network topology consisting of a number of
+   *roles* which are categorized as *source*, *sink* or *proxy*.  A
+   source generates messages and sink consumes them.  A proxy recvs
+   messages and resends them.
+
+ - each role may utilize multiple sockets to emulate multiple
+   instances of a role.  For example a source with 10 sockets emulates
+   10 sources with 1 socket.
+
+ - each role periodically emits a rate measure which can be used to
+   benchmark different topology and physical networks.
+
+ - network topology is quasi-self-organizing as links may be described
+   using abstract node and port names.
+
+ - Both PUB/SUB and PUSH/PULL links are supported to allow easy
+   evaluation of their technical trade-offs.
+
+ - behavior of ~check-pubsub~ is highly configurable and a number of
+   *configuration models* are provided as starting points.
+
+* Quick start
+
+Here you will generate JSON configuration file for ~check-pubsub~ and
+then run two instances of the program, one *source* with 10 PUB
+sockets and one *sink* with 10 SUB sockets.  Every SUB will connect to
+every PUB by using ZIO discovery.  
+
+  #+begin_example
+    $ waf install
+    $ mkdir junk && cd junk
+    $ ../test/check-pubsub-gencfg.sh
+    $ ../scripts/shoreman Procfile.many2many
+    ...
+    11:26:49 sink	| [2020-04-02 11:26:49.011] [console] [info] sink: rate: 46.1681 kHz, <46.3631> kHz
+    11:26:49 source	| [2020-04-02 11:26:49.990] [console] [info] source: rate: 4.6374 kHz, <4.6374> kHz
+    ...
+    Ctrl-c
+  #+end_example
+
+In this example, messages were generated at 500 Hz, each message is
+separately sent out to each of the 10 PUB sockets of the *source*
+(aggregate 5kHz) and each of those messages are fanned out to 10 SUB
+sockets and all received in the one *sink* (aggregate of 50 kHz).
+
+The 10x10 links can be change to 10 + 10 by inserting a *proxy*
+("lightweight broker") between the PUBs and the SUBs.  The proxy has a
+SUB "front end" linked to all *source* PUBs.  Each message received is
+then sent out its "back end" PUB which fans out to the 10 SUBs of the
+*sink*.  This can be exercised with:
+
+#+begin_example
+  $ ../scripts/shoreman Procfile.many2one2many
+  11:55:30 proxy	| [2020-04-02 11:55:30.289] [console] [info] proxy: rate: 4.7529 kHz, <4.7529> kHz
+  11:55:30 source	| [2020-04-02 11:55:30.289] [console] [info] source: rate: 4.7547 kHz, <4.7547> kHz
+  11:55:30 sink	| [2020-04-02 11:55:30.289] [console] [info] sink: rate: 47.6190 kHz, <47.5421> kHz
+#+end_example
+
+As before the (approx) 500 Hz of generation of messages is amplified
+by 10x out of the *source* (5kHz).  The *proxy* sees and forwards this
+rate and another 10x implication occurs by its PUB socket so the
+*sink* sees an aggregate 50 kHz.
+
+* Exploring
+
+The single ~check-pubsub.jsonnet~ *configuration model* file generates
+all these demo JSON files.  One may play with it and rerun the
+~check-pubsub-gencfg.sh~ to refresh the JSON files (or make new ones).
+Toward the top of the file are a number of parameters that can be
+modified with out looking deeper at the data structure.  They are
+described:
+
+- ~rate~ :: Sets the rate of message generation in Hz.  This is the rate
+          before any amplification (see example in [[Quick start]]).
+          This is an approximate rate which translates into a sleep
+          which at best millisecond resolution.  Beyond about 500 Hz,
+          the code will simply free run.
+
+- ~msize~ :: Sets the message size in bytes.  
+
+- ~nchirp~ :: Sets the frequency of emitting message given in terms of
+              the number of messages output.  Eg, if a source has 10
+              output sockets and a ~rate = 500~ then ~nchirp = 5000~
+              produces approximately 1 Hz of rate messages.
+
+- ~give_sock~ :: Sets the socket type for output.  It may be "PUB" or
+                 "PUSH".  See notes below
+- ~take_sock~ :: Sets the socket type for input.  It may be "SUB" or
+                 "PULL".  See notes below
+
+- ~bind_addr~ :: Set an IP address for any sockets that will ~bind()~.
+                 Eg, may set to "127.0.0.1" for local testing or an
+                 external NIC for testing across a network.
+
+Notes on sockets: Links between PUB/SUB and those between PUSH/PULL
+differ in important ways:
+
+- PUB/SUB is subject to message loss if downstream can not keep up
+- PUSH/PULL is subject to back pressure causing upstream to wait if downstream can not keep up
+
+- PUB fans out to all SUBs
+- PUSH sends round-robin to all PULLs
+
+These features must be taken into account when interpreting rates.
+
+* Going further
+
+Some places to take this demo further are describe.  The first entail
+updating the C++ code of ~check-pubsub~ and the remaining involve
+developing the *configuration model* further.
+
+** Threaded actors
+
+Currently, only one role per instance of ~check-pubsub~ is supported
+and it runs in a single thread.  This means that, eg, a *source* with
+10 sockets sends 10 message to each in term before sleeping by the
+inverse of the requested rate.  This explains why the observed rate is
+less than "10x500 Hz".  
+
+For very high rates, this single thread will become starved and a
+maximum source rate will be hit.  Downstream roles may likewise be
+starved which may either lead to dropped messages (PUB/SUB) or causing
+downstream to wait (PUSH/PULL).
+
+** Hybrid topology
+
+The current *configuration model* only supports homogeneous choice of
+PUB/SUB or PUSH/PULL.  Different use cases might be emulated.  For
+example a *proxy* may have a SUB on input and a PUSH on output in
+order to spread the load of downstream message processing.
+
+** Multi-hosted demo
+
+The current *configuration model* only supports having all ~bind()~
+sockets be on one host while ~connect()~ sockets may be on any
+depending one where the *role* is executed.  Extending the model to
+let ~bind()~ be ephemeral (automagically pick both the NIC and the IP
+port number) would allow a demo across many hosts.  ZIO supports this,
+one need simply bind with an "address" which is the empty string.
+
+
