@@ -1,4 +1,4 @@
-/** Exercise ZeroMQ PUB/SUB
+/** Exercise ZeroMQ PUB/SUB or PUSH/PULL
  */
 
 
@@ -24,7 +24,7 @@ struct CountRate {
         if (count and count % ntocheck == 0) {
             double dt_lap = std::chrono::duration_cast<std::chrono::milliseconds>(sw.lap()).count();
             double dt_tot = std::chrono::duration_cast<std::chrono::milliseconds>(sw.accum()).count();
-            zio::info("{}: rate: {} kHz, <{}> kHz",
+            zio::info("{}: rate: {:.4f} kHz, <{:.4f}> kHz",
                       name, ntocheck/dt_lap, count/dt_tot);
         }
     }
@@ -35,7 +35,15 @@ void do_source(zio::Node& node, zio::json& cfg)
 {
     const size_t msg_size = cfg["size"].get<size_t>();
     const double msg_rate = cfg["rate"].get<double>();
-    zio::time_unit_t zzz_ms{(int64_t)(1000.0/msg_rate)};
+
+    int64_t zzz_ms = 1000.0/msg_rate;
+    if (zzz_ms < 2) {
+        zio::debug("source: message rate too fast, will free run");
+        zzz_ms = 0;
+    }
+    else {
+        zio::debug("source: message generation sleep: {} ms", zzz_ms);
+    }
 
     const size_t nchirp = cfg["nchirp"].get<size_t>();
     CountRate cr{nchirp, "source"};
@@ -45,23 +53,25 @@ void do_source(zio::Node& node, zio::json& cfg)
         auto port = node.port(pname);
         auto& sock = port->socket();
         int stype = zio::sock_type(sock);
-        if (stype != ZMQ_PUB) {
-            continue;
+        if (stype == ZMQ_PUB or stype == ZMQ_PUSH) {
+            socks.push_back(sock);
         }
-        socks.push_back(sock);
+
     }
     if (socks.empty()) {
         throw std::runtime_error("source given no PUBs");
     }
-    zio::debug("source with {} PUBs", socks.size());
+    zio::info("source with {} PUBs", socks.size());
 
     std::vector<std::byte> buf(msg_size, std::byte(0));
     zio::const_buffer cbuf(buf.data(), buf.size());
     cr.sw.start();
     while (true) {
-        zio::sleep_ms(zzz_ms);
+        if (zzz_ms) {
+            zio::sleep_ms(zio::time_unit_t{zzz_ms});
+        }
         for (auto& sock: socks) {
-            sock.send(cbuf, zio::send_flags::dontwait);
+            sock.send(cbuf, zio::send_flags::none);
             cr();
         }
     } // run forever
@@ -76,11 +86,13 @@ void do_proxy(zio::Node& node, zio::json& cfg)
         auto port = node.port(pname);
         auto& sock = port->socket();
         int stype = zio::sock_type(sock);
-        if (stype == ZMQ_SUB) {
+        if (stype == ZMQ_SUB or stype == ZMQ_PULL) {
             subs.push_back(sock);
-            port->subscribe("");
+            if (stype == ZMQ_SUB) {
+                port->subscribe("");
+            }
         }
-        if (stype == ZMQ_PUB) {
+        if (stype == ZMQ_PUB or stype == ZMQ_PUSH) {
             pubs.push_back(sock);
         }
     }
@@ -90,7 +102,7 @@ void do_proxy(zio::Node& node, zio::json& cfg)
 
     const size_t nsubs = subs.size();
     const size_t npubs = pubs.size();
-    zio::debug("proxy with {} SUBs, {} PUBs", nsubs, npubs);
+    zio::info("proxy with {} SUBs, {} PUBs", nsubs, npubs);
 
     zio::poller_t<> poller;
     for (auto& sock : subs) {
@@ -107,7 +119,7 @@ void do_proxy(zio::Node& node, zio::json& cfg)
             assert(res);        // we don't wait so this can never be false
             zio::const_buffer cbuf(msg.data(), msg.size());
             for (auto& pub : pubs) {
-                pub.send(cbuf, zio::send_flags::dontwait);
+                pub.send(cbuf, zio::send_flags::none);
                 cr();
             }
         }
@@ -124,17 +136,18 @@ void do_sink(zio::Node& node, zio::json& cfg)
         auto port = node.port(pname);
         auto& sock = port->socket();
         int stype = zio::sock_type(sock);
-        if (stype != ZMQ_SUB) {
-            continue;
+        if (stype == ZMQ_SUB or stype == ZMQ_PULL) {
+            socks.push_back(sock);
+            if (stype == ZMQ_SUB) {
+                port->subscribe("");
+            }
         }
-        socks.push_back(sock);
-        port->subscribe("");
     }
     if (socks.empty()) {
         throw std::runtime_error("sink given no SUBs");
     }
     const size_t nsocks = socks.size();
-    zio::debug("sink with {} SUBs", socks.size());
+    zio::info("sink with {} SUBs", socks.size());
 
     zio::poller_t<> poller;
     for (auto& sock : socks) {
@@ -248,7 +261,8 @@ std::string usage()
     return R"V0G0N(
 
 This one program implements exactly one of: a source, a sink or a
-proxy.
+proxy.  Where PUB is mentioned, PUSH may be substituted, etc for
+SUB/PULL.
  
 - source :: generate messages of a given size and rate out a number
             of PUB sockets.
