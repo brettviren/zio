@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-02-20 Thu 12:10 -->
+<!-- 2020-04-03 Fri 05:48 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>ZIO Tutorial: Flow Broker</title>
@@ -239,9 +239,9 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org6f0b832">1. Running a flow broker</a></li>
-<li><a href="#orgb0536a1">2. Flow broker protocol</a></li>
-<li><a href="#org12e522e">3. An example flow broker factory</a></li>
+<li><a href="#org7022527">1. Running a flow broker</a></li>
+<li><a href="#orgb91ca77">2. Flow broker protocol</a></li>
+<li><a href="#orga3d8d7e">3. An example flow broker factory</a></li>
 </ul>
 </div>
 </div>
@@ -250,6 +250,7 @@ for the JavaScript code in this tag.
 <li><a href="index.html">Main Page</a></li>
 <li><a href="install.html">Installation</a></li>
 <li><a href="tutorial.html">Tutorials</a></li>
+<li><a href="examples.html">Examples</a></li>
 <li><a href="whytos.html">Design documents</a></li>
 <li><a href="api.html">API Reference</a></li>
 </ul>
@@ -263,8 +264,8 @@ writeup</a> and it is suggested to read through that before using this
 tutorial to understand how to use the Python implementation.  
 </p>
 
-<div id="outline-container-org6f0b832" class="outline-2">
-<h2 id="org6f0b832"><span class="section-number-2">1</span> Running a flow broker</h2>
+<div id="outline-container-org7022527" class="outline-2">
+<h2 id="org7022527"><span class="section-number-2">1</span> Running a flow broker</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 A flow broker brings together a <code>zio.Port</code> and a "factory".  The port
@@ -313,8 +314,8 @@ the flow is heavy.  Interrupting this loop will hang all flows.
 </div>
 </div>
 
-<div id="outline-container-orgb0536a1" class="outline-2">
-<h2 id="orgb0536a1"><span class="section-number-2">2</span> Flow broker protocol</h2>
+<div id="outline-container-orgb91ca77" class="outline-2">
+<h2 id="orgb91ca77"><span class="section-number-2">2</span> Flow broker protocol</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 The broker is a man-in-the-middle between clients and any handlers of
@@ -347,8 +348,8 @@ messages between client and handler.
 </div>
 </div>
 
-<div id="outline-container-org12e522e" class="outline-2">
-<h2 id="org12e522e"><span class="section-number-2">3</span> An example flow broker factory</h2>
+<div id="outline-container-orga3d8d7e" class="outline-2">
+<h2 id="orga3d8d7e"><span class="section-number-2">3</span> An example flow broker factory</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 The provided <code>test_flowbroker.py</code> includes a simple factory that will

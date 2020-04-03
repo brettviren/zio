@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-04-02 Thu 12:18 -->
+<!-- 2020-04-03 Fri 05:48 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>ZIO Example - Distribution</title>
@@ -161,19 +161,6 @@
   .footdef  { margin-bottom: 1em; }
   .figure { padding: 1em; }
   .figure p { text-align: center; }
-  .equation-container {
-    display: table;
-    text-align: center;
-    width: 100%;
-  }
-  .equation {
-    vertical-align: middle;
-  }
-  .equation-label {
-    display: table-cell;
-    text-align: right;
-    vertical-align: middle;
-  }
   .inlinetask {
     padding: 10px;
     border: 2px solid gray;
@@ -199,7 +186,7 @@
 @licstart  The following is the entire license notice for the
 JavaScript code in this tag.
 
-Copyright (C) 2012-2018 Free Software Foundation, Inc.
+Copyright (C) 2012-2019 Free Software Foundation, Inc.
 
 The JavaScript code in this tag is free software: you can
 redistribute it and/or modify it under the terms of the GNU
@@ -252,13 +239,13 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org4edd5cb">1. Quick start</a></li>
-<li><a href="#org7ae2b9c">2. Exploring</a></li>
-<li><a href="#org1544de2">3. Going further</a>
+<li><a href="#org2f6203b">1. Quick start</a></li>
+<li><a href="#org37db13f">2. Exploring</a></li>
+<li><a href="#org9ef28fa">3. Going further</a>
 <ul>
-<li><a href="#org917ee3c">3.1. Threaded actors</a></li>
-<li><a href="#org17650cd">3.2. Hybrid topology</a></li>
-<li><a href="#org2105532">3.3. Multi-hosted demo</a></li>
+<li><a href="#org53b44e1">3.1. Threaded actors</a></li>
+<li><a href="#orgafb9df2">3.2. Hybrid topology</a></li>
+<li><a href="#org30a3fae">3.3. Multi-hosted demo</a></li>
 </ul>
 </li>
 </ul>
@@ -304,8 +291,8 @@ evaluation of their technical trade-offs.</li>
 <b>configuration models</b> are provided as starting points.</li>
 </ul>
 
-<div id="outline-container-org4edd5cb" class="outline-2">
-<h2 id="org4edd5cb"><span class="section-number-2">1</span> Quick start</h2>
+<div id="outline-container-org2f6203b" class="outline-2">
+<h2 id="org2f6203b"><span class="section-number-2">1</span> Quick start</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 Here you will generate JSON configuration file for <code>check-pubsub</code> and
@@ -357,8 +344,8 @@ rate and another 10x implication occurs by its PUB socket so the
 </div>
 </div>
 
-<div id="outline-container-org7ae2b9c" class="outline-2">
-<h2 id="org7ae2b9c"><span class="section-number-2">2</span> Exploring</h2>
+<div id="outline-container-org37db13f" class="outline-2">
+<h2 id="org37db13f"><span class="section-number-2">2</span> Exploring</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 The single <code>check-pubsub.jsonnet</code> <b>configuration model</b> file generates
@@ -371,7 +358,7 @@ described:
 
 <dl class="org-dl">
 <dt><code>rate</code></dt><dd>Sets the rate of message generation in Hz.  This is the rate
-before any amplification (see example in <a href="#org4edd5cb">1</a>).
+before any amplification (see example in <a href="#org2f6203b">1</a>).
 This is an approximate rate which translates into a sleep
 which at best millisecond resolution.  Beyond about 500 Hz,
 the code will simply free run.</dd>
@@ -412,8 +399,8 @@ These features must be taken into account when interpreting rates.
 </div>
 </div>
 
-<div id="outline-container-org1544de2" class="outline-2">
-<h2 id="org1544de2"><span class="section-number-2">3</span> Going further</h2>
+<div id="outline-container-org9ef28fa" class="outline-2">
+<h2 id="org9ef28fa"><span class="section-number-2">3</span> Going further</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 Some places to take this demo further are describe.  The first entail
@@ -422,8 +409,8 @@ developing the <b>configuration model</b> further.
 </p>
 </div>
 
-<div id="outline-container-org917ee3c" class="outline-3">
-<h3 id="org917ee3c"><span class="section-number-3">3.1</span> Threaded actors</h3>
+<div id="outline-container-org53b44e1" class="outline-3">
+<h3 id="org53b44e1"><span class="section-number-3">3.1</span> Threaded actors</h3>
 <div class="outline-text-3" id="text-3-1">
 <p>
 Currently, only one role per instance of <code>check-pubsub</code> is supported
@@ -442,8 +429,8 @@ downstream to wait (PUSH/PULL).
 </div>
 </div>
 
-<div id="outline-container-org17650cd" class="outline-3">
-<h3 id="org17650cd"><span class="section-number-3">3.2</span> Hybrid topology</h3>
+<div id="outline-container-orgafb9df2" class="outline-3">
+<h3 id="orgafb9df2"><span class="section-number-3">3.2</span> Hybrid topology</h3>
 <div class="outline-text-3" id="text-3-2">
 <p>
 The current <b>configuration model</b> only supports homogeneous choice of
@@ -454,8 +441,8 @@ order to spread the load of downstream message processing.
 </div>
 </div>
 
-<div id="outline-container-org2105532" class="outline-3">
-<h3 id="org2105532"><span class="section-number-3">3.3</span> Multi-hosted demo</h3>
+<div id="outline-container-org30a3fae" class="outline-3">
+<h3 id="org30a3fae"><span class="section-number-3">3.3</span> Multi-hosted demo</h3>
 <div class="outline-text-3" id="text-3-3">
 <p>
 The current <b>configuration model</b> only supports having all <code>bind()</code>

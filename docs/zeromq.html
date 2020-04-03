@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-03-26 Thu 17:35 -->
+<!-- 2020-04-03 Fri 05:48 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>ZIO ZeroMQ notes</title>
@@ -239,8 +239,8 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org1b13c7e">1. cppzmq errors</a></li>
-<li><a href="#orgc5ef9f2">2. ROUTER/DEALER Multipart Messages</a></li>
+<li><a href="#orgf20b4d3">1. cppzmq errors</a></li>
+<li><a href="#org6b6a5c9">2. ROUTER/DEALER Multipart Messages</a></li>
 </ul>
 </div>
 </div>
@@ -249,6 +249,7 @@ for the JavaScript code in this tag.
 <li><a href="index.html">Main Page</a></li>
 <li><a href="install.html">Installation</a></li>
 <li><a href="tutorial.html">Tutorials</a></li>
+<li><a href="examples.html">Examples</a></li>
 <li><a href="whytos.html">Design documents</a></li>
 <li><a href="api.html">API Reference</a></li>
 </ul>
@@ -259,8 +260,8 @@ for the JavaScript code in this tag.
 This document holds some special notes on the underlying ZeroMQ ecosystem
 </p>
 
-<div id="outline-container-org1b13c7e" class="outline-2">
-<h2 id="org1b13c7e"><span class="section-number-2">1</span> cppzmq errors</h2>
+<div id="outline-container-orgf20b4d3" class="outline-2">
+<h2 id="orgf20b4d3"><span class="section-number-2">1</span> cppzmq errors</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 The core <code>zmq::socket_t::recv()</code> and <code>send()</code> calls follow an error
@@ -290,8 +291,8 @@ given an unsupported socket type.
 </div>
 </div>
 
-<div id="outline-container-orgc5ef9f2" class="outline-2">
-<h2 id="orgc5ef9f2"><span class="section-number-2">2</span> ROUTER/DEALER Multipart Messages</h2>
+<div id="outline-container-org6b6a5c9" class="outline-2">
+<h2 id="org6b6a5c9"><span class="section-number-2">2</span> ROUTER/DEALER Multipart Messages</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 Of particular confusion is how ROUTER and DEALER deal with "address

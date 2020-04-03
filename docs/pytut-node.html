@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-02-20 Thu 12:10 -->
+<!-- 2020-04-03 Fri 05:48 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>ZIO Tutorial: Nodes</title>
@@ -239,11 +239,11 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orga8f275f">1. When to use a node</a></li>
-<li><a href="#orgdcd60b1">2. Create a node</a></li>
-<li><a href="#org49a2c60">3. Making ports</a></li>
-<li><a href="#org3b18cdd">4. Going online</a></li>
-<li><a href="#org218fc61">5. Going offline</a></li>
+<li><a href="#org0fec12a">1. When to use a node</a></li>
+<li><a href="#org430865f">2. Create a node</a></li>
+<li><a href="#orgfbee666">3. Making ports</a></li>
+<li><a href="#org66120a8">4. Going online</a></li>
+<li><a href="#org9f0c12d">5. Going offline</a></li>
 </ul>
 </div>
 </div>
@@ -252,6 +252,7 @@ for the JavaScript code in this tag.
 <li><a href="index.html">Main Page</a></li>
 <li><a href="install.html">Installation</a></li>
 <li><a href="tutorial.html">Tutorials</a></li>
+<li><a href="examples.html">Examples</a></li>
 <li><a href="whytos.html">Design documents</a></li>
 <li><a href="api.html">API Reference</a></li>
 </ul>
@@ -264,8 +265,8 @@ of <code>zio.Port</code> objects (<a href="port.html">writeup</a> and <a href="p
 participate in peering (<a href="peer.html">writeup</a> and <a href="pytut-peer.html">tutorial</a>)
 </p>
 
-<div id="outline-container-orga8f275f" class="outline-2">
-<h2 id="orga8f275f"><span class="section-number-2">1</span> When to use a node</h2>
+<div id="outline-container-org0fec12a" class="outline-2">
+<h2 id="org0fec12a"><span class="section-number-2">1</span> When to use a node</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 A node is a distinct entity as seen on the network.  This means a
@@ -279,8 +280,8 @@ or possibly component will have a single node.
 </div>
 </div>
 
-<div id="outline-container-orgdcd60b1" class="outline-2">
-<h2 id="orgdcd60b1"><span class="section-number-2">2</span> Create a node</h2>
+<div id="outline-container-org430865f" class="outline-2">
+<h2 id="org430865f"><span class="section-number-2">2</span> Create a node</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 A node must be created with a nick name, an optional <b>origin</b> number and
@@ -295,8 +296,8 @@ binds on a port is later requested.
 </div>
 </div>
 
-<div id="outline-container-org49a2c60" class="outline-2">
-<h2 id="org49a2c60"><span class="section-number-2">3</span> Making ports</h2>
+<div id="outline-container-orgfbee666" class="outline-2">
+<h2 id="orgfbee666"><span class="section-number-2">3</span> Making ports</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 The main thing a node provides is a simplified port construction.
@@ -313,8 +314,8 @@ See <a href="pytut-port.html">port tutorial</a> for how to now connect and/or bi
 </div>
 </div>
 
-<div id="outline-container-org3b18cdd" class="outline-2">
-<h2 id="org3b18cdd"><span class="section-number-2">4</span> Going online</h2>
+<div id="outline-container-org66120a8" class="outline-2">
+<h2 id="org66120a8"><span class="section-number-2">4</span> Going online</h2>
 <div class="outline-text-2" id="text-4">
 <p>
 When a node goes online it brings its ports online in a careful order
@@ -340,8 +341,8 @@ peer.drain()
 </div>
 </div>
 
-<div id="outline-container-org218fc61" class="outline-2">
-<h2 id="org218fc61"><span class="section-number-2">5</span> Going offline</h2>
+<div id="outline-container-org9f0c12d" class="outline-2">
+<h2 id="org9f0c12d"><span class="section-number-2">5</span> Going offline</h2>
 <div class="outline-text-2" id="text-5">
 <p>
 When a node is taken offline, all its ports are taken offline.  This

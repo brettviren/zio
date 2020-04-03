@@ -6,7 +6,8 @@ main_org = $(shell grep setup.org *.org | sed -e 's/\(.*\.org\):.*/\1/')
 main_html = $(patsubst %.org,%.html,$(main_org))
 
 define org2html =
-emacs --no-site-file -Q --batch $< --eval="(progn (load-file \"htmlize.el\") (require 'org) (org-html-export-to-html))" --kill
+# emacs --no-site-file -Q --batch $< --eval="(progn (load-file \"htmlize.el\") (require 'org) (org-html-export-to-html))" --kill
+emacs --no-site-file -Q --batch $< --eval="(progn (load-file \"export.el\") (org-html-export-to-html))" --kill
 endef
 
 all: all_png all_svg all_html
