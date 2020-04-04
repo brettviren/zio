@@ -17,14 +17,38 @@ namespace zio {
     namespace flow {
         enum Direction { undefined, extract, inject };
 
+        enum MessageType { timeout, BOT, DAT, PAY, EOT, notype };
+        const char* name(MessageType mt);
+
+        [[nodiscard]]
+        bool parse_label(Message& msg, zio::json& lobj);
+
+        /*! brief return message type
+         */
+        MessageType type(Message& msg);
 
         class Flow {
+
         public:
             /*!
               @brief create a flow.
             */
             Flow(portptr_t port);
             ~Flow();
+
+            /*! Receive at most one message on the flow port.
+
+              The message is filled and the corresponding message type
+              returned.  This type may be "timeout" if no message was
+              available or "unexpected" if a message was received but
+              it was invalid.
+
+              The message will be processed internally.  Eg, if PAY,
+              the credit is increased.
+              
+            */
+            [[nodiscard]]
+            MessageType recv(Message& msg, int timeout=-1);
 
             /*!  
               @brief send a BOT
@@ -34,49 +58,65 @@ namespace zio {
             void send_bot(Message& bot);
 
             /*!
-              @brief receive a BOT
+              @brief Try to receive next message as a BOT message
 
-              A timeout, -1 waits forever.  Return false if timeout
-              occurs.
-
-              Server calls send_bot() first, client calls send_bot() second;
+              Return value is BOT on success, but may be EOT or
+              timeout.
             */
-            bool recv_bot(Message& bot, int timeout=-1);
+            [[nodiscard]]
+            MessageType recv_bot(Message& msg, int timeout=-1);
 
             /*!
               @brief put a payload message into the flow
 
-              Return false if an EOT was received in the process.
+              Prior to sending DAT, this tries to receive PAY.  If
+              credit drops to zero, flow requires no sending of DAT
+              and will wait as long as the given timeout.
+
+              Return DAT message type if message successful sent.  EOT
+              is returned if EOT was received during pay slurping.  If
+              timeout occurs due to no credit and timeout while
+              waiting for pay, timeout is returned.
             */
-            bool put(Message& dat);
+            [[nodiscard]]
+            MessageType put(Message& dat, int timeout = -1);
             
             /*!
-              @brief recv any waiting PAY messages
+              @brief Try to receive a PAY message and apply any credit
 
-              A sender will slurp prior to a send of a DAT but the
-              application may call this at any time after BOT.  Number
-              of credits slurped is returned.  A -1 indicates EOT,
-              which if app calls should respond.  A -2 indicates
-              protocol error.
+              This method can be but need not be called by the
+              application as it is called prior to any attempt to get
+              DAT messages.
+
+              Message type will indicate actual message which may be.
+              If application calls, it should respond to EOT.
             */
-            int slurp_pay(int timeout);
+            [[nodiscard]]
+            MessageType recv_pay(Message& msg, int timeout);
 
             /*!
-              @brief get a payload message from the flow
+              @brief Try to get a payload message from the flow
 
               Return false immediately if an EOT was received instead.
 
               Negative timeout waits forever, otherwise gives timeout
               in milliseconds to wait for a FLOW message.
             */
-            bool get(Message& dat, int timeout=-1);
+            [[nodiscard]]
+            MessageType recv_dat(Message& dat, int timeout=-1);
 
             /*!
               @brief send any accumulated credit as a PAY
 
-              A recver will flush pay prior to any get but the
-              application may do this at any time after BOT.  Number
-              of credits sent is returned.  This does not block.
+              Number of credits sent is returned.  
+
+              This does not block.
+
+              This will be called implicity in recv_dat().  An
+              application may explicitly call this anytime after BOT
+              handshake if it is desired for the other end to not
+              block in send_dat() prior to this end calling
+              recv_dat().  
             */
             int flush_pay();
 
@@ -103,7 +143,22 @@ namespace zio {
               explicitly initiated with send_eot(). 
 
             */
-            bool recv_eot(Message& msg, int timeout=-1);
+            [[nodiscard]]
+            MessageType recv_eot(Message& msg, int timeout=-1);
+
+            /*!
+              @brief Recv until get EOT.
+
+              Returns false if timeout.
+            */
+            MessageType finish(Message& msg, int timeout=-1);
+            /*!
+              @brief Do shutdown handshake.
+
+              This will send and recv an EOT, waiting as timout.  
+              Returns false if timeout.
+            */
+            MessageType close(Message& msg, int timeout=-1);
 
             bool is_sender() const { return m_sender; }
             int credit() const { return m_credit; }
@@ -122,7 +177,21 @@ namespace zio {
             int m_send_seqno{-1};
             int m_recv_seqno{-1};
 
-            bool parse_label(Message& msg, zio::json& lobj);
+            // Helper to do a single receive and validate if a message
+            // is available.  
+            MessageType recv_one(Message& msg, int timeout);
+
+            // These internally process a received and validated
+            // message message of the given type.  These do not
+            // increment m_recv_seqno.
+            MessageType proc_bot(Message& bot, const zio::json& fobj);
+            MessageType proc_dat(Message& dat, const zio::json& fobj);
+            MessageType proc_pay(Message& pay, const zio::json& fobj);
+            MessageType proc_eot(Message& eot, const zio::json& fobj);
+
+            // enum States { CTOR, WANTBOT, OWEBOT, INI, EXTRACTING, INJECTING,
+            //               FINACK, ACKFIN, FIN };
+            // States m_state;
         };
 
     }

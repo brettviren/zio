@@ -10,7 +10,7 @@ int main()
     zio::init_all();
 
     zio::Node snode("server", 1);
-    snode.set_verbose();
+    //snode.set_verbose();
     auto sport = snode.port("recver", ZMQ_SERVER);
     // C/S can't do inproc!
     /// const char* addr = "inproc://testflow";
@@ -22,7 +22,7 @@ int main()
     snode.online();
 
     zio::Node cnode("client", 2);
-    cnode.set_verbose();
+    //cnode.set_verbose();
     auto cport = cnode.port("sender", ZMQ_CLIENT);
     cport->connect(addr);
     cnode.online();
@@ -48,8 +48,11 @@ int main()
     cflow.send_bot(msg);
 
     zio::debug("sflow recv BOT");
-    ok = sflow.recv_bot(msg);
-    assert(ok);
+    {
+        auto mtype = sflow.recv_bot(msg);
+        assert(mtype == zio::flow::BOT);
+    }
+
     zio::debug("sflow recv'ed");
     auto rid = msg.remote_id();
     zio::debug("sflow msg.label: {}, rid: {}", msg.label(), zio::binstr(rid));
@@ -71,9 +74,10 @@ int main()
     assert(msg.remote_id() == rid);
     sflow.send_bot(msg);
     zio::debug("cflow recv BOT");
-    ok = cflow.recv_bot(msg);
-    assert(ok);
-
+    {
+        auto mtype = cflow.recv_bot(msg);
+        assert(mtype == zio::flow::BOT);
+    }
     assert (cflow.is_sender());
 
     // at this point deadlock could occur because this test is
@@ -94,17 +98,24 @@ int main()
     zio::debug("sflow recv DAT, credit {}/{}",
                sflow.credit(), sflow.total_credit());
     assert(0 == sflow.credit());
-    ok = sflow.get(msg);
-    assert(ok);
+    {
+        auto mtype = sflow.recv_dat(msg);
+        assert(mtype == zio::flow::DAT);
+    }
     assert(sflow.credit() == 1);    
     
-    zio::debug("sflow send EOT");
-    sflow.send_eot(msg);
-    zio::debug("cflow send EOT");
-    ok = cflow.recv_eot(msg);
-    assert(ok);
-    cflow.send_eot(msg);
-    sflow.recv_eot(msg);
+    zio::debug("shutdown");
+    {             
+        // note, can't use .close() in this synchronous test
+        zio::Message eot;
+        sflow.send_eot(eot);
+        auto mtype = cflow.recv_eot(eot);
+        assert(mtype == zio::flow::EOT);
+        cflow.send_eot(eot);
+        mtype = sflow.recv_eot(eot);
+        assert(mtype == zio::flow::EOT);
+    }
+
     zio::debug("done");    
     return 0;
 }

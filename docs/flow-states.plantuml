@@ -1,27 +1,28 @@
 @startuml
 left to right direction
 title ZIO data flow states
-[*] --> server : SERVER
-[*] --> client : CLIENT
-server --> sending : BOT [dir=inject] / set_bot;send_bot
-server --> recving : BOT [dir=extract] / set_bot;send_bot
-client --> recving : BOT [dir=inject] / set_bot;send_bot
-client --> sending : BOT [dir=extract] / set_bot;send_bot
-state sending {
-        [*] --> cansend
-        cansend --> broke : DAT [cred=1] / send_dat;--cred
-        cansend -> cansend : DAT [cred>1] / send_dat;--cred
-        broke --> cansend : PAY / ++cred
-        cansend -> cansend : PAY / ++cred
-}
-state recving {
-        [*] -> waiting
-        waiting --> gotdat : DAT / ++cred;
-        gotdat -> gotdat : DAT / ++cred;
-        gotdat -> gotdat : PAY [cred>1] / send_pay;--cred;
-        gotdat --> waiting : PAY [cred=1] / send_pay;--cred;
-}
+[*] --> CTOR : construct
+CTOR --> WANTBOT : send_bot
+CTOR --> OWEBOT : recv_bot
+WANTBOT --> INI : recv_bot
+OWEBOT --> INI : send_bot
 
+INI --> EXTRACTING : [direction=extract]
+INI --> INJECTING : [direction=inject]
 
+EXTRACTING -> EXTRACTING : send_dat
+EXTRACTING -> EXTRACTING : recv_pay [msg={PAY,timout}]
+EXTRACTING -> EXTRACTING : recv_pay [msg=???] / drop
+EXTRACTING --> FINACK : recv_pay [msg=EOT]
+EXTRACTING --> ACKFIN : send_eot
+
+INJECTING -> INJECTING : send_pay
+INJECTING -> INJECTING : recv_dat [msg={DAT,timeout}]
+INJECTING -> INJECTING : recv_dat [msg=???] / drop
+INJECTING --> FINACK : recv_dat [msg=EOT]
+INJECTING --> ACKFIN : send_eot
+
+FINACK --> FIN : send_eot
+ACKFIN --> FIN : recv_eot
 
 @enduml

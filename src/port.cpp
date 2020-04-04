@@ -213,7 +213,7 @@ void zio::Port::offline()
 
 void zio::Port::send(zio::Message& msg)
 {
-    zio::debug("[port {}]: send {} {} to ({})",
+    zio::debug("[port {}]: send {} #{} {}",
                m_name, msg.form(), msg.seqno(),
                zio::binstr(msg.remote_id()));
     msg.set_coord(m_origin);
