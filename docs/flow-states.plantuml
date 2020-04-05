@@ -1,28 +1,37 @@
 @startuml
 left to right direction
 title ZIO data flow states
-[*] --> CTOR : construct
-CTOR --> WANTBOT : send_bot
-CTOR --> OWEBOT : recv_bot
-WANTBOT --> INI : recv_bot
-OWEBOT --> INI : send_bot
+[*] -> CTOR : construct
+CTOR -> IDLE
+IDLE --> BOTSEND : SendBOT
+IDLE --> BOTRECV : RecvBOT
+BOTSEND --> READY : RecvBOT
+BOTRECV --> READY : SendBOT
 
-INI --> EXTRACTING : [direction=extract]
-INI --> INJECTING : [direction=inject]
+READY --> GIVING : BeginFlow [is_giver]
+READY --> TAKING : BeginFlow [!is_giver] / flush_pay
 
-EXTRACTING -> EXTRACTING : send_dat
-EXTRACTING -> EXTRACTING : recv_pay [msg={PAY,timout}]
-EXTRACTING -> EXTRACTING : recv_pay [msg=???] / drop
-EXTRACTING --> FINACK : recv_pay [msg=EOT]
-EXTRACTING --> ACKFIN : send_eot
+state GIVING {
+        [*] --> BROKE
+        BROKE -> GENEROUS : RecvPAY [ check_pay ] / recv_pay
+        GENEROUS -> CREDITCHECK : SendDAT / (send_msg,process(CreditCheck))
+        CREDITCHECK --> GENEROUS : CreditCheck [ have_credit ]
+        CREDITCHECK --> BROKE : CreditCheck [ !have_credit ]
+}
 
-INJECTING -> INJECTING : send_pay
-INJECTING -> INJECTING : recv_dat [msg={DAT,timeout}]
-INJECTING -> INJECTING : recv_dat [msg=???] / drop
-INJECTING --> FINACK : recv_dat [msg=EOT]
-INJECTING --> ACKFIN : send_eot
+GIVING --> FINACK : RecvEOT
+GIVING --> ACKFIN : SendEOT
 
-FINACK --> FIN : send_eot
-ACKFIN --> FIN : recv_eot
+state TAKING {
+        [*] --> WALLETCHECK
+        WALLETCHECK -> HANDSOUT : SendPAY [ have_credit ] / flush_pay
+        HANDSOUT --> WALLETCHECK : RecvDAT [ check_dat ] / (recv_msg, process(SendPAY))
+}
+
+TAKING --> FINACK : RecvEOT
+TAKING --> ACKFIN : SendEOT
+
+FINACK --> FIN : SendEOT
+ACKFIN --> FIN : RecvEOT
 
 @enduml
