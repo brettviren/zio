@@ -296,6 +296,27 @@ struct flowsm {
     }
 };
 
+typedef boost::sml::sm<flowsm, boost::sml::defer_queue<std::deque>, boost::sml::process_queue<std::queue>> FlowSM;
+
+struct FlowDevice {
+    zio::portptr_t port;
+    FlowApp app;
+    FlowSM sm;
+
+    FlowDevice(zio::portptr_t p) : port{p}, app{port}, sm{app} { }
+
+    // Recv a message on flow port and run it thought the state
+    // machine.  Return false if message is bogus
+    [[nodiscard]]
+    bool recv(zio::Message& msg, int timeout=-1) {
+        bool ok = port->recv(msg, timeout);
+        if (!ok) {
+            return ok;
+        }
+        return sm.process_event(RecvMsg{msg});
+    }
+
+};
 } // generic namespace
 
 
@@ -316,17 +337,14 @@ int main()
     cport->connect("server","recver");
     cnode.online();
 
-    typedef sml::sm<flowsm, sml::defer_queue<std::deque>, sml::process_queue<std::queue>> FlowSM;
+    FlowDevice server(sport);
+    FlowDevice client(cport);
 
-    FlowApp sflow{sport};
-    FlowApp cflow{cport};
+    assert(server.sm.is(sml::state<IDLE>));
+    assert(server.app.send_seqno == -1);
 
-    FlowSM sm{sflow};
-    assert(sm.is(sml::state<IDLE>));
-    assert(sflow.send_seqno == -1);
-    FlowSM cm{cflow};
-    assert(cm.is(sml::state<IDLE>));
-    assert(cflow.send_seqno == -1);
+    assert(client.sm.is(sml::state<IDLE>));
+    assert(client.app.send_seqno == -1);
 
     // CLIENT: initial BOT
     {
@@ -335,10 +353,10 @@ int main()
                                {"direction","extract"},
                                {"credit",2}});
 
-        auto ok = cm.process_event(SendMsg{cbot});
+        auto ok = client.sm.process_event(SendMsg{cbot});
         assert(ok);
-        assert(cm.is(sml::state<BOTSEND>));
-        assert(cflow.send_seqno == 0);
+        assert(client.sm.is(sml::state<BOTSEND>));
+        assert(client.app.send_seqno == 0);
     }
     
     // CLIENT: try to send again.  This apparently quietly does
@@ -351,29 +369,26 @@ int main()
                                {"direction","extract"},
                                {"credit",2}});
 
-        auto ok = cm.process_event(SendMsg{cbot});
+        auto ok = client.sm.process_event(SendMsg{cbot});
         assert(!ok);
-        assert(cm.is(sml::state<BOTSEND>));
-        assert(cflow.send_seqno == 0);
+        assert(client.sm.is(sml::state<BOTSEND>));
+        assert(client.app.send_seqno == 0);
     }
 
     // SERVER: do a recv, better be a BOT
     {
-        zio::Message sbot("FLOW");
-        assert(sport->recv(sbot));
-
+        zio::Message sbot;
+        assert(server.recv(sbot));
         {
-            auto ok = sm.process_event(RecvMsg{sbot});
-            assert(ok);
-            assert(sm.is(sml::state<BOTRECV>));
-            assert(sflow.recv_seqno == 0);
+            assert(server.sm.is(sml::state<BOTRECV>));
+            assert(server.app.recv_seqno == 0);
         }
         {
             zio::debug("server: try double recv");
-            auto ok = sm.process_event(RecvMsg{sbot});
+            auto ok = server.sm.process_event(RecvMsg{sbot});
             assert(!ok);
-            assert(sm.is(sml::state<BOTRECV>));
-            assert(sflow.recv_seqno == 0);
+            assert(server.sm.is(sml::state<BOTRECV>));
+            assert(server.app.recv_seqno == 0);
         }
 
         // SERVER responds to BOT, reuse sbot
@@ -383,36 +398,33 @@ int main()
         fobj["direction"] = "inject"; // server
         sbot.set_label_object(fobj);
 
-        auto ok = sm.process_event(SendMsg{sbot});
+        auto ok = server.sm.process_event(SendMsg{sbot});
         assert(ok);
-        assert(sm.is(sml::state<READY>));
-        assert(sflow.send_seqno == 0);
-        assert(!sflow.giver);
+        assert(server.sm.is(sml::state<READY>));
+        assert(server.app.send_seqno == 0);
+        assert(!server.app.giver);
     }
 
     // CLIENT do a recv, better be a bot
     {
         zio::Message cbot;
-        assert(cport->recv(cbot));
-
-        auto ok = cm.process_event(RecvMsg{cbot});
-        assert(ok);
-        assert(cm.is(sml::state<READY>));
-        assert(cflow.recv_seqno == 0);
-        assert(cflow.giver);
+        assert(client.recv(cbot));
+        assert(client.sm.is(sml::state<READY>));
+        assert(client.app.recv_seqno == 0);
+        assert(client.app.giver);
     }
 
     // Explicitly leave READY state
     {
-        auto ok = sm.process_event(BeginFlow{});
+        auto ok = server.sm.process_event(BeginFlow{});
         assert(ok);
-        assert(sm.is< decltype(sml::state<flowsm_taking>) >(sml::state<HANDSOUT>));
+        assert(server.sm.is< decltype(sml::state<flowsm_taking>) >(sml::state<HANDSOUT>));
     }
 
     {
-        auto ok = cm.process_event(BeginFlow{});
+        auto ok = client.sm.process_event(BeginFlow{});
         assert(ok);
-        assert(cm.is< decltype(sml::state<flowsm_giving>) >(sml::state<BROKE>));
+        assert(client.sm.is< decltype(sml::state<flowsm_giving>) >(sml::state<BROKE>));
     }
 
 
@@ -420,27 +432,23 @@ int main()
     
     {
         zio::Message cpay;
-        assert(cport->recv(cpay));
-        auto ok = cm.process_event(RecvMsg{cpay});
-        assert(ok);
-        assert(cm.is< decltype(sml::state<flowsm_giving>) >(sml::state<GENEROUS>));
+        assert(client.recv(cpay));
+        assert(client.sm.is< decltype(sml::state<flowsm_giving>) >(sml::state<GENEROUS>));
     }
 
     {
         zio::Message cdat("FLOW");
         cdat.set_label_object({{"flow","DAT"}});
 
-        auto ok = cm.process_event(SendMsg{cdat});
+        auto ok = client.sm.process_event(SendMsg{cdat});
         assert(ok);
-        assert(cm.is< decltype(sml::state<flowsm_giving>) >(sml::state<GENEROUS>));
+        assert(client.sm.is< decltype(sml::state<flowsm_giving>) >(sml::state<GENEROUS>));
     }
 
     {
         zio::Message sdat;
-        assert(sport->recv(sdat));
-        auto ok = sm.process_event(RecvMsg{sdat});
-        assert(ok);
-        assert(sm.is< decltype(sml::state<flowsm_taking>) >(sml::state<HANDSOUT>));
+        assert(server.recv(sdat));
+        assert(server.sm.is< decltype(sml::state<flowsm_taking>) >(sml::state<HANDSOUT>));
     }
 
     // shut it down
@@ -448,32 +456,26 @@ int main()
     {                           // client
         zio::Message ceot("FLOW");
         ceot.set_label_object({{"flow","EOT"}});
-        auto ok = cm.process_event(SendMsg{ceot});
+        auto ok = client.sm.process_event(SendMsg{ceot});
         assert(ok);
-        assert(cm.is(sml::state<ACKFIN>));
+        assert(client.sm.is(sml::state<ACKFIN>));
     }
 
     {                           // server
         zio::Message seot;
-        assert(sport->recv(seot));
+        assert(server.recv(seot));
+        assert(server.sm.is(sml::state<FINACK>));
         {
-            auto ok = sm.process_event(RecvMsg{seot});
+            auto ok = server.sm.process_event(SendMsg{seot});
             assert(ok);
-            assert(sm.is(sml::state<FINACK>));
-        }
-        {
-            auto ok = sm.process_event(SendMsg{seot});
-            assert(ok);
-            assert(sm.is(sml::state<FIN>));
+            assert(server.sm.is(sml::state<FIN>));
         }
     }
 
     {                           // client
         zio::Message ceot;
-        assert(cport->recv(ceot));
-        auto ok = cm.process_event(RecvMsg{ceot});
-        assert (ok);
-        assert(cm.is(sml::state<FIN>));
+        assert(client.recv(ceot));
+        assert(client.sm.is(sml::state<FIN>));
     }    
 
     return 0;
