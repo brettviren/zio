@@ -8,6 +8,7 @@
 #include <string>
 #include <deque>
 #include <queue>
+#include <iostream>
 
 // The main app holding mutable state operated on via actions.
 struct FlowApp {
@@ -230,7 +231,7 @@ struct flowsm_taking {
         return make_transition_table(
             * state<TAKING> = state<WALLETCHECK>
             , state<WALLETCHECK> + event<FlushPay> [have_credit] / flush_pay = state<HANDSOUT>
-            , state<HANDSOUT>    + event<RecvMsg>  [check_dat]  / (recv_msg, process(FlushPay{}))
+            , state<HANDSOUT>    + event<RecvMsg>  [check_dat]  / recv_msg = state<WALLETCHECK>
             );
     }
 };
@@ -256,8 +257,8 @@ struct flowsm_flowing {
 
         return make_transition_table(
             * state<FLOWING> = state<READY>
-            , state<READY> + event<BeginFlow> [ is_giver ]                         = state<flowsm_giving>
-            , state<READY> + event<BeginFlow> [!is_giver ] / (process(FlushPay{})) = state<flowsm_taking>
+            , state<READY> + event<BeginFlow> [ is_giver ] = state<flowsm_giving>
+            , state<READY> + event<BeginFlow> [!is_giver ] = state<flowsm_taking>
             );
     }
 };
@@ -326,17 +327,80 @@ struct flow_logger {
     }
 };
 
+template <class T>
+void flow_dump_plantuml() noexcept {
+  auto src_state = std::string{boost::sml::aux::string<typename T::src_state>{}.c_str()};
+  auto dst_state = std::string{boost::sml::aux::string<typename T::dst_state>{}.c_str()};
+  if (dst_state == "X") {
+    dst_state = "[*]";
+  }
 
+  if (T::initial) {
+    std::cout << "[*] --> " << src_state << std::endl;
+  }
 
+  std::cout << src_state << " --> " << dst_state;
+
+  const auto has_event = !boost::sml::aux::is_same<typename T::event, boost::sml::anonymous>::value;
+  const auto has_guard = !boost::sml::aux::is_same<typename T::guard, boost::sml::front::always>::value;
+  const auto has_action = !boost::sml::aux::is_same<typename T::action, boost::sml::front::none>::value;
+
+  if (has_event || has_guard || has_action) {
+    std::cout << " :";
+  }
+
+  if (has_event) {
+    std::cout << " " << boost::sml::aux::get_type_name<typename T::event>();
+  }
+
+  if (has_guard) {
+    std::cout << " [" << boost::sml::aux::get_type_name<typename T::guard::type>() << "]";
+  }
+
+  if (has_action) {
+    std::cout << " / " << boost::sml::aux::get_type_name<typename T::action::type>();
+  }
+
+  std::cout << std::endl;
+}
+
+template <template <class...> class T, class... Ts>
+void flow_dump_plantuml(const T<Ts...>&) noexcept {
+  int _[]{0, (flow_dump_plantuml<Ts>(), 0)...};
+  (void)_;
+}
+
+template <class SM>
+void flow_plantuml(const SM&) noexcept {
+  std::cout << "@startuml" << std::endl << std::endl;
+  flow_dump_plantuml(typename SM::transitions{});
+  std::cout << std::endl << "@enduml" << std::endl;
+}
 
 typedef boost::sml::sm<flowsm,
-                       boost::sml::logger<flow_logger>,
-                       boost::sml::defer_queue<std::deque>,
-                       boost::sml::process_queue<std::queue>
+                       boost::sml::logger<flow_logger>
+                       // boost::sml::defer_queue<std::deque>,
+                       // boost::sml::process_queue<std::queue>
                        > FlowSM;
 
 } // generic namespace
 
+
+void test_dump_plantuml()
+{
+    FlowApp app;
+    boost::sml::sm<flowsm> sm{app};
+    flow_plantuml(sm);
+    boost::sml::sm<flowsm_flowing> sm_flowing{app};
+    flow_plantuml(sm_flowing);
+
+    boost::sml::sm<flowsm_taking> sm_taking{app};
+    flow_plantuml(sm_taking);
+
+    boost::sml::sm<flowsm_giving> sm_giving{app};
+    flow_plantuml(sm_giving);
+    
+}
 
 // A protototype for a user-facing class which takes care of the
 // high-level parts of flow protocol.  For simplicity, it will
@@ -640,7 +704,7 @@ void test_concise_c2s()
     one.link().send(signal, zio::send_flags::none);
     two.link().send(signal, zio::send_flags::none);
     zio::debug("test_concise_c2s sleep again");
-    zio::sleep_ms(zio::time_unit_t{1000});
+    zio::sleep_ms(zio::time_unit_t{100});
     zio::debug("test_concise_c2s exit");
 }
 
@@ -805,8 +869,10 @@ int main()
 {
     zio::init_all();
 
-    //test_longhand();
+
+    // test_longhand();
     test_concise_c2s();
+    test_dump_plantuml();
 
     return 0;
 }

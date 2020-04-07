@@ -1,0 +1,39 @@
+@startuml
+
+[*] --> CTOR
+CTOR --> IDLE
+IDLE --> BOTSEND : SendMsg [check_send_bot] / send_msg
+IDLE --> BOTRECV : RecvMsg [check_recv_bot] / recv_bot
+BOTSEND --> flowsm_flowing : RecvMsg [check_recv_bot] / recv_bot
+BOTRECV --> flowsm_flowing : SendMsg [check_send_bot] / send_msg
+flowsm_flowing --> ACKFIN : SendMsg [check_eot] / send_msg
+flowsm_flowing --> FINACK : RecvMsg [check_eot] / recv_msg
+FINACK --> FIN : SendMsg [check_eot] / send_msg
+ACKFIN --> FIN : RecvMsg [check_eot] / recv_msg
+
+state flowsm_flowing {
+[*] --> FLOWING
+FLOWING --> READY
+READY --> flowsm_giving : BeginFlow [lambda(auto:8, FlowApp&)]
+READY --> flowsm_taking : BeginFlow [lambda(auto:8, FlowApp&)]
+
+state flowsm_taking {
+[*] --> TAKING
+TAKING --> WALLETCHECK
+WALLETCHECK --> HANDSOUT : FlushPay [have_credit] / flush_msg
+HANDSOUT --> WALLETCHECK : RecvMsg [check_dat] / recv_msg
+}
+
+state flowsm_giving {
+[*] --> GIVING
+GIVING --> BROKE
+BROKE --> GENEROUS : RecvMsg [check_pay] / recv_pay
+GENEROUS --> GENEROUS : RecvMsg [check_pay] / recv_pay
+GENEROUS --> CREDITCHECK : SendMsg [check_dat] / send_msg
+CREDITCHECK --> GENEROUS : CheckCredit [have_credit]
+CREDITCHECK --> BROKE : CheckCredit [!have_credit]
+}
+}
+
+@enduml
+
