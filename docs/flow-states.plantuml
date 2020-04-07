@@ -8,8 +8,9 @@ IDLE --> BOTRECV : RecvBOT
 BOTSEND --> READY : RecvBOT
 BOTRECV --> READY : SendBOT
 
-READY --> GIVING : BeginFlow [is_giver]
-READY --> TAKING : BeginFlow [!is_giver] / flush_pay
+state READY {
+        [*] --> GIVING : BeginFlow [is_giver]
+        [*] --> TAKING : BeginFlow [!is_giver] / flush_pay
 
 state GIVING {
         [*] --> BROKE
@@ -19,17 +20,14 @@ state GIVING {
         CREDITCHECK --> BROKE : CreditCheck [ !have_credit ]
 }
 
-GIVING --> FINACK : RecvEOT
-GIVING --> ACKFIN : SendEOT
-
 state TAKING {
         [*] --> WALLETCHECK
         WALLETCHECK -> HANDSOUT : SendPAY [ have_credit ] / flush_pay
         HANDSOUT --> WALLETCHECK : RecvDAT [ check_dat ] / (recv_msg, process(SendPAY))
 }
-
-TAKING --> FINACK : RecvEOT
-TAKING --> ACKFIN : SendEOT
+}
+READY --> FINACK : RecvEOT
+READY --> ACKFIN : SendEOT
 
 FINACK --> FIN : SendEOT
 ACKFIN --> FIN : RecvEOT

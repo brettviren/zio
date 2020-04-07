@@ -23,7 +23,7 @@ struct FlowApp {
     }
 };
 
-namespace {
+
 
 // Event types
 
@@ -37,32 +37,6 @@ struct RecvMsg {
 struct FlushPay {};
 struct BeginFlow {};
 struct CheckCredit {};
-
-
-auto guard0 = [](auto e) {
-                  zio::debug("guard1: {}", typeid(e).name());
-                  return true; };
-auto action1 = [](auto e, FlowApp& f) {
-                   zio::debug("action1: {}, credit: {}",
-                              typeid(e).name(), f.credit); ++f.credit; };
-
-// template <class R, class... Ts>
-// auto call_impl(R (*f)(Ts...)) {
-//     return [f](Ts... args) { return f(args...); };
-// }
-// template <class T, class R, class... Ts>
-// auto call_impl(T* self, R (T::*f)(Ts...)) {
-//     return [self, f](Ts... args) { return (self->*f)(args...); };
-// }
-// template <class T, class R, class... Ts>
-// auto call_impl(const T* self, R (T::*f)(Ts...) const) {
-//     return [self, f](Ts... args) { return (self->*f)(args...); };
-// }
-// template <class T, class R, class... Ts>
-// auto call_impl(const T* self, R (T::*f)(Ts...)) {
-//     return [self, f](Ts... args) { return (self->*f)(args...); };
-// }
-// auto call = [](auto... args) { return call_impl(args...); };
 
 
 // Guards
@@ -166,14 +140,13 @@ auto have_credit = [](auto e, FlowApp& f) {
 
 // Actions
 
-
 auto send_msg = [](auto e, FlowApp& f) {
     ++ f.send_seqno;
     e.msg.set_seqno(f.send_seqno);
     e.msg.set_remote_id(f.remid);
     f.port->send(e.msg);
-    zio::debug("[flow {}] send_msg #{} with {}/{} credit",
-               f.name(), f.send_seqno, f.credit, f.total_credit);
+    zio::debug("[flow {}] send_msg #{} with {}/{} credit, {}",
+               f.name(), f.send_seqno, f.credit, f.total_credit, e.msg.label());
 };
 
 auto recv_bot = [](auto e, FlowApp& f) {
@@ -204,6 +177,8 @@ auto recv_pay = [](auto e, FlowApp& f) {
 
 auto flush_pay = [](auto e, FlowApp& f) {
     if (!f.credit) {
+        zio::debug("[flow {}] flush_pay no credit to flush",
+                   f.port->name());
         return;
     }
     zio::Message msg("FLOW");
@@ -227,28 +202,35 @@ struct CTOR{};
 struct IDLE{};
 struct BOTSEND{};
 struct BOTRECV{};
+struct FLOWING{};
 struct READY{};
-struct GIVING{};
+
 struct FINACK{};
 struct ACKFIN{};
 struct FIN{};
 
 // giving states
+struct GIVING{};
 struct BROKE{};
 struct GENEROUS{};
 struct CREDITCHECK{};
 
 // taking states
+struct TAKING{};
 struct WALLETCHECK{};
 struct HANDSOUT{};
+
+
+namespace {
 
 struct flowsm_taking {
     auto operator()() const noexcept {
         using namespace boost::sml;
 
         return make_transition_table(
-* state<WALLETCHECK> + event<FlushPay> [have_credit] / flush_pay = state<HANDSOUT>
-, state<HANDSOUT>    + event<RecvMsg>  [check_dat]  / (recv_msg, process(FlushPay{}))
+            * state<TAKING> = state<WALLETCHECK>
+            , state<WALLETCHECK> + event<FlushPay> [have_credit] / flush_pay = state<HANDSOUT>
+            , state<HANDSOUT>    + event<RecvMsg>  [check_dat]  / (recv_msg, process(FlushPay{}))
             );
     }
 };
@@ -258,11 +240,24 @@ struct flowsm_giving {
         using namespace boost::sml;
 
         return make_transition_table(
-            * state<BROKE>    + event<RecvMsg> [check_pay] / recv_pay = state<GENEROUS>
+            * state<GIVING> = state<BROKE>
+            , state<BROKE>    + event<RecvMsg> [check_pay] / recv_pay = state<GENEROUS>
             , state<GENEROUS> + event<RecvMsg> [check_pay] / recv_pay = state<GENEROUS>
-            , state<GENEROUS> + event<SendMsg> [check_dat] / (send_msg, process(CheckCredit{})) = state<CREDITCHECK>
+            , state<GENEROUS> + event<SendMsg> [check_dat] / send_msg = state<CREDITCHECK>
             , state<CREDITCHECK> + event<CheckCredit> [ have_credit] = state<GENEROUS>
             , state<CREDITCHECK> + event<CheckCredit> [!have_credit] = state<BROKE>
+            );
+    }
+};
+
+struct flowsm_flowing {
+    auto operator()() const noexcept {
+        using namespace boost::sml;
+
+        return make_transition_table(
+            * state<FLOWING> = state<READY>
+            , state<READY> + event<BeginFlow> [ is_giver ]                         = state<flowsm_giving>
+            , state<READY> + event<BeginFlow> [!is_giver ] / (process(FlushPay{})) = state<flowsm_taking>
             );
     }
 };
@@ -278,16 +273,11 @@ struct flowsm {
 , state<IDLE> + event<SendMsg> [check_send_bot] / send_msg = state<BOTSEND>
 , state<IDLE> + event<RecvMsg> [check_recv_bot] / recv_bot = state<BOTRECV>
 
-, state<BOTSEND> + event<RecvMsg> [check_recv_bot] / recv_bot = state<READY>
-, state<BOTRECV> + event<SendMsg> [check_send_bot] / send_msg = state<READY>
+, state<BOTSEND> + event<RecvMsg> [check_recv_bot] / recv_bot = state<flowsm_flowing>
+, state<BOTRECV> + event<SendMsg> [check_send_bot] / send_msg = state<flowsm_flowing>
 
-, state<READY> + event<BeginFlow> [ is_giver ]             = state<flowsm_giving>
-, state<READY> + event<BeginFlow> [!is_giver ] / (process(FlushPay{})) = state<flowsm_taking>
-
-, state<flowsm_giving> + event<SendMsg> [check_eot] / send_msg = state<ACKFIN>
-, state<flowsm_giving> + event<RecvMsg> [check_eot] / recv_msg = state<FINACK>
-, state<flowsm_taking> + event<SendMsg> [check_eot] / send_msg = state<ACKFIN>
-, state<flowsm_taking> + event<RecvMsg> [check_eot] / recv_msg = state<FINACK>
+, state<flowsm_flowing> + event<SendMsg> [check_eot] / send_msg = state<ACKFIN>
+, state<flowsm_flowing> + event<RecvMsg> [check_eot] / recv_msg = state<FINACK>
 
 , state<FINACK> + event<SendMsg> [check_eot] / send_msg = state<FIN>
 , state<ACKFIN> + event<RecvMsg> [check_eot] / recv_msg = state<FIN>
@@ -296,35 +286,367 @@ struct flowsm {
     }
 };
 
-typedef boost::sml::sm<flowsm, boost::sml::defer_queue<std::deque>, boost::sml::process_queue<std::queue>> FlowSM;
+struct flow_logger {
+    template <class SM, class TEvent>
+    void log_process_event(const TEvent&) {
+        std::string e = boost::sml::aux::get_type_name<TEvent>();
+        const std::string a = "anonymous";
+        if (e.size() > a.size()) {
+            if (e.substr(e.size() - a.size()) == a) {
+                return;
+            }
+        }
+        zio::debug("[{}][process_event] {}",
+                   boost::sml::aux::get_type_name<SM>(),
+                   boost::sml::aux::get_type_name<TEvent>());
+    }
 
+    template <class SM, class TGuard, class TEvent>
+    void log_guard(const TGuard&, const TEvent&, bool result) {
+        zio::debug("[{}][guard] {} {} {}",
+                   boost::sml::aux::get_type_name<SM>(),
+                   boost::sml::aux::get_type_name<TGuard>(),
+                   boost::sml::aux::get_type_name<TEvent>(),
+                   (result ? "[OK]" : "[Reject]"));
+    }
+
+    template <class SM, class TAction, class TEvent>
+    void log_action(const TAction&, const TEvent&) {
+        zio::debug("[{}][action] {} {}",
+                   boost::sml::aux::get_type_name<SM>(),
+                   boost::sml::aux::get_type_name<TAction>(),
+                   boost::sml::aux::get_type_name<TEvent>());
+    }
+
+    template <class SM, class TSrcState, class TDstState>
+    void log_state_change(const TSrcState& src, const TDstState& dst) {
+        zio::debug("[{}][transition] {} -> {}",
+                   boost::sml::aux::get_type_name<SM>(),
+                   src.c_str(), dst.c_str());
+    }
+};
+
+
+
+
+typedef boost::sml::sm<flowsm,
+                       boost::sml::logger<flow_logger>,
+                       boost::sml::defer_queue<std::deque>,
+                       boost::sml::process_queue<std::queue>
+                       > FlowSM;
+
+} // generic namespace
+
+
+// A protototype for a user-facing class which takes care of the
+// high-level parts of flow protocol.  For simplicity, it will
+// assert() in many places.  The real class will throw.
 struct FlowDevice {
     zio::portptr_t port;
     FlowApp app;
+    flow_logger logger;
     FlowSM sm;
+    std::string direction;
+    int credit;
 
-    FlowDevice(zio::portptr_t p) : port{p}, app{port}, sm{app} { }
+    zio::Message msg{"FLOW"};
+
+    void clear() {
+        msg.set_label_object({});
+    }
+    std::string flowtype() {
+        auto fobj = msg.label_object();
+        return fobj["flow"];
+    }
+
+    FlowDevice(zio::portptr_t p, std::string dir, int credit)
+        : port{p}, app{port}, sm{logger,app}, direction{dir}, credit{credit} { }
+
+    // Exchange BOT with other end
+    void bot_handshake() {
+        assert (sm.is(boost::sml::state<IDLE>));
+        if (zio::sock_type(port->socket()) == ZMQ_SERVER) {
+            bot_handshake_serverish();
+        }
+        else {
+            bot_handshake_clientish();
+        }
+        assert (sm.is< decltype(boost::sml::state<flowsm_flowing>) >(boost::sml::state<READY>));
+        // boost::sml::state<READY>));
+        assert(app.send_seqno == 0);
+        assert(app.recv_seqno == 0);
+        zio::debug("[flow {}] bot handshake complete", port->name());
+        assert(sm.process_event(BeginFlow{}));
+        zio::debug("[flow {}] enter flow", port->name());
+    }
+
+    void bot_handshake_serverish() {
+        
+        zio::debug("[flow {}] serverish bot handshake",
+                   port->name());
+
+        // server recv's then sends
+        bool ok = recv();
+        assert(ok);
+        assert(sm.is(boost::sml::state<BOTRECV>));
+        auto fobj = msg.label_object();
+        std::string typ = fobj["flow"];
+        assert (typ == "BOT");
+        std::string other_dir = fobj["direction"];
+        if (direction == "inject") {
+            assert (other_dir == "extract");
+        }
+        else {
+            assert (other_dir == "inject");
+        }
+        int other_credit = fobj["credit"];
+        // protocol lets server override client's credit request,
+        // here we just test for overall consistency.
+        assert(credit == other_credit);
+        fobj["direction"] = direction;
+        msg.set_label_object(fobj);
+
+        ok = sm.process_event(SendMsg{msg});
+        assert(ok);
+    }
+
+    void bot_handshake_clientish() {
+        msg.set_label_object({{"flow","BOT"},
+                              {"direction",direction},
+                              {"credit",credit}});
+        zio::debug("[flow {}] clientish bot handshake label:{}",
+                   port->name(),  msg.label());
+
+        assert(sm.is(boost::sml::state<IDLE>));
+
+        bool ok = sm.process_event(SendMsg{msg});
+        assert(ok);
+        assert(sm.is(boost::sml::state<BOTSEND>));
+
+        zio::debug("[flow {}] clientish bot send okay", port->name());
+
+        ok = recv();            // get BOT reply
+        assert(ok);
+        auto fobj = msg.label_object();
+        std::string typ = fobj["flow"];
+        assert (typ == "BOT");
+        std::string other_dir = fobj["direction"];
+        if (direction == "inject") {
+            assert (other_dir == "extract");
+        }
+        else {
+            assert (other_dir == "inject");
+        }
+        int other_credit = fobj["credit"];
+        credit = other_credit;
+    }
+
+    void sendeot() {            // call if receive EOT
+        std::string pname = port->name();
+        sm.visit_current_states([pname](auto state) {
+                                    zio::debug("[flow {}] sendeot from {}", pname, state.c_str());
+                                });
+
+        msg.set_label_object({{"flow","EOT"}});
+        auto ok = sm.process_event(SendMsg{msg});
+        assert(ok);
+        assert(sm.is(boost::sml::state<ACKFIN>));
+    }
+    void shutdown(int timeout=-1) { // call to initiate shutdown handshake
+        zio::debug("[flow {}] shutdown", port->name());
+        sendeot();
+        do {
+            auto what = recv(timeout);
+            if (!what) {
+                zio::debug("[flow {}] shutdown timeout on EOT reply", port->name());
+                break;
+            }
+        } while (! sm.is(boost::sml::state<FINACK>));
+    }
+    void sendpay() {
+        zio::debug("[flow {}] sendpay", port->name());
+        sm.process_event(FlushPay{}); // don't care if fails
+    }
+    void senddat() {
+        std::string pname = port->name();
+        sm.visit_current_states([pname](auto state) {
+                                    zio::debug("[flow {}] senddat from {}", pname, state.c_str());
+                                });
+
+        msg.set_label_object({{"flow","DAT"}});
+        auto ok = sm.process_event(SendMsg{msg});
+        assert(ok);
+        sm.process_event(CheckCredit{});
+    }
+
+        
+    // Try to receive one message and process it through the state
+    // machine.  Return nullptr if timeout of unexpected message
+    // otherwise return "DAT", "PAY" or "EOT".  If the latter, handle
+    // responding.
+    const char* recv_proc(int timeout = -1) {
+        if (direction == "inject") {
+            sendpay();
+        }
+        if (! recv(timeout)) {
+            return nullptr;
+        }
+        std::string typ = flowtype();
+        if (direction == "inject") {
+            if (typ == "DAT") {
+                return "DAT";
+            }
+            if (typ == "PAY") {
+                return nullptr;
+            }
+        }
+        if (direction == "extract") {
+            if (typ == "DAT") {
+                return nullptr;
+            }
+            if (typ == "PAY") {
+                return "PAY";
+            }
+        }
+        if (typ == "EOT") {
+            sendeot();
+            return "EOT";
+        }
+        
+        throw std::runtime_error("unexpected flow type " + typ);
+    }
+
 
     // Recv a message on flow port and run it thought the state
     // machine.  Return false if message is bogus
     [[nodiscard]]
-    bool recv(zio::Message& msg, int timeout=-1) {
+    bool recv(int timeout=-1) {
+        clear();
         bool ok = port->recv(msg, timeout);
         if (!ok) {
+            zio::debug("[flow {}] recv timeout", port->name());
             return ok;
         }
-        return sm.process_event(RecvMsg{msg});
+        ok = sm.process_event(RecvMsg{msg});
+        if (!ok) {
+            zio::debug("[flow {}] sm recv fail for: {}",
+                       port->name(), msg.label());
+        }
+        return ok;
     }
 
+
 };
-} // generic namespace
 
 
-int main()
+static
+void flow_endpoint(zio::socket_t& link, int socket, bool sender, int credit)
+{
+    // actor ready
+    link.send(zio::message_t{}, zio::send_flags::none);
+
+    // create node based on socket/sender config
+    std::string nodename = "client";
+    std::string othernode = "server";
+    if (socket == ZMQ_SERVER) {
+        nodename = "server";
+        othernode = "client";
+    }
+    std::string direction = "inject";
+    std::string portname = "recver";
+    std::string otherport = "sender";
+    if (sender) {
+        direction = "extract";
+        portname = "sender";
+        otherport = "recver";
+    }
+
+    zio::debug("[{} {}] direction: {}, socket: {}, sender: {}, credit: {}",
+               nodename, portname, direction, zio::sock_type_name(socket), sender, credit);
+
+
+    zio::Node node(nodename);
+    auto port = node.port(portname, socket);
+    if (nodename == "server") { // note, client can bind.
+        port->bind();           // here, simplify cfg.
+    }                           
+    else {
+        port->connect(othernode, otherport);
+    }
+    node.online();
+
+    FlowDevice device(port, direction, credit);
+    device.bot_handshake();
+
+    zio::poller_t<> link_poller;
+    link_poller.add(link, zio::event_flags::pollin);
+
+    std::vector<zio::poller_event<>> events(1);
+
+    while (true) {
+        zio::debug("[{} {}] main loop", nodename, direction);
+        if (link_poller.wait_all(events, zio::time_unit_t{0})) {
+            zio::debug("[{} {}] link hit", nodename, direction);
+            device.shutdown(1000);
+            break;
+        }
+
+        if (sender and device.app.credit) {
+            device.senddat();
+        }
+
+        const char* what = device.recv_proc(100);
+        if (!what) {
+            continue;           // timeout or bogus message
+        }
+        if (what == std::string("EOT")) {
+            zio::debug("[{} {}] got EOT", nodename, direction);
+            break;
+        }
+        if (what == std::string("DAT")) {
+            zio::debug("[{} {}] got DAT", nodename, direction);
+            // a real application would do something useful here.
+            continue;
+        }
+
+    }
+
+    zio::debug("[{} {}] node going offline", nodename, direction);
+    node.offline();
+
+    zio::debug("[{} {}] waiting for actor shutdown", nodename, direction);
+    zio::message_t rmsg;
+    auto res = link.recv(rmsg);
+    assert(res);
+}
+
+#include "zio/actor.hpp"
+
+// this test makes better uses of the FlowDevice
+void test_concise_c2s()
+{
+    zio::context_t ctx;
+
+    const int credit = 10;
+    zio::debug("test_concise_c2s start actors with {} credit", credit);
+    // int socket, bool sender, int credit)
+    zio::zactor_t one(ctx, flow_endpoint, ZMQ_SERVER, false, credit);
+    zio::zactor_t two(ctx, flow_endpoint, ZMQ_CLIENT, true,  credit);
+
+    zio::debug("test_concise_c2s sleep");
+    zio::sleep_ms(zio::time_unit_t{1000});
+    zio::debug("test_concise_c2s shutdown actors");
+    zio::message_t signal;
+    one.link().send(signal, zio::send_flags::none);
+    two.link().send(signal, zio::send_flags::none);
+    zio::debug("test_concise_c2s sleep again");
+    zio::sleep_ms(zio::time_unit_t{1000});
+    zio::debug("test_concise_c2s exit");
+}
+
+void test_longhand()
 {
     using namespace boost;
-
-    zio::init_all();
 
     // this test interleaves client and server conversation
 
@@ -337,8 +659,11 @@ int main()
     cport->connect("server","recver");
     cnode.online();
 
-    FlowDevice server(sport);
-    FlowDevice client(cport);
+    // this test only "half uses" the device see test_concise() for
+    // more leaning-in.
+    const int credit = 2;
+    FlowDevice server(sport, "inject", credit);
+    FlowDevice client(cport, "extract", credit);
 
     assert(server.sm.is(sml::state<IDLE>));
     assert(server.app.send_seqno == -1);
@@ -377,39 +702,40 @@ int main()
 
     // SERVER: do a recv, better be a BOT
     {
-        zio::Message sbot;
-        assert(server.recv(sbot));
+        assert(server.recv());
         {
             assert(server.sm.is(sml::state<BOTRECV>));
             assert(server.app.recv_seqno == 0);
         }
         {
             zio::debug("server: try double recv");
-            auto ok = server.sm.process_event(RecvMsg{sbot});
+            auto ok = server.sm.process_event(RecvMsg{server.msg});
             assert(!ok);
             assert(server.sm.is(sml::state<BOTRECV>));
             assert(server.app.recv_seqno == 0);
+            zio::debug("server: double recv successfully blocked");
         }
 
-        // SERVER responds to BOT, reuse sbot
-        auto fobj = sbot.label_object();
+        // SERVER responds to BOT, partly reuse last message
+        auto fobj = server.msg.label_object();
         zio::debug("server bot: {}", fobj.dump());
         assert(fobj["direction"].get<std::string>() == "extract");
         fobj["direction"] = "inject"; // server
-        sbot.set_label_object(fobj);
+        server.msg.set_label_object(fobj);
 
-        auto ok = server.sm.process_event(SendMsg{sbot});
+        auto ok = server.sm.process_event(SendMsg{server.msg});
         assert(ok);
-        assert(server.sm.is(sml::state<READY>));
+        //assert(server.sm.is(sml::state<READY>));
+        assert (server.sm.is< decltype(sml::state<flowsm_flowing>) >(sml::state<READY>));
         assert(server.app.send_seqno == 0);
         assert(!server.app.giver);
     }
 
     // CLIENT do a recv, better be a bot
     {
-        zio::Message cbot;
-        assert(client.recv(cbot));
-        assert(client.sm.is(sml::state<READY>));
+        assert(client.recv());
+        // assert(client.sm.is(sml::state<READY>));
+        assert (client.sm.is< decltype(sml::state<flowsm_flowing>) >(sml::state<READY>));
         assert(client.app.recv_seqno == 0);
         assert(client.app.giver);
     }
@@ -431,8 +757,7 @@ int main()
     // both are now in flow
     
     {
-        zio::Message cpay;
-        assert(client.recv(cpay));
+        assert(client.recv());
         assert(client.sm.is< decltype(sml::state<flowsm_giving>) >(sml::state<GENEROUS>));
     }
 
@@ -446,8 +771,7 @@ int main()
     }
 
     {
-        zio::Message sdat;
-        assert(server.recv(sdat));
+        assert(server.recv());
         assert(server.sm.is< decltype(sml::state<flowsm_taking>) >(sml::state<HANDSOUT>));
     }
 
@@ -462,21 +786,27 @@ int main()
     }
 
     {                           // server
-        zio::Message seot;
-        assert(server.recv(seot));
+        assert(server.recv());
         assert(server.sm.is(sml::state<FINACK>));
         {
-            auto ok = server.sm.process_event(SendMsg{seot});
+            auto ok = server.sm.process_event(SendMsg{server.msg});
             assert(ok);
             assert(server.sm.is(sml::state<FIN>));
         }
     }
 
     {                           // client
-        zio::Message ceot;
-        assert(client.recv(ceot));
+        assert(client.recv());
         assert(client.sm.is(sml::state<FIN>));
     }    
+}
+
+int main()
+{
+    zio::init_all();
+
+    //test_longhand();
+    test_concise_c2s();
 
     return 0;
 }

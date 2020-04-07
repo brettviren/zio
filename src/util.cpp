@@ -23,15 +23,15 @@ std::string zio::sock_type_name(int stype)
         "SUB",
         "REQ",
         "REP",
-        "DEALER",
-        "ROUTER",
+        "DEALER",               // 5
+        "ROUTER",               // 6
         "PULL",
         "PUSH",
         "XPUB",
         "XSUB",
         "STREAM",
-        "SERVER",
-        "CLIENT",
+        "SERVER",               // 12
+        "CLIENT",               // 13
         "RADIO",
         "DISH",
         "GATHER",
@@ -39,7 +39,7 @@ std::string zio::sock_type_name(int stype)
         "DGRAM",
         0
     };
-    if (stype < 0 or stype > 11) return "";
+    if (stype < 0 or stype > 18) return "";
     return names[stype];
 }
 
