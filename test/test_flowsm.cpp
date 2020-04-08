@@ -37,7 +37,7 @@ struct RecvMsg {
 
 struct FlushPay {};
 struct BeginFlow {};
-struct CheckCredit {};
+// struct CheckCredit {};
 
 
 // Guards
@@ -89,7 +89,7 @@ auto check_pay = [](auto e, FlowApp& f) {
         return false;
     }
     if (! fobj["credit"].is_number()) {
-        zio::debug("[flow {}] check_pay bad flow object '{}'",
+        zio::debug("[flow {}] check_pay no credit attr '{}'",
                    f.name(), e.msg.label());
         return false;
     }
@@ -138,6 +138,23 @@ auto have_credit = [](auto e, FlowApp& f) {
     return f.credit > 0;
 };
 
+auto penultimate_credit = [](auto e, FlowApp& f) {
+    zio::debug("[flow {}] penultimate_credit {}/{}",
+               f.name(), f.credit, f.total_credit);
+    return f.total_credit - f.credit == 1;
+};
+
+auto check_one_credit = [](auto e, FlowApp& f) {
+    zio::debug("[flow {}] check_one_credit {}/{}",
+               f.name(), f.credit, f.total_credit);
+    return f.credit == 1;
+};
+
+auto check_many_credit = [](auto e, FlowApp& f) {
+    zio::debug("[flow {}] check_one_credit {}/{}",
+               f.name(), f.credit, f.total_credit);
+    return f.credit > 1;
+};
 
 // Actions
 
@@ -211,14 +228,15 @@ struct ACKFIN{};
 struct FIN{};
 
 // giving states
-struct GIVING{};
+// struct GIVING{};
 struct BROKE{};
 struct GENEROUS{};
-struct CREDITCHECK{};
+// struct CREDITCHECK{};
 
 // taking states
-struct TAKING{};
-struct WALLETCHECK{};
+// struct TAKING{};
+// struct WALLETCHECK{};
+struct RICH{};
 struct HANDSOUT{};
 
 
@@ -229,9 +247,13 @@ struct flowsm_taking {
         using namespace boost::sml;
 
         return make_transition_table(
-            * state<TAKING> = state<WALLETCHECK>
-            , state<WALLETCHECK> + event<FlushPay> [have_credit] / flush_pay = state<HANDSOUT>
-            , state<HANDSOUT>    + event<RecvMsg>  [check_dat]  / recv_msg = state<WALLETCHECK>
+            * state<RICH> + event<FlushPay> [have_credit] / flush_pay = state<HANDSOUT>
+            , state<HANDSOUT> + event<RecvMsg> [ penultimate_credit and check_dat] / recv_msg = state<RICH>
+            , state<HANDSOUT> + event<RecvMsg> [!penultimate_credit and check_dat] / recv_msg = state<HANDSOUT>
+            , state<HANDSOUT> + event<FlushPay> [have_credit] / flush_pay = state<HANDSOUT>
+            // * state<TAKING> = state<WALLETCHECK>
+            // , state<WALLETCHECK> + event<FlushPay> [have_credit] / flush_pay = state<HANDSOUT>
+            // , state<HANDSOUT>    + event<RecvMsg>  [check_dat]  / recv_msg = state<WALLETCHECK>
             );
     }
 };
@@ -241,12 +263,16 @@ struct flowsm_giving {
         using namespace boost::sml;
 
         return make_transition_table(
-            * state<GIVING> = state<BROKE>
-            , state<BROKE>    + event<RecvMsg> [check_pay] / recv_pay = state<GENEROUS>
+            * state<BROKE> + event<RecvMsg> [check_pay] / recv_pay = state<GENEROUS>
+            , state<GENEROUS> + event<SendMsg> [ check_one_credit and check_dat] / send_msg = state<BROKE>
+            , state<GENEROUS> + event<SendMsg> [check_many_credit and check_dat] / send_msg = state<GENEROUS>
             , state<GENEROUS> + event<RecvMsg> [check_pay] / recv_pay = state<GENEROUS>
-            , state<GENEROUS> + event<SendMsg> [check_dat] / send_msg = state<CREDITCHECK>
-            , state<CREDITCHECK> + event<CheckCredit> [ have_credit] = state<GENEROUS>
-            , state<CREDITCHECK> + event<CheckCredit> [!have_credit] = state<BROKE>
+            // * state<GIVING> = state<BROKE>
+            // , state<BROKE>    + event<RecvMsg> [check_pay] / recv_pay = state<GENEROUS>
+            // , state<GENEROUS> + event<RecvMsg> [check_pay] / recv_pay = state<GENEROUS>
+            // , state<GENEROUS> + event<SendMsg> [check_dat] / send_msg = state<CREDITCHECK>
+            // , state<CREDITCHECK> + event<CheckCredit> [ have_credit] = state<GENEROUS>
+            // , state<CREDITCHECK> + event<CheckCredit> [!have_credit] = state<BROKE>
             );
     }
 };
@@ -378,9 +404,9 @@ void flow_plantuml(const SM&) noexcept {
 }
 
 typedef boost::sml::sm<flowsm,
-                       boost::sml::logger<flow_logger>
-                       // boost::sml::defer_queue<std::deque>,
-                       // boost::sml::process_queue<std::queue>
+                       boost::sml::logger<flow_logger>,
+                       boost::sml::defer_queue<std::deque>,
+                       boost::sml::process_queue<std::queue>
                        > FlowSM;
 
 } // generic namespace
@@ -450,8 +476,7 @@ struct FlowDevice {
                    port->name());
 
         // server recv's then sends
-        bool ok = recv();
-        assert(ok);
+        assert(recv());
         assert(sm.is(boost::sml::state<BOTRECV>));
         auto fobj = msg.label_object();
         std::string typ = fobj["flow"];
@@ -470,7 +495,7 @@ struct FlowDevice {
         fobj["direction"] = direction;
         msg.set_label_object(fobj);
 
-        ok = sm.process_event(SendMsg{msg});
+        auto ok = sm.process_event(SendMsg{msg});
         assert(ok);
     }
 
@@ -540,7 +565,7 @@ struct FlowDevice {
         msg.set_label_object({{"flow","DAT"}});
         auto ok = sm.process_event(SendMsg{msg});
         assert(ok);
-        sm.process_event(CheckCredit{});
+        // sm.process_event(CheckCredit{});
     }
 
         
@@ -586,17 +611,22 @@ struct FlowDevice {
     [[nodiscard]]
     bool recv(int timeout=-1) {
         clear();
-        bool ok = port->recv(msg, timeout);
-        if (!ok) {
-            zio::debug("[flow {}] recv timeout", port->name());
-            return ok;
+        {
+            auto ok = port->recv(msg, timeout);
+            if (!ok) {
+                zio::debug("[flow {}] recv timeout", port->name());
+                return false;
+            }
         }
-        ok = sm.process_event(RecvMsg{msg});
-        if (!ok) {
-            zio::debug("[flow {}] sm recv fail for: {}",
-                       port->name(), msg.label());
+        {
+            auto ok = sm.process_event(RecvMsg{msg});
+            if (!ok) {
+                zio::debug("[flow {}] sm recv fail for: {}",
+                           port->name(), msg.label());
+                return false;
+            }
         }
-        return ok;
+        return true;
     }
 
 
@@ -872,7 +902,7 @@ int main()
 
     // test_longhand();
     test_concise_c2s();
-    test_dump_plantuml();
+    // test_dump_plantuml();
 
     return 0;
 }
