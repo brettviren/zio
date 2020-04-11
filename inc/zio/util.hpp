@@ -4,6 +4,7 @@
 #include "zio/cppzmq.hpp"
 #include "zio/json.hpp"
 
+#include <optional>
 #include <string>
 
 namespace zio {
@@ -16,8 +17,11 @@ namespace zio {
     std::string sock_type_name(int stype);
 
     // timeouts, heartbeats and other things are in units of millisecond.
-    typedef std::chrono::milliseconds time_unit_t;
+    using time_unit_t = std::chrono::milliseconds;
     
+    // A timeout is either a time or nothing.
+    using timeout_t = std::optional<time_unit_t>;
+
     // default values
     const int HEARTBEAT_LIVENESS = 3;
     const time_unit_t HEARTBEAT_INTERVAL{2500};

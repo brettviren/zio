@@ -3,7 +3,7 @@
 #include "zio/main.hpp"
 #include "zio/logging.hpp"
 #include "zio/flow.hpp"
-#include "sml.hpp"
+#include "zio/sml.hpp"
 
 #include <string>
 #include <deque>
@@ -214,6 +214,7 @@ auto recv_msg = [](auto e, FlowApp& f) {
     ++ f.recv_seqno;
 };
 
+namespace {
 
 // main states
 struct CTOR{};
@@ -238,9 +239,6 @@ struct GENEROUS{};
 // struct WALLETCHECK{};
 struct RICH{};
 struct HANDSOUT{};
-
-
-namespace {
 
 struct flowsm_taking {
     auto operator()() const noexcept {
@@ -409,7 +407,7 @@ typedef boost::sml::sm<flowsm,
                        boost::sml::process_queue<std::queue>
                        > FlowSM;
 
-} // generic namespace
+} // namespace
 
 
 void test_dump_plantuml()
@@ -539,9 +537,9 @@ struct FlowDevice {
         msg.set_label_object({{"flow","EOT"}});
         auto ok = sm.process_event(SendMsg{msg});
         assert(ok);
-        assert(sm.is(boost::sml::state<ACKFIN>));
+        assert(sm.is(boost::sml::state<ACKFIN>) or sm.is(boost::sml::state<FIN>));
     }
-    void shutdown(int timeout=-1) { // call to initiate shutdown handshake
+    void shutdown(zio::timeout_t timeout={}) { // call to initiate shutdown handshake
         zio::debug("[flow {}] shutdown", port->name());
         sendeot();
         do {
@@ -573,7 +571,7 @@ struct FlowDevice {
     // machine.  Return nullptr if timeout of unexpected message
     // otherwise return "DAT", "PAY" or "EOT".  If the latter, handle
     // responding.
-    const char* recv_proc(int timeout = -1) {
+    const char* recv_proc(zio::timeout_t timeout = {}) {
         if (direction == "inject") {
             sendpay();
         }
@@ -609,7 +607,7 @@ struct FlowDevice {
     // Recv a message on flow port and run it thought the state
     // machine.  Return false if message is bogus
     [[nodiscard]]
-    bool recv(int timeout=-1) {
+    bool recv(zio::timeout_t timeout={}) {
         clear();
         {
             auto ok = port->recv(msg, timeout);
@@ -681,7 +679,7 @@ void flow_endpoint(zio::socket_t& link, int socket, bool sender, int credit)
         zio::debug("[{} {}] main loop", nodename, direction);
         if (link_poller.wait_all(events, zio::time_unit_t{0})) {
             zio::debug("[{} {}] link hit", nodename, direction);
-            device.shutdown(1000);
+            device.shutdown(zio::timeout_t(1000));
             break;
         }
 
@@ -689,7 +687,7 @@ void flow_endpoint(zio::socket_t& link, int socket, bool sender, int credit)
             device.senddat();
         }
 
-        const char* what = device.recv_proc(100);
+        const char* what = device.recv_proc(zio::timeout_t(100));
         if (!what) {
             continue;           // timeout or bogus message
         }

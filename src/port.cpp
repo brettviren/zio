@@ -211,7 +211,7 @@ void zio::Port::offline()
 // }
 
 
-void zio::Port::send(zio::Message& msg)
+bool zio::Port::send(zio::Message& msg, timeout_t /*timeout*/)
 {
     zio::debug("[port {}]: send {} #{} {}",
                m_name, msg.form(), msg.seqno(),
@@ -220,22 +220,25 @@ void zio::Port::send(zio::Message& msg)
     zio::multipart_t mmsg = msg.toparts();
     if (zio::is_serverish(m_sock)) {
         send_serverish(m_sock, mmsg, msg.remote_id());
-        return;
+        return true;
     }
     if (zio::is_clientish(m_sock)) {
         send_clientish(m_sock, mmsg);
-        return;
+        return true;
     }
 
     throw std::runtime_error("Port::send: unsupported socket type");
 }
 
-bool zio::Port::recv(Message& msg, int timeout)
+bool zio::Port::recv(Message& msg, timeout_t timeout)
 {
-    zio::debug("[port {}] polling for {}",
-               m_name, timeout);
+    long tout = -1;
+    if (timeout.has_value()) {
+        tout = timeout.value().count();
+    }
+    zio::debug("[port {}] polling for {}", m_name, tout);
     zio::pollitem_t items[] = {{m_sock, 0, ZMQ_POLLIN, 0}};
-    int item = zio::poll(&items[0], 1, timeout);
+    int item = zio::poll(&items[0], 1, tout);
     if (!item) return false;
 
     if (zio::is_serverish(m_sock)) {
@@ -254,5 +257,4 @@ bool zio::Port::recv(Message& msg, int timeout)
     }
     throw std::runtime_error("Port::recv: unsupported socket type");
 }
-
 

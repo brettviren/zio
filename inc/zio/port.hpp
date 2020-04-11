@@ -115,10 +115,10 @@ namespace zio {
         /// @brief Send a message.
         ///
         /// The @ref zio::Message is modified to set its coordinates.
-        void send(Message& msg);
+        bool send(Message& msg, timeout_t timeout={});
 
         /// Recieve a message, return false if timeout occurred.
-        bool recv(Message& msg, int timeout=-1);
+        bool recv(Message& msg, timeout_t timeout={});
 
         /// @brief Access the underlying cppzmq socket.
         ///

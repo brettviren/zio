@@ -1,7 +1,8 @@
 // example from readme
 #include <iostream>
 #include <cassert>
-#include "sml.hpp"
+#include "zio/sml.hpp"
+
 namespace sml = boost::sml;
 
 // Dependencies
