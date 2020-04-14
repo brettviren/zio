@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-04-03 Fri 05:48 -->
+<!-- 2020-04-14 Tue 12:05 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>ZIO Logging</title>
@@ -161,6 +161,19 @@
   .footdef  { margin-bottom: 1em; }
   .figure { padding: 1em; }
   .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
   .inlinetask {
     padding: 10px;
     border: 2px solid gray;
@@ -186,7 +199,7 @@
 @licstart  The following is the entire license notice for the
 JavaScript code in this tag.
 
-Copyright (C) 2012-2019 Free Software Foundation, Inc.
+Copyright (C) 2012-2018 Free Software Foundation, Inc.
 
 The JavaScript code in this tag is free software: you can
 redistribute it and/or modify it under the terms of the GNU
@@ -239,8 +252,10 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgeda3ac6">1. Usage</a></li>
-<li><a href="#org9fb5a62">2. Possible future changes</a></li>
+<li><a href="#orgba604ed">1. Usage</a></li>
+<li><a href="#orgcebf977">2. Run time log levels</a></li>
+<li><a href="#orgb00616b">3. Build time log levels</a></li>
+<li><a href="#orge3aa010">4. Possible future changes</a></li>
 </ul>
 </div>
 </div>
@@ -260,18 +275,18 @@ for the JavaScript code in this tag.
 ZIO uses <a href="https://github.com/gabime/spdlog">spdlog</a> for logging.
 </p>
 
-<div id="outline-container-orgeda3ac6" class="outline-2">
-<h2 id="orgeda3ac6"><span class="section-number-2">1</span> Usage</h2>
+<div id="outline-container-orgba604ed" class="outline-2">
+<h2 id="orgba604ed"><span class="section-number-2">1</span> Usage</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 In library code:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-c++"><span style="font-weight: bold;">#include</span> <span style="font-style: italic;">"zio/logging.hpp"</span>
+<pre class="src src-c++"><span style="color: #e090d7;">#include</span> <span style="color: #e9b96e;">"zio/logging.hpp"</span>
 
-<span style="font-weight: bold; text-decoration: underline;">void</span> <span style="font-weight: bold;">my_func</span>() {
-    <span style="font-weight: bold;">if</span> (bad) <span style="font-weight: bold; text-decoration: underline;">zio</span>::error(<span style="font-style: italic;">"Oh no!"</span>);
+<span style="color: #8cc4ff;">void</span> <span style="color: #fce94f;">my_func</span>() {
+    <span style="color: #b4fa70;">if</span> (bad) <span style="color: #e9b2e3;">zio</span>::error(<span style="color: #e9b96e;">"Oh no!"</span>);
 }
 </pre>
 </div>
@@ -281,18 +296,23 @@ In "main" code (code providing <code>main()</code> or app embedding ZIO)
 </p>
 
 <div class="org-src-container">
-<pre class="src src-c++"><span style="font-weight: bold;">#include</span> <span style="font-style: italic;">"zio/main.hpp"</span>
+<pre class="src src-c++"><span style="color: #e090d7;">#include</span> <span style="color: #e9b96e;">"zio/main.hpp"</span>
 
-<span style="font-weight: bold; text-decoration: underline;">void</span> <span style="font-weight: bold;">main</span>() {
-    <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">more fine grained init functions available</span>
-    <span style="font-weight: bold; text-decoration: underline;">zio</span>::init_all();
+<span style="color: #8cc4ff;">void</span> <span style="color: #fce94f;">main</span>() {
+    <span style="color: #73d216;">// </span><span style="color: #73d216;">more fine grained init functions available</span>
+    <span style="color: #e9b2e3;">zio</span>::init_all();
 }
 </pre>
 </div>
+</div>
+</div>
 
+<div id="outline-container-orgcebf977" class="outline-2">
+<h2 id="orgcebf977"><span class="section-number-2">2</span> Run time log levels</h2>
+<div class="outline-text-2" id="text-2">
 <p>
 Given the above initialization the user may control what log level is
-selected.
+selected at run-time.
 </p>
 
 <pre class="example">
@@ -301,10 +321,104 @@ $ export SPDLOG_LEVEL=debug
 </div>
 </div>
 
+<div id="outline-container-orgb00616b" class="outline-2">
+<h2 id="orgb00616b"><span class="section-number-2">3</span> Build time log levels</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+The logging system also has build-time level filtering.  These only
+effect logging code placed inside the CPP macros <code>ZIO_DEBUG</code> and
+<code>ZIO_TRACE</code> (these are merely wrappers of spdlog equivalents).  Any bare
+calls to, eg, <code>zio::debug()</code> are not affected by build-time filtering.
+Even if run-time filtering turns them off they will still consume CPU.
+</p>
 
-<div id="outline-container-org9fb5a62" class="outline-2">
-<h2 id="org9fb5a62"><span class="section-number-2">2</span> Possible future changes</h2>
-<div class="outline-text-2" id="text-2">
+<p>
+An example to exercise the options is provided and included here:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-c++"><span style="color: #e090d7;">#include</span> <span style="color: #e9b96e;">"zio/logging.hpp"</span>
+<span style="color: #e090d7;">#include</span> <span style="color: #e9b96e;">"zio/main.hpp"</span>
+
+<span style="color: #b4fa70;">using</span> <span style="color: #b4fa70;">namespace</span> <span style="color: #e9b2e3;">zio</span>;
+
+<span style="color: #8cc4ff;">int</span> <span style="color: #fce94f;">main</span>()
+{
+    <span style="color: #e9b2e3;">zio</span>::init_all();
+
+    <span style="color: #e9b2e3;">zio</span>::trace(<span style="color: #e9b96e;">"trace"</span>);        <span style="color: #73d216;">// </span><span style="color: #73d216;">avoid bare trace</span>
+    <span style="color: #e9b2e3;">zio</span>::debug(<span style="color: #e9b96e;">"debug"</span>);        <span style="color: #73d216;">// </span><span style="color: #73d216;">avoid bare debug</span>
+    <span style="color: #e9b2e3;">zio</span>::info(<span style="color: #e9b96e;">"info"</span>);
+    <span style="color: #e9b2e3;">zio</span>::warn(<span style="color: #e9b96e;">"warn"</span>);
+    <span style="color: #e9b2e3;">zio</span>::error(<span style="color: #e9b96e;">"error"</span>);
+    <span style="color: #e9b2e3;">zio</span>::critical(<span style="color: #e9b96e;">"critical"</span>);
+
+    ZIO_TRACE(<span style="color: #e9b96e;">"TRACE"</span>);         <span style="color: #73d216;">// </span><span style="color: #73d216;">prefer over bare call</span>
+    ZIO_DEBUG(<span style="color: #e9b96e;">"DEBUG"</span>);         <span style="color: #73d216;">// </span><span style="color: #73d216;">prefer over bare call</span>
+
+    <span style="color: #b4fa70;">return</span> 0;
+}
+</pre>
+</div>
+
+<p>
+With it, you can test the effects of build-time and run-time filters.
+First, an example using the default "info" build-time level.
+</p>
+
+<pre class="example">
+$ ./waf configure build --target=test_logging
+
+$ unset SPDLOG_LEVEL
+
+$ ./build/test_logging 
+[2020-04-14 11:58:10.691] [console] [info] info
+[2020-04-14 11:58:10.691] [console] [warning] warn
+[2020-04-14 11:58:10.691] [console] [error] error
+[2020-04-14 11:58:10.691] [console] [critical] critical
+
+$ SPDLOG_LEVEL=trace ./build/test_logging 
+[2020-04-14 11:58:32.664] [console] [trace] trace
+[2020-04-14 11:58:32.664] [console] [debug] debug
+[2020-04-14 11:58:32.664] [console] [info] info
+[2020-04-14 11:58:32.664] [console] [warning] warn
+[2020-04-14 11:58:32.664] [console] [error] error
+[2020-04-14 11:58:32.664] [console] [critical] critical
+</pre>
+
+<p>
+The "trace" and "debug" lines seen in the second run were those using
+functions, not macros.  After reconfiguring and rebuilding the source
+we can see the omitted lines made by the macros.
+</p>
+
+<pre class="example">
+$ ./waf configure build --target=test_logging --active-log-level=trace
+
+$ ./build/test_logging 
+[2020-04-14 12:00:01.143] [console] [info] info
+[2020-04-14 12:00:01.143] [console] [warning] warn
+[2020-04-14 12:00:01.143] [console] [error] error
+[2020-04-14 12:00:01.143] [console] [critical] critical
+
+$ SPDLOG_LEVEL=trace ./build/test_logging 
+[2020-04-14 12:00:11.005] [console] [trace] trace
+[2020-04-14 12:00:11.005] [console] [debug] debug
+[2020-04-14 12:00:11.005] [console] [info] info
+[2020-04-14 12:00:11.005] [console] [warning] warn
+[2020-04-14 12:00:11.005] [console] [error] error
+[2020-04-14 12:00:11.005] [console] [critical] critical
+[2020-04-14 12:00:11.005] [console] [trace] [test_logging.cpp:17] TRACE
+[2020-04-14 12:00:11.005] [console] [debug] [test_logging.cpp:18] DEBUG
+</pre>
+</div>
+</div>
+
+
+
+<div id="outline-container-orge3aa010" class="outline-2">
+<h2 id="orge3aa010"><span class="section-number-2">4</span> Possible future changes</h2>
+<div class="outline-text-2" id="text-4">
 <p>
 Currently, ZIO logs into the default front end of <code>spdlog</code> and only the
 console backend is activated.

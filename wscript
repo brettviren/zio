@@ -7,10 +7,20 @@ out = 'build'
 def options(opt):
     opt.load('compiler_cxx')
     opt.load('waf_unit_test')
+    opt.add_option('--active-log-level', default='info',
+                   choices='trace debug info warn error critical'.split(),
+                   help='Set lowest compile time level (default=%default)')
+    opt.add_option('--quell-tests', action='store_true', default='false',
+                   help='Compile but do not run the tests (default=%default)')
 
 def configure(cfg):
     #cfg.env.CXXFLAGS += ['-std=c++17', '-ggdb', '-O2', '-Wall', '-Wpedantic', '-Werror']
     cfg.env.CXXFLAGS += ['-std=c++17', '-ggdb3', '-Wall', '-Wpedantic', '-Werror']
+
+    loglvl = cfg.options.active_log_level.upper()
+    cfg.env.CXXFLAGS += ['-D','SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_%s'%loglvl]
+    print(cfg.env.CXXFLAGS)
+
     cfg.load('compiler_cxx')
     cfg.load('waf_unit_test')
     p = dict(mandatory=True, args='--cflags --libs')
@@ -35,14 +45,20 @@ def build(bld):
               uselib_store='ZIO', use=uses)
 
     tsources = bld.path.ant_glob('test/test*.cpp')
-    for tmain in tsources:
-        bld.program(features = 'test cxx',
-                    source = [tmain], target = tmain.name.replace('.cpp',''),
-                    ut_cwd = bld.path,
-                    install_path = None,
-                    includes = 'inc build test',
-                    rpath = rpath,
-                    use = ['zio'] + uses + ['PTHREAD'])
+    if tsources and not bld.options.no_tests:
+        # fixme: it would be nice to have an option that builds but doesn't run
+        features='test cxx'
+        if bld.options.quell_tests:
+            features='cxx'
+
+        for tmain in tsources:
+            bld.program(features = features,
+                        source = [tmain], target = tmain.name.replace('.cpp',''),
+                        ut_cwd = bld.path,
+                        install_path = None,
+                        includes = 'inc build test',
+                        rpath = rpath,
+                        use = ['zio'] + uses + ['PTHREAD'])
     csources = bld.path.ant_glob('test/check*.cpp')
     for cmain in csources:
         bld.program(features = 'cxx',

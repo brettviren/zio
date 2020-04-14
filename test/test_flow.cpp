@@ -2,6 +2,7 @@
 #include "zio/node.hpp"
 #include "zio/main.hpp"
 #include "zio/logging.hpp"
+#include "zio/stopwatch.hpp"
 #include "zio/actor.hpp"
 
 static
@@ -31,7 +32,7 @@ void flow_endpoint(zio::socket_t& link, int socket, bool giver, int credit)
 
     zio::timeout_t timeout{1000};
 
-    zio::debug("[{} {}] socket: {}, giver: {}, credit: {}, timeout: {}",
+    ZIO_DEBUG("[{} {}] socket: {}, giver: {}, credit: {}, timeout: {}",
                nodename, portname, zio::sock_type_name(socket),
                giver, credit, timeout.value().count());
 
@@ -54,73 +55,107 @@ void flow_endpoint(zio::socket_t& link, int socket, bool giver, int credit)
 
     std::vector<zio::poller_event<>> events(1);
 
+    size_t ngive=0, ntake=0;
+    zio::Stopwatch sw;
+    sw.start();
+
+    bool link_hit = false;
     while (true) {
 
         if (link_poller.wait_all(events, zio::time_unit_t{0})) {
-            zio::debug("[{} {}] link hit", nodename, portname);
+            ZIO_DEBUG("[{} {}] link hit", nodename, portname);
             flow.eot();
+            link_hit = true;
             break;
         }
 
         if (giver) {
             zio::Message msg;
-            bool noto = flow.put(msg);
+            bool noto;
+            try {
+                noto = flow.put(msg);
+            } catch (zio::flow::end_of_transmission) {
+                ZIO_DEBUG("[{} {}] EOT during put(DAT)", nodename, portname);
+                flow.eotack();
+                break;
+            }
             if (noto) {
-                zio::debug("[{} {}] send DAT", nodename, portname);
+                ZIO_TRACE("[{} {}] send DAT", nodename, portname);
+                ++ngive;
             }
             else {
-                zio::debug("[{} {}] send DAT: TIMEOUT", nodename, portname);
+                ZIO_DEBUG("[{} {}] send DAT: TIMEOUT", nodename, portname);
             }
         }
         else {                  // taker
             zio::Message msg;
-            bool noto = flow.get(msg);
+            bool noto;
+            try {
+                noto = flow.get(msg);
+            } catch (zio::flow::end_of_transmission) {
+                ZIO_DEBUG("[{} {}] EOT during put(DAT)", nodename, portname);
+                flow.eotack();
+                break;
+            }
             if (noto) {
-                zio::debug("[{} {}] recv DAT", nodename, portname);                
+                ZIO_TRACE("[{} {}] recv DAT", nodename, portname);                
+                ++ntake;
             }
             else {
-                zio::debug("[{} {}] recv DAT: TIMEOUT", nodename, portname);
+                ZIO_DEBUG("[{} {}] recv DAT: TIMEOUT", nodename, portname);
             }
         }
     }
 
-    zio::debug("[{} {}] node going offline", nodename, portname);
+    sw.stop();
+    auto khz_give = sw.hz(ngive)/1000.0;
+    auto khz_take = sw.hz(ntake)/1000.0;
+
+    zio::info("[{} {}] credit:{} gave:{} ({:.3f} kHz) took:{} ({:.3f} kHz)",
+              nodename, portname, credit, ngive, khz_give, ntake, khz_take);
+
+    ZIO_DEBUG("[{} {}] node going offline", nodename, portname);
     node.offline();
 
-    zio::debug("[{} {}] waiting for actor shutdown", nodename, portname);
-    zio::message_t rmsg;
-    auto res = link.recv(rmsg);
-    assert(res);
+    if (!link_hit) {
+        ZIO_DEBUG("[{} {}] waiting for actor shutdown", nodename, portname);
+        zio::message_t rmsg;
+        auto res = link.recv(rmsg);
+        assert(res);
+    }
 }
 
 #include "zio/actor.hpp"
 
-void test_flow()
+void test_flow(int credit)
 {
     zio::context_t ctx;
 
-    const int credit = 10;
-
-    zio::debug("test_flow: start actors with {} credit", credit);
+    ZIO_DEBUG("test_flow: start actors with {} credit", credit);
 
     zio::zactor_t one(ctx, flow_endpoint, ZMQ_SERVER, false, credit);
     zio::zactor_t two(ctx, flow_endpoint, ZMQ_CLIENT, true,  credit);
 
-    zio::debug("test_flow: sleep");
+    ZIO_DEBUG("test_flow: sleep");
     zio::sleep_ms(zio::time_unit_t{1000});
-    zio::debug("test_flow: shutdown actors");
+    ZIO_DEBUG("test_flow: shutdown actors");
     zio::message_t signal;
     one.link().send(signal, zio::send_flags::none);
     two.link().send(signal, zio::send_flags::none);
-    zio::debug("test_flow: sleep again");
+    ZIO_DEBUG("test_flow: sleep again");
     zio::sleep_ms(zio::time_unit_t{100});
-    zio::debug("test_flow: exit");
+    ZIO_DEBUG("test_flow: exit");
 }
+
 
 
 int main()
 {
     zio::init_all();
-    test_flow();
+    test_flow(10);
+    test_flow(5);
+    test_flow(2);
+    test_flow(1);
+
     return 0;
 }

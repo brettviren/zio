@@ -27,6 +27,9 @@ namespace zio {
         /// Return total accumulated time when stopwatch was running.
         duration accum();
 
+        /// Return an average rate in Hz if count things happened over accum
+        double hz(size_t count);
+
     private:
         bool started{false};
         time_point t_start, t_lap;

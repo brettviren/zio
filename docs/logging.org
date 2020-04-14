@@ -27,12 +27,74 @@ void main() {
 }
 #+end_src
 
+* Run time log levels
+
 Given the above initialization the user may control what log level is
-selected.
+selected at run-time.
 
 #+begin_example
   $ export SPDLOG_LEVEL=debug
 #+end_example
+
+* Build time log levels
+
+The logging system also has build-time level filtering.  These only
+effect logging code placed inside the CPP macros ~ZIO_DEBUG~ and
+~ZIO_TRACE~ (these are merely wrappers of spdlog equivalents).  Any bare
+calls to, eg, ~zio::debug()~ are not affected by build-time filtering.
+Even if run-time filtering turns them off they will still consume CPU.
+
+An example to exercise the options is provided and included here:
+
+#+INCLUDE: "../test/test_logging.cpp" src c++
+
+With it, you can test the effects of build-time and run-time filters.
+First, an example using the default "info" build-time level.
+
+#+begin_example
+  $ ./waf configure build --target=test_logging
+
+  $ unset SPDLOG_LEVEL
+
+  $ ./build/test_logging 
+  [2020-04-14 11:58:10.691] [console] [info] info
+  [2020-04-14 11:58:10.691] [console] [warning] warn
+  [2020-04-14 11:58:10.691] [console] [error] error
+  [2020-04-14 11:58:10.691] [console] [critical] critical
+
+  $ SPDLOG_LEVEL=trace ./build/test_logging 
+  [2020-04-14 11:58:32.664] [console] [trace] trace
+  [2020-04-14 11:58:32.664] [console] [debug] debug
+  [2020-04-14 11:58:32.664] [console] [info] info
+  [2020-04-14 11:58:32.664] [console] [warning] warn
+  [2020-04-14 11:58:32.664] [console] [error] error
+  [2020-04-14 11:58:32.664] [console] [critical] critical
+#+end_example
+
+The "trace" and "debug" lines seen in the second run were those using
+functions, not macros.  After reconfiguring and rebuilding the source
+we can see the omitted lines made by the macros.
+
+#+begin_example
+  $ ./waf configure build --target=test_logging --active-log-level=trace
+
+  $ ./build/test_logging 
+  [2020-04-14 12:00:01.143] [console] [info] info
+  [2020-04-14 12:00:01.143] [console] [warning] warn
+  [2020-04-14 12:00:01.143] [console] [error] error
+  [2020-04-14 12:00:01.143] [console] [critical] critical
+
+  $ SPDLOG_LEVEL=trace ./build/test_logging 
+  [2020-04-14 12:00:11.005] [console] [trace] trace
+  [2020-04-14 12:00:11.005] [console] [debug] debug
+  [2020-04-14 12:00:11.005] [console] [info] info
+  [2020-04-14 12:00:11.005] [console] [warning] warn
+  [2020-04-14 12:00:11.005] [console] [error] error
+  [2020-04-14 12:00:11.005] [console] [critical] critical
+  [2020-04-14 12:00:11.005] [console] [trace] [test_logging.cpp:17] TRACE
+  [2020-04-14 12:00:11.005] [console] [debug] [test_logging.cpp:18] DEBUG
+#+end_example
+
 
 
 * Possible future changes

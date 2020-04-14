@@ -37,36 +37,36 @@ namespace zio {
 
         bool check_recv_bot(zio::Message& msg) {
             if (m_recv_seqno != -1) {
-                zio::debug("[flow {}] check_recv_bot recv_seqno={}",
+                ZIO_TRACE("[flow {}] check_recv_bot recv_seqno={}",
                            name(), m_recv_seqno);
                 return false;
             }
             const flow::Label lab(msg);
             auto typ = lab.msgtype();
             if (typ != flow::msgtype_e::bot) {
-                zio::debug("[flow {}] check_recv_bot called with '{}'",
+                ZIO_TRACE("[flow {}] check_recv_bot called with '{}'",
                            name(), msg.label());
                 return false;
             }
             auto odir = lab.direction();
             if (odir == flow::direction_e::unknown) {
-                zio::debug("[flow {}] check_recv_bot corrupt message", name());
+                ZIO_TRACE("[flow {}] check_recv_bot corrupt message", name());
                 return false;
             }
             if (odir == m_dir) {
-                zio::debug("[flow {}] check_recv_bot both are direction ({})",
+                ZIO_TRACE("[flow {}] check_recv_bot both are direction ({})",
                            name(), m_dir);
                 return false;
             }
 
-            zio::debug("[flow {}] check_recv_bot okay with '{}'",
+            ZIO_TRACE("[flow {}] check_recv_bot okay with '{}'",
                        name(), msg.label());
             return true;
         }
 
         bool check_send_bot(zio::Message& msg) {
             if (m_send_seqno != -1) {
-                zio::debug("[flow {}] check_send_bot send_seqno={}",
+                ZIO_TRACE("[flow {}] check_send_bot send_seqno={}",
                            name(), m_send_seqno);
                 return false;
             }
@@ -74,17 +74,17 @@ namespace zio {
             const flow::Label lab(msg);
             auto typ = lab.msgtype();
             if (typ != flow::msgtype_e::bot) {
-                zio::debug("[flow {}] check_send_bot called with '{}'",
+                ZIO_TRACE("[flow {}] check_send_bot called with '{}'",
                            name(), msg.label());
                 return false;
             }
             auto odir = lab.direction();
             if (odir != m_dir) {
-                zio::debug("[flow {}] check_send_bot try to send differing direction",
+                ZIO_TRACE("[flow {}] check_send_bot try to send differing direction",
                            name());
                 return false;
             }
-            zio::debug("[flow {}] check_send_bot okay with '{}'",
+            ZIO_TRACE("[flow {}] check_send_bot okay with '{}'",
                        name(), msg.label());
             return true;
         }
@@ -93,22 +93,22 @@ namespace zio {
             const flow::Label lab(msg);
             auto typ = lab.msgtype();
             if (typ != flow::msgtype_e::pay) {
-                zio::debug("[flow {}] check_pay not PAY '{}'",
+                ZIO_TRACE("[flow {}] check_pay not PAY '{}'",
                            name(), msg.label());
                 return false;
             }
             int got_credit = lab.credit();
             if (got_credit < 0) {
-                zio::debug("[flow {}] check_pay bad credit attr '{}'",
+                ZIO_TRACE("[flow {}] check_pay bad credit attr '{}'",
                            name(), msg.label());
                 return false;
             }
             if (got_credit + m_credit > m_total_credit) {
-                zio::debug("[flow {}] check_pay too much PAY {} + {} > {}",
+                ZIO_TRACE("[flow {}] check_pay too much PAY {} + {} > {}",
                            name(), got_credit, m_credit, m_total_credit);
                 return false;
             }
-            zio::debug("[flow {}] check_pay okay with '{}'",
+            ZIO_TRACE("[flow {}] check_pay okay with '{}'",
                        name(), msg.label());
             return true;
         }
@@ -117,11 +117,11 @@ namespace zio {
             const flow::Label lab(msg);
             auto typ = lab.msgtype();
             if (typ != flow::msgtype_e::dat) {
-                zio::debug("[flow {}] check_dat not DAT '{}'",
+                ZIO_TRACE("[flow {}] check_dat not DAT '{}'",
                            name(), msg.label());
                 return false;
             }
-            zio::debug("[flow {}] check_dat okay with '{}'",
+            ZIO_TRACE("[flow {}] check_dat okay with '{}'",
                        name(), msg.label());
             return true;
         }            
@@ -129,11 +129,11 @@ namespace zio {
             const flow::Label lab(msg);
             auto typ = lab.msgtype();
             if (typ != flow::msgtype_e::eot) {
-                zio::debug("[flow {}] check_eot not EOT '{}'",
+                ZIO_TRACE("[flow {}] check_eot not EOT '{}'",
                            name(), msg.label());
                 return false;
             }
-            zio::debug("[flow {}] check_eot okay with '{}'",
+            ZIO_TRACE("[flow {}] check_eot okay with '{}'",
                        name(), msg.label());
             return true;
         }
@@ -152,14 +152,14 @@ namespace zio {
 
             ++ m_recv_seqno;
             m_remid = msg.remote_id();
-            zio::debug("[flow {}] recv_bot #{} as {} with {}/{} credit",
+            ZIO_TRACE("[flow {}] recv_bot #{} as {} with {}/{} credit",
                        name(), m_recv_seqno, m_dir, m_credit, m_total_credit);
         }
         void send_msg(zio::Message& msg) {
             ++ m_send_seqno;
             msg.set_seqno(m_send_seqno);
             msg.set_remote_id(m_remid);
-            zio::debug("[flow {}] send_msg #{} with {}/{} credit, {}",
+            ZIO_TRACE("[flow {}] send_msg #{} with {}/{} credit, {}",
                        name(), m_send_seqno, m_credit, m_total_credit, msg.label());
         };
 
@@ -193,26 +193,26 @@ auto check_eot = [](auto e, zio::FlowFSM& f) { return f.check_eot(e.msg); };
 auto is_giver = [](auto e, zio::FlowFSM& f) { return f.giver(); };
 
 auto have_credit = [](auto e, zio::FlowFSM& f) {
-    zio::debug("[flow {}] have_credit {}/{}",
+    ZIO_TRACE("[flow {}] have_credit {}/{}",
                f.name(), f.m_credit, f.m_total_credit);
     return f.m_credit > 0;
 };
 
 // return if we are down to our last buck
 auto check_last_credit = [](auto e, zio::FlowFSM& f) {
-    zio::debug("[flow {}] check_last_credit {}/{}",
+    ZIO_TRACE("[flow {}] check_last_credit {}/{}",
                f.name(), f.m_credit, f.m_total_credit);
     return f.m_total_credit - f.m_credit == 1;
 };
 
 auto check_one_credit = [](auto e, zio::FlowFSM& f) {
-    zio::debug("[flow {}] check_one_credit {}/{}",
+    ZIO_TRACE("[flow {}] check_one_credit {}/{}",
                f.name(), f.m_credit, f.m_total_credit);
     return f.m_credit == 1;
 };
 
 auto check_many_credit = [](auto e, zio::FlowFSM& f) {
-    zio::debug("[flow {}] check_many_credit {}/{}",
+    ZIO_TRACE("[flow {}] check_many_credit {}/{}",
                f.name(), f.m_credit, f.m_total_credit);
     return f.m_credit > 1;
 };
@@ -224,7 +224,7 @@ auto send_msg = [](auto e, zio::FlowFSM& f) {
 };
 auto send_dat = [](auto e, zio::FlowFSM& f) {
     -- f.m_credit;
-    zio::debug("[flow {}] send_dat {}/{}",
+    ZIO_TRACE("[flow {}] send_dat {}/{}",
                f.name(), f.m_credit, f.m_total_credit);
     f.send_msg(e.msg);
 };
@@ -238,7 +238,7 @@ auto recv_pay = [](auto e, zio::FlowFSM& f) {
     zio::json fobj = e.msg.label_object();
     int credit = fobj["credit"];
     f.m_credit += credit;
-    zio::debug("[flow {}] recv_pay #{} as {} with {}/{} credit",
+    ZIO_TRACE("[flow {}] recv_pay #{} as {} with {}/{} credit",
                f.name(), f.m_recv_seqno, f.m_dir, credit, f.m_total_credit);
 };
 
@@ -254,7 +254,7 @@ auto flush_pay = [](auto e, zio::FlowFSM& f) {
     fobj["credit"] = f.m_credit;
     e.msg.set_label_object(fobj);
     e.msg.set_seqno(++f.m_send_seqno);
-    zio::debug("[flow {}] flush_pay #{}, credit:{}",
+    ZIO_TRACE("[flow {}] flush_pay #{}, credit:{}",
                f.name(), f.m_send_seqno, f.m_credit);
     f.m_credit=0;
     if (f.m_remid.size()) { e.msg.set_remote_id(f.m_remid); }
@@ -263,13 +263,13 @@ auto flush_pay = [](auto e, zio::FlowFSM& f) {
 auto recv_dat = [](auto e, zio::FlowFSM& f) {
     ++ f.m_recv_seqno;
     ++ f.m_credit;
-    zio::debug("[flow {}] recv_dat #{} as {} with {}/{} credit",
+    ZIO_TRACE("[flow {}] recv_dat #{} as {} with {}/{} credit",
                f.name(), f.m_recv_seqno, f.m_dir, f.m_credit, f.m_total_credit);
 };
 
 auto recv_eot = [](auto e, zio::FlowFSM& f) {
     ++ f.m_recv_seqno;
-    zio::debug("[flow {}] recv_eot #{} as {} with {}/{} credit",
+    ZIO_TRACE("[flow {}] recv_eot #{} as {} with {}/{} credit",
                f.name(), f.m_recv_seqno, f.m_dir, f.m_credit, f.m_total_credit);
 };
 
@@ -455,7 +455,7 @@ struct FlowImp : public FlowFSM {
     }
 
     bool bot(zio::Message& botmsg) {
-        zio::debug(str("bot handshake starts"));
+        ZIO_TRACE(str("bot handshake starts"));
         if (m_send_seqno != -1) {
             throw flow::local_error(str("bot send attempt with already open flow"));
         }
@@ -480,7 +480,7 @@ struct FlowImp : public FlowFSM {
         if (!sm.process_event(BeginFlow{})) {
             throw flow::local_error(str("bot handshake failed to reach FLOW state"));
         }
-        zio::debug(str("bot handshake complete"));
+        ZIO_TRACE(str("bot handshake complete"));
         return true;
     }
 
@@ -506,7 +506,7 @@ struct FlowImp : public FlowFSM {
                 return false;
             }
             if (sm.is(boost::sml::state<ACKFIN>)) {
-                zio::debug("eot recv non EOT {}", msg.label());
+                ZIO_TRACE("eot recv non EOT {}", msg.label());
                 continue;
             }
             if (! sm.is(boost::sml::state<FIN>)) {
@@ -522,7 +522,7 @@ struct FlowImp : public FlowFSM {
         zio::Message maybe_pay;
         if (port->recv(maybe_pay, timeout_t{0})) {
 
-            zio::debug(str("income: {}", maybe_pay.label()));
+            ZIO_TRACE(str("income: {}", maybe_pay.label()));
 
             sm.process_event(RecvMsg{maybe_pay});
             if (sm.is(boost::sml::state<FINACK>)) {
@@ -534,7 +534,7 @@ struct FlowImp : public FlowFSM {
                 return false;
             }
 
-            zio::debug(str("just in time income: {}", maybe_pay.label()));
+            ZIO_TRACE(str("just in time income: {}", maybe_pay.label()));
 
             sm.process_event(RecvMsg{maybe_pay});
             if (sm.is(boost::sml::state<FINACK>)) {
@@ -556,7 +556,7 @@ struct FlowImp : public FlowFSM {
             lab.msgtype(flow::msgtype_e::pay);
             lab.commit();
 
-            zio::debug(str("paying: {}", pay.label()));
+            ZIO_TRACE(str("paying: {}", pay.label()));
 
             if (sm.process_event(FlushPay{pay})) {
                 port->send(pay);
@@ -579,7 +579,7 @@ struct FlowImp : public FlowFSM {
             return false;       // timeout
         }
 
-        zio::debug(str("recving: {}", msg.label()));
+        ZIO_TRACE(str("recving: {}", msg.label()));
 
         if (! sm.process_event(RecvMsg{msg})) {
             throw flow::remote_error(str("recv flow bad message {}", msg.label()));
@@ -594,7 +594,7 @@ struct FlowImp : public FlowFSM {
             throw flow::local_error(str("send flow message type unknown"));
         }
         
-        zio::debug(str("sending: {}", msg.label()));
+        ZIO_TRACE(str("sending: {}", msg.label()));
 
         if (! sm.process_event(SendMsg{msg})) {
             throw flow::local_error(str("send invalid: {}", msg.label()));

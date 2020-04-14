@@ -48,3 +48,9 @@ zio::Stopwatch::duration zio::Stopwatch::accum()
     return dt_accum + (t_now - t_start);
 }
 
+double zio::Stopwatch::hz(size_t count)
+{
+    auto dt = accum();
+    auto dt_us = std::chrono::duration_cast<std::chrono::microseconds>(dt).count();
+    return count/(dt_us/1.0e6);
+}
