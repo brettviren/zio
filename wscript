@@ -9,7 +9,8 @@ def options(opt):
     opt.load('waf_unit_test')
 
 def configure(cfg):
-    cfg.env.CXXFLAGS += ['-std=c++17', '-ggdb', '-O2', '-Wall', '-Wpedantic', '-Werror']
+    #cfg.env.CXXFLAGS += ['-std=c++17', '-ggdb', '-O2', '-Wall', '-Wpedantic', '-Werror']
+    cfg.env.CXXFLAGS += ['-std=c++17', '-ggdb3', '-Wall', '-Wpedantic', '-Werror']
     cfg.load('compiler_cxx')
     cfg.load('waf_unit_test')
     p = dict(mandatory=True, args='--cflags --libs')

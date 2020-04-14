@@ -8,7 +8,13 @@ BOTSEND --> flowsm_flowing : RecvMsg [check_recv_bot] / recv_bot
 BOTRECV --> flowsm_flowing : SendMsg [check_send_bot] / send_msg
 flowsm_flowing --> ACKFIN : SendMsg [check_eot] / send_msg
 flowsm_flowing --> FINACK : RecvMsg [check_eot] / recv_msg
+
+FINACK --> FINACK : SendMsg [!check_eot]
+FINACK --> FINACK : RecvMsg [!check_eot]
 FINACK --> FIN : SendMsg [check_eot] / send_msg
+
+ACKFIN --> ACKFIN : SendMsg [!check_eot]
+ACKFIN --> ACKFIN : RecvMsg [!check_eot]
 ACKFIN --> FIN : RecvMsg [check_eot] / recv_msg
 
 

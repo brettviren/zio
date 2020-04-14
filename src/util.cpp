@@ -104,7 +104,6 @@ zio::recv_result_t zio::recv_server(zio::socket_t& server_socket,
         return res;
     }
     remid = to_remid(msg.routing_id());
-    zio::debug("recv_server: rid={} remid='{}'", msg.routing_id(), zio::binstr(remid));
     mmsg.decode_append(msg);
     return res;
 }
@@ -118,7 +117,6 @@ zio::recv_result_t zio::recv_router(zio::socket_t& router_socket,
     if (!res) {
         return res;
     }
-    zio::debug("recv router: {} parts", mmsg.size());
     remid = mmsg.popstr();
     mmsg.pop();                 // delimiter
     return res;
@@ -160,7 +158,6 @@ zio::send_result_t zio::send_router(zio::socket_t& router_socket,
 {
     mmsg.pushmem(NULL, 0);      // delimiter
     mmsg.pushstr(remid);
-    zio::debug("send router: {} parts", mmsg.size());
     return mmsg.send(router_socket);
 }
 
@@ -200,7 +197,6 @@ zio::recv_result_t zio::recv_dealer(zio::socket_t& dealer_socket,
     if (!res) {
         return res;
     }
-    zio::debug("recv dealer: {} parts", mmsg.size());
     mmsg.pop();                 // fake being REQ
     return res;
 }
@@ -233,7 +229,6 @@ zio::send_result_t zio::send_dealer(zio::socket_t& dealer_socket,
                                     send_flags flags)
 {
     mmsg.pushmem(NULL,0);       // pretend to be REQ
-    zio::debug("send dealer: {} parts", mmsg.size());
     return mmsg.send(dealer_socket);
 }
 

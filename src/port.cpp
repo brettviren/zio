@@ -75,7 +75,7 @@ void zio::Port::bind()
 
 void zio::Port::bind(const std::string& hostname, int port)
 {
-    zio::debug("[port {}]: bind host/port: {}:{}",
+    zio::debug("[port {}] bind host/port: {}:{}",
                m_name, hostname, port);
     HostPortBinder binder{m_sock, hostname, 0};
     m_binders.push_back(binder);
@@ -83,7 +83,7 @@ void zio::Port::bind(const std::string& hostname, int port)
 
 void zio::Port::bind(const address_t& address)
 {
-    zio::debug("[port {}]: bind address: {}",
+    zio::debug("[port {}] bind address: {}",
                m_name, address);
     m_binders.push_back(DirectBinder{m_sock, address});
 }
@@ -129,7 +129,7 @@ zio::headerset_t zio::Port::do_binds()
     set_header("address", addresses);
     set_header("socket", zio::sock_type_name(zio::sock_type(m_sock)));
     for (const auto& hh : m_headers) {
-        zio::debug("[port {}]: {} = {}", m_name, hh.first, hh.second);
+        zio::debug("[port {}] {} = {}", m_name, hh.first, hh.second);
     }
 
     return m_headers;
@@ -140,7 +140,7 @@ void zio::Port::online(zio::Peer& peer)
     if (m_online) { return; }
     m_online = true;
 
-    zio::debug("[port {}]: going online with {}({}+{}) connects, {} binds",
+    zio::debug("[port {}] going online with {}({}+{}) connects, {} binds",
                m_name, 
                m_connect_nodeports.size()+m_connect_addresses.size(),
                m_connect_nodeports.size(),
@@ -148,16 +148,16 @@ void zio::Port::online(zio::Peer& peer)
                m_binders.size());
 
     for (const auto& addr : m_connect_addresses) {
-        zio::debug("[port {}]: connect to {}", m_name, addr);
+        zio::debug("[port {}] connect to {}", m_name, addr);
         m_sock.connect(addr);
         m_connected.push_back(addr);
     }
 
     for (const auto& nh : m_connect_nodeports) {
-        zio::debug("[port {}]: wait for {}", m_name, nh.first);
+        zio::debug("[port {}] wait for {}", m_name, nh.first);
         auto uuids = peer.waitfor(nh.first);
         assert(uuids.size());
-        zio::debug("[port {}]: {} peers match {}",
+        zio::debug("[port {}] {} peers match {}",
                    m_name, uuids.size(), nh.first);
 
         for (auto uuid : uuids) {
@@ -165,7 +165,7 @@ void zio::Port::online(zio::Peer& peer)
 
             std::string maybe = pi.branch("zio.port." + nh.second)[".address"];
             if (maybe.empty()) {
-                zio::warn("[port {}]: found {}:{} ({}) lacking address header",
+                zio::warn("[port {}] found {}:{} ({}) lacking address header",
                           m_name, nh.first, nh.second, uuid);
                 continue;
             }
@@ -175,7 +175,7 @@ void zio::Port::online(zio::Peer& peer)
                 if (addr.empty() or addr[0] == ' ') {
                     continue;
                 }
-                zio::debug("[port {}]: connect to {}:{} at {}",
+                zio::debug("[port {}] connect to {}:{} at {}",
                            m_name, nh.first, nh.second, addr);
                 m_sock.connect(addr);
                 m_connected.push_back(addr);
@@ -213,9 +213,9 @@ void zio::Port::offline()
 
 bool zio::Port::send(zio::Message& msg, timeout_t /*timeout*/)
 {
-    zio::debug("[port {}]: send {} #{} {}",
-               m_name, msg.form(), msg.seqno(),
-               zio::binstr(msg.remote_id()));
+    // zio::debug("[port {}] send {} #{} {}",
+    //            m_name, msg.form(), msg.seqno(),
+    //            zio::binstr(msg.remote_id()));
     msg.set_coord(m_origin);
     zio::multipart_t mmsg = msg.toparts();
     if (zio::is_serverish(m_sock)) {
@@ -236,7 +236,7 @@ bool zio::Port::recv(Message& msg, timeout_t timeout)
     if (timeout.has_value()) {
         tout = timeout.value().count();
     }
-    zio::debug("[port {}] polling for {}", m_name, tout);
+    //zio::debug("[port {}] polling for {}", m_name, tout);
     zio::pollitem_t items[] = {{m_sock, 0, ZMQ_POLLIN, 0}};
     int item = zio::poll(&items[0], 1, tout);
     if (!item) return false;

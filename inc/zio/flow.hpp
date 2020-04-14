@@ -26,7 +26,46 @@ namespace zio {
             using std::runtime_error::runtime_error ;
         };
 
-        enum class direction_e { inject, extract };
+        enum class direction_e : int { unknown, inject, extract };
+        enum class msgtype_e : int { unknown, bot, dat, pay, eot };
+
+        class Label{
+            zio::Message& m_msg;
+            zio::json m_fobj;
+            bool m_dirty{false};
+        public:
+            Label(zio::Message& msg);
+            ~Label();
+            Label(Label&& rhs) = default;
+            Label& operator=(Label&& rhs) = default;
+
+            zio::json object() const { return m_fobj; }
+            zio::json& object() { return m_fobj; }
+
+            /// Emit a string rep 
+            std::string str() const;
+
+            /// Commit any changes back to the message
+            void commit();
+
+            /// Return the direction of flow
+            direction_e direction() const;
+            
+            /// Return amount of credit in message or -1 if none/error
+            int credit() const;
+
+            /// Return the flow message type
+            msgtype_e msgtype() const;
+
+            /// Set direction
+            void direction(direction_e);
+
+            /// Set the message type
+            void msgtype(msgtype_e mt);
+
+            /// Set the amount of credit
+            void credit(int cred);
+        };
 
     }
 
@@ -53,17 +92,21 @@ namespace zio {
           the call violates the flow protocol.
           
         */
-        Flow(zio::portptr_t p, flow::direction_e direction, size_t credit,
+        Flow(zio::portptr_t p, flow::direction_e direction, int credit,
              timeout_t tout = timeout_t{});
+        ~Flow();
         
+        Flow(Flow&& rhs);
+        Flow& operator=(Flow&& rhs);
+
         /// Change the timeout
         void set_timeout(timeout_t tout);
 
         /// Return the amount of credit currently held
-        size_t credit() const;
+        int credit() const;
 
         /// Return the amount of total credit in use
-        size_t total_credit() const;
+        int total_credit() const;
 
         // client/server: do the bot handshake when the application
         // cares about the message content.  The payload of the passed

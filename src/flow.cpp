@@ -9,54 +9,53 @@
 
 namespace zio {
 
+
     // Used by SM guards and actions and forms base class for
     // implementation of user Flow API class.  It knows nothing about
     // sockets nor the state machine itself.
     struct FlowFSM {
-        FlowFSM(flow::direction_e d, size_t credit)
-            : dir(d)
-            , total_credit(credit) {}
+        FlowFSM(flow::direction_e d, int credit)
+            : m_dir(d)
+            , m_total_credit(credit) {}
         virtual ~FlowFSM() {}
 
-        flow::direction_e dir;
-        size_t total_credit;
-        size_t credit{0}; 
-        std::string remid{""};
-        int send_seqno{-1};
-        int recv_seqno{-1};
+        flow::direction_e m_dir;
+        int m_total_credit;
+        int m_credit{0}; 
+        std::string m_remid{""};
+        int m_send_seqno{-1};
+        int m_recv_seqno{-1};
 
         virtual std::string name() const = 0;
 
         bool giver() const {
-            return dir == flow::direction_e::extract;
+            return m_dir == flow::direction_e::extract;
         }
         bool taker() const {
-            return dir == flow::direction_e::inject;
+            return m_dir == flow::direction_e::inject;
         }
 
         bool check_recv_bot(zio::Message& msg) {
-            if (recv_seqno != -1) {
+            if (m_recv_seqno != -1) {
                 zio::debug("[flow {}] check_recv_bot recv_seqno={}",
-                           name(), recv_seqno);
+                           name(), m_recv_seqno);
                 return false;
             }
-            zio::json fobj = msg.label_object();
-            std::string typ = fobj["flow"].get<std::string>();
-            if (typ != "BOT") {
+            const flow::Label lab(msg);
+            auto typ = lab.msgtype();
+            if (typ != flow::msgtype_e::bot) {
                 zio::debug("[flow {}] check_recv_bot called with '{}'",
                            name(), msg.label());
                 return false;
             }
-            // Direction must be opposite from what we are.
-            std::string sdir = fobj["direction"].get<std::string>();
-            if (giver() and sdir == "extract") {
-                zio::debug("[flow {}] check_recv_bot both are 'extract': '{}'",
-                           name(), msg.label());
+            auto odir = lab.direction();
+            if (odir == flow::direction_e::unknown) {
+                zio::debug("[flow {}] check_recv_bot corrupt message", name());
                 return false;
             }
-            if (taker() and sdir == "inject") {
-                zio::debug("[flow {}] check_recv_bot both are 'inject': '{}'",
-                           name(), msg.label());
+            if (odir == m_dir) {
+                zio::debug("[flow {}] check_recv_bot both are direction ({})",
+                           name(), m_dir);
                 return false;
             }
 
@@ -66,29 +65,23 @@ namespace zio {
         }
 
         bool check_send_bot(zio::Message& msg) {
-            if (send_seqno != -1) {
+            if (m_send_seqno != -1) {
                 zio::debug("[flow {}] check_send_bot send_seqno={}",
-                           name(), send_seqno);
+                           name(), m_send_seqno);
                 return false;
             }
     
-            zio::json fobj = msg.label_object();
-            std::string typ = fobj["flow"].get<std::string>();
-            if (typ != "BOT") {
+            const flow::Label lab(msg);
+            auto typ = lab.msgtype();
+            if (typ != flow::msgtype_e::bot) {
                 zio::debug("[flow {}] check_send_bot called with '{}'",
                            name(), msg.label());
                 return false;
             }
-            // Direction must be what we are.
-            std::string sdir = fobj["direction"].get<std::string>();
-            if (taker() and sdir == "extract") {
-                zio::debug("[flow {}] check_send_bot we take but claim 'extract': '{}'",
-                           name(), msg.label());
-                return false;
-            }
-            if (giver() and sdir == "inject") {
-                zio::debug("[flow {}] check_send_bot we give but claim 'inject': '{}'",
-                           name(), msg.label());
+            auto odir = lab.direction();
+            if (odir != m_dir) {
+                zio::debug("[flow {}] check_send_bot try to send differing direction",
+                           name());
                 return false;
             }
             zio::debug("[flow {}] check_send_bot okay with '{}'",
@@ -97,33 +90,33 @@ namespace zio {
         }
 
         bool check_pay(zio::Message& msg) {
-            zio::json fobj = msg.label_object();
-            std::string typ = fobj["flow"].get<std::string>();
-            if (typ != "PAY") {
+            const flow::Label lab(msg);
+            auto typ = lab.msgtype();
+            if (typ != flow::msgtype_e::pay) {
                 zio::debug("[flow {}] check_pay not PAY '{}'",
                            name(), msg.label());
                 return false;
             }
-            if (! fobj["credit"].is_number()) {
-                zio::debug("[flow {}] check_pay no credit attr '{}'",
+            int got_credit = lab.credit();
+            if (got_credit < 0) {
+                zio::debug("[flow {}] check_pay bad credit attr '{}'",
                            name(), msg.label());
                 return false;
             }
-            int got_credit = fobj["credit"];
-            if (got_credit + credit > total_credit) {
+            if (got_credit + m_credit > m_total_credit) {
                 zio::debug("[flow {}] check_pay too much PAY {} + {} > {}",
-                           name(), got_credit, credit, total_credit);
+                           name(), got_credit, m_credit, m_total_credit);
                 return false;
             }
-            zio::debug("[flow {}] check_dat okay with '{}'",
+            zio::debug("[flow {}] check_pay okay with '{}'",
                        name(), msg.label());
             return true;
         }
 
         bool check_dat(zio::Message& msg) {
-            zio::json fobj = msg.label_object();
-            std::string typ = fobj["flow"].get<std::string>();
-            if (typ != "DAT") {
+            const flow::Label lab(msg);
+            auto typ = lab.msgtype();
+            if (typ != flow::msgtype_e::dat) {
                 zio::debug("[flow {}] check_dat not DAT '{}'",
                            name(), msg.label());
                 return false;
@@ -133,9 +126,9 @@ namespace zio {
             return true;
         }            
         bool check_eot(zio::Message& msg) {
-            zio::json fobj = msg.label_object();
-            std::string typ = fobj["flow"].get<std::string>();
-            if (typ != "EOT") {
+            const flow::Label lab(msg);
+            auto typ = lab.msgtype();
+            if (typ != flow::msgtype_e::eot) {
                 zio::debug("[flow {}] check_eot not EOT '{}'",
                            name(), msg.label());
                 return false;
@@ -146,32 +139,28 @@ namespace zio {
         }
                     
         // c/s switch
-        virtual void init_credit(int other_credit) = 0;
+        virtual int accept_credit(int other_credit) = 0;
 
         void recv_bot(zio::Message& msg) {
-            zio::json fobj = msg.label_object();
-            std::string dir = fobj["direction"];
-            init_credit(fobj["credit"].get<int>());
-            if (dir == "extract") { 
-                total_credit = credit;
-                credit = total_credit;
+            flow::Label lab(msg);
+            auto dir = lab.direction();
+            int cred = accept_credit(lab.credit());
+            m_credit = 0;       // inject
+            if (dir == flow::direction_e::extract) { 
+                m_credit = cred;
             }
-            else if (dir == "inject") {
-                total_credit = credit;
-                credit = 0;          
-            }
-            ++ recv_seqno;
-            remid = msg.remote_id();
+
+            ++ m_recv_seqno;
+            m_remid = msg.remote_id();
             zio::debug("[flow {}] recv_bot #{} as {} with {}/{} credit",
-                       name(), recv_seqno, dir, credit, total_credit);
+                       name(), m_recv_seqno, m_dir, m_credit, m_total_credit);
         }
         void send_msg(zio::Message& msg) {
-            ++ send_seqno;
-            msg.set_seqno(send_seqno);
-            msg.set_remote_id(remid);
-            // f.port->send(e.msg);
+            ++ m_send_seqno;
+            msg.set_seqno(m_send_seqno);
+            msg.set_remote_id(m_remid);
             zio::debug("[flow {}] send_msg #{} with {}/{} credit, {}",
-                       name(), send_seqno, credit, total_credit, msg.label());
+                       name(), m_send_seqno, m_credit, m_total_credit, msg.label());
         };
 
 
@@ -193,7 +182,7 @@ struct FlushPay {
 };
 struct BeginFlow {};
 
-// Guards
+// Guards mostly forward to FlowFSM
 
 auto check_recv_bot = [](auto e, zio::FlowFSM& f) { return f.check_recv_bot(e.msg); };
 auto check_send_bot = [](auto e, zio::FlowFSM& f) { return f.check_send_bot(e.msg); };
@@ -205,77 +194,83 @@ auto is_giver = [](auto e, zio::FlowFSM& f) { return f.giver(); };
 
 auto have_credit = [](auto e, zio::FlowFSM& f) {
     zio::debug("[flow {}] have_credit {}/{}",
-               f.name(), f.credit, f.total_credit);
-    return f.credit > 0;
+               f.name(), f.m_credit, f.m_total_credit);
+    return f.m_credit > 0;
 };
 
 // return if we are down to our last buck
-auto last_credit = [](auto e, zio::FlowFSM& f) {
-    zio::debug("[flow {}] last_credit {}/{}",
-               f.name(), f.credit, f.total_credit);
-    return f.total_credit - f.credit == 1;
+auto check_last_credit = [](auto e, zio::FlowFSM& f) {
+    zio::debug("[flow {}] check_last_credit {}/{}",
+               f.name(), f.m_credit, f.m_total_credit);
+    return f.m_total_credit - f.m_credit == 1;
 };
 
 auto check_one_credit = [](auto e, zio::FlowFSM& f) {
     zio::debug("[flow {}] check_one_credit {}/{}",
-               f.name(), f.credit, f.total_credit);
-    return f.credit == 1;
+               f.name(), f.m_credit, f.m_total_credit);
+    return f.m_credit == 1;
 };
 
 auto check_many_credit = [](auto e, zio::FlowFSM& f) {
-    zio::debug("[flow {}] check_one_credit {}/{}",
-               f.name(), f.credit, f.total_credit);
-    return f.credit > 1;
+    zio::debug("[flow {}] check_many_credit {}/{}",
+               f.name(), f.m_credit, f.m_total_credit);
+    return f.m_credit > 1;
 };
 
 // Actions
 
-auto send_msg = [](auto e, zio::FlowFSM& f) { f.send_msg(e.msg); };
+auto send_msg = [](auto e, zio::FlowFSM& f) {
+    f.send_msg(e.msg);
+};
 auto send_dat = [](auto e, zio::FlowFSM& f) {
-    -- f.credit;
+    -- f.m_credit;
+    zio::debug("[flow {}] send_dat {}/{}",
+               f.name(), f.m_credit, f.m_total_credit);
     f.send_msg(e.msg);
 };
 
 auto recv_bot = [](auto e, zio::FlowFSM& f) {
+    f.recv_bot(e.msg);
 };
 
 auto recv_pay = [](auto e, zio::FlowFSM& f) {
+    ++ f.m_recv_seqno;
     zio::json fobj = e.msg.label_object();
     int credit = fobj["credit"];
+    f.m_credit += credit;
     zio::debug("[flow {}] recv_pay #{} as {} with {}/{} credit",
-               f.name(), f.recv_seqno, f.dir, credit, f.total_credit);
-    f.credit += credit;
+               f.name(), f.m_recv_seqno, f.m_dir, credit, f.m_total_credit);
 };
 
 auto flush_pay = [](auto e, zio::FlowFSM& f) {
-    if (!f.credit) {
-        zio::debug("[flow {}] flush_pay no credit to flush",
-                   f.name());
+    if (!f.m_credit) {
+        // shouldn't be called
+        zio::critical("[flow {}] flush_pay no credit to flush",
+                      f.name());
         return;
     }
     auto fobj = e.msg.label_object();
     fobj["flow"] = "PAY";
-    fobj["credit"] = f.credit;
+    fobj["credit"] = f.m_credit;
     e.msg.set_label_object(fobj);
-    e.msg.set_seqno(++f.send_seqno);
+    e.msg.set_seqno(++f.m_send_seqno);
     zio::debug("[flow {}] flush_pay #{}, credit:{}",
-               f.name(), f.send_seqno, f.credit);
-    f.credit=0;
-    if (f.remid.size()) { e.msg.set_remote_id(f.remid); }
-    // f.port->send(msg);
+               f.name(), f.m_send_seqno, f.m_credit);
+    f.m_credit=0;
+    if (f.m_remid.size()) { e.msg.set_remote_id(f.m_remid); }
 };
 
 auto recv_dat = [](auto e, zio::FlowFSM& f) {
-    ++ f.recv_seqno;
-    ++ f.credit;
+    ++ f.m_recv_seqno;
+    ++ f.m_credit;
     zio::debug("[flow {}] recv_dat #{} as {} with {}/{} credit",
-               f.name(), f.recv_seqno, f.dir, f.credit, f.total_credit);
+               f.name(), f.m_recv_seqno, f.m_dir, f.m_credit, f.m_total_credit);
 };
 
 auto recv_eot = [](auto e, zio::FlowFSM& f) {
-    ++ f.recv_seqno;
+    ++ f.m_recv_seqno;
     zio::debug("[flow {}] recv_eot #{} as {} with {}/{} credit",
-               f.name(), f.recv_seqno, f.dir, f.credit, f.total_credit);
+               f.name(), f.m_recv_seqno, f.m_dir, f.m_credit, f.m_total_credit);
 };
 
 
@@ -288,13 +283,14 @@ namespace {
 struct RICH{};
 struct HANDSOUT{};
 struct flowsm_taking {
+
     auto operator()() const noexcept {
         using namespace boost::sml;
 
         return make_transition_table(
             * state<RICH> + event<FlushPay> [have_credit] / flush_pay = state<HANDSOUT>
-            , state<HANDSOUT> + event<RecvMsg> [ last_credit and check_dat] / recv_dat = state<RICH>
-            , state<HANDSOUT> + event<RecvMsg> [!last_credit and check_dat] / recv_dat = state<HANDSOUT>
+            , state<HANDSOUT> + event<RecvMsg> [ check_last_credit and check_dat] / recv_dat = state<RICH>
+            , state<HANDSOUT> + event<RecvMsg> [!check_last_credit and check_dat] / recv_dat = state<HANDSOUT>
             , state<HANDSOUT> + event<FlushPay> [have_credit] / flush_pay = state<HANDSOUT>
             );
     }
@@ -319,9 +315,10 @@ struct flowsm_giving {
 // flowing
 struct READY{};
 struct flowsm_flowing {
+
     auto operator()() const noexcept {
         using namespace boost::sml;
-
+        
         return make_transition_table(
             * state<READY> + event<BeginFlow> [ is_giver ] = state<flowsm_giving>
             , state<READY> + event<BeginFlow> [!is_giver ] = state<flowsm_taking>
@@ -337,7 +334,8 @@ struct FINACK{};
 struct ACKFIN{};
 struct FIN{};
 struct flowsm_main {
-
+    
+    // main
     auto operator()() const noexcept {
         using namespace boost::sml;
 
@@ -351,7 +349,12 @@ struct flowsm_main {
 , state<flowsm_flowing> + event<SendMsg> [check_eot] / send_msg = state<ACKFIN>
 , state<flowsm_flowing> + event<RecvMsg> [check_eot] / recv_eot = state<FINACK>
 
+, state<FINACK> + event<SendMsg> [!check_eot] = state<FINACK>
+, state<FINACK> + event<RecvMsg> [!check_eot] = state<FINACK>
 , state<FINACK> + event<SendMsg> [check_eot] / send_msg = state<FIN>
+
+, state<ACKFIN> + event<RecvMsg> [!check_eot] = state<ACKFIN>
+, state<ACKFIN> + event<SendMsg> [!check_eot] = state<ACKFIN>
 , state<ACKFIN> + event<RecvMsg> [check_eot] / recv_eot = state<FIN>
 
             );
@@ -359,11 +362,11 @@ struct flowsm_main {
 };
 
 
-typedef boost::sml::sm<flowsm_main,
-//                       boost::sml::logger<flow_logger>,
-                       boost::sml::defer_queue<std::deque>,
-                       boost::sml::process_queue<std::queue>
-                       > FlowSM;
+// boost::sml::logger<flow_logger>,
+    // boost::sml::defer_queue<std::deque>,
+    // boost::sml::process_queue<std::queue>
+
+typedef boost::sml::sm<flowsm_main> FlowSM;
 
 
 } // anonymous namespace
@@ -378,7 +381,7 @@ struct FlowImp : public FlowFSM {
     timeout_t timeout;
     FlowSM sm;
 
-    FlowImp(zio::portptr_t p, flow::direction_e dir, size_t credit, timeout_t tout)
+    FlowImp(zio::portptr_t p, flow::direction_e dir, int credit, timeout_t tout)
         : FlowFSM(dir, credit)
         , port{p}
         , timeout{tout}
@@ -390,39 +393,102 @@ struct FlowImp : public FlowFSM {
     // for client/server to implement
     virtual bool bot_handshake(zio::Message& botmsg) = 0;
 
-    bool bot(zio::Message& botmsg) {
-        if (send_seqno != -1) {
-            throw flow::local_error("bot send attempt with already open flow");
+    template<typename... Args>
+    std::string str(std::string form, Args... args) {
+        std::string prefix = fmt::format("[flow {}] ", name());
+        std::string body = fmt::format(form, args...);
+
+        std::vector<std::string> snames;
+
+        // sm.visit_current_states(
+        //         [&snames](auto l1) {
+        //             if (l1.is(boost::sml::state<flowsm_flowing>)) {
+        //                 l1.visit_current_states(
+        //                     [&snames](auto l2) {
+        //                         if (l2.is(boost::sml::state<flowsm_taking>) or
+        //                             l2.is(boost::sml::state<flowsm_giving>)) {
+        //                             l2.visit_current_states(
+        //                                 [&snames](auto l3) {
+        //                                     snames.push_back(l3.c_str());
+        //                                 });
+        //                         }
+        //                         else {
+        //                             snames.push_back(l2.c_str());
+        //                         }
+        //                     });
+        //             }
+        //             else {
+        //                 snames.push_back(l1.c_str());
+        //             }
+        //         });
+
+        if (sm.is(boost::sml::state<flowsm_flowing>)) {
+
+            sm.visit_current_states< decltype(boost::sml::state<flowsm_flowing>) >(
+                [&snames](auto state) {
+                    snames.push_back(state.c_str());
+                });
         }
-        if (recv_seqno != -1) {
-            throw flow::local_error("bot recv attempt with already open flow");
+        // else if (sm.is( boost::sml::state<flowsm_giving> )) {
+        //     sm<flowsm_flowing>.visit_current_states< decltype(boost::sml::state<flowsm_giving>) > (
+        //         [&snames](auto state) {
+        //             snames.push_back(state.c_str());
+        //         });
+        // }
+        // else if (sm.is(boost::sml::state<flowsm_giving>)) {
+        //     sm.visit_current_states< decltype(boost::sml::state<flowsm_giving>) > (
+        //         [&where](auto state) {
+        //             where += state.c_str();
+        //         });
+        // }
+        else {
+            sm.visit_current_states(
+                [&snames](auto state) {
+                    snames.push_back(state.c_str());
+                });
+            }
+        std::string ret = prefix + body;
+        for (auto s : snames) {
+            ret += "\n\t" + s;
+        }
+        return ret;
+    }
+
+    bool bot(zio::Message& botmsg) {
+        zio::debug(str("bot handshake starts"));
+        if (m_send_seqno != -1) {
+            throw flow::local_error(str("bot send attempt with already open flow"));
+        }
+        if (m_recv_seqno != -1) {
+            throw flow::local_error(str("bot recv attempt with already open flow"));
         }
         if (!sm.is(boost::sml::state<IDLE>)) {
-            throw flow::local_error("bot handshake outside of flow IDLE state");
+            throw flow::local_error(str("bot handshake outside of flow IDLE state"));
         }
         if (! bot_handshake(botmsg)) {
             return false;
         }
-        if (send_seqno != 0) {
-            throw flow::remote_error("bot handshake send failed");
+        if (m_send_seqno != 0) {
+            throw flow::remote_error(str("bot handshake send failed"));
         }
-        if (recv_seqno != 0) {
-            throw flow::remote_error("bot handshake recv failed");
+        if (m_recv_seqno != 0) {
+            throw flow::remote_error(str("bot handshake recv failed"));
         }
         if (! sm.is< decltype(boost::sml::state<flowsm_flowing>) >(boost::sml::state<READY>)) {
-            throw flow::remote_error("bot handshake failed to reach READY state");
+            throw flow::remote_error(str("bot handshake failed to reach READY state"));
         }
         if (!sm.process_event(BeginFlow{})) {
-            throw flow::local_error("bot handshake failed to reach FLOW state");
+            throw flow::local_error(str("bot handshake failed to reach FLOW state"));
         }
+        zio::debug(str("bot handshake complete"));
         return true;
     }
 
     // Send an EOT msg as an ack (or as an initiation);
     bool eotack(zio::Message& msg) {
-        auto fobj = msg.label_object();
-        fobj["flow"] = "EOT";
-        msg.set_label_object(fobj);
+        flow::Label lab(msg);
+        lab.msgtype(flow::msgtype_e::eot);
+        lab.commit();
         return send(msg);
     }
 
@@ -431,13 +497,23 @@ struct FlowImp : public FlowFSM {
         if (! eotack(msg)) {
             return false;
         }
-        if (! recv(msg) ) {
-            return false;
+        if (! sm.is(boost::sml::state<ACKFIN>)) {
+            throw flow::remote_error(str("eot handshake failed to reach ACKFIN state"));
         }
-        if (! sm.is(boost::sml::state<FIN>)) {
-            throw flow::remote_error("eot handshake failed to reach FIN state");
+        
+        while (true) {
+            if (! recv(msg) ) {
+                return false;
+            }
+            if (sm.is(boost::sml::state<ACKFIN>)) {
+                zio::debug("eot recv non EOT {}", msg.label());
+                continue;
+            }
+            if (! sm.is(boost::sml::state<FIN>)) {
+                throw flow::remote_error(str("eot handshake failed to reach FIN state"));
+            }
+            return true;
         }
-        return true;
     }
 
     /// Attempt to send DAT (for givers)
@@ -445,20 +521,46 @@ struct FlowImp : public FlowFSM {
         // try to recv any waiting pay
         zio::Message maybe_pay;
         if (port->recv(maybe_pay, timeout_t{0})) {
+
+            zio::debug(str("income: {}", maybe_pay.label()));
+
             sm.process_event(RecvMsg{maybe_pay});
             if (sm.is(boost::sml::state<FINACK>)) {
-                throw flow::end_of_transmission("flow get received EOT");
+                throw flow::end_of_transmission(str("flow get received EOT"));
+            }
+        }
+        if (!m_credit) {
+            if (!port->recv(maybe_pay, timeout)) {
+                return false;
+            }
+
+            zio::debug(str("just in time income: {}", maybe_pay.label()));
+
+            sm.process_event(RecvMsg{maybe_pay});
+            if (sm.is(boost::sml::state<FINACK>)) {
+                throw flow::end_of_transmission(str("flow get received EOT"));
             }
         }
 
+        flow::Label lab(dat);
+        lab.msgtype(flow::msgtype_e::dat);
+        lab.commit();
         return send(dat);
     }
 
     /// Attempt to get DAT (for takers)
     bool get(zio::Message& dat) {
-        zio::Message pay;
-        if (sm.process_event(FlushPay{pay})) {
-            port->send(pay);
+        {
+            zio::Message pay;
+            flow::Label lab(pay);
+            lab.msgtype(flow::msgtype_e::pay);
+            lab.commit();
+
+            zio::debug(str("paying: {}", pay.label()));
+
+            if (sm.process_event(FlushPay{pay})) {
+                port->send(pay);
+            }
         }
 
         bool noto = recv(dat);
@@ -466,7 +568,7 @@ struct FlowImp : public FlowFSM {
             return false;
         }
         if (sm.is(boost::sml::state<FINACK>)) {
-            throw flow::end_of_transmission("flow get received EOT");
+            throw flow::end_of_transmission(str("flow get received EOT"));
         }
         return true;
     }
@@ -476,16 +578,26 @@ struct FlowImp : public FlowFSM {
         if (! port->recv(msg, timeout)) {
             return false;       // timeout
         }
+
+        zio::debug(str("recving: {}", msg.label()));
+
         if (! sm.process_event(RecvMsg{msg})) {
-            throw flow::remote_error("recv flow bad message " + msg.label());
+            throw flow::remote_error(str("recv flow bad message {}", msg.label()));
         }
         return true;
     }
 
     // Try to do a flow level send.  Process through SM then send.
     bool send(zio::Message& msg) {
+        flow::Label lab(msg);
+        if (lab.msgtype() == flow::msgtype_e::unknown) {
+            throw flow::local_error(str("send flow message type unknown"));
+        }
+        
+        zio::debug(str("sending: {}", msg.label()));
+
         if (! sm.process_event(SendMsg{msg})) {
-            throw flow::local_error("send flow message invalid to send");
+            throw flow::local_error(str("send invalid: {}", msg.label()));
         }
         // fixme: use a pollout timeout?
         return port->send(msg);
@@ -495,49 +607,63 @@ struct FlowImp : public FlowFSM {
 
 struct FlowImpServer : public FlowImp {
 
-    FlowImpServer(zio::portptr_t p, flow::direction_e dir, size_t credit, timeout_t tout)
+    FlowImpServer(zio::portptr_t p, flow::direction_e dir, int credit, timeout_t tout)
         : FlowImp(p,dir,credit,tout) { }
     virtual ~FlowImpServer() {}
 
     virtual bool bot_handshake(zio::Message& botmsg) {
 
-        auto our_fobj = botmsg.label_object();
+        //auto our_fobj = botmsg.label_object();
         if (! recv(botmsg)) {
             return false;
         }
         if (! sm.is(boost::sml::state<BOTRECV>)) {
-            throw flow::local_error("bot server handshake failed to enter BOTRECV");
+            throw flow::local_error(str("bot server handshake failed to enter BOTRECV"));
         }
+        flow::Label lab(botmsg);
+        if (lab.direction() == flow::direction_e::inject) {
+            lab.direction(flow::direction_e::extract);
+        }
+        else {
+            lab.direction(flow::direction_e::inject);
+        }
+        lab.commit();
+
         if (! send(botmsg)) {
             return false;
         }
         return true;
     }
 
-    virtual void init_credit(int other_credit) {
-        if (!other_credit) {
-            other_credit = credit; // server decides
+    virtual int accept_credit(int offer_credit) {
+        // This server protects its memory by only allowing a client
+        // to shink the credit.
+        if (offer_credit > 0 and offer_credit < m_total_credit) {
+            m_total_credit = offer_credit;
         }
-        else {
-            credit = other_credit; // this server accepts recomendation
-        }
+        return m_total_credit;
     }
 
 };                          
 
 struct FlowImpClient : public FlowImp {
 
-    FlowImpClient(zio::portptr_t p, flow::direction_e dir, size_t credit, timeout_t tout)
+    FlowImpClient(zio::portptr_t p, flow::direction_e dir, int credit, timeout_t tout)
         : FlowImp(p,dir,credit,tout) { }
     virtual ~FlowImpClient() {}
 
     virtual bool bot_handshake(zio::Message& botmsg) {
+        flow::Label lab(botmsg);
+        lab.msgtype(flow::msgtype_e::bot);
+        lab.direction(m_dir);
+        lab.credit(m_total_credit);
+        lab.commit();
 
         if (! send(botmsg)) {
             return false;
         }
         if (! sm.is(boost::sml::state<BOTSEND>)) {
-            throw flow::local_error("bot client handshake failed to enter BOTSEND");
+            throw flow::local_error(str("bot client handshake failed to enter BOTSEND"));
         }
         if (! recv(botmsg)) {
             return false;
@@ -545,8 +671,10 @@ struct FlowImpClient : public FlowImp {
         return true;
     }
 
-    virtual void init_credit(int other_credit) {
-        credit = other_credit;  // client accepts unconditionally
+    virtual int accept_credit(int offer_credit) {
+        // Client must accept credit amount offered by server
+        m_total_credit = offer_credit;
+        return m_total_credit;
     }
 
 };
@@ -555,7 +683,7 @@ struct FlowImpClient : public FlowImp {
 
 static
 std::unique_ptr<zio::FlowImp>
-make_imp(zio::portptr_t p, zio::flow::direction_e dir, size_t credit, zio::timeout_t timeout)
+make_imp(zio::portptr_t p, zio::flow::direction_e dir, int credit, zio::timeout_t timeout)
 {
     if (zio::is_serverish(p->socket())) {
         return std::make_unique<zio::FlowImpServer>(p, dir, credit, timeout);
@@ -567,22 +695,27 @@ make_imp(zio::portptr_t p, zio::flow::direction_e dir, size_t credit, zio::timeo
 }
 
 // Forward to implementation
-zio::Flow::Flow(zio::portptr_t p, zio::flow::direction_e dir, size_t credit, zio::timeout_t timeout)
+zio::Flow::Flow(zio::portptr_t p, zio::flow::direction_e dir, int credit, zio::timeout_t timeout)
     : imp(make_imp(p, dir, credit, timeout))
 {
 }
+
+// We put these here as needed for using unique_ptr in pimpl pattern.
+zio::Flow::~Flow() = default;
+zio::Flow::Flow(zio::Flow&& rhs) = default;
+zio::Flow& zio::Flow::operator=(zio::Flow&& rhs) = default;
 
 void zio::Flow::set_timeout(timeout_t timeout)
 {
     imp->timeout = timeout;
 }
-size_t zio::Flow::credit() const
+int zio::Flow::credit() const
 {
-    return imp->credit;
+    return imp->m_credit;
 }
-size_t zio::Flow::total_credit() const
+int zio::Flow::total_credit() const
 {
-    return imp->total_credit;
+    return imp->m_total_credit;
 }
 bool zio::Flow::bot() {
     zio::Message msg("FLOW");
@@ -630,4 +763,102 @@ bool zio::Flow::recv(zio::Message& msg)
 bool zio::Flow::send(zio::Message& msg)
 {
     return imp->send(msg);
+}
+
+
+zio::flow::Label::Label(zio::Message& msg) : m_msg(msg), m_fobj(msg.label_object()) { }
+zio::flow::Label::~Label() { commit(); }
+void zio::flow::Label::commit() {
+    if (m_dirty) { 
+        m_msg.set_label_object(m_fobj);
+        m_dirty = false;
+    }
+}
+zio::flow::direction_e zio::flow::Label::direction() const {
+    if (! m_fobj.is_object()) { return direction_e::unknown; }
+    const auto jit = m_fobj.find("direction");
+    if (jit == m_fobj.end()) { return direction_e::unknown; }
+    const auto jdir = *jit;
+    if (! jdir.is_string()) { return direction_e::unknown; }
+    std::string dir = jdir.get<std::string>();
+    if (dir == "inject") { return direction_e::inject; }
+    if (dir == "extract") { return direction_e::extract; }
+    return direction_e::unknown;        
+}
+
+void zio::flow::Label::direction(zio::flow::direction_e dir) {
+    switch (dir) {
+    case direction_e::inject:
+        m_fobj["direction"] = "inject";
+        break;
+    case direction_e::extract:
+        m_fobj["direction"] = "extract";
+        break;
+    case direction_e::unknown:
+        m_fobj.erase("direction");
+        break;
+    }
+    m_dirty = true;
+}
+
+zio::flow::msgtype_e zio::flow::Label::msgtype() const {
+    if (! m_fobj.is_object()) { return msgtype_e::unknown; }
+    const auto jit = m_fobj.find("flow");
+    if (jit == m_fobj.end()) { return msgtype_e::unknown; }
+    const auto jtyp = *jit;
+    if (! jtyp.is_string()) { return msgtype_e::unknown; }
+    std::string typ = jtyp.get<std::string>();
+    if (typ == "BOT") { return msgtype_e::bot; }
+    if (typ == "DAT") { return msgtype_e::dat; }
+    if (typ == "PAY") { return msgtype_e::pay; }
+    if (typ == "EOT") { return msgtype_e::eot; }
+    return msgtype_e::unknown;        
+}
+void zio::flow::Label::msgtype(zio::flow::msgtype_e typ) {
+    switch (typ) {
+    case zio::flow::msgtype_e::bot:
+        m_fobj["flow"] = "BOT";
+        break;
+    case zio::flow::msgtype_e::dat:
+        m_fobj["flow"] = "DAT";
+        break;
+    case zio::flow::msgtype_e::pay:
+        m_fobj["flow"] = "PAY";
+        break;
+    case zio::flow::msgtype_e::eot:
+        m_fobj["flow"] = "EOT";
+        break;
+    case zio::flow::msgtype_e::unknown:
+        m_fobj.erase("flow");
+        break;
+    }
+    m_dirty = true;
+}
+int zio::flow::Label::credit() const {
+    if (! m_fobj.is_object()) { return -1; }
+    const auto jit = m_fobj.find("credit");
+    if (jit == m_fobj.end()) { return -1; }
+    const auto jtyp = *jit;
+    if (! jtyp.is_number()) { return -1; }
+    return jtyp.get<int>();
+}
+void zio::flow::Label::credit(int cred) {
+    if (cred < 0) {
+        m_fobj.erase("credit");
+        return;
+    }
+    m_fobj["credit"] = cred;
+    m_dirty = true;
+}
+
+std::string zio::flow::Label::str() const
+{
+    const char* dirs[] = {"?dir?", "INJECT", "EXTRACT" };
+    const char* msgs[] = {"?msg?", "BOT", "DAT", "PAY", "EOT" };
+
+    auto mt = msgtype();
+    auto dir = direction();
+    int cred = credit();
+    return fmt::format("<flow mt:{} dir:{} cred:{}>",
+                       msgs[zio::enumind(mt)], dirs[zio::enumind(dir)], cred);
 }

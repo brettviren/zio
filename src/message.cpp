@@ -80,7 +80,16 @@ void zio::Message::set_label(const std::string& label)
 
 zio::json zio::Message::label_object() const
 {
-    return json::parse(label());
+    const std::string lab = label();
+    if (lab.size() == 0) {
+        return nullptr;
+    }
+    try {
+        return json::parse(lab);
+    }
+    catch (const json::parse_error&) {
+        return nullptr;
+    }
 }
 void zio::Message::set_label_object(const zio::json& lobj)
 {

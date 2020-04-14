@@ -4,9 +4,29 @@
 
 #include <cassert>
 
+void test_empty()
+{
+    zio::json empty{};
+
+    zio::Message msg;
+    auto fobj = msg.label_object();
+    assert (fobj == empty);
+
+    msg.set_label("");
+    fobj = msg.label_object();
+    assert (fobj == empty);
+
+    msg.set_label_object({});
+    fobj = msg.label_object();
+    assert (fobj == empty);
+}
+
 int main()
 {
     zio::init_all();
+
+    test_empty();
+
 
     std::string label = "Extra spicy";
 
