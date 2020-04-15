@@ -407,28 +407,6 @@ struct FlowImp : public FlowFSM {
 
         std::vector<std::string> snames;
 
-        // sm.visit_current_states(
-        //         [&snames](auto l1) {
-        //             if (l1.is(boost::sml::state<flowsm_flowing>)) {
-        //                 l1.visit_current_states(
-        //                     [&snames](auto l2) {
-        //                         if (l2.is(boost::sml::state<flowsm_taking>) or
-        //                             l2.is(boost::sml::state<flowsm_giving>)) {
-        //                             l2.visit_current_states(
-        //                                 [&snames](auto l3) {
-        //                                     snames.push_back(l3.c_str());
-        //                                 });
-        //                         }
-        //                         else {
-        //                             snames.push_back(l2.c_str());
-        //                         }
-        //                     });
-        //             }
-        //             else {
-        //                 snames.push_back(l1.c_str());
-        //             }
-        //         });
-
         if (sm.is(boost::sml::state<flowsm_giving>)) {
 
             sm.visit_current_states< decltype(boost::sml::state<flowsm_giving>) >(
@@ -449,11 +427,19 @@ struct FlowImp : public FlowFSM {
                     snames.push_back(state.c_str());
                 });
             }
-        std::string ret = prefix + body;
+
+        std::string states = "[";
+        std::string comma="";
         for (auto s : snames) {
-            ret += "\n\t" + s;
+            const std::string ns = "{anonymous}::";
+            if (s.substr(0, ns.size()) == ns) {
+                s = s.substr(ns.size());
+            }
+            states += comma + s;
+            comma = ",";
         }
-        return ret;
+        states += "] ";
+        return prefix + states + body;
     }
 
     bool bot(zio::Message& botmsg) {
@@ -522,18 +508,9 @@ struct FlowImp : public FlowFSM {
 
     /// Attempt to send DAT (for givers)
     bool put(zio::Message& dat) {
-        // try to recv any waiting pay
-        zio::Message maybe_pay;
-        if (port->recv(maybe_pay, timeout_t{0})) {
-
-            ZIO_TRACE(str("income: {}", maybe_pay.label()));
-
-            sm.process_event(RecvMsg{maybe_pay});
-            if (sm.is(boost::sml::state<FINACK>)) {
-                throw flow::end_of_transmission(str("flow get received EOT"));
-            }
-        }
-        if (!m_credit) {
+        recv_pay();
+        if (!m_credit) {        // try harder
+            zio::Message maybe_pay;
             if (!port->recv(maybe_pay, timeout)) {
                 return false;
             }
@@ -554,17 +531,7 @@ struct FlowImp : public FlowFSM {
 
     /// Attempt to get DAT (for takers)
     bool get(zio::Message& dat) {
-        {
-            zio::Message pay;
-            flow::Label lab(pay);
-            lab.msgtype(flow::msgtype_e::pay);
-            lab.commit();
-
-            if (sm.process_event(FlushPay{pay})) {
-                ZIO_TRACE(str("paying: {}", pay.label()));
-                port->send(pay);
-            }
-        }
+        send_pay();
 
         bool noto = recv(dat);
         if (! noto) {
@@ -575,6 +542,47 @@ struct FlowImp : public FlowFSM {
         }
         return true;
     }
+
+    void recv_pay() {
+        if (m_credit == m_total_credit) {
+            return;
+        }
+        zio::Message maybe_pay;
+        if (port->recv(maybe_pay, timeout_t{0})) {
+
+            ZIO_TRACE(str("income: {}", maybe_pay.label()));
+
+            sm.process_event(RecvMsg{maybe_pay});
+            if (sm.is(boost::sml::state<FINACK>)) {
+                throw flow::end_of_transmission(str("flow pay received EOT"));
+            }
+        }
+    }
+    void send_pay() {
+        if (!m_credit) {
+            return;
+        }
+        zio::Message pay;
+        flow::Label lab(pay);
+        lab.msgtype(flow::msgtype_e::pay);
+        lab.commit();
+
+        if (sm.process_event(FlushPay{pay})) {
+            ZIO_TRACE(str("paying: {}", pay.label()));
+            port->send(pay);
+        }
+    }
+
+    int pay() {
+        if (giver()) {
+            recv_pay();
+        }
+        else {
+            send_pay();
+        }
+        return m_credit;
+    }
+
 
     // Try to do a flow level recv and process it throught the SM
     bool recv(zio::Message& msg) {
@@ -756,6 +764,11 @@ bool zio::Flow::put(zio::Message& msg)
 bool zio::Flow::get(zio::Message& msg)
 {
     return imp->get(msg);
+}
+
+int zio::Flow::pay()
+{
+    return imp->pay();
 }
 
 bool zio::Flow::recv(zio::Message& msg)

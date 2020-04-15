@@ -126,21 +126,58 @@ namespace zio {
         bool eot();
         bool eot(zio::Message& eotmsg);
 
-        /// Attempt to send DAT (for givers)
+        /// Attempt to send DAT (for givers) after checking for PAY.
         bool put(zio::Message& dat);
 
-        /// Attempt to get DAT (for takers)
+        /// Attempt to get DAT (for takers) after flushing PAY.
         bool get(zio::Message& dat);
 
+        /// Return the amount of credit in this flow object.
+        ///
+        /// This must be called if application uses low-level
+        /// recv()/send() instead of put()/et().
+        ///
+        /// Does not block.  May throw end_of_transmission.
+        ///
+        /// May produce side-effect communication:
+        ///
+        /// If flow is "extract" (giver) then pay() attempts to
+        /// receive a PAY message from socket to gain credit.  If 0 is
+        /// returned by pay() then a subsequent send() of a DAT will
+        /// timeout or block.  Thus, the applicatin using low-level
+        /// send() must try to call pay() until it returns non-zero.
+        /// If giver uses recv() then received payment is processed
+        /// automatically.
+        ///
+        /// If flow is "inject" (taker) then pay() attempts to send a
+        /// PAY message to flush any accumulated credit.  If the value
+        /// total_credit() is returned then a subsequent low-level
+        /// recv() will timeout or block.  If using recv() instead of
+        /// get() then this MUST be called to give PAY back to other
+        /// end.
+        int pay();
 
         /// Receive a message on the flow port and push it through the
-        /// flow state machine.  
+        /// flow state machine.
+        ///
+        /// This is is suitable for use if an application needs to
+        /// poll the underlying socket.  However, it will NOT have
+        /// additional side-effect communication.  In particular, it
+        /// will NOT flush PAY like get().  A taker using recv() and
+        /// does not explicitly and periodically call pay() will block
+        /// the flow.  In particular an initial pay() is needed to get
+        /// flow started.
         bool recv(zio::Message& msg);
 
         /// Push a message through the flow state machine and then
-        /// send it to the flow port.  Applications should take care
-        /// to use this while respecting the state machine.  Best to
-        /// use the three letter methods.
+        /// send it to the flow port if the state machine accepts the message.
+        ///
+        /// Applications may use this when they must send in a way
+        /// that is less coupled to the state machine.  They must then
+        /// be resilient to mistakes.  Also not that no side-effect
+        /// communication is performed.  In particular sending DAT
+        /// does NOT also cause PAY to be received.  Such applications
+        /// must explicitly and periodically call pay().
         bool send(zio::Message& msg);
 
     private:
