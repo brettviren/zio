@@ -343,11 +343,18 @@ struct flowsm_main {
 * state<IDLE> + event<SendMsg> [check_send_bot] / send_msg = state<BOTSEND>
 , state<IDLE> + event<RecvMsg> [check_recv_bot] / recv_bot = state<BOTRECV>
 
-, state<BOTSEND> + event<RecvMsg> [check_recv_bot] / recv_bot = state<flowsm_flowing>
-, state<BOTRECV> + event<SendMsg> [check_send_bot] / send_msg = state<flowsm_flowing>
+// , state<BOTSEND> + event<RecvMsg> [check_recv_bot] / recv_bot = state<flowsm_flowing>
+// , state<BOTRECV> + event<SendMsg> [check_send_bot] / send_msg = state<flowsm_flowing>
+, state<BOTSEND> + event<RecvMsg> [check_recv_bot] / recv_bot = state<READY>
+, state<BOTRECV> + event<SendMsg> [check_send_bot] / send_msg = state<READY>
 
-, state<flowsm_flowing> + event<SendMsg> [check_eot] / send_msg = state<ACKFIN>
-, state<flowsm_flowing> + event<RecvMsg> [check_eot] / recv_eot = state<FINACK>
+, state<READY> + event<BeginFlow> [ is_giver ] = state<flowsm_giving>
+, state<READY> + event<BeginFlow> [!is_giver ] = state<flowsm_taking>
+
+, state<flowsm_giving> + event<SendMsg> [check_eot] / send_msg = state<ACKFIN>
+, state<flowsm_giving> + event<RecvMsg> [check_eot] / recv_eot = state<FINACK>
+, state<flowsm_taking> + event<SendMsg> [check_eot] / send_msg = state<ACKFIN>
+, state<flowsm_taking> + event<RecvMsg> [check_eot] / recv_eot = state<FINACK>
 
 , state<FINACK> + event<SendMsg> [!check_eot] = state<FINACK>
 , state<FINACK> + event<RecvMsg> [!check_eot] = state<FINACK>
@@ -422,25 +429,20 @@ struct FlowImp : public FlowFSM {
         //             }
         //         });
 
-        if (sm.is(boost::sml::state<flowsm_flowing>)) {
+        if (sm.is(boost::sml::state<flowsm_giving>)) {
 
-            sm.visit_current_states< decltype(boost::sml::state<flowsm_flowing>) >(
+            sm.visit_current_states< decltype(boost::sml::state<flowsm_giving>) >(
                 [&snames](auto state) {
                     snames.push_back(state.c_str());
                 });
         }
-        // else if (sm.is( boost::sml::state<flowsm_giving> )) {
-        //     sm<flowsm_flowing>.visit_current_states< decltype(boost::sml::state<flowsm_giving>) > (
-        //         [&snames](auto state) {
-        //             snames.push_back(state.c_str());
-        //         });
-        // }
-        // else if (sm.is(boost::sml::state<flowsm_giving>)) {
-        //     sm.visit_current_states< decltype(boost::sml::state<flowsm_giving>) > (
-        //         [&where](auto state) {
-        //             where += state.c_str();
-        //         });
-        // }
+        else if (sm.is(boost::sml::state<flowsm_taking>)) {
+
+            sm.visit_current_states< decltype(boost::sml::state<flowsm_taking>) >(
+                [&snames](auto state) {
+                    snames.push_back(state.c_str());
+                });
+        }
         else {
             sm.visit_current_states(
                 [&snames](auto state) {
@@ -474,7 +476,9 @@ struct FlowImp : public FlowFSM {
         if (m_recv_seqno != 0) {
             throw flow::remote_error(str("bot handshake recv failed"));
         }
-        if (! sm.is< decltype(boost::sml::state<flowsm_flowing>) >(boost::sml::state<READY>)) {
+        // bool ready = sm.is< decltype(boost::sml::state<flowsm_flowing>) >(boost::sml::state<READY>);
+        bool ready = sm.is(boost::sml::state<READY>);
+        if (! ready) {
             throw flow::remote_error(str("bot handshake failed to reach READY state"));
         }
         if (!sm.process_event(BeginFlow{})) {
@@ -556,9 +560,8 @@ struct FlowImp : public FlowFSM {
             lab.msgtype(flow::msgtype_e::pay);
             lab.commit();
 
-            ZIO_TRACE(str("paying: {}", pay.label()));
-
             if (sm.process_event(FlushPay{pay})) {
+                ZIO_TRACE(str("paying: {}", pay.label()));
                 port->send(pay);
             }
         }
