@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-04-03 Fri 05:48 -->
+<!-- 2020-04-16 Thu 08:34 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>ZIO Flow Broker File Server</title>
@@ -239,17 +239,17 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org7ddeb1b">1. Getting started</a></li>
-<li><a href="#org360531a">2. Attribute rules</a>
+<li><a href="#org3f05a18">1. Getting started</a></li>
+<li><a href="#org998fc05">2. Attribute rules</a>
 <ul>
-<li><a href="#org8b0d8f1">2.1. Overview</a></li>
-<li><a href="#org1c8a52d">2.2. Testing a rule set</a></li>
+<li><a href="#orgdc9b94c">2.1. Overview</a></li>
+<li><a href="#org3dc218d">2.2. Testing a rule set</a></li>
 </ul>
 </li>
-<li><a href="#org0d8959e">3. Example runs</a>
+<li><a href="#orgc5b6970">3. Example runs</a>
 <ul>
-<li><a href="#org07d53ea">3.1. Single client</a></li>
-<li><a href="#orgc68a0b4">3.2. Multiple clients</a></li>
+<li><a href="#org5170895">3.1. Single client</a></li>
+<li><a href="#orgdcabaaf">3.2. Multiple clients</a></li>
 </ul>
 </li>
 </ul>
@@ -275,8 +275,8 @@ clients need not know what file technology or detailed schema is
 employed by the back end handlers.
 </p>
 
-<div id="outline-container-org7ddeb1b" class="outline-2">
-<h2 id="org7ddeb1b"><span class="section-number-2">1</span> Getting started</h2>
+<div id="outline-container-org3f05a18" class="outline-2">
+<h2 id="org3f05a18"><span class="section-number-2">1</span> Getting started</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 Command line access to the file server is via the <code>zio</code> Python module
@@ -303,8 +303,8 @@ to be run from inside other Python applications.
 </div>
 </div>
 
-<div id="outline-container-org360531a" class="outline-2">
-<h2 id="org360531a"><span class="section-number-2">2</span> Attribute rules</h2>
+<div id="outline-container-org998fc05" class="outline-2">
+<h2 id="org998fc05"><span class="section-number-2">2</span> Attribute rules</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 The flow broker file server brings together ZIO data flow clients with
@@ -315,8 +315,8 @@ rules</i>.
 </p>
 </div>
 
-<div id="outline-container-org8b0d8f1" class="outline-3">
-<h3 id="org8b0d8f1"><span class="section-number-3">2.1</span> Overview</h3>
+<div id="outline-container-orgdc9b94c" class="outline-3">
+<h3 id="orgdc9b94c"><span class="section-number-3">2.1</span> Overview</h3>
 <div class="outline-text-3" id="text-2-1">
 <p>
 A set of rules are given to the server in a JSON or Jsonnet file:
@@ -382,8 +382,8 @@ applied to servicing that flow.
 </div>
 </div>
 
-<div id="outline-container-org1c8a52d" class="outline-3">
-<h3 id="org1c8a52d"><span class="section-number-3">2.2</span> Testing a rule set</h3>
+<div id="outline-container-org3dc218d" class="outline-3">
+<h3 id="org3dc218d"><span class="section-number-3">2.2</span> Testing a rule set</h3>
 <div class="outline-text-3" id="text-2-2">
 <p>
 Rulesets may be elaborate and deepened on attributes that are supplied
@@ -447,12 +447,12 @@ also be possible to "hard-code" the <code>extra</code> value into the <code>grou
 </div>
 </div>
 
-<div id="outline-container-org0d8959e" class="outline-2">
-<h2 id="org0d8959e"><span class="section-number-2">3</span> Example runs</h2>
+<div id="outline-container-orgc5b6970" class="outline-2">
+<h2 id="orgc5b6970"><span class="section-number-2">3</span> Example runs</h2>
 <div class="outline-text-2" id="text-3">
 </div>
-<div id="outline-container-org07d53ea" class="outline-3">
-<h3 id="org07d53ea"><span class="section-number-3">3.1</span> Single client</h3>
+<div id="outline-container-org5170895" class="outline-3">
+<h3 id="org5170895"><span class="section-number-3">3.1</span> Single client</h3>
 <div class="outline-text-3" id="text-3-1">
 <p>
 Run the file server in one terminal:
@@ -489,8 +489,8 @@ created from information previously saved into a file.
 </div>
 </div>
 
-<div id="outline-container-orgc68a0b4" class="outline-3">
-<h3 id="orgc68a0b4"><span class="section-number-3">3.2</span> Multiple clients</h3>
+<div id="outline-container-orgdcabaaf" class="outline-3">
+<h3 id="orgdcabaaf"><span class="section-number-3">3.2</span> Multiple clients</h3>
 <div class="outline-text-3" id="text-3-2">
 <p>
 A larger test using <a href="http://www.chrismytton.uk/shoreman/">shoreman</a> to run many writers.

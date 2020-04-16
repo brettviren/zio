@@ -4,10 +4,8 @@
 CTOR --> IDLE
 IDLE --> BOTSEND : SendMsg [check_send_bot] / send_msg
 IDLE --> BOTRECV : RecvMsg [check_recv_bot] / recv_bot
-BOTSEND --> flowsm_flowing : RecvMsg [check_recv_bot] / recv_bot
-BOTRECV --> flowsm_flowing : SendMsg [check_send_bot] / send_msg
-flowsm_flowing --> ACKFIN : SendMsg [check_eot] / send_msg
-flowsm_flowing --> FINACK : RecvMsg [check_eot] / recv_msg
+BOTSEND --> READY : RecvMsg [check_recv_bot] / recv_bot
+BOTRECV --> READY : SendMsg [check_send_bot] / send_msg
 
 FINACK --> FINACK : SendMsg [!check_eot]
 FINACK --> FINACK : RecvMsg [!check_eot]
@@ -18,8 +16,6 @@ ACKFIN --> ACKFIN : RecvMsg [!check_eot]
 ACKFIN --> FIN : RecvMsg [check_eot] / recv_msg
 
 
-state flowsm_flowing {
-[*] --> READY
 READY --> flowsm_giving : BeginFlow [lambda(auto:8, FlowApp&)]
 READY --> flowsm_taking : BeginFlow [lambda(auto:8, FlowApp&)]
 
@@ -40,7 +36,10 @@ HANDSOUT --> HANDSOUT : RecvMsg [!penultimate_credit, check_dat] / recv_msg
 HANDSOUT --> HANDSOUT : FlushPay [have_credit] / flush_pay
 }
 
-}
+flowsm_giving --> ACKFIN : SendMsg [check_eot] / send_msg
+flowsm_giving --> FINACK : RecvMsg [check_eot] / recv_msg
+flowsm_taking --> ACKFIN : SendMsg [check_eot] / send_msg
+flowsm_taking --> FINACK : RecvMsg [check_eot] / recv_msg
 
 @enduml
 
