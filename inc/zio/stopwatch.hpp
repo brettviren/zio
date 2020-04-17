@@ -12,11 +12,17 @@ namespace zio {
         /// Create a stopwatch.  It will not yet be "running".
         Stopwatch();
 
+        /// Clear accumulated duration (doesn't stop the watch).
+        void clear();
+
         /// The current time, doesn't affect the stopwatch.
         time_point now();
 
         /// Start the stop watch, return the starting time ("now")
         time_point start();
+
+        /// Clear and start the stop watch, return the starting time ("now")
+        time_point restart();
 
         /// Stop the stop watch, return the elapsed time from start
         duration stop();

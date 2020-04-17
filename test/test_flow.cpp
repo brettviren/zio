@@ -74,7 +74,7 @@ void flow_endpoint(zio::socket_t& link, int socket, bool giver, int credit)
             bool noto;
             try {
                 noto = flow.put(msg);
-            } catch (zio::flow::end_of_transmission) {
+            } catch (const zio::flow::end_of_transmission&) {
                 ZIO_DEBUG("[{} {}] EOT during put(DAT)", nodename, portname);
                 flow.eotack();
                 break;
@@ -92,7 +92,7 @@ void flow_endpoint(zio::socket_t& link, int socket, bool giver, int credit)
             bool noto;
             try {
                 noto = flow.get(msg);
-            } catch (zio::flow::end_of_transmission) {
+            } catch (const zio::flow::end_of_transmission&) {
                 ZIO_DEBUG("[{} {}] EOT during put(DAT)", nodename, portname);
                 flow.eotack();
                 break;

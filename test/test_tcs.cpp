@@ -44,7 +44,7 @@ void server(zio::socket_t& s)
                 zio::info("server: poll times out");
                 break;
             }
-        } catch (zio::error_t e) {
+        } catch (const zio::error_t& e) {
             zio::info("server: poller exception: {}", e.what());
             return;
         }
@@ -139,7 +139,7 @@ void client(zio::socket_t& c, int me)
                 zio::info("client: poll times out");
                 return;
             }
-        } catch (zio::error_t e) {
+        } catch (const zio::error_t& e) {
             zio::info("client: poller exception: {}", e.what());
             return;
         }

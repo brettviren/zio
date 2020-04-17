@@ -2,6 +2,11 @@
 
 zio::Stopwatch::Stopwatch()
 {
+    clear();
+}
+
+void zio::Stopwatch::clear()
+{
     dt_accum = duration::zero();
 }
 
@@ -15,6 +20,12 @@ zio::Stopwatch::time_point zio::Stopwatch::start()
     started = true;
     t_start = t_lap = now();
     return t_start;
+}
+
+zio::Stopwatch::time_point zio::Stopwatch::restart()
+{
+    clear();
+    return start();
 }
 
 zio::Stopwatch::duration zio::Stopwatch::stop()
