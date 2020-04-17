@@ -45,7 +45,7 @@ The ZIO ~TENS~ message format attempts to provide the above requirements.
 A ~TENS~ message *may* have a ZIO message ~form~ [[file:messages.org][header]] value of ~TENS~ however,
 an application may choose to include the general ~TENS~ form in other messages as
 long as the rest of the specification is followed.  A compatible form
-is ~FLOW~.
+is ~FLOW~ (which requires the form to be ~FLOW~).
 
 As with other forms, the ~zio::Message~ header prefix attribute ~label~
 shall hold structured data as an object encoded as a JSON string.  A

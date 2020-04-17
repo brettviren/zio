@@ -50,7 +50,9 @@ void zio::tens::append(zio::Message& msg, zio::message_t&& data,
                        size_t word_size, const char* tn,
                        const zio::json& metadata)
 {
-    msg.set_form(zio::tens::form);
+    if (msg.form().empty()) {
+        msg.set_form(zio::tens::form);
+    }
     zio::json lobj = zio::json::value_t::object;
     std::string label = msg.label();
     if (! label.empty()) {

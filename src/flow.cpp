@@ -600,6 +600,7 @@ struct FlowImp : public FlowFSM {
 
     // Try to do a flow level send.  Process through SM then send.
     bool send(zio::Message& msg) {
+        msg.set_form("FLOW");
         flow::Label lab(msg);
         if (lab.msgtype() == flow::msgtype_e::unknown) {
             throw flow::local_error(str("send flow message type unknown"));
