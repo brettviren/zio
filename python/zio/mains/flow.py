@@ -147,18 +147,18 @@ def file_server(bind, format, name, port, verbosity, ruleset):
     sport = node.port(port, zmq.SERVER)
     sport.bind(bind)
     node.online()    
-    log.info(f'domo-broker {name}:{port} online at {bind}')
+    log.info(f'flow-broker {name}:{port} online at {bind}')
 
     # this may throw
     broker = Broker(sport, factory)
 
-    log.info(f'domo-broker {name} entering loop')
+    log.info(f'flow-broker {name} entering loop')
     while True:
         try:
             broker.poll(10000)
         except TimeoutError:
             node.peer.drain()
-            log.debug(f'domo-broker {name} is lonely')
+            log.debug(f'flow-broker {name} is lonely')
             log.debug(node.peer.peers)
         except Exception as e:
             log.error(e)
