@@ -7,39 +7,35 @@ IDLE --> BOTRECV : RecvMsg [check_recv_bot] / recv_bot
 BOTSEND --> READY : RecvMsg [check_recv_bot] / recv_bot
 BOTRECV --> READY : SendMsg [check_send_bot] / send_msg
 
-FINACK --> FINACK : SendMsg [!check_eot]
-FINACK --> FINACK : RecvMsg [!check_eot]
+FINACK --> FINACK : SendMsg [!check_eot]\nRecvMsg [!check_eot]
 FINACK --> FIN : SendMsg [check_eot] / send_msg
 
-ACKFIN --> ACKFIN : SendMsg [!check_eot]
-ACKFIN --> ACKFIN : RecvMsg [!check_eot]
-ACKFIN --> FIN : RecvMsg [check_eot] / recv_msg
+ACKFIN --> ACKFIN : SendMsg [!check_eot]\nRecvMsg [!check_eot]
+ACKFIN --> FIN : RecvMsg [check_eot] / recv_eot
 
 
-READY --> flowsm_giving : BeginFlow [lambda(auto:8, FlowApp&)]
-READY --> flowsm_taking : BeginFlow [lambda(auto:8, FlowApp&)]
+READY --> flowsm_giving : BeginFlow [is_giver]
+READY --> flowsm_taking : BeginFlow [is_taker]
 
 
 state flowsm_giving {
 [*] --> BROKE
 BROKE --> GENEROUS : RecvMsg [check_pay] / recv_pay
 GENEROUS --> BROKE : SendMsg [check_one_credit, check_dat] / send_msg
-GENEROUS --> GENEROUS : SendMsg [check_many_credit, check_dat] / send_msg
-GENEROUS --> GENEROUS : RecvMsg [check_pay] / recv_pay
+GENEROUS --> GENEROUS : SendMsg [check_many_credit, check_dat] / send_msg\nRecvMsg [check_pay] / recv_pay
 }
 
 state flowsm_taking {
 [*] --> RICH
 RICH --> HANDSOUT : FlushPay [have_credit] / flush_pay
-HANDSOUT --> RICH : RecvMsg [penultimate_credit, check_dat] / recv_msg
-HANDSOUT --> HANDSOUT : RecvMsg [!penultimate_credit, check_dat] / recv_msg
-HANDSOUT --> HANDSOUT : FlushPay [have_credit] / flush_pay
+HANDSOUT --> RICH : RecvMsg [check_last_credit, check_dat] / recv_eot
+HANDSOUT --> HANDSOUT : RecvMsg [!check_last_credit, check_dat] / recv_dat\nFlushPay [have_credit] / flush_pay
 }
 
 flowsm_giving --> ACKFIN : SendMsg [check_eot] / send_msg
-flowsm_giving --> FINACK : RecvMsg [check_eot] / recv_msg
+flowsm_giving --> FINACK : RecvMsg [check_eot] / recv_eot
 flowsm_taking --> ACKFIN : SendMsg [check_eot] / send_msg
-flowsm_taking --> FINACK : RecvMsg [check_eot] / recv_msg
+flowsm_taking --> FINACK : RecvMsg [check_eot] / recv_eot
 
 @enduml
 

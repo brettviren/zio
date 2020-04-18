@@ -14,13 +14,14 @@ class TestMessage(unittest.TestCase):
         pass
 
     def test_ctor_default(self):
-        m = zio.Message();
+        m = zio.Message(form='FORM');
         print (m.origin)
         assert (m.origin == 0)
         assert (m.seqno == 0)
         assert (m.level == zio.MessageLevel.undefined)
         assert (m.label == "")
-        assert (m.form == "    ")
+        assert (m.form == "FORM")
+        assert (m.routing_id == 0)
 
     def test_ctor_parts(self):
         ph = zio.PrefixHeader()
@@ -37,3 +38,6 @@ class TestMessage(unittest.TestCase):
         msg = zio.Message(coord = zio.CoordHeader(seqno=100))
         assert(msg.seqno == 100)
         
+
+if __name__ == '__main__':
+    unittest.main()

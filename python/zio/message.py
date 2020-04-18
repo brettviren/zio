@@ -160,6 +160,8 @@ class Message:
             self.prefix = prefix
         if routing_id is not None:
             self.routing_id = routing_id
+        else:
+            self.routing_id = 0
         if label is not None:
             self.label = label
         if form is not None:

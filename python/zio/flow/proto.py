@@ -1,276 +1,157 @@
 #!/usr/bin/env python3
-'''
-zio.flow implements ZIO flow protocol helper
 
-This is equivalent to the C++ zio::flow namespace
-'''
-
-
-from ..message import Message
-from .util import *
+from zio.flow.sm import Flow as FlowMachine
+import zio
+import zmq
 
 import logging
-log = logging.getLogger("zio")
+log = logging.getLogger(__name__)
 
-from enum import Enum
-class Direction(Enum):
-    undefined=0
-    extract=1
-    inject=2
-
-class Flow:
+class Flow(object):
     '''
     A Flow object provides ZIO flow protocol API
 
-    It is equivalent to the C++ zio::flow::Flow class
+    It is equivalent to the C++ zio::Flow class
 
-    All timeouts are in milliseconds.  A timeout of None means forever.
+    All timeouts are in milliseconds.  A timeout of None means forever.  
     '''
 
-    credit = 0
-    total_credit = 0
-    is_sender = True
-    routing_id = 0
-    send_seqno = -1
-    recv_seqno = -1
-
-    def __init__(self, port):
+    def __init__(self, port, direction, credit, timeout=None):
         '''
         Construct a flow object on a port.
 
         Application shall handle ports bind/connect and online states.
         '''
         self.port = port
+        self.sm = FlowMachine(direction, credit)
+        self.timeout = timeout
 
-    def send_bot(self, msg):
-        '''
-        Send a BOT message to the other end.
-
-        Client calls send_bot() first, server calls send_bot() second.
-        '''
-        if self.send_seqno != -1:
-            raise RuntimeError("BOT must be sent first")
-
-        msg.form = 'FLOW'
-        fobj = objectify(msg)
-        msg.label = stringify('BOT', **fobj)
-        msg.routing_id = self.routing_id
-        msg.seqno = self.send_seqno = 0
-        log.debug(f'send_bot: {self.send_seqno} {msg}')
-        self.port.send(msg)
-
-
-    def recv_bot(self, timeout=-1):
-        '''
-        Receive and return BOT message or None.
-
-        Returns None if EOT was received.  
-
-        Raises exceptions
-        '''
-        if self.recv_seqno != -1:
-            raise RuntimeError("BOT must be recv first")
-
-        msg = self.port.recv(timeout)
-        if msg is None:
-            raise TimeoutError('flow.recv_bot: timeout')
-        if msg.seqno != 0:
-            raise RuntimeError(f'flow.recv_bot: BOT not seqno 0 {msg.seqno}')
-        if msg.form != 'FLOW':
-            raise TypeError('flow.recv_bot: not FLOW message')
-        fobj = objectify(msg)
-        ftype = fobj.get("flow",None) 
-        if ftype != "BOT":
-            raise TypeError(f'flow.recv_bot: unknown FLOW message {ftype}')
-
-        credit = fobj.get("credit",None)
-        if credit is None:
-            raise ValueError('flow.recv_bot: no credit')
-
-        fdir = fobj.get("direction", None)
-        if fdir == "extract":
-            self.is_sender = False
-            self.credit = credit
-        elif fdir == "inject":
-            self.is_sender = True
-            self.credit = 0
-        else:
-            raise ValueError(f'flow.recv_bot: uknonwn direction {fdir}')
-
-        self.total_credit = credit
-        self.recv_seqno = 0
-        self.routing_id = msg.routing_id
-        return msg
+    @property
+    def credit(self):
+        return self.sm.credit
+    @property
+    def total_credit(self):
+        return self.sm.total_credit
     
-    def slurp_pay(self, timeout=None):
-        '''
-        Receive any waiting PAY messages
 
-        The flow object will slurp prior to a sending a DAT but the
-        application may call this at any time after BOT.  Number of
-        credits slurped is returned.  None is returned if other than a
-        PAY is received.  Caller should likely respond to that with
-        send_eot(msg,0).
-        '''
-        if self.recv_seqno < 0:
-            raise RuntimeError("must recv BOT before PAY")
+    def giver(self):
+        return self.sm.direction == "extract"
+    def taker(self):
+        return self.sm.direction == "inject"
 
-        msg = self.port.recv(timeout)
+    def send_bot(self, msg=None):
         if msg is None:
-            return None
-        if msg.seqno - self.recv_seqno != 1:
-            return None
-        if msg.form != 'FLOW':
-            return None
-        fobj = objectify(msg)
-        if fobj.get("flow",None) != "PAY":
-            log.debug("malformed PAY flow: %s" % (msg,))
-            return None
-        try:
-            credit = fobj["credit"]
-        except KeyError:
-            log.debug("malformed PAY credit: %s" % (msg,))
-            return None
-        self.credit += credit
-        self.recv_seqno += 1
-        return credit
+            msg = zio.Message(form="FLOW")
+        my_fobj = dict(flow='BOT',
+                       credit = self.sm.total_credit,
+                       direction = self.sm.direction)
+        fobj = msg.label_object
+        fobj.update(my_fobj)
+        log.debug(f'send bot {fobj}')
+        msg.label_object = fobj
+        self.send(msg);
+        
 
+    def bot(self, msg=None):
+        '''Do flow BOT handshake.  
 
-    def put(self, msg):
+        If msg given it is sent, else a generic one is created.
+
+        Return the BOT message from other end
         '''
-        Send a DAT message and slurp for any waiting PAY.
+        my_fobj = dict(flow='BOT',
+                       credit = self.sm.total_credit,
+                       direction = self.sm.direction)
 
-        Return True if sent, None if an EOT was received instead of
-        PAY.
-        '''
-        if self.credit < self.total_credit:
-            self.slurp_pay(0)   # first do fast try
-        while self.credit == 0: # next really must have 
-            self.slurp_pay(-1)  # some credit to continue
+        if self.port.sock.type in (zmq.CLIENT, zmq.DEALER):
+            self.send_bot(msg)
+            return self.recv()
 
-        msg.form = 'FLOW'
-        msg.label = stringify('DAT', **objectify(msg))
-        msg.routing_id = self.routing_id
-        if self.send_seqno < 0:
-            raise RuntimeError("must send BOT before DAT")
-        self.send_seqno += 1
-        msg.seqno = self.send_seqno
-        #log.debug (f"port send with credit %d: %s" % (self.credit, msg))
-        self.port.send(msg)
-        self.credit -= 1
-        return True
+        if self.port.sock.type in (zmq.SERVER, zmq.ROUTER):
+            obot = self.recv()
 
+            # note: a server that wants to respond to a BOT, such as
+            # the flow broker will want to do something more right here.
 
-    def flush_pay(self):
-        '''
-        Send any accumulated credit as PAY.
-
-        This is called in a get() but app may call any time after a
-        BOT exchange.  Number of credits sent is returned.  This does
-        not block.
-        '''
-        if self.credit == 0:
-            return 0
-        nsent = self.credit
-        self.credit = 0
-        msg = Message(form='FLOW', label=stringify('PAY', credit=nsent))
-        self.send_seqno += 1
-        msg.seqno = self.send_seqno
-        msg.routing_id = self.routing_id
-        log.debug(f'flush_pay: {self.send_seqno} {msg}')
-        if self.send_seqno < 0:
-            raise RuntimeError("must recv BOT before PAY")
-        self.port.send(msg)
-        return nsent
-
-
-    def get(self, timeout=None):
-        '''
-        Receive and return a DAT message and send any accumulated PAY.
-
-        Return None if EOT was received instead of DAT.
-
-        Exceptions raised.
-        '''
-        if self.recv_seqno < 0:
-            raise RuntimeError("must recv BOT before DAT")
-
-        log.debug (f'flow.get({timeout})')
-        self.flush_pay()
-        msg = self.port.recv(timeout)
-        if msg is None:
-            log.debug("flow.get timeout")
-            raise TimeoutError("flow.get timeout")
-        if msg.seqno - self.recv_seqno != 1:
-            log.debug(f'flow.get bad seqno: {msg.seqno}, last {self.recv_seqno}\n{msg}')
-            raise ValueError('flow.get bad seqno')
-        if msg.form != 'FLOW':
-            log.debug(f'flow.get not FLOW message\n{msg}')
-            raise TypeError('flow.get not FLOW message')
-        fobj = objectify(msg)
-        if fobj.get('flow',None) == 'EOT':
-            log.debug("EOT during flow:\n%s" % (msg,))
-            return None
-        ftype = fobj.get('flow',None)
-        if ftype != 'DAT':
-            log.warning("malformed DAT flow:\n%s" % (msg,))
-            raise TypeError(f'flow.get unexpected FLOW type {ftype}')
-
-        self.credit += 1
-        self.recv_seqno += 1
-        self.flush_pay()
-        return msg;
-            
-    def send_eot(self, msg = Message()):
-        '''
-        Send EOT message to other end.
-
-        Note, if app initiates the EOT, it should then call
-        recv_eot().  If it unexpectedly got EOT when recving another
-        then it should send EOT as a response.
-        '''
-        msg.form = 'FLOW'
-        msg.label = stringify('EOT', **objectify(msg))
-        msg.routing_id = self.routing_id
-        if self.send_seqno < 0:
-            raise RuntimeError("must send BOT before EOT")
-
-        self.send_seqno += 1
-        msg.seqno = self.send_seqno
-        log.debug(f'send_eot: {self.send_seqno} {msg}')
-        self.port.send(msg)
-        self.send_seqno = -1
-
-    def recv_eot(self, timeout=None):
-        '''
-        Recv an EOT message.
-
-        EOT message is returned or None if timeout occurs.
-
-        If app explicitly calls send_eot() it should call recv_eot()
-        to wait for the ack from the other end.  If an app receives
-        EOT as an unepxected message while receiving PAY or DAT then
-        it should send_eot() but not expect another EOT ack.
-        '''
-        while True:
-            if self.recv_seqno < 0:
-                raise RuntimeError("must recv BOT before EOT")
-
-            msg = self.port.recv(timeout)
             if msg is None:
-                return None
-            if msg.seqno - self.recv_seqno != 1:
+                msg = obot
+            self.send_bot(msg)
+
+
+    def eot(self, msg=None):
+        '''Do flow EOT handshake.  
+
+        If msg it given it is sent, else a generic one is created.
+
+        Return the EOT message from the other end.
+        '''
+        self.eotsend(msg)
+        return self.eotrecv()
+
+    def eotsend(self, msg=None):
+        '''Acknowledge the recipt of an EOT.
+
+        If msg it given it is sent, else a generic one is created.
+
+        This should be called if EOT is received during put() or get().
+        '''
+        if msg is None:
+            msg = zio.Message(form='FLOW')
+        fobj = msg.label_object
+        fobj['flow'] = 'EOT'
+        msg.label_object = fobj
+        self.send(msg)
+    def eotrecv(self):
+        '''Recv EOT'''
+        while True:
+            msg = self.recv()
+            if self.sm.state == 'ACKFIN':
                 continue
-            if msg.form != 'FLOW':
-                continue        # who's knocking at my door?
-            self.recv_seqno += 1
-            fobj = objectify(msg)
-            if fobj.get('flow',None) == 'EOT':
-                self.recv_seqno = -1
-                return msg
-            continue            # try again, probably got a PAY/DAT
-        return                  # won't reach
+            if self.sm.state != 'FIN':
+                raise RuntimeError('flow remote error: EOT handshake failed to reach FIN state')
+            break
 
+    def put(self, dat):
+        '''Send DAT message (for givers/extract) after checking for PAY'''
+        self.recv_pay();
+        if self.credit == 0:
+            msg = self.port.recv(self.timeout)
+            self.sm.RecvMsg(msg)
+        fobj = dat.label_object
+        fobj['flow'] = 'DAT'
+        dat.label_object = fobj
+        self.send(dat)
+        return
 
+    def get(self):
+        '''Recv DAT message (for takers/inject) after flushing PAY
+        
+        DAT message is returned.'''
+        self.send_pay()
+        return self.recv()
 
-    pass
+    def pay(self):
+        '''Manual pay, not required if put() or get() is used'''
+        if self.giver():
+            self.recv_pay()
+        else:
+            self.send_pay()
+        return self.sm.credit
+
+    def recv(self):
+        '''Low-level recv of a message.
+
+        Message is returned'''
+        msg = self.port.recv(self.timeout)
+        if self.sm.RecvMsg(msg):
+            return msg
+        return None
+
+    def send(self, msg):
+        '''Low-level send of a message.'''
+        msg.form = 'FLOW'
+        if not self.sm.SendMsg(msg):
+            return 
+        log.debug(f'flow send {msg} {msg.level} {msg.routing_id}')
+        self.port.send(msg)
+        

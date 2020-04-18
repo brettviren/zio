@@ -12,43 +12,36 @@ from zio.flow import Flow, stringify, objectify
 class TestFlow(unittest.TestCase):
 
     origin = 42
+    credit = 2
 
     def setUp(self):
         self.snode = Node("server", self.origin)
         sport = self.snode.port("sport", zmq.SERVER)
         sport.bind()
         self.snode.online()
-        self.sflow = Flow(sport)
+        self.sflow = Flow(sport, "extract", TestFlow.credit)
 
         self.cnode = Node("client")
         cport = self.cnode.port("cport", zmq.CLIENT)
         cport.connect("server", "sport")
         self.cnode.online()
-        self.cflow = Flow(cport)
+        self.cflow = Flow(cport, "inject", TestFlow.credit)
 
     def test_conversation(self):
 
-        # cflow is recver
-        bot = Message(label='{"credit":2,"direction":"inject"}')
-        self.cflow.send_bot(bot)
-        bot = self.sflow.recv_bot(1000);
-        assert(bot)
-        assert(self.sflow.credit == 0)
-        assert(self.sflow.total_credit == 2)
+        self.cflow.send_bot()
 
-        # sflow is sender
-        bot = Message(label='{"credit":2,"direction":"extract"}')
-        self.sflow.send_bot(bot)
-        bot = self.cflow.recv_bot(1000);
-        assert(bot)
+        sbot = self.sflow.bot()
+        assert(sbot)
+        assert(sflow.credit == 0)
+        assert(sflow.total_credit == TestFlow.credit)
+
+        cbot = self.recv()
+        assert(cbot)
         assert(self.cflow.credit == 2)
         assert(self.cflow.total_credit == 2)
 
         self.cflow.flush_pay()
-        assert(self.cflow.credit == 0)
-        c = self.sflow.slurp_pay()
-        assert (c==2)
-        assert(self.sflow.credit == 2)
 
         for count in range(10):
             self.sflow.put(Message())
@@ -61,13 +54,12 @@ class TestFlow(unittest.TestCase):
         # will recv the EOT when its trying to recv another message
         # (PAY or DAT).  In this test things are synchronous and so we
         # explicitly recv_eot().
-        self.cflow.send_eot(Message())
+        self.cflow.eotsend()
 
-        surprise = self.sflow.recv_eot(1000)
+        surprise = self.sflow.recv()
         assert(surprise)
-        self.sflow.send_eot(Message())
-
-        expected = self.cflow.recv_eot(1000)
+        self.sflow.sendeot()
+        expected = self.cflow.eotrecv()
         assert(expected)
         
 
@@ -88,4 +80,6 @@ class TestFlow(unittest.TestCase):
 
 
 if __name__ == '__main__':
+    import logging
+    logging.basicConfig(level=logging.DEBUG)
     unittest.main()
