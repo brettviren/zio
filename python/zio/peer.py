@@ -150,7 +150,7 @@ class Peer:
                 timeout = int(1000*(until - time.time()))
                 if timeout <= 0:
                     return seen
-            print ("seen:",' '.join(know))
+            log.debug ("seen:",' '.join(know))
             #print ("peers:",self.peers)
             self.poll(timeout)
             

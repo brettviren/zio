@@ -6,6 +6,9 @@ import zmq
 from .port import Port
 from .peer import Peer
 
+import logging
+log = logging.getLogger(__name__)
+
 class Node:
     '''
     A vertex in a ported graph with ZIO edges
@@ -53,7 +56,7 @@ class Node:
         may also be included.
         '''
         if hasattr(self,"peer"):
-            print ('Node "%s" already online' % self.nick)
+            log.debug ('Node "%s" already online' % self.nick)
             return
 
         for port in self.ports.values():

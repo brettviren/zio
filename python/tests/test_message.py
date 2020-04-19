@@ -8,6 +8,12 @@ import unittest
 
 import zio
 
+
+import logging
+logging.basicConfig(level=logging.DEBUG)
+
+log = logging.getLogger('test_message')
+
 class TestMessage(unittest.TestCase):
 
     def setUp(self):
@@ -15,7 +21,7 @@ class TestMessage(unittest.TestCase):
 
     def test_ctor_default(self):
         m = zio.Message(form='FORM');
-        print (m.origin)
+        log.debug(m.origin)
         assert (m.origin == 0)
         assert (m.seqno == 0)
         assert (m.level == zio.MessageLevel.undefined)
@@ -25,6 +31,7 @@ class TestMessage(unittest.TestCase):
 
     def test_ctor_parts(self):
         ph = zio.PrefixHeader()
+        assert (ph.form == '    ')
         ch = zio.CoordHeader()
         msg = zio.Message(parts=[bytes(ph), bytes(ch), b'Hello', b'World'])
         assert (2 == len(msg.payload))
@@ -40,4 +47,6 @@ class TestMessage(unittest.TestCase):
         
 
 if __name__ == '__main__':
+    logging.getLogger('zio.message').setLevel(logging.DEBUG)
     unittest.main()
+        

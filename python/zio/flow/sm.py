@@ -5,79 +5,111 @@ from transitions.extensions import HierarchicalMachine as Machine
 import logging
 # logging.basicConfig(level=logging.DEBUG)
 # Set transitions' log level to INFO; DEBUG messages will be omitted
-logging.getLogger('transitions').setLevel(logging.INFO)
+# logging.getLogger('transitions').setLevel(logging.INFO)
+log = logging.getLogger(__name__)
 
-def tran(t,s,d,c,a):
-    return dict(trigger=t, source=s, dest=d, conditions=c,after=a)
+def tran(t,s,d,**kwds):
+    ret = dict(trigger=t, source=s, dest=d)
+    ret.update(kwds)
+    return ret
 
+states = [
+    'IDLE', 'BOTSEND', 'BOTRECV', 'READY',
+    'FINACK','ACKFIN','FIN',
+    dict(name='giving',
+         initial='BROKE',
+         children=['BROKE', 'GENEROUS'],
+         transitions=[
+             tran('RecvMsg','BROKE','GENEROUS',
+                  conditions='check_pay', after='recv_pay'),
+             tran('RecvMsg','GENEROUS','GENEROUS',
+                  conditions='check_pay', after='recv_pay'),
+             tran('SendMsg','GENEROUS','BROKE',
+                  conditions=['check_one_credit','is_dat'], after='send_dat'),
+             tran('SendMsg','GENEROUS','GENEROUS',
+                  conditions=['check_many_credit','is_dat'], after='send_dat'),
+         ]
+    ),
+    dict(name='taking',
+         initial='RICH',
+         children=['RICH', 'HANDSOUT'],
+         transitions=[
+             tran('FlushPay','RICH','HANDSOUT',
+                  conditions=['check_have_credit','is_pay'], after='flush_pay'),
+             tran('FlushPay','HANDSOUT','HANDSOUT',
+                  conditions=['check_have_credit','is_pay'], after='flush_pay'),
+             tran('RecvMsg','HANDSOUT','RICH',
+                  conditions=['check_last_credit','is_dat'], after='recv_dat'),
+             tran('RecvMsg','HANDSOUT','HANDSOUT',
+                  conditions=['check_low_credit','is_dat'], after='recv_dat'),
+         ]
+    )
+]
+transitions =[
+    # bot handshake
+    # bot handshake
+    tran('SendMsg','IDLE','BOTSEND',
+         conditions='check_send_bot',after='send_msg'),
+    tran('RecvMsg','IDLE','BOTRECV',
+         conditions='check_recv_bot',after='recv_bot'),
+    tran('SendMsg','BOTRECV','READY',
+         conditions='check_send_bot',after='send_msg'),
+    tran('RecvMsg','BOTSEND','READY',
+         conditions='check_recv_bot',after='recv_bot'),
+
+    tran('BeginFlow','READY','giving',
+         conditions='is_giver'),
+    tran('BeginFlow','READY','taking',
+         conditions='is_taker'),
+    
+        # eot response
+    tran('SendMsg','giving','ACKFIN',
+         conditions='check_eot', after='send_msg'),
+    tran('RecvMsg','giving','FINACK',
+         conditions='check_eot', after='recv_eot'),
+    tran('SendMsg','taking','ACKFIN',
+         conditions='check_eot', after='send_msg'),
+    tran('RecvMsg','taking','FINACK',
+         conditions='check_eot', after='recv_eot'),
+
+    tran('SendMsg','FINACK','FINACK',
+         unless='check_eot'),
+    tran('RecvMsg','FINACK','FINACK',
+         unless='check_eot'),
+    tran('SendMsg','FINACK','FIN',
+         conditions='check_eot',after='send_msg'),
+        
+    tran('RecvMsg','ACKFIN','ACKFIN',
+         unless='check_eot'),
+    tran('SendMsg','ACKFIN','ACKFIN',
+         unless='check_eot'),
+    tran('RecvMsg','ACKFIN','FIN',
+         conditions='check_eot'),
+
+]
 
 class Flow(object):
-
-    states = ['IDLE', 'BOTSEND', 'BOTRECV', 'READY',
-              dict(name='giving',
-                   initial='BROKE',
-                   children=['BROKE', 'GENEROUS']),
-              dict(name='taking',
-                   initial='RICH',
-                   children=['RICH', 'HANDSOUT']),
-              'FINACK','ACKFIN','FIN'
-    ]
-    transitions =[
-        # bot handshake
-        tran('SendMsg','IDLE','BOTSEND','check_send_bot','send_msg'),
-        tran('RecvMsg','IDLE','BOTRECV','check_recv_bot','recv_bot'),
-        tran('SendMsg','BOTRECV','READY','check_send_bot','send_msg'),
-        tran('RecvMsg','BOTSEND','READY','check_recv_bot','recv_bot'),
-        tran('BeginFlow','READY','giving','is_giver',None),
-        tran('BeginFlow','READY','taking','is_taker',None),
-
-        # giving submachine
-        tran('RecvMsg','BROKE','GENEROUS','check_pay','recv_pay'),
-        tran('SendMsg','GENEROUS','BROKE','check_one_credit','send_msg'),
-        tran('SendMsg','GENEROUS','GENEROUS','check_many_credit','send_msg'),
-        tran('RecvMsg','GENEROUS','GENEROUS','check_pay','recv_pay'),
-
-        # taking submachine
-        tran('FlushPay','RICH','HANDSOUT','have_credit','flush_pay'),
-        tran('RecvMsg','HANDSOUT','RICH','check_last_credit','recv_dat'),
-        tran('RecvMsg','HANDSOUT','HANDSOUT','check_many_credit','recv_dat'),
-        tran('FlushPay','HANDSOUT','HANDSOUT','check_have_credit','flush_pay'),
-        
-        # eot response
-        tran('SendMsg','giving','ACKFIN','check_eot','send_msg'),
-        tran('RecvMsg','giving','FINACK','check_eot','recv_eot'),
-        tran('SendMsg','taking','ACKFIN','check_eot','send_msg'),
-        tran('RecvMsg','taking','FINACK','check_eot','recv_eot'),
-
-        tran('SendMsg','FINACK','FINACK','not_check_eot',None),
-        tran('RecvMsg','FINACK','FINACK','not_check_eot',None),
-        tran('SendMsg','FINACK','FIN','check_eot','send_msg'),
-
-        
-        tran('RecvMsg','ACKFIN','ACKFIN','not_check_eot',None),
-        tran('SendMsg','ACKFIN','ACKFIN','not_check_eot',None),
-        tran('RecvMsg','ACKFIN','FIN','check_eot','recv_eot'),
-
-    ]
 
     send_seqno = -1
     recv_seqno = -1
     credit=0
     total_credit=0
-    remid = 0
+    remid = None
 
-    def __init__(self, direction, credit):
-        self.machine = Machine(model=self, states=Flow.states, initial='IDLE',
-                               transitions=Flow.transitions)
+    def __init__(self, direction, credit, serverish):
+        self.machine = Machine(model=self, states=states, initial='IDLE',
+                               transitions=transitions)
         self.direction = direction
         self.total_credit = credit
+        self.serverish = serverish
+        #log.info(f'STATES: {self.machine.states}')
 
     # guards
 
-    def is_giver(self,msg):
+    def is_giver(self, msg=None):
         return self.direction == "extract"
 
-    def is_taker(self,msg):
+    def is_taker(self, msg=None):
         return self.direction == "inject"
 
     def check_send_bot(self,msg):
@@ -93,33 +125,48 @@ class Flow(object):
 
     def check_recv_bot(self,msg):
         if self.recv_seqno != -1:
+            log.debug(f'bad recv_seqno for BOT: {self.recv_seqno}')
             return False
         fobj = msg.label_object
         if fobj.get('flow',None) != 'BOT':
+            log.debug('bad flow type for BOT')
             return False
         odir = fobj.get('direction',None)
-        if odir != self.direction:
+        if odir == self.direction:
+            log.debug(f'bad flow direction for BOT: {odir}')
             return False
         return True
+
+    def is_pay(self, msg):
+        fobj = msg.label_object
+        if fobj.get('flow',None) != 'PAY':
+            log.debug(f'not pay {msg}')
+            return False
+        return True
+
+    def is_dat(self, msg):
+        fobj = msg.label_object
+        return fobj.get('flow',None) == 'DAT'
 
     def check_pay(self,msg):
         fobj = msg.label_object
         if fobj.get('flow',None) != 'PAY':
+            log.debug(f'not pay type {msg}')
             return False
         got_cred = fobj.get('credit', -1)
         if got_cred < 0:
+            log.debug(f'negative pay {msg}')
             return False
         if got_cred + self.credit > self.total_credit:
+            log.debug(f'too much pay: {got_cred}+{self.credit}>{self.total_credit} {msg}')
             return False
         return True
 
     def check_eot(self,msg):
         fobj = msg.label_object
-        if fobj.get('flow',None) != 'EOT':
-            return False
-        return True
-    def not_check_eot(self,msg):
-        return not self.check_eot(msg)
+        if fobj.get('flow',None) == 'EOT':
+            return True
+        return False
 
     def check_dat(self,msg):
         fobj = msg.label_object
@@ -128,29 +175,33 @@ class Flow(object):
         return True
 
 
-    def check_one_credit(self,msg):
+    def check_one_credit(self,msg=None):
         return self.credit == 1
 
-    def check_last_credit(self,msg):
+    def check_last_credit(self,msg=None):
         return self.total_credit - self.credit == 1
 
-    def check_many_credit(self,msg):
+    def check_low_credit(self,msg=None):
+        return self.total_credit - self.credit > 1
+
+    def check_many_credit(self,msg=None):
         return self.credit > 1
 
-    def check_have_credit(self,msg):
+    def check_have_credit(self,msg=None):
+        log.debug(f"check_have_credit: {self.credit}")
         return self.credit > 0
 
 
     def recv_bot(self, msg):
         fobj = msg.label_object
         offer_credit = fobj["credit"]
-        if self.server:
+        if self.serverish:      # server may lower to client's offer
             if offer_credit > 0 and offer_credit < self.total_credit:
                 self.total_credit = offer_credit
-        else:                   # client
+        else:                   # client must accept server's offer
             self.total_credit = offer_credit
         self.credit = 0
-        if self.direction == "extract":
+        if self.direction == "inject":
             self.credit = self.total_credit
         self.recv_seqno += 1
         self.remid = msg.routing_id
@@ -159,6 +210,10 @@ class Flow(object):
         self.send_seqno += 1
         msg.seqno = self.send_seqno
         msg.routing_id = self.remid
+
+    def send_dat(self, msg):
+        self.credit -= 1
+        self.send_msg(msg);
 
     def recv_eot(self, msg):
         self.recv_seqno += 1
@@ -173,8 +228,8 @@ class Flow(object):
         self.credit += fobj["credit"]
 
     def flush_pay(self, msg):
+        msg.form='FLOW'
         fobj = msg.label_object
-        fobj["flow"] = "PAY"
         fobj["credit"] = self.credit
         msg.label_object = fobj
         self.send_seqno += 1

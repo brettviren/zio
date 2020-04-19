@@ -7,6 +7,9 @@ from zio.util import clientish_recv, clientish_send
 from zio.util import serverish_recv, serverish_send
 from .message import Message
 
+import logging
+log = logging.getLogger(__name__)
+
 def bind_address(sock, addr):
     """Bind socket to address
 
@@ -90,12 +93,16 @@ class Port:
         If spec is a string, it is assumed to be a ZeroMQ adddress.
         If spec is a tuple ithen it is a (hostname,portnumber).
         '''
+        # log.debug(f'bind({spec})')
         if not spec:
-            #print ("[port %s] request default bind %s" % (self.name, spec,))
+            log.debug (f'bind port "{self.name}" to default {self._hostname}')
             self.to_bind.append((self._hostname, 0))
             return
         if len(spec) > 2:
             raise ValueError("unsupported bind specification")
+        if len(spec) == 1:
+            if spec[0].startswith("inproc://") and self.sock.type in (zmq.CLIENT,zmq.SERVER):
+                raise ValueError('CLIENT and SERVER does not work with inproc://')
         self.to_bind.append(spec)
         return
 
@@ -228,10 +235,12 @@ class Port:
         if self.origin is not None:
             msg.coord.origin = self.origin
         if self.sock.type in (zmq.SERVER, zmq.ROUTER):
+            log.debug(f'send serverish rid:{msg.routing_id} {len(msg.payload)}')
             return serverish_send(self.sock, msg.routing_id, msg.toparts())
         if self.sock.type in (zmq.CLIENT, zmq.DEALER):
+            log.debug(f'send clientish {len(msg.payload)}')
             return clientish_send(self.sock, msg.toparts())
-        return
+        raise ValueError(f'unsupported socket type {self.sock.type}')
 
     def recv(self, timeout=None):
         '''

@@ -10,6 +10,9 @@ from collections import namedtuple
 from enum import Enum
 from .util import byteify_list, encode_message, decode_message
 
+import logging
+log = logging.getLogger(__name__)
+
 class MessageLevel(Enum):
     undefined=0
     trace=1
@@ -121,7 +124,9 @@ class Message:
     _payload = ()
 
     def __init__(self,
-                 level=None, form=None, label=None, routing_id=None,
+                 level=None, form=None,
+                 label=None, label_object=None,
+                 routing_id=None,
                  origin=None, granule=None, seqno=None,
                  prefix=None, coord=None, payload=None,
                  parts=None, encoded=None, frame=None):
@@ -143,6 +148,8 @@ class Message:
         set.
 
         '''
+        #log.debug(f'Message(level={level},form="{form}", label="{label}")')
+
         self.prefix = PrefixHeader()
         self.coord = CoordHeader()
 
@@ -164,6 +171,8 @@ class Message:
             self.routing_id = 0
         if label is not None:
             self.label = label
+        if label_object is not None:
+            self.label_object = label_object
         if form is not None:
             self.form = form
         if level is not None:
