@@ -17,6 +17,7 @@ setuptools.setup(
         "rule==0.1.2bv",        # note: see requirements.txt
         "pyparsing",
         "jsonnet",
+        "transitions",
     ],
     entry_points = dict(
         console_scripts = [
