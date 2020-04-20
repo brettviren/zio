@@ -222,12 +222,17 @@ def client_handler(ctx, pipe, bot, rule_object, writer_addr, broker_addr):
     port = Port("write-handler", sock)
     port.connect(broker_addr)
     port.online(None)
-    flow = Flow(port)
+
+    direction = mattr["direction"]
+    if direction != "inject":
+        raise RuntimeError(f'zio.flow.hdf.writer bad direction: "{direction}"')
+    credit = mattr["credit"]
+    flow = Flow(port, direction, credit)
     log.debug (f'writer({base_path}) send BOT to {broker_addr}')
-    flow.send_bot(bot)          # this introduces us to the server
-    bot = flow.recv_bot()
+
+    bot = flow.bot(bot)         # this introduces us to the server
     log.debug (f'writer({base_path}) got response:\n{bot}')
-    flow.flush_pay()
+    flow.begin()
 
     def push_message(m):
         log.debug (f'write_handler({base_path}) push {m}')
@@ -255,18 +260,10 @@ def client_handler(ctx, pipe, bot, rule_object, writer_addr, broker_addr):
 
             try:
                 msg = flow.get()
-            except Exception as err:
-                log.warning('flow.get error: %s %s' % (type(err),err))
-                continue
-
-            if not msg:
-                log.debug("write_handler: got EOT")
-                flow.send_eot()
-                # fixme: send an EOT also to push socket?.
+            except TransmissionEnd as te:
+                flow.eotsend()
+                push_message(te.msg)
                 break
-
-            push_message(msg)
-
             continue
 
     log.debug ('write_handler exiting')

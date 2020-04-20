@@ -105,7 +105,7 @@ class Flow(object):
     def begin(self):
         if not self.sm.BeginFlow():
             raise RuntimeError("flow failed to begin")
-
+        self.pay()
 
     def eot(self, msg=None):
         '''Do flow EOT handshake.  
@@ -130,6 +130,7 @@ class Flow(object):
         fobj['flow'] = 'EOT'
         msg.label_object = fobj
         self.send(msg)
+
     def eotrecv(self):
         '''Recv EOT'''
         while True:

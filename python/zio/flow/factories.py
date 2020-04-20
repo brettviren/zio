@@ -6,7 +6,7 @@ from .util import message_to_dict
 from .. import rules
 from pyre.zactor import ZActor
 import logging
-log = logging.getLogger("zio")
+log = logging.getLogger(__name__)
 
 def wash_one(t):
     return t if isinstance(t,tuple) else (t,())

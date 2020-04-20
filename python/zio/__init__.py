@@ -14,8 +14,9 @@ in the zio:: C++ namespace.
 >>> p.connect(...)
 >>> f = zio.Flow(p)
 >>> bot = f.bot()
+>>> f.begin()
 >>> dat = ...
->>> ok = f.dat(dat)
+>>> ok = f.put(dat)
 '''
 
 # emulate libzio's namespace/class tree 

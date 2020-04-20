@@ -98,7 +98,12 @@ def handler(ctx, pipe, bot, rule_object, filename, broker_addr, *rargs):
     port = Port("read-handler", sock)
     port.connect(broker_addr)
     port.online(None)
-    flow = Flow(port)
+
+    direction = mattr["direction"]
+    if direction != "extract":
+        raise RuntimeError(f'zio.flow.hdf.reader bad direction: "{direction}"')
+    credit = mattr["credit"]
+    flow = Flow(port, direction, credit)
     log.debug (f'reader({base_path}) send BOT to {broker_addr}')
 
     sg = fp.get(base_path)
@@ -107,10 +112,9 @@ def handler(ctx, pipe, bot, rule_object, filename, broker_addr, *rargs):
         return
     fr = TensReader(sg, *rargs)
 
-    flow.send_bot(bot)          # this introduces us to the server
-    bot = flow.recv_bot()
+    bot = flow.bot(bot)         # this introduces us to the server
     log.debug (f'reader({base_path}) got response:\n{bot}')
-    flow.slurp_pay()
+    bot.begin()
 
     while True:
         msg = fr.read()
@@ -120,6 +124,5 @@ def handler(ctx, pipe, bot, rule_object, filename, broker_addr, *rargs):
         ok = flow.put(msg)
         if not ok:
             break;
-    flow.send_eot()
-    flow.recv_eot()
+    flow.eot()
     

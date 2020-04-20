@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 import logging
-logging.basicConfig(level=logging.DEBUG,
-                    format='%(asctime)s.%(msecs)03d %(levelname)s\t%(message)s',
-                    datefmt='%Y-%m-%d %H:%M:%S')
-log = logging.getLogger("zio")
+log = logging.getLogger("test_flowbroker")
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s.%(msecs)03d %(levelname)s\t%(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S')
 
 
 import json
@@ -23,24 +24,22 @@ def client_actor(ctx, pipe, address):
     port.connect(address)
     port.online(None)       # peer not needed if port only direct connects
     log.debug ("made flow")
-    cflow = zio.flow.Flow(port)
 
-    msg = zio.Message(seqno=0,
-                      label=json.dumps(dict(direction='extract',credit=2)))
-    cflow.send_bot(msg)
-    log.debug (f'client sent BOT: {msg}')
-    msg = cflow.recv_bot(1000)
-    assert(msg)
-    log.debug (f'client got BOT: {msg}')
-    msg = zio.Message(seqno=1)
+    direction='extract'
+    credit=2
+    cflow = zio.flow.Flow(port, direction, credit)
+
+    bot = cflow.bot()
+    log.debug (f'client did BOT: {bot}')
+    assert(bot)
+    cflow.begin()
+
+    msg = zio.Message(form='FLOW', label_object={'flow':'DAT'})
     cflow.put(msg)
-    log.debug (f'client sent {msg}')
-    eot = zio.Message(seqno=2)
-    cflow.send_eot(eot)
-    log.debug (f'client sent {eot}')
-    eot = cflow.recv_eot()
-    assert(eot)
-    log.debug (f'client done with {eot}')
+    log.debug (f'client did DAT')
+    cflow.eot()
+    log.debug (f'client did EOT')
+
     pipe.recv()                 # wait for signal to exit
 
 
@@ -62,19 +61,19 @@ def dumper(ctx, pipe, bot, address):
     port = zio.Port("client", zmq.CLIENT,'')
     port.connect(address)
     port.online(None)       # peer not needed if port only direct connects
-    flow = zio.flow.Flow(port)
+
+    fobj = bot.label_object
+    direction=fobj["direction"]
+    credit=fobj["credit"]
+    flow = zio.flow.Flow(port, direction, credit)
     poller.register(flow.port.sock, zmq.POLLIN)
 
     log.debug (f'dumper: send {bot}')
 
-    flow.send_bot(bot)
-    bot = flow.recv_bot(1000)
+    bot = flow.bot(bot)
     assert(bot)
 
-    # must explicitly break the deadlock of us waiting for DAT before
-    # triggering the poll so that get() will implicitly send PAY so
-    # that the other end can send DAT.  3rd base.
-    flow.flush_pay()
+    flow.begin()
 
     interupted = False
     keep_going = True
@@ -93,14 +92,16 @@ def dumper(ctx, pipe, bot, address):
                 return
 
             # got flow messages
-            msg = flow.get()
-            log.debug (f'dumper: sock hit: {msg}')
-            if msg is None:
-                log.debug ("dumper: null message from get, sending EOT")
-                flow.send_eot()
+            try:
+                msg = flow.get()
+            except TransmissionEnd:
+                log.debug ("dumper: get gives EOT")
+                flow.eotsend()
                 poller.unregister(sock)
                 keep_going = False
                 break
+
+            log.debug (f'dumper: sock hit: {msg}')
 
     log.debug("dumper: taking port offline")
     port.offline()
@@ -162,4 +163,8 @@ def test_dumper():
     
 
 if '__main__' == __name__:
+    logging.getLogger('transitions').setLevel(logging.INFO)
+    logging.getLogger('zio.flow.proto').setLevel(logging.DEBUG)
+    logging.getLogger('zio.flow.sm').setLevel(logging.DEBUG)
+    logging.getLogger('test_flowbroker').setLevel(logging.DEBUG)
     test_dumper()
