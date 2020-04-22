@@ -60,10 +60,12 @@ class TestFlow(unittest.TestCase):
         log.debug("flow bot done")
         assert(self.cflow.sm.state == "READY");
         assert(self.sflow.sm.state == "READY");
+
+        # this also imitates PAY 
         self.sflow.begin()
         self.cflow.begin()
 
-        assert(self.cflow.sm.state == "taking_RICH");
+        assert(self.cflow.sm.state == "taking_HANDSOUT");
         assert(self.sflow.sm.state == "giving_BROKE");
 
         # this is normally not needed if we use get()/put()
