@@ -234,13 +234,17 @@ class Port:
         '''
         if self.origin is not None:
             msg.coord.origin = self.origin
+
         if self.sock.type in (zmq.SERVER, zmq.ROUTER):
-            log.debug(f'send serverish rid:{msg.routing_id} {len(msg.payload)}')
+            log.debug(f'port [{self.name}] send {msg} rid:{msg.routing_id}')
             return serverish_send(self.sock, msg.routing_id, msg.toparts())
         if self.sock.type in (zmq.CLIENT, zmq.DEALER):
-            log.debug(f'send clientish {len(msg.payload)}')
+            log.debug(f'port [{self.name}] send {msg}')
             return clientish_send(self.sock, msg.toparts())
-        raise ValueError(f'unsupported socket type {self.sock.type}')
+
+        log.debug(f'port [{self.name}] send {msg}')
+        return self.sock.send_multipart(msg.toparts())
+
 
     def recv(self, timeout=None):
         '''
@@ -250,15 +254,23 @@ class Port:
         '''
         which  = dict(self.poller.poll(timeout))
         if not self.sock in which:
-            return None
+            return None         # timeout
 
         if self.sock.type in (zmq.SERVER, zmq.ROUTER):
             rid, parts = serverish_recv(self.sock)
-            return Message(routing_id = rid, parts = parts)
+            msg = Message(routing_id = rid, parts = parts)
+            log.debug(f'port [{self.name}] recv {msg} rid:{msg.routing_id}')
+            return msg
             
         if self.sock.type in (zmq.CLIENT, zmq.DEALER):
             parts = clientish_recv(self.sock)
-            return Message(parts = parts)
+            msg = Message(parts = parts)
+            log.debug(f'port [{self.name}] recv {msg}')
+            return msg
 
-        return None
+        parts = sock.recv_multipart()
+        msg = Message(parts = parts)
+        log.debug(f'port [{self.name}] recv {msg}')
+        return msg
+        
 

@@ -156,7 +156,7 @@ class Flow(object):
         DAT message is returned.'''
         self.send_pay()
         ret = self.recv()
-        assert (self.sm.credit > 0)
+        self.debug(f"get: {ret}")
         fobj = ret.label_object
         if fobj['flow'] == 'EOT':
             raise TransmissionEnd("EOT in flow get",ret)
@@ -174,14 +174,11 @@ class Flow(object):
         if self.taker():        # sanity check application
             raise TypeError('flow extract does not receive pay')
         if self.credit < self.total_credit:
-            self.debug(f'recv_pay: flow has room for pay in {self.sm.state}')
             msg = self.port.recv(0)
-            if msg is None:     # timeout
-                return
-            if not self.sm.RecvMsg(msg):
+            if msg and not self.sm.RecvMsg(msg): # no timeout but fail sm
                 raise RuntimeError(f'flow recv bad PAY: {msg} in {self.sm.state}')
         if not self.credit:
-            self.debug('recv_pay: flow needs pay badly')
+            self.debug(f'recv_pay: flow needs pay badly {self.credit}/{self.total_credit} in {self.sm.state}')
             msg = self.port.recv(self.timeout)
             if msg is None:
                 raise TimeoutError('flow timeout waiting for needed credit')
@@ -218,7 +215,7 @@ class Flow(object):
         msg.form = 'FLOW'
         self.debug(f'send: from {self.sm.state} {msg} rid:{msg.routing_id}')
         if not self.sm.SendMsg(msg):
-            raise ValueError(f'bad send {msg} in {self.sm.state}')
+            raise ValueError(f'bad send {msg} in {self.sm.state} with {self.credit}/{self.total_credit}')
         self.debug(f'send: {msg} rid:{msg.routing_id}')
         self.port.send(msg)
         

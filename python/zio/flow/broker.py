@@ -10,7 +10,7 @@ import zmq
 import zio
 from .util import objectify, switch_direction
 import logging
-log = logging.getLogger("zio")
+log = logging.getLogger(__name__)
 
 class Broker:
     def __init__(self, server, factory):
@@ -28,19 +28,22 @@ class Broker:
         initiation protocol to ZIO flow protocol.
 
         On receipt of a BOT, the broker passes it to the factory which
-        should return True if the BOT was accepted else None.  The
-        factory call should return as promptly as possible as the
-        broker blocks.
+        should return True if the BOT was accepted.  The factory call
+        should return as promptly as possible as the broker blocks on
+        this call.
 
         If factory returns True then it is expected that the factory
         has started some other client which contacs the broker with
         the BOT.  The factory or the new client may modify the BOT as
-        per flow protorocl but must leave intact the `cid` attribute
+        per flow protocol but must leave intact the `cid` attribute
         placed in the flow object by the broker.
 
         Note that the flow handler protocol does not communicate the
         location of the broker's SERVER socket.  It is up to handler
         implementations to locate the the server.
+
+        After this flow initiating prototocl messages between client
+        and handler are merely passed through the broker.
 
         '''
         self.server = server
@@ -65,9 +68,9 @@ class Broker:
         orid = self.other.get(rid, None)
         if orid:                # we have its other
             if orid in self.handlers:
-                log.debug (f"broker route c2h {rid} -> {orid}:\n{msg}\n")
+                log.debug (f"broker route c2h {rid} -> {orid}: {msg}")
             else:
-                log.debug (f"broker route h2c {rid} -> {orid}:\n{msg}\n")
+                log.debug (f"broker route h2c {rid} -> {orid}: {msg}")
             msg.routing_id = orid
             self.server.send(msg)
             return
@@ -95,12 +98,12 @@ class Broker:
             fobj = switch_direction(fobj)                
             msg.label = json.dumps(fobj)                
             msg.routing_id = rid
-            log.debug (f"broker route c2h {cid} -> {rid}:\n{msg}\n")
+            log.debug (f"broker route c2h {cid} -> {rid}: {msg}")
             self.server.send(msg) # to handler
 
             msg.label = label_for_client
             msg.routing_id = cid
-            log.debug (f"broker route h2c {rid} -> {cid}:\n{msg}\n")
+            log.debug (f"broker route h2c {rid} -> {cid}: {msg}")
             self.server.send(msg)
             return
 

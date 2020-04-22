@@ -176,20 +176,36 @@ class Flow(object):
 
 
     def check_one_credit(self,msg=None):
-        return self.credit == 1
+        ok = self.credit == 1
+        if not ok:
+            log.debug(f'check_one_credit {self.credit}/{self.total_credit} {msg}')
+        return ok
 
     def check_last_credit(self,msg=None):
-        return self.total_credit - self.credit == 1
+        ok = self.total_credit - self.credit == 1
+        if not ok:
+            log.debug(f'check_last_credit {self.credit}/{self.total_credit} {msg}')
+        return ok
 
     def check_low_credit(self,msg=None):
-        return self.total_credit - self.credit > 1
+        ok = self.total_credit - self.credit > 1
+        if not ok:
+            log.debug(f'check_low_credit {self.credit}/{self.total_credit} {msg}')
+        return ok
+
 
     def check_many_credit(self,msg=None):
-        return self.credit > 1
+        ok = self.credit > 1
+        if not ok:
+            log.debug(f'check_many_credit {self.credit}/{self.total_credit} {msg}')
+        return ok
 
     def check_have_credit(self,msg=None):
-        log.debug(f"check_have_credit: {self.credit}")
-        return self.credit > 0
+        ok = self.credit > 0
+        if not ok:
+            log.debug(f'check_have_credit {self.credit}/{self.total_credit} {msg}')
+        return ok
+
 
 
     def recv_bot(self, msg):

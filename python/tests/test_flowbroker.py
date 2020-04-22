@@ -1,20 +1,18 @@
 #!/usr/bin/env python3
+
+import json
+import zmq
+import zio
+from zio.flow import objectify, Broker, Flow, TransmissionEnd
+
+from pyre.zactor import ZActor
+
 import logging
 log = logging.getLogger("test_flowbroker")
 logging.basicConfig(
     level=logging.DEBUG,
     format='%(asctime)s.%(msecs)03d %(levelname)s\t%(message)s',
     datefmt='%Y-%m-%d %H:%M:%S')
-
-
-import json
-import zmq
-import zio
-from zio.flow import objectify, Broker
-
-from pyre.zactor import ZActor
-
-
 
 def client_actor(ctx, pipe, address):
     'An actor function talking to a broker on given address'
@@ -27,7 +25,7 @@ def client_actor(ctx, pipe, address):
 
     direction='extract'
     credit=2
-    cflow = zio.flow.Flow(port, direction, credit)
+    cflow = Flow(port, direction, credit)
 
     bot = cflow.bot()
     log.debug (f'client did BOT: {bot}')
@@ -35,6 +33,7 @@ def client_actor(ctx, pipe, address):
     cflow.begin()
 
     msg = zio.Message(form='FLOW', label_object={'flow':'DAT'})
+    log.debug (f'client put DAT with {cflow.credit}/{cflow.total_credit} {msg}')
     cflow.put(msg)
     log.debug (f'client did DAT')
     cflow.eot()
@@ -58,14 +57,14 @@ def dumper(ctx, pipe, bot, address):
     poller.register(pipe, zmq.POLLIN)
     pipe.signal()               # ready
 
-    port = zio.Port("client", zmq.CLIENT,'')
+    port = zio.Port("dumper", zmq.CLIENT,'')
     port.connect(address)
     port.online(None)       # peer not needed if port only direct connects
 
     fobj = bot.label_object
     direction=fobj["direction"]
     credit=fobj["credit"]
-    flow = zio.flow.Flow(port, direction, credit)
+    flow = Flow(port, direction, credit)
     poller.register(flow.port.sock, zmq.POLLIN)
 
     log.debug (f'dumper: send {bot}')
@@ -118,7 +117,7 @@ class Factory:
         self.ctx = zmq.Context()
 
     def __call__(self, bot):
-        fobj = json.loads(bot.label) 
+        fobj = bot.label_object
         if fobj['direction'] == 'extract': # my direction.
             return                         # only handle inject
         actor = ZActor(self.ctx, dumper, bot, self.address)
@@ -130,6 +129,7 @@ class Factory:
             log.debug("factory stopping handler")
             actor.pipe.signal()
             del(actor)
+
 def test_dumper():
     
     ctx = zmq.Context()
@@ -166,5 +166,6 @@ if '__main__' == __name__:
     logging.getLogger('transitions').setLevel(logging.INFO)
     logging.getLogger('zio.flow.proto').setLevel(logging.DEBUG)
     logging.getLogger('zio.flow.sm').setLevel(logging.DEBUG)
+    logging.getLogger('zio.flow.broker').setLevel(logging.DEBUG)
     logging.getLogger('test_flowbroker').setLevel(logging.DEBUG)
     test_dumper()
