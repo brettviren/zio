@@ -562,7 +562,7 @@ struct FlowImp : public FlowFSM {
         if (!m_credit) {
             return;
         }
-        zio::Message pay;
+        zio::Message pay("FLOW");
         flow::Label lab(pay);
         lab.msgtype(flow::msgtype_e::pay);
         lab.commit();

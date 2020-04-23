@@ -31,8 +31,8 @@ def mainlog(level='info', **sublevels):
     elevel = os.environ.get('ZIO_LOGLEVEL', "").lower()
     if not elevel:              # maybe piggyback on SPDLOG's
         elevel = os.environ.get('SPDLOG_LEVEL', "").lower()
-        if elevel and elevel == "verbose":
-            elevel = "debug"    # Python lacks "verbose" level
+        if elevel and elevel in ("verbose","trace"):
+            elevel = "debug"
     if elevel:
         level = elevel
 

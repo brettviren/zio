@@ -37,12 +37,14 @@ class TensReader:
         gn = self.seqno_interp % self.seqno
         seq = self.group.get(gn)
         if not seq:
-            log.error(f'TensReader: failed to get {gn} from {self.group}')
+            log.info(f'TensReader: failed to get {gn} from {self.group}, iteration over')
             return
 
         tens = seq.get("tensors")
 
         attrs = dict(tens.attrs)
+        log.debug(f'tensor attributes: {attrs}')
+
         msg = Message(form='FLOW', 
                       origin = attrs.pop("origin"),
                       granule = attrs.pop("granule"),
@@ -54,6 +56,9 @@ class TensReader:
         umd = seq.get("metadata")
         if umd:
             attrs["metadata"] = dict(umd.attrs)
+        # fixme: the lines between flow and file handler are too damn
+        # blurred!
+        attrs['flow'] = 'DAT'
         msg.label_object = attrs
 
         partnums = [int(p) for p in tens.keys()]
@@ -78,6 +83,7 @@ class TensReader:
             payload[part] = ds[:].tostring()
 
         msg.payload = payload
+        log.debug(f'read {msg}')
         return msg
 
 
@@ -112,16 +118,14 @@ def handler(ctx, pipe, bot, rule_object, filename, broker_addr, *rargs):
     fr = TensReader(sg, *rargs)
 
     bot = flow.bot(bot)         # this introduces us to the server
-    log.debug (f'reader({base_path}) got response:\n{bot}')
-    bot.begin()
+    log.debug (f'reader({base_path}) got response: {bot}')
+    flow.begin()
 
     while True:
         msg = fr.read()
         log.debug(f'reader: {msg}')
         if not msg:
             break
-        ok = flow.put(msg)
-        if not ok:
-            break;
+        flow.put(msg)
     flow.eot()
     
