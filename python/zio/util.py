@@ -45,7 +45,7 @@ def mainlog(level='info', **sublevels):
     level = logging._checkLevel(level.upper());
     logging.basicConfig(
         level=level,
-        format='{asctime}.{msecs:.0f} [{name:^16.16}] {levelname:^8} {message}',
+        format='{asctime}.{msecs:.03f} [{name:^16.16}] {levelname:^8} {message}',
         style='{',
         datefmt=datefmt)
     for lname, level in sublevels.items():

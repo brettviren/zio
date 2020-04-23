@@ -14,12 +14,12 @@ It provides:
 import json
 
 from zio import Port, Message
-from zio.flow import objectify, Flow, TransmissionEnd
+from zio.flow import Flow, TransmissionEnd
 from pyre.zactor import ZActor
 from zmq import CLIENT, PUSH, PULL, Poller, POLLIN
 import h5py
 import numpy
-from zio.util import message_to_dict, modlog
+from zio.util import message_to_dict, modlog, objectify
 
 log = modlog(__name__)
 
@@ -44,8 +44,6 @@ class TensWriter:
     def save(self, msg):
 #        log.debug(f'save: {msg}')
         fobj = msg.label_object
-        if fobj["flow"] == "BOT":
-            return
 
         try:
             tens = fobj.pop("TENS")
@@ -240,7 +238,7 @@ def client_handler(ctx, pipe, bot, rule_object, writer_addr, broker_addr):
         m.label = json.dumps(attr)
         push.send(m.encode())
 
-    push_message(bot)
+    #push_message(bot)
 
     poller = Poller()
     poller.register(pipe, POLLIN)
@@ -261,7 +259,7 @@ def client_handler(ctx, pipe, bot, rule_object, writer_addr, broker_addr):
                 msg = flow.get()
             except TransmissionEnd as te:
                 flow.eotsend()
-                push_message(te.msg)
+                #push_message(te.msg)
                 break
             continue
 
