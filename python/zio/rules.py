@@ -3,10 +3,10 @@
 Support for rules
 '''
 from rule import Rule           # bv's hacked version
-from . import lispish
+from zio import lispish
 
-import logging
-log = logging.getLogger("zio")
+from zio.util import modlog
+log = modlog(__name__)
 
 def parse(rule_object, **params):
     '''

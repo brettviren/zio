@@ -3,11 +3,11 @@
 import json
 import zmq
 import zio
-from zio.flow import objectify, Broker, Flow, TransmissionEnd
+from zio.flow import  Broker, Flow, TransmissionEnd
 
 from pyre.zactor import ZActor
 
-from zio.util import modlog, mainlog, DEBUG, INFO
+from zio.util import objectify, modlog, mainlog, DEBUG, INFO
 log = modlog("test_flowbroker")
 
 
@@ -161,11 +161,4 @@ def test_dumper():
 
 if '__main__' == __name__:
     mainlog()
-
-    # logging.getLogger('transitions').setLevel(logging.INFO)
-    # logging.getLogger('zio').setLevel(logging.DEBUG)
-    # # logging.getLogger('zio.flow.proto').setLevel(logging.DEBUG)
-    # # logging.getLogger('zio.flow.sm').setLevel(logging.DEBUG)
-    # # logging.getLogger('zio.flow.broker').setLevel(logging.DEBUG)
-    # logging.getLogger('test_flowbroker').setLevel(logging.DEBUG)
     test_dumper()

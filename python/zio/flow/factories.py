@@ -2,11 +2,11 @@
 '''
 ZIO flow factories are used by the flow broker to service client flows.
 '''
-from .util import message_to_dict
-from .. import rules
+from zio.util import message_to_dict, modlog
+import zio.rules as rules
 from pyre.zactor import ZActor
-import logging
-log = logging.getLogger(__name__)
+
+log = modlog(__name__)
 
 def wash_one(t):
     return t if isinstance(t,tuple) else (t,())

@@ -2,7 +2,9 @@
 
 import zmq
 import struct
-from zio.util import encode_message, decode_message
+from zio.util import encode_message, decode_message, modlog, mainlog
+
+log = modlog(__name__)
 
 def test_codec():
     lil_data = b"ddd"
@@ -25,7 +27,7 @@ def test_codec():
     ptr += 1
     siz = struct.unpack('>I', enc[ptr:ptr+4])[0]
     ptr += 4 
-    print ('big data size',siz)
+    log.debug (f'big data size {siz}')
     assert(siz == 512)
     assert(enc[ptr:ptr+siz] == big_data)
     ptr += 512
@@ -34,7 +36,7 @@ def test_codec():
     ptr += 1
     siz = struct.unpack('>I', enc[ptr:ptr+4])[0]
     assert(siz == 512)
-    print ('big frame size',siz)
+    log.debug (f'big frame size {siz}')
     ptr += 4
     assert(enc[ptr:ptr+siz] == big_frame.bytes)
     
@@ -46,5 +48,6 @@ def test_codec():
 
 
 if '__main__' == __name__:
+    mainlog()
     test_codec()
     

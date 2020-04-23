@@ -9,13 +9,13 @@ Originally from Zguide examples, generalized to use CLIENT
 or DEALER by brett.viren@gmail.com
 """
 
-import logging
-
 import zmq
 
 from zio.domo import MDP
-from zio.util import dump
+from zio.util import dump, modlog
 from zio.util import clientish_recv, clientish_send
+
+log = modlog(__name__)
 
 class Client(object):
     """Majordomo Protocol Client API, Python version.
@@ -35,9 +35,6 @@ class Client(object):
         self.verbose = verbose
         self.ctx = zmq.Context()
         self.poller = zmq.Poller()
-        logging.basicConfig(format="%(asctime)s %(message)s",
-                            datefmt="%Y-%m-%d %H:%M:%S",
-                            level=logging.INFO)
         self.reconnect_to_broker()
 
 
@@ -51,7 +48,7 @@ class Client(object):
         self.client.connect(self.broker)
         self.poller.register(self.client, zmq.POLLIN)
         if self.verbose:
-            logging.info("I: connecting to broker at %s...", self.broker)
+            log.info("connecting to broker at %s...", self.broker)
 
     def send(self, service, request):
         """Send request to broker
@@ -65,7 +62,7 @@ class Client(object):
 
         request = [MDP.C_CLIENT, service] + request
         if self.verbose:
-            logging.warn("I: send request to '%s' service: ", service)
+            log.warn("send request to '%s' service: ", service)
             dump(request)
         #self.client.send_multipart(request)
         clientish_send(self.client, request)
@@ -82,7 +79,7 @@ class Client(object):
             #msg = self.client.recv_multipart()
             msg = clientish_recv(self.client)
             if self.verbose:
-                logging.info("I: received reply:")
+                log.info("received reply:")
                 dump(msg)
 
             # Don't try to handle errors, just assert noisily
@@ -94,4 +91,4 @@ class Client(object):
             service = msg.pop(0)
             return msg
         else:
-            logging.warn("W: permanent error, abandoning request")
+            log.warn("permanent error, abandoning request")

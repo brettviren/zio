@@ -7,12 +7,11 @@ import json
 import h5py
 import numpy
 from zmq import CLIENT
-from ..util import message_to_dict
+from zio.util import message_to_dict, modlog
 from zio import Port, Message
 from zio.flow import Flow
 
-import logging
-log = logging.getLogger("zio")
+log = modlog(__name__)
 
 class TensReader:
     '''Read ZIO TENS messages from HDF5

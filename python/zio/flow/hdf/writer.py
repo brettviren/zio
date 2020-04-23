@@ -14,15 +14,14 @@ It provides:
 import json
 
 from zio import Port, Message
-from zio.flow import objectify, Flow
+from zio.flow import objectify, Flow, TransmissionEnd
 from pyre.zactor import ZActor
 from zmq import CLIENT, PUSH, PULL, Poller, POLLIN
 import h5py
 import numpy
-from ..util import message_to_dict
+from zio.util import message_to_dict, modlog
 
-import logging
-log = logging.getLogger("zio")
+log = modlog(__name__)
 
 
 class TensWriter:

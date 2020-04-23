@@ -9,7 +9,6 @@ Originally from Zguide examples, generalized to use SERVER
 or ROUTER by brett.viren@gmail.com
 """
 
-import logging
 import sys
 import time
 from binascii import hexlify
@@ -18,8 +17,10 @@ import zmq
 
 # local
 from zio.domo import MDP
-from zio.util import dump
+from zio.util import dump, modlog
 from zio.util import serverish_recv, serverish_send
+
+log = modlog(__name__)
 
 def hash_sender(sender):
     if isinstance(sender, int):
@@ -90,9 +91,6 @@ class Broker(object):
         self.socket.linger = 0
         self.poller = zmq.Poller()
         self.poller.register(self.socket, zmq.POLLIN)
-        logging.basicConfig(format="%(asctime)s %(message)s",
-                            datefmt="%Y-%m-%d %H:%M:%S",
-                            level=logging.INFO)
 
 
 
@@ -108,7 +106,7 @@ class Broker(object):
             if items:
                 sender, msg = serverish_recv(self.socket)
                 if self.verbose:
-                    logging.info("I: received message:")
+                    log.info("received message:")
                     dump(msg)
 
                 header = msg.pop(0)
@@ -118,7 +116,7 @@ class Broker(object):
                 elif (MDP.W_WORKER == header):
                     self.process_worker(sender, msg)
                 else:
-                    logging.error("E: invalid message:")
+                    log.error("invalid message:")
                     dump(msg)
 
             self.purge_workers()
@@ -187,7 +185,7 @@ class Broker(object):
         elif (MDP.W_DISCONNECT == command):
             self.delete_worker(worker, False)
         else:
-            logging.error("E: invalid message:")
+            log.error("invalid message:")
             dump(msg)
 
     def delete_worker(self, worker, disconnect):
@@ -209,7 +207,7 @@ class Broker(object):
             worker = Worker(identity, address, self.HEARTBEAT_EXPIRY)
             self.workers[identity] = worker
             if self.verbose:
-                logging.info("I: registering new worker: %s", identity)
+                log.info("registering new worker: %s", identity)
 
         return worker
 
@@ -229,7 +227,7 @@ class Broker(object):
         We use a single socket for both clients and workers.
         """
         self.socket.bind(endpoint)
-        logging.info("I: MDP broker/0.1.1 is active at %s", endpoint)
+        log.info("MDP broker/0.1.1 is active at %s", endpoint)
 
     def service_internal(self, service, msg):
         """Handle internal service according to 8/MMI specification"""
@@ -262,7 +260,7 @@ class Broker(object):
         while self.waiting:
             w = self.waiting[0]
             if w.expiry < time.time():
-                logging.info("I: deleting expired worker: %s", w.identity)
+                log.info("deleting expired worker: %s", w.identity)
                 self.delete_worker(w,False)
                 self.waiting.pop(0)
             else:
@@ -307,7 +305,7 @@ class Broker(object):
         msg = [MDP.W_WORKER, command] + msg
 
         if self.verbose:
-            logging.info("I: sending %r to worker", command)
+            log.info("sending %r to worker", command)
             dump(msg)
 
         #self.socket.send_multipart(msg)

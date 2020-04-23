@@ -1,13 +1,12 @@
 #!/usr/bin/env python
 
-from .util import guess_hostname
+from zio.util import guess_hostname, modlog
 
 import zmq
-from .port import Port
-from .peer import Peer
+from zio.port import Port
+from zio.peer import Peer
 
-import logging
-log = logging.getLogger(__name__)
+log = modlog(__name__)
 
 class Node:
     '''

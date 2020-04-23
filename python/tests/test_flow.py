@@ -7,12 +7,10 @@ import time
 import unittest
 import zmq
 from zio import Node, Message, CoordHeader
-from zio.flow import Flow, stringify, objectify
+from zio.flow import Flow
+from zio.util import modlog, mainlog, stringify, objectify
 
-import logging
-logging.basicConfig(level=logging.DEBUG)
-
-log = logging.getLogger('test_flow')
+log = modlog('test_flow')
 
 class TestFlow(unittest.TestCase):
 
@@ -57,25 +55,19 @@ class TestFlow(unittest.TestCase):
         assert(self.cflow.credit == TestFlow.credit)
         assert(self.cflow.total_credit == TestFlow.credit)
 
-        log.debug("flow bot done")
+        log.debug("flow BOT handshake done")
         assert(self.cflow.sm.state == "READY");
         assert(self.sflow.sm.state == "READY");
 
         # this also imitates PAY 
-        self.sflow.begin()
         self.cflow.begin()
-
+        log.debug("client flow began")
         assert(self.cflow.sm.state == "taking_HANDSOUT");
-        assert(self.sflow.sm.state == "giving_BROKE");
 
-        # this is normally not needed if we use get()/put()
-        self.cflow.send_pay()
-        assert(self.cflow.credit == 0)
-        while self.sflow.credit != TestFlow.credit:
-            self.sflow.recv_pay()
+        self.sflow.begin()
+        log.debug("server flow began")
+        assert(self.sflow.sm.state == "giving_GENEROUS");
 
-
-        log.debug("flow manual first pay done")
 
         send_eot = False
         for count in range(10):
@@ -119,12 +111,5 @@ class TestFlow(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    import logging
-    logging.basicConfig(level=logging.INFO)
-    logging.getLogger('transitions').setLevel(logging.INFO)
-    logging.getLogger('pyre').setLevel(logging.INFO)
-    logging.getLogger('zio.peer').setLevel(logging.INFO)
-    logging.getLogger('zio.flow.proto').setLevel(logging.DEBUG)
-    logging.getLogger('zio.flow.sm').setLevel(logging.DEBUG)
-    logging.getLogger('zio.message').setLevel(logging.DEBUG)
+    mainlog()
     unittest.main()

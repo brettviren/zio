@@ -7,12 +7,9 @@ import zmq
 import unittest
 
 import zio
+from zio.util import modlog, mainlog
 
-
-import logging
-logging.basicConfig(level=logging.DEBUG)
-
-log = logging.getLogger('test_message')
+log = modlog('test_message')
 
 class TestMessage(unittest.TestCase):
 
@@ -47,6 +44,6 @@ class TestMessage(unittest.TestCase):
         
 
 if __name__ == '__main__':
-    logging.getLogger('zio.message').setLevel(logging.DEBUG)
+    mainlog()
     unittest.main()
         

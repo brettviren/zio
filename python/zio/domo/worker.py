@@ -9,14 +9,15 @@ Originally from Zguide examples, generalized to use CLIENT
 or DEALER following Generaldomo Protocol. brett.viren@gmail.com
 """
 
-import logging
 import time
 import zmq
 
-from zio.util import dump
+from zio.util import dump, modlog
 from zio.util import clientish_recv, clientish_send
 # MajorDomo protocol constants:
 from . import MDP
+
+log = modlog(__name__)
 
 class Worker(object):
     """Generaldomo Protocol Worker API, Python version
@@ -53,9 +54,6 @@ class Worker(object):
         self.verbose = verbose
         self.ctx = zmq.Context()
         self.poller = zmq.Poller()
-        logging.basicConfig(format="%(asctime)s %(message)s",
-                            datefmt="%Y-%m-%d %H:%M:%S",
-                            level=logging.INFO)
         self.reconnect_to_broker()
 
 
@@ -69,7 +67,7 @@ class Worker(object):
         self.worker.connect(self.broker)
         self.poller.register(self.worker, zmq.POLLIN)
         if self.verbose:
-            logging.info("I: connecting to broker at %s...", self.broker)
+            log.info("connecting to broker at %s...", self.broker)
 
         # Register service with broker
         self.send_to_broker(MDP.W_READY, self.service, [])
@@ -95,7 +93,7 @@ class Worker(object):
         #msg = [b'', MDP.W_WORKER, command] + msg
         msg = [MDP.W_WORKER, command] + msg
         if self.verbose:
-            logging.info("I: sending %s to broker", command)
+            log.info("sending %s to broker", command)
             dump(msg)
         #self.worker.send_multipart(msg)
         clientish_send(self.worker, msg)
@@ -124,7 +122,7 @@ class Worker(object):
                 #msg = self.worker.recv_multipart()
                 msg = clientish_recv(self.worker)
                 if self.verbose:
-                    logging.info("I: received message from broker: ")
+                    log.info("received message from broker: ")
                     dump(msg)
 
                 self.liveness = self.HEARTBEAT_LIVENESS
@@ -150,14 +148,14 @@ class Worker(object):
                 elif command == MDP.W_DISCONNECT:
                     self.reconnect_to_broker()
                 else :
-                    logging.error("E: invalid input message: ")
+                    log.error("invalid input message: ")
                     dump(msg)
 
             else:
                 self.liveness -= 1
                 if self.liveness == 0:
                     if self.verbose:
-                        logging.warn("W: disconnected from broker - retrying...")
+                        log.warn("disconnected from broker - retrying...")
                     try:
                         time.sleep(1e-3*self.reconnect)
                     except KeyboardInterrupt:
@@ -169,7 +167,7 @@ class Worker(object):
                 self.send_to_broker(MDP.W_HEARTBEAT)
                 self.heartbeat_at = time.time() + 1e-3*self.heartbeat
 
-        logging.warn("W: interrupt received, killing worker...")
+        log.warn("interrupt received, killing worker...")
         return None
 
 

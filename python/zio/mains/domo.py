@@ -3,8 +3,8 @@ import json
 from .. import jsonnet
 import click
 
-import logging
-log = logging.getLogger("zio")
+from zio.util import modlog
+log = modlog(__name__)
 
 import zmq
 

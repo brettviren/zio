@@ -2,11 +2,8 @@
 
 from transitions.extensions import HierarchicalMachine as Machine
 
-import logging
-# logging.basicConfig(level=logging.DEBUG)
-# Set transitions' log level to INFO; DEBUG messages will be omitted
-# logging.getLogger('transitions').setLevel(logging.INFO)
-log = logging.getLogger(__name__)
+from zio.util import modlog
+log = modlog(__name__)
 
 def tran(t,s,d,**kwds):
     ret = dict(trigger=t, source=s, dest=d)

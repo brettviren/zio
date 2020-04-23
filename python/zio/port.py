@@ -2,13 +2,12 @@
 
 import zmq
 from zmq.error import ZMQError
-from zio.util import socket_names
+from zio.util import socket_names, modlog
 from zio.util import clientish_recv, clientish_send
 from zio.util import serverish_recv, serverish_send
-from .message import Message
+from zio.message import Message
 
-import logging
-log = logging.getLogger(__name__)
+log = modlog(__name__)
 
 def bind_address(sock, addr):
     """Bind socket to address

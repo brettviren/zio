@@ -7,11 +7,9 @@ import time
 import unittest
 import zmq
 from zio import Port, Node, Message
+from zio.util import modlog, mainlog
 
-import logging
-logging.basicConfig(level=logging.DEBUG)
-
-log = logging.getLogger('test_port')
+log = modlog('test_port')
 
 
 class TestPort(unittest.TestCase):
@@ -49,7 +47,6 @@ class TestPort(unittest.TestCase):
         assert(lobj2 == lobj)
 
 if __name__ == '__main__':
-    logging.getLogger('zio.message').setLevel(logging.DEBUG)
-    logging.getLogger('zio.port').setLevel(logging.DEBUG)
+    mainlog()
     unittest.main()
         

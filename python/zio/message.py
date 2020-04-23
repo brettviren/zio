@@ -8,10 +8,9 @@ import json
 import struct
 from collections import namedtuple
 from enum import Enum
-from .util import byteify_list, encode_message, decode_message
+from .util import byteify_list, encode_message, decode_message, modlog
 
-import logging
-log = logging.getLogger(__name__)
+log = modlog(__name__)
 
 class MessageLevel(Enum):
     undefined=0

@@ -9,6 +9,8 @@ import time
 
 import unittest
 
+from zio.util import mainlog
+
 class TestNode(unittest.TestCase):
 
     origin = 42
@@ -53,5 +55,6 @@ class TestNode(unittest.TestCase):
         self.cnode.offline()        
 
 if __name__ == '__main__':
+    mainlog()
     unittest.main()
     

@@ -7,10 +7,10 @@ import pyre
 import uuid
 import json
 import time
-import logging
 from collections import namedtuple
+from zio.util import modlog, DEBUG
 
-log = logging.getLogger(__name__)
+log = modlog(__name__)
 PeerInfo = namedtuple("PeerInfo","uuid nick headers")
 
 class Peer:
@@ -63,7 +63,7 @@ class Peer:
         if not self.zyre.socket() in which:
             return None
         msg = self.zyre.recv()
-        if log.isEnabledFor(logging.DEBUG):
+        if log.isEnabledFor(DEBUG):
             log.debug("[peer %s]: zyre message:" %(self.zyre.name(),))
             for ind, part in enumerate(msg):
                 if len(part) < 100:

@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 
 from zio.flow.sm import Flow as FlowMachine
+from zio.util import modlog
 import zio
 import zmq
 
-import logging
-log = logging.getLogger(__name__)
+log = modlog(__name__)
 
 class TransmissionEnd(Exception):
     def __init__(self, text, msg):

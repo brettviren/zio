@@ -11,5 +11,6 @@ machine = Machine(states=states, transitions=transitions,
                   show_conditions=True,
                   show_auto_transitions=False)
 
-machine.get_graph().draw('test_flow_graph.pdf',prog='dot')
-
+pdf='test_flow_graph.pdf'
+machine.get_graph().draw(pdf,prog='dot')
+print(pdf)

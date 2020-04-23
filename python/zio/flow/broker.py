@@ -8,9 +8,9 @@ import json
 from collections import namedtuple
 import zmq
 import zio
-from .util import objectify, switch_direction
-import logging
-log = logging.getLogger(__name__)
+from zio.util import objectify, switch_direction, modlog
+
+log = modlog(__name__)
 
 class Broker:
     def __init__(self, server, factory):

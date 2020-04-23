@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 
-import logging
-logger = logging.getLogger("zio.peer")
-logger.level = logging.DEBUG
+from zio.util import modlog, mainlog
 
 import zio
 import unittest
@@ -41,5 +39,6 @@ class TestPeer(unittest.TestCase):
         self.p1.stop()
 
 if __name__ == '__main__':
+    mainlog()
     unittest.main()
     

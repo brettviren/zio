@@ -4,11 +4,8 @@ Main CLI to ZIO
 '''
 import click
 
-import logging
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s.%(msecs)03d %(levelname)s\t%(message)s',
-                    datefmt='%Y-%m-%d %H:%M:%S')
-log = logging.getLogger("zio")
+from zio.util import mainlog
+mainlog()
 
 from .mains import  peers, flow, domo, check
 cli = click.CommandCollection(sources=[peers.cli, flow.cli, domo.cli, check.cli])

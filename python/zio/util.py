@@ -7,17 +7,24 @@ import os
 import zmq
 import sys
 import struct
+import json
 
 
 import logging
 from logging import DEBUG, INFO, getLogger
 
 def modlog(name):
+    '''
+    Call this to initialize and return a logger at top-level inside a module
+    '''
     log = logging.getLogger(name)
     log.addHandler(logging.NullHandler())    
     return log
 
 def mainlog(level='info', **sublevels):
+    '''
+    Call this in main to initialize ZIO logging.
+    '''
     #datefmt = '%Y-%m-%d %H:%M:%S'
     datefmt = '%H:%M:%S'
 
@@ -273,4 +280,54 @@ def clientish_send(sock, msg, *args, **kwds):
         return sock.send_multipart(msg, *args, **kwds)
 
     raise ValueError(f'unsupported socket type {sock.type}')
+
+
+def objectify(morl):
+    '''
+    Return a flow object.
+
+    The morl may be a zio.Message or a zio.Message.label
+
+    See also zio.Message.label_object
+    '''
+    if not morl:
+        return dict()
+    if type(morl) is bytes:
+        morl = morl.decode('utf-8')
+    if type(morl) is str:
+        return json.loads(morl)
+    return objectify(morl.prefix.label)
+
+def stringify(flowtype, **params):
+    '''
+    Return a flow label string of given flow type and any extra
+    parameters.
+    '''
+    params = params or dict()
+    params['flow'] = flowtype
+    return json.dumps(params)
+
+
+def switch_direction(fobj):
+    if isinstance(fobj, str):
+        fobj = json.loads(fobj)
+    else:
+        fobj = dict(fobj)
+    if fobj["direction"] == 'inject':
+        fobj["direction"] = 'extract'
+    elif fobj["direction"] == 'extract':
+        fobj["direction"] = 'inject'
+    else:
+        raise KeyError('direction')
+    return fobj
+
+def message_to_dict(msg):
+    '''
+    Return a simple dictionary of message header info.
+    '''
+    d = objectify(msg)
+    d['origin'] = msg.origin
+    d['granule'] = msg.granule
+    d['seqno'] = msg.seqno
+    return d
 
