@@ -161,7 +161,7 @@ def file_handler(ctx, pipe, filename, *wargs):
             fobj = objectify(msg)
             path = fobj.pop("hdfgroup") # must be supplied
             msg.label = json.dumps(fobj)
-            log.debug(f'writer: {filename}:/{path} writing:\n{msg}')
+            log.debug(f'writer: {filename}:/{path} writing: {msg}')
 
             fw = flow_writer.get(path, None)
             if fw is None:
@@ -171,7 +171,7 @@ def file_handler(ctx, pipe, filename, *wargs):
                 fw = flow_writer[path] = TensWriter(sg, *wargs)
 
             fw.save(msg)
-            log.debug(f'writer: flush {filename}')
+            #log.debug(f'writer: flush {filename}')
             fp.flush()
                 
     return
@@ -259,8 +259,9 @@ def client_handler(ctx, pipe, bot, rule_object, writer_addr, broker_addr):
                 msg = flow.get()
             except TransmissionEnd as te:
                 flow.eotsend()
-                #push_message(te.msg)
                 break
+            push_message(msg)
+
             continue
 
     log.debug ('write_handler exiting')
