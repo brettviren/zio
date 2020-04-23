@@ -7,12 +7,9 @@ from zio.flow import objectify, Broker, Flow, TransmissionEnd
 
 from pyre.zactor import ZActor
 
-import logging
-log = logging.getLogger("test_flowbroker")
-logging.basicConfig(
-    level=logging.DEBUG,
-    format='%(asctime)s.%(msecs)03d %(levelname)s\t%(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S')
+from zio.util import modlog, mainlog, DEBUG, INFO
+log = modlog("test_flowbroker")
+
 
 def client_actor(ctx, pipe, address):
     'An actor function talking to a broker on given address'
@@ -150,8 +147,8 @@ def test_dumper():
         try:
             broker.poll(1000)
         except TimeoutError as te:
-            log.warning(te)
-            # not the most elegant nor robust way to shutdown
+            log.info('broker is lonely, quitting')
+            
             break
 
     log.debug (f"main: stop broker")
@@ -163,9 +160,12 @@ def test_dumper():
     
 
 if '__main__' == __name__:
-    logging.getLogger('transitions').setLevel(logging.INFO)
-    logging.getLogger('zio.flow.proto').setLevel(logging.DEBUG)
-    logging.getLogger('zio.flow.sm').setLevel(logging.DEBUG)
-    logging.getLogger('zio.flow.broker').setLevel(logging.DEBUG)
-    logging.getLogger('test_flowbroker').setLevel(logging.DEBUG)
+    mainlog()
+
+    # logging.getLogger('transitions').setLevel(logging.INFO)
+    # logging.getLogger('zio').setLevel(logging.DEBUG)
+    # # logging.getLogger('zio.flow.proto').setLevel(logging.DEBUG)
+    # # logging.getLogger('zio.flow.sm').setLevel(logging.DEBUG)
+    # # logging.getLogger('zio.flow.broker').setLevel(logging.DEBUG)
+    # logging.getLogger('test_flowbroker').setLevel(logging.DEBUG)
     test_dumper()

@@ -60,7 +60,7 @@ class Broker:
         '''
         msg = self.server.recv(timeout)
         if not msg:
-            log.error (f'broker poll timeout with {timeout}')
+            log.debug (f'broker poll timeout with {timeout}')
             raise TimeoutError(f'broker poll timeout with {timeout}')
         log.debug (f'broker recv {msg}')
         rid = msg.routing_id

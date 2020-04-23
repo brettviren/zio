@@ -49,14 +49,14 @@ class Flow(object):
     def serverish(self):
         return self.sm.serverish
 
-    def debug(self, text):
+    def debug(self, text, io=""):
         sc = 'c'
         if self.serverish:
             sc='s'
-        d = '->'
+        d = 'e'
         if self.taker():
-            d = '<-'
-        prefix = f'flow [{sc}] {self.name} {d} {self.credit}/{self.total_credit} '
+            d = 'i'
+        prefix = f'flow [{sc}{d}] {self.name} {io} {self.credit}/{self.total_credit} '
         log.debug(prefix + text)
 
     def giver(self):
@@ -73,7 +73,7 @@ class Flow(object):
                        direction = self.sm.direction)
         fobj = msg.label_object
         fobj.update(my_fobj)
-        self.debug(f'send_bot: {fobj}')
+        self.debug(f'send_bot: {fobj}', '->')
         msg.label_object = fobj
         self.send(msg);
         
@@ -156,7 +156,7 @@ class Flow(object):
         DAT message is returned.'''
         self.send_pay()
         ret = self.recv()
-        self.debug(f"get: {ret}")
+        self.debug(f"get: {ret}", '<-')
         fobj = ret.label_object
         if fobj['flow'] == 'EOT':
             raise TransmissionEnd("EOT in flow get",ret)
@@ -196,7 +196,7 @@ class Flow(object):
             raise RuntimeError('flow send pay failed')
         if self.credit:
             raise RuntimeError('LOGIC ERROR')
-        self.debug(f"send_pay: {pay}")
+        self.debug(f"send_pay: {pay}",'->')
         self.port.send(pay)
 
     def recv(self):
@@ -204,18 +204,18 @@ class Flow(object):
 
         Message is returned'''
         msg = self.port.recv(self.timeout)
-        self.debug(f'recv: from {self.sm.state} {msg} rid:{msg.routing_id}')
+        self.debug(f'recv: from {self.sm.state} {msg} rid:{msg.routing_id}','<-')
         if not self.sm.RecvMsg(msg):
             raise ValueError(f'bad recv {msg} in {self.sm.state}')
-        self.debug(f'recv: remid:{self.sm.remid}')
+        self.debug(f'recv: remid:{self.sm.remid}', '<-')
         return msg
 
     def send(self, msg):
         '''Low-level send of a message.'''
         msg.form = 'FLOW'
-        self.debug(f'send: from {self.sm.state} {msg} rid:{msg.routing_id}')
+        self.debug(f'send: from {self.sm.state} {msg} rid:{msg.routing_id}', '->')
         if not self.sm.SendMsg(msg):
             raise ValueError(f'bad send {msg} in {self.sm.state} with {self.credit}/{self.total_credit}')
-        self.debug(f'send: {msg} rid:{msg.routing_id}')
+        self.debug(f'send: {msg} rid:{msg.routing_id}','->')
         self.port.send(msg)
         

@@ -3,9 +3,48 @@
 Utilities
 '''
 
+import os
 import zmq
 import sys
 import struct
+
+
+import logging
+from logging import DEBUG, INFO, getLogger
+
+def modlog(name):
+    log = logging.getLogger(name)
+    log.addHandler(logging.NullHandler())    
+    return log
+
+def mainlog(level='info', **sublevels):
+    #datefmt = '%Y-%m-%d %H:%M:%S'
+    datefmt = '%H:%M:%S'
+
+    elevel = os.environ.get('ZIO_LOGLEVEL', "").lower()
+    if not elevel:              # maybe piggyback on SPDLOG's
+        elevel = os.environ.get('SPDLOG_LEVEL', "").lower()
+        if elevel and elevel == "verbose":
+            elevel = "debug"    # Python lacks "verbose" level
+    if elevel:
+        level = elevel
+
+    zlevels = os.environ.get('ZIO_LOGLEVELS',"")
+    if zlevels:
+        for one in zlevels.split(','):
+            n,l = one.split(":")
+            sublevels[n] = logging._checkLevel(l.upper())
+
+    level = logging._checkLevel(level.upper());
+    logging.basicConfig(
+        level=level,
+        format='{asctime}.{msecs:.0f} [{name:^16.16}] {levelname:^8} {message}',
+        style='{',
+        datefmt=datefmt)
+    for lname, level in sublevels.items():
+        logging.getLogger(lname,).setLevel(level)
+    
+
 
 socket_names = [
     "PAIR",
