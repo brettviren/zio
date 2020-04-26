@@ -3,10 +3,10 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-04-26 Sun 15:11 -->
+<!-- 2020-04-26 Sun 15:34 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>ZIO Flow Broker File Server</title>
+<title>ZIO RPC</title>
 <meta name="generator" content="Org mode" />
 <meta name="author" content="Brett Viren" />
 <style type="text/css">
@@ -234,22 +234,17 @@ for the JavaScript code in this tag.
  |
  <a accesskey="H" href="index.html"> HOME </a>
 </div><div id="content">
-<h1 class="title">ZIO Flow Broker File Server</h1>
+<h1 class="title">ZIO RPC</h1>
 <div id="table-of-contents">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org0cd9124">1. Getting started</a></li>
-<li><a href="#orgc49b1d9">2. Attribute rules</a>
+<li><a href="#orgd5ea2f6">1. Protocol</a></li>
+<li><a href="#org8774b09">2. Patterns</a>
 <ul>
-<li><a href="#orgac2b4ae">2.1. Overview</a></li>
-<li><a href="#orgf6f380a">2.2. Testing a rule set</a></li>
-</ul>
-</li>
-<li><a href="#org85a3479">3. Example runs</a>
-<ul>
-<li><a href="#org1e5dadd">3.1. Single client</a></li>
-<li><a href="#orgecbef4c">3.2. Multiple clients</a></li>
+<li><a href="#org5fe9309">2.1. Classroom</a></li>
+<li><a href="#org337be38">2.2. Restaurant</a></li>
+<li><a href="#org4722744">2.3. Seeger</a></li>
 </ul>
 </li>
 </ul>
@@ -268,247 +263,223 @@ for the JavaScript code in this tag.
 </div>
 
 <p>
-ZIO Python provides a broker which allows data to flow to and from
-numerous asynchronous clients and synchronous resources such as files.
-Clients and back end file handlers are decoupled.  In particular,
-clients need not know what file technology or detailed schema is
-employed by the back end handlers.
+There are many RPC systems.  Here is mine.
 </p>
 
-<div id="outline-container-org0cd9124" class="outline-2">
-<h2 id="org0cd9124"><span class="section-number-2">1</span> Getting started</h2>
+<div id="outline-container-orgd5ea2f6" class="outline-2">
+<h2 id="orgd5ea2f6"><span class="section-number-2">1</span> Protocol</h2>
 <div class="outline-text-2" id="text-1">
 <p>
-Command line access to the file server is via the <code>zio</code> Python module
-or the <code>zio</code> CLI program:
+The ZIO remote object method execution (ROME) is an asynchronous,
+(mostly) symmetric and reliable protocol which allows one peer to
+issue a query on another and to receive a response.  It is
+asynchronous in that queries and responses may interleave and not
+retain order.  It is symmetric in that once a link between endpoints
+are established (which may be asymmetric) either end may initiate a
+query (as required by the system application).  It is reliable in the
+sense that an endpoint may discover if its cohort has become
+unresponsive and thus may abandon the conversation.
 </p>
 
-<pre class="example">
-$ python -m zio --help
-$ zio --help
-</pre>
-
 <p>
-The file server exists as a sub-command, eg:
+When the query is interpreted as a request to execute some method or
+procedure on some object held by the remote endpoint then the response
+is considered to be the return value of that method.  Thus the ZIO
+ROME protocol can be seen as a generalization the more common and
+typically more restrictive remote procedure call (RPC) communication
+pattern.  ROME can simplify to RPC.
 </p>
 
-<pre class="example">
-$ zio flow-file-server --help
-</pre>
-
 <p>
-The file server broker and factory are factored to allow a file server
-to be run from inside other Python applications.
-</p>
-</div>
-</div>
-
-<div id="outline-container-orgc49b1d9" class="outline-2">
-<h2 id="orgc49b1d9"><span class="section-number-2">2</span> Attribute rules</h2>
-<div class="outline-text-2" id="text-2">
-<p>
-The flow broker file server brings together ZIO data flow clients with
-file handlers in a decoupled way so that clients need not be
-configured directly with details about the files.  It does this by
-<i>mapping</i> data flows to files and file contents with a set <i>attribute
-rules</i>.  
-</p>
-</div>
-
-<div id="outline-container-orgac2b4ae" class="outline-3">
-<h3 id="orgac2b4ae"><span class="section-number-3">2.1</span> Overview</h3>
-<div class="outline-text-3" id="text-2-1">
-<p>
-A set of rules are given to the server in a JSON or Jsonnet file:
+Being part of ZIO, ROME uses the <a href="messages.html">ZIO message</a> for exchanging data.  The
+four byte message <i>form</i> is not surprisingly <code>ROME</code>.  Like the ZIO <a href="flow.html">flow</a>
+protocol, the label holds a JSON-encoded object.  All ZIO ROME
+messages must include a label object attribute <code>rome</code> to hold the value
+of one of the ROME message types listed below.  Additional label
+object attributes are required depending on the ROME message type,
+also in the message type list below.
 </p>
 
-<pre class="example">
-$ zio flow-file-server [...] myruleset.jsonnet 
-</pre>
-
 <p>
-A single <i>attribute rule</i> in the set is a data structure provided by
-user configuration and has these elements:
+The prefix header is also required as part of the ZIO ROME protocol as
+defined:
 </p>
 
 <dl class="org-dl">
-<dt>rule</dt><dd>an S-expression in terms of a set of attributes and
-operators which should evaluate to a single Boolean value.
-If <b>true</b> then the rule is said to apply as determined stated
-by the remaining items.</dd>
-
-<dt>filepat</dt><dd>a string which may be interpolated against the set of
-attributes to form the name of the file to use.</dd>
-
-<dt>rw</dt><dd>a marker that the file shall be read from or written to.</dd>
-
-<dt>grouppat</dt><dd>a string which may be interpolated against the set of
-attributes in order to form an identifier for the data
-flow to which this rule applies.</dd>
-
-<dt>attr</dt><dd>An optional dictionary of additional attributes.</dd>
+<dt><code>seqno</code></dt><dd>shall hold the count of ZIO ROME messages that have been sent prior to the current message from the given application socket.</dd>
+<dt><code>granule</code></dt><dd>shall hold the local time as determined by the sender and
+in an application-depended clock (eg, microseconds from Unix epoch).</dd>
+<dt><code>origin</code></dt><dd>may be used in an application-dependent manner.</dd>
 </dl>
 
 <p>
-The overall attribute set applied to <b>rule</b>, <b>filepath</b> and <b>grouppat</b> is
-formed from two distinct attributes sets.  The first consists of all
-attributes provided by the <i>flow object</i> held as JSON in the "label"
-field of the prefix header of an initial <b>BOT</b> message for a new flow.
-The second set updates the first and consists of any attributes
-provided by the rule <b>attr</b> item.
+The message payload parts are not strictly required by the ZIO ROME
+protocol and their use is application-dependent.  It is expected that
+applications will use them to hold data to be interpreted as method
+arguments or method return values by the ZIO ROME endpoint applications.
 </p>
 
 <p>
-The <b>rule</b> itself is an S-expression (ie, like used in Scheme or LISP
-languages).  For example,
+The ZIO ROME protocol has three message types.  The type is identified
+by the <code>rome</code> label object attribute value.
 </p>
 
-<div class="org-src-container">
-<pre class="src src-scheme">(<span style="font-weight: bold;">and</span> (== stream <span style="font-style: italic;">"raw"</span>) (== type <span style="font-style: italic;">"frame"</span>))
-</pre>
+<dl class="org-dl">
+<dt>BEAT</dt><dd>a heartbeat message to be sent periodically at a
+predetermined rate in both directions.  An endpoint application may
+elect to terminate further conversation with its cohort if no
+messages are received within the predefined period.  BEAT may be
+used to refresh this deadline if no other messages need be sent.</dd>
+
+<dt>CALL</dt><dd>a remote method call.  Additional label object attributes
+are required: a <code>callid</code> must provide unique identifier of type string
+and a <code>query</code> attribute of type string must provide the name of a
+query, command, procedure, etc, to execute on the remote object.
+Additional application-dependent attributes may be included.</dd>
+
+<dt>BACK</dt><dd>a result of a call.  Additional label object attributes are
+required: a <code>callid</code> must provide the unique identifier sent with the
+corresponding CALL.  A <code>status</code> attribute shall hold an integer code
+with semantic meaning taken from HTTP status codes and include at
+least 200 (OK).</dd>
+</dl>
+</div>
+</div>
+
+<div id="outline-container-org8774b09" class="outline-2">
+<h2 id="org8774b09"><span class="section-number-2">2</span> Patterns</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+As mentioned, the ZIO ROME protocol is "mostly" symmetric.  ZeroMQ
+sockets require some level of asymmetry.  For example, clientish
+sockets (CLIENT/DEALER) must send before serverish (SERVER/ROUTER) may
+reply.  That initial message may be provided by a clientish endpoint
+by sending a BEAT or if applicable a CALL.  After that, the two
+endpoints are considered to be "linked" and fully symmetric
+conversation may follow.
+</p>
+
+<p>
+Other ZeroMQ sockets are very asymmetric in that they allow only send
+or recv but not both.  The ZIO RPC protocol may still be used but it
+requires then a pair of sockets, one for each directions.
+</p>
+
+<p>
+Thus the ZIO ROME protocol may be with a variety of socket patterns
+based on the needs of the applications.  This section describes some
+compatible patterns which emerge.
+</p>
+</div>
+
+<div id="outline-container-org5fe9309" class="outline-3">
+<h3 id="org5fe9309"><span class="section-number-3">2.1</span> Classroom</h3>
+<div class="outline-text-3" id="text-2-1">
+
+<div class="figure">
+<p><img src="rome-classroom.png" alt="rome-classroom.png" />
+</p>
 </div>
 
 <p>
-In the example, either <code>stream</code> or <code>type</code> may be provided by the <b>BOT</b>
-message or the <b>attr</b> item.
+The ZIO ROME classroom model is intended for applications that require
+communication between a central "teacher" and multiple "students".  A
+student may make a CALL on the teacher ("ask a question") and the
+teacher may make a CALL on a student ("give instruction").
 </p>
 
 <p>
-The entire rule set is an ordered sequence.  When a client's <b>BOT</b>
-message is received by the file server broker it is evaluated against
-each rule in the set.  The first to evaluate as Boolean <b>true</b> will be
-applied to servicing that flow.
+The classroom model is implemented with a single SERVER socket for the
+"teacher".  It binds and to it many CLIENT sockets ("students")
+connect.  A student may send BEAT or CALL at any time.  A teacher may
+send BEAT or CALL to a particular student any time after at least one
+BEAT or one CALL from that student was received.
+</p>
+
+<p>
+A student may simultaneously be in multiple "classrooms" by connecting
+to multiple teachers' SERVER sockets.  Such a student must maintain a
+unique CLIENT socket for each in order to properly address a teacher.
 </p>
 </div>
 </div>
 
-<div id="outline-container-orgf6f380a" class="outline-3">
-<h3 id="orgf6f380a"><span class="section-number-3">2.2</span> Testing a rule set</h3>
+
+<div id="outline-container-org337be38" class="outline-3">
+<h3 id="org337be38"><span class="section-number-3">2.2</span> Restaurant</h3>
 <div class="outline-text-3" id="text-2-2">
-<p>
-Rulesets may be elaborate and deepened on attributes that are supplied
-only by the <b>BOT</b> message.  To assist in writing valid rule sets they
-may be easily tested with the provided command:
-</p>
 
-<pre class="example">
-$ zio test-ruleset \
-    -r example-ruleset.jsonnet \
-      direction=inject  \
-      jobname=testjob \
-      stream=depos \
-      type=depo
-2020-01-23 12:54:52.555 INFO	#0 FALSE w testjob.hdf:/foo/depos/depo
-2020-01-23 12:54:52.556 INFO	#1 TRUE  r testjob.hdf:/bar/depos/depo
-</pre>
-
-<p>
-The arguments give attributes that might otherwise be provided by the
-<b>BOT</b> message if this rule set were applied in the file server.  In
-this example, the first rule in the test fails against the provided
-attributes while the second rule succeeds.  The rule set tested in
-this example, expressed as Jsonnet, is:
-</p>
-
-<div class="org-src-container">
-<pre class="src src-jsonnet">[
-    {
-	rule: |||
-	    (and (= direction 'extract')
-	     (or (= type 'depo') (= type 'frame')))
-	|||,
-	rw: "w",
-	filepat: "{jobname}.hdf",
-	grouppat: "{extra}/{stream}/{type}",
-	attr: {extra:"foo"}
-    },
-    {
-	rule: |||
-	    (and (= direction 'inject')
-	     (or (= type 'depo') (= type 'frame')))
-	|||,
-	rw: "r",
-	filepat: "{jobname}.hdf",
-	grouppat: "{extra}/{stream}/{type}",
-	attr: {extra:"bar"}
-    },
-]
-</pre>
-</div>
-
-<p>
-Note the inclusion of the <code>extra</code> attribute in the <code>attr</code> field.  It
-is included here in order to demonstrate how the full attribute set is
-a mix of those provided in the rule set and the message (or command
-line in the <code>test-ruleset</code> command).  In this simple case, it would
-also be possible to "hard-code" the <code>extra</code> value into the <code>grouppat</code>.
+<div class="figure">
+<p><img src="rome-restaurant.png" alt="rome-restaurant.png" />
 </p>
 </div>
-</div>
-</div>
 
-<div id="outline-container-org85a3479" class="outline-2">
-<h2 id="org85a3479"><span class="section-number-2">3</span> Example runs</h2>
-<div class="outline-text-2" id="text-3">
-</div>
-<div id="outline-container-org1e5dadd" class="outline-3">
-<h3 id="org1e5dadd"><span class="section-number-3">3.1</span> Single client</h3>
-<div class="outline-text-3" id="text-3-1">
 <p>
-Run the file server in one terminal:
+The ZIO ROME restaurant model is intended for applications that
+require some redundancy.  It leverages the round-robin distribution
+pattern provided by some ZeroMQ sockets.
 </p>
 
-<pre class="example">
-$ zio flow-file-server python/tests/file-server.jsonnet
-</pre>
-
 <p>
-And in another send some test tensors:
+The restaurant model is implemented with a number of SERVER sockets
+(each a "waiter") which bind and with a (presumably larger) number of
+CLIENT sockets (each a "diner") which connect.  The waiters are
+considered identical from the point of view of their connected diners.
 </p>
 
-<pre class="example">
-$ zio flow-send-tens stream=stream1
-</pre>
-
 <p>
-When that competes, this test will stream the content back
+A diner may send a BEAT or CALL at any time and does not know which
+connected waiter receives it.  A waiter may send a BEAT or CALL to a
+particular diner any time after at least one BEAT or one CALL from
+that diner has been received.
 </p>
 
-<pre class="example">
-$ zio flow-recv-tens stream=stream1
-</pre>
 
 <p>
-Note that the <code>stream=stream1</code> command line argument sets an additional
-attribute required by the rule sets in <code>file-server.jsonnet</code>.  The rules
-use <code>stream</code> to set a portion of the HDF5 group path.  In a "real"
-application, this additional attribute would be provided by the
-messages extracted from the flow client or by injected messages
-created from information previously saved into a file.
+Not drawn, but like with the classroom model, a diner may have
+multiple CLIENT sockets in order to simultaneously "dine" at more than
+one restaurant.
 </p>
 </div>
 </div>
 
-<div id="outline-container-orgecbef4c" class="outline-3">
-<h3 id="orgecbef4c"><span class="section-number-3">3.2</span> Multiple clients</h3>
-<div class="outline-text-3" id="text-3-2">
-<p>
-A larger test using <a href="http://www.chrismytton.uk/shoreman/">shoreman</a> to run many writers.
-</p>
+<div id="outline-container-org4722744" class="outline-3">
+<h3 id="org4722744"><span class="section-number-3">2.3</span> Seeger</h3>
+<div class="outline-text-3" id="text-2-3">
 
-<pre class="example">
-$ shoreman python/tests/Procfile.test-sink
-</pre>
+<div class="figure">
+<p><img src="rome-seeger.png" alt="rome-seeger.png" />
+</p>
+</div>
 
 <p>
-After it calms down after a few seconds, hit <code>Ctrl-c</code> as the broker runs
-forever.  You can then stream these flows back to multiple clients
-with the sibling test:
+The ZIO ROME seeger model is intended for applications where one
+individual ("singer") will make a CALL to a "crowd" of peers ("If I
+had a hammer") and the crowd will send BACK ("I'd hammer in the
+morning").  The crowd may be very large in number and/or it may not be
+possible to precisely know each individual or otherwise it may be
+deemed inconvenient to maintain individual routing IDs needed for use
+of a SERVER socket.  Further, it may be that the central "singer" is
+well known to all in the crowd.
 </p>
 
-<pre class="example">
-$ shoreman python/tests/Procfile.test-source
-</pre>
+<p>
+In this pattern the singer will bind one PUB and one PULL socket.
+Each peer in the crowd will connect to these a SUB and a PUSH,
+respectively.  The singer will send BEAT and CALL out the PUB and
+expect BEAT and BACK on the PULL.  Each in the crowd will receive BEAT
+and CALL on their SUB and send BEAT and BACK on their PUSH.
+</p>
+
+<p>
+PUB to SUB and PUSH to PULL both allow one way transports and thus
+implementations of ZIO RPC must not assume one socket for both
+directions.  PUB/SUB can drop packets if HWM is reached and in any
+case the singer does not know the crowd individuals and thus some in
+the crowd should expect to miss BEAT or CALL messages and the singer
+should expect to not receive BEAT and BACK from some individuals some
+of the time.
+</p>
 </div>
 </div>
 </div>

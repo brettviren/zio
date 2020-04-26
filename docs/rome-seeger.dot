@@ -1,0 +1,28 @@
+digraph rpcsockets {
+        rankdir=LR
+        node[shape=Mrecord]
+        call0[label="{crowd|{<s>sub|<p>push}}"]
+        call1[label="{crowd|{<s>sub|<p>push}}"]
+        call2[label="{crowd|{<s>sub|<p>push}}"]
+        call3[label="{crowd|{<s>sub|<p>push}}"]
+
+        oper0[label="{{<b>pub|<l>pull}|singer}"]
+
+        {rank=same; call0; call1; call2; call3}
+
+        edge[dir=normal,arrowtail="o"]
+        call0:p->oper0:l
+        call1:p->oper0:l
+        call2:p->oper0:l
+        call3:p->oper0:l
+
+        edge[dir=back,arrowtail="o"]
+        call0:s->oper0:b
+        call1:s->oper0:b
+        call2:s->oper0:b
+        call3:s->oper0:b
+
+
+        label="ZIO ROME: Seeger model."
+        
+}

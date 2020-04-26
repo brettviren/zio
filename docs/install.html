@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-04-03 Fri 05:48 -->
+<!-- 2020-04-26 Sun 15:11 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>ZIO Installation</title>
@@ -186,7 +186,7 @@
 @licstart  The following is the entire license notice for the
 JavaScript code in this tag.
 
-Copyright (C) 2012-2019 Free Software Foundation, Inc.
+Copyright (C) 2012-2018 Free Software Foundation, Inc.
 
 The JavaScript code in this tag is free software: you can
 redistribute it and/or modify it under the terms of the GNU
@@ -239,18 +239,18 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org9f8070a">1. Install ZIO</a></li>
-<li><a href="#orgf60296b">2. Tests</a></li>
-<li><a href="#org1efd50c">3. Documentation</a></li>
-<li><a href="#orga8fbf5d">4. Python</a>
+<li><a href="#orga9ec79b">1. Install ZIO</a></li>
+<li><a href="#orgd9c1733">2. Tests</a></li>
+<li><a href="#org81404ac">3. Documentation</a></li>
+<li><a href="#org0081289">4. Python</a>
 <ul>
-<li><a href="#org9c5f5a3">4.1. Install from source</a></li>
-<li><a href="#org7d9a576">4.2. Python Package Index</a></li>
+<li><a href="#org278e40c">4.1. Install from source</a></li>
+<li><a href="#org40cca1b">4.2. Python Package Index</a></li>
 </ul>
 </li>
-<li><a href="#orga63ef25">5. Installation Details</a>
+<li><a href="#org0de9eff">5. Installation Details</a>
 <ul>
-<li><a href="#orgd0f0da3">5.1. spdlog</a></li>
+<li><a href="#orgb4320c8">5.1. spdlog</a></li>
 </ul>
 </li>
 </ul>
@@ -268,8 +268,8 @@ for the JavaScript code in this tag.
 
 </div>
 
-<div id="outline-container-org9f8070a" class="outline-2">
-<h2 id="org9f8070a"><span class="section-number-2">1</span> Install ZIO</h2>
+<div id="outline-container-orga9ec79b" class="outline-2">
+<h2 id="orga9ec79b"><span class="section-number-2">1</span> Install ZIO</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 ZIO installs in the usual <a href="https://waf.io">Waf</a> way.
@@ -297,13 +297,13 @@ copies of these header-only packages.
 </p>
 
 <p>
-See also <a href="#orga63ef25">5</a> for info on installing the software dependencies.
+See also <a href="#org0de9eff">5</a> for info on installing the software dependencies.
 </p>
 </div>
 </div>
 
-<div id="outline-container-orgf60296b" class="outline-2">
-<h2 id="orgf60296b"><span class="section-number-2">2</span> Tests</h2>
+<div id="outline-container-orgd9c1733" class="outline-2">
+<h2 id="orgd9c1733"><span class="section-number-2">2</span> Tests</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 The default install target will compile and execute units tests.  To
@@ -320,8 +320,8 @@ Or, to force their running:
 </div>
 </div>
 
-<div id="outline-container-org1efd50c" class="outline-2">
-<h2 id="org1efd50c"><span class="section-number-2">3</span> Documentation</h2>
+<div id="outline-container-org81404ac" class="outline-2">
+<h2 id="org81404ac"><span class="section-number-2">3</span> Documentation</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 The generated documentation committed to the repository.  With a
@@ -336,16 +336,16 @@ $ make
 </div>
 </div>
 
-<div id="outline-container-orga8fbf5d" class="outline-2">
-<h2 id="orga8fbf5d"><span class="section-number-2">4</span> Python</h2>
+<div id="outline-container-org0081289" class="outline-2">
+<h2 id="org0081289"><span class="section-number-2">4</span> Python</h2>
 <div class="outline-text-2" id="text-4">
 <p>
 ZIO also provides a Python package.  
 </p>
 </div>
 
-<div id="outline-container-org9c5f5a3" class="outline-3">
-<h3 id="org9c5f5a3"><span class="section-number-3">4.1</span> Install from source</h3>
+<div id="outline-container-org278e40c" class="outline-3">
+<h3 id="org278e40c"><span class="section-number-3">4.1</span> Install from source</h3>
 <div class="outline-text-3" id="text-4-1">
 <p>
 The ZIO Python package installs in "the usual way" from source but its
@@ -383,8 +383,8 @@ $ python -m unittest
 </div>
 </div>
 
-<div id="outline-container-org7d9a576" class="outline-3">
-<h3 id="org7d9a576"><span class="section-number-3">4.2</span> Python Package Index</h3>
+<div id="outline-container-org40cca1b" class="outline-3">
+<h3 id="org40cca1b"><span class="section-number-3">4.2</span> Python Package Index</h3>
 <div class="outline-text-3" id="text-4-2">
 <p>
 At some point ZIO may be placed in PyPI.  Currently there is an
@@ -396,12 +396,12 @@ unrelated to this here project.
 </div>
 </div>
 
-<div id="outline-container-orga63ef25" class="outline-2">
-<h2 id="orga63ef25"><span class="section-number-2">5</span> Installation Details</h2>
+<div id="outline-container-org0de9eff" class="outline-2">
+<h2 id="org0de9eff"><span class="section-number-2">5</span> Installation Details</h2>
 <div class="outline-text-2" id="text-5">
 </div>
-<div id="outline-container-orgd0f0da3" class="outline-3">
-<h3 id="orgd0f0da3"><span class="section-number-3">5.1</span> spdlog</h3>
+<div id="outline-container-orgb4320c8" class="outline-3">
+<h3 id="orgb4320c8"><span class="section-number-3">5.1</span> spdlog</h3>
 <div class="outline-text-3" id="text-5-1">
 <p>
 For now, ZIO uses spdlog <b>after</b> (and not including) version 1.5.0 which

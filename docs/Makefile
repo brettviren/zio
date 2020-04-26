@@ -1,3 +1,7 @@
+dot_src = $(wildcard *.dot)
+dot_svg = $(patsubst %.dot,%.svg,$(dot_src))
+dot_png = $(patsubst %.dot,%.png,$(dot_src))
+
 plantuml_src = $(wildcard *.plantuml)
 plantuml_svg = $(patsubst %.plantuml,%.svg,$(plantuml_src))
 plantuml_png = $(patsubst %.plantuml,%.png,$(plantuml_src))
@@ -11,8 +15,8 @@ emacs --no-site-file -Q --batch $< --eval="(progn (load-file \"export.el\") (org
 endef
 
 all: all_png all_svg all_html
-all_svg: $(plantuml_svg)
-all_png: $(plantuml_png)
+all_svg: $(plantuml_svg) $(dot_svg)
+all_png: $(plantuml_png) $(dot_png)
 all_html: $(main_html) index.html
 
 
@@ -20,6 +24,12 @@ all_html: $(main_html) index.html
 	plantuml -tsvg $<
 %.png : %.plantuml
 	plantuml -tpng $<
+
+%.png: %.dot
+	dot -Tpng -o $@ $<
+
+%.svg: %.dot
+	dot -Tsvg -o $@ $<
 
 index.html: index.org nav.org
 

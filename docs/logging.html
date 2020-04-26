@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-04-14 Tue 12:05 -->
+<!-- 2020-04-26 Sun 15:11 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>ZIO Logging</title>
@@ -161,19 +161,6 @@
   .footdef  { margin-bottom: 1em; }
   .figure { padding: 1em; }
   .figure p { text-align: center; }
-  .equation-container {
-    display: table;
-    text-align: center;
-    width: 100%;
-  }
-  .equation {
-    vertical-align: middle;
-  }
-  .equation-label {
-    display: table-cell;
-    text-align: right;
-    vertical-align: middle;
-  }
   .inlinetask {
     padding: 10px;
     border: 2px solid gray;
@@ -252,10 +239,10 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgba604ed">1. Usage</a></li>
-<li><a href="#orgcebf977">2. Run time log levels</a></li>
-<li><a href="#orgb00616b">3. Build time log levels</a></li>
-<li><a href="#orge3aa010">4. Possible future changes</a></li>
+<li><a href="#org3335d4e">1. Usage</a></li>
+<li><a href="#orgd407b3c">2. Run time log levels</a></li>
+<li><a href="#org47900b0">3. Build time log levels</a></li>
+<li><a href="#org1b01f4a">4. Possible future changes</a></li>
 </ul>
 </div>
 </div>
@@ -275,18 +262,18 @@ for the JavaScript code in this tag.
 ZIO uses <a href="https://github.com/gabime/spdlog">spdlog</a> for logging.
 </p>
 
-<div id="outline-container-orgba604ed" class="outline-2">
-<h2 id="orgba604ed"><span class="section-number-2">1</span> Usage</h2>
+<div id="outline-container-org3335d4e" class="outline-2">
+<h2 id="org3335d4e"><span class="section-number-2">1</span> Usage</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 In library code:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-c++"><span style="color: #e090d7;">#include</span> <span style="color: #e9b96e;">"zio/logging.hpp"</span>
+<pre class="src src-c++"><span style="font-weight: bold;">#include</span> <span style="font-style: italic;">"zio/logging.hpp"</span>
 
-<span style="color: #8cc4ff;">void</span> <span style="color: #fce94f;">my_func</span>() {
-    <span style="color: #b4fa70;">if</span> (bad) <span style="color: #e9b2e3;">zio</span>::error(<span style="color: #e9b96e;">"Oh no!"</span>);
+<span style="font-weight: bold; text-decoration: underline;">void</span> <span style="font-weight: bold;">my_func</span>() {
+    <span style="font-weight: bold;">if</span> (bad) <span style="font-weight: bold; text-decoration: underline;">zio</span>::error(<span style="font-style: italic;">"Oh no!"</span>);
 }
 </pre>
 </div>
@@ -296,19 +283,19 @@ In "main" code (code providing <code>main()</code> or app embedding ZIO)
 </p>
 
 <div class="org-src-container">
-<pre class="src src-c++"><span style="color: #e090d7;">#include</span> <span style="color: #e9b96e;">"zio/main.hpp"</span>
+<pre class="src src-c++"><span style="font-weight: bold;">#include</span> <span style="font-style: italic;">"zio/main.hpp"</span>
 
-<span style="color: #8cc4ff;">void</span> <span style="color: #fce94f;">main</span>() {
-    <span style="color: #73d216;">// </span><span style="color: #73d216;">more fine grained init functions available</span>
-    <span style="color: #e9b2e3;">zio</span>::init_all();
+<span style="font-weight: bold; text-decoration: underline;">void</span> <span style="font-weight: bold;">main</span>() {
+    <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">more fine grained init functions available</span>
+    <span style="font-weight: bold; text-decoration: underline;">zio</span>::init_all();
 }
 </pre>
 </div>
 </div>
 </div>
 
-<div id="outline-container-orgcebf977" class="outline-2">
-<h2 id="orgcebf977"><span class="section-number-2">2</span> Run time log levels</h2>
+<div id="outline-container-orgd407b3c" class="outline-2">
+<h2 id="orgd407b3c"><span class="section-number-2">2</span> Run time log levels</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 Given the above initialization the user may control what log level is
@@ -321,8 +308,8 @@ $ export SPDLOG_LEVEL=debug
 </div>
 </div>
 
-<div id="outline-container-orgb00616b" class="outline-2">
-<h2 id="orgb00616b"><span class="section-number-2">3</span> Build time log levels</h2>
+<div id="outline-container-org47900b0" class="outline-2">
+<h2 id="org47900b0"><span class="section-number-2">3</span> Build time log levels</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 The logging system also has build-time level filtering.  These only
@@ -337,26 +324,26 @@ An example to exercise the options is provided and included here:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-c++"><span style="color: #e090d7;">#include</span> <span style="color: #e9b96e;">"zio/logging.hpp"</span>
-<span style="color: #e090d7;">#include</span> <span style="color: #e9b96e;">"zio/main.hpp"</span>
+<pre class="src src-c++"><span style="font-weight: bold;">#include</span> <span style="font-style: italic;">"zio/logging.hpp"</span>
+<span style="font-weight: bold;">#include</span> <span style="font-style: italic;">"zio/main.hpp"</span>
 
-<span style="color: #b4fa70;">using</span> <span style="color: #b4fa70;">namespace</span> <span style="color: #e9b2e3;">zio</span>;
+<span style="font-weight: bold;">using</span> <span style="font-weight: bold;">namespace</span> <span style="font-weight: bold; text-decoration: underline;">zio</span>;
 
-<span style="color: #8cc4ff;">int</span> <span style="color: #fce94f;">main</span>()
+<span style="font-weight: bold; text-decoration: underline;">int</span> <span style="font-weight: bold;">main</span>()
 {
-    <span style="color: #e9b2e3;">zio</span>::init_all();
+    <span style="font-weight: bold; text-decoration: underline;">zio</span>::init_all();
 
-    <span style="color: #e9b2e3;">zio</span>::trace(<span style="color: #e9b96e;">"trace"</span>);        <span style="color: #73d216;">// </span><span style="color: #73d216;">avoid bare trace</span>
-    <span style="color: #e9b2e3;">zio</span>::debug(<span style="color: #e9b96e;">"debug"</span>);        <span style="color: #73d216;">// </span><span style="color: #73d216;">avoid bare debug</span>
-    <span style="color: #e9b2e3;">zio</span>::info(<span style="color: #e9b96e;">"info"</span>);
-    <span style="color: #e9b2e3;">zio</span>::warn(<span style="color: #e9b96e;">"warn"</span>);
-    <span style="color: #e9b2e3;">zio</span>::error(<span style="color: #e9b96e;">"error"</span>);
-    <span style="color: #e9b2e3;">zio</span>::critical(<span style="color: #e9b96e;">"critical"</span>);
+    <span style="font-weight: bold; text-decoration: underline;">zio</span>::trace(<span style="font-style: italic;">"trace"</span>);        <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">avoid bare trace</span>
+    <span style="font-weight: bold; text-decoration: underline;">zio</span>::debug(<span style="font-style: italic;">"debug"</span>);        <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">avoid bare debug</span>
+    <span style="font-weight: bold; text-decoration: underline;">zio</span>::info(<span style="font-style: italic;">"info"</span>);
+    <span style="font-weight: bold; text-decoration: underline;">zio</span>::warn(<span style="font-style: italic;">"warn"</span>);
+    <span style="font-weight: bold; text-decoration: underline;">zio</span>::error(<span style="font-style: italic;">"error"</span>);
+    <span style="font-weight: bold; text-decoration: underline;">zio</span>::critical(<span style="font-style: italic;">"critical"</span>);
 
-    ZIO_TRACE(<span style="color: #e9b96e;">"TRACE"</span>);         <span style="color: #73d216;">// </span><span style="color: #73d216;">prefer over bare call</span>
-    ZIO_DEBUG(<span style="color: #e9b96e;">"DEBUG"</span>);         <span style="color: #73d216;">// </span><span style="color: #73d216;">prefer over bare call</span>
+    ZIO_TRACE(<span style="font-style: italic;">"TRACE"</span>);         <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">prefer over bare call</span>
+    ZIO_DEBUG(<span style="font-style: italic;">"DEBUG"</span>);         <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">prefer over bare call</span>
 
-    <span style="color: #b4fa70;">return</span> 0;
+    <span style="font-weight: bold;">return</span> 0;
 }
 </pre>
 </div>
@@ -416,8 +403,8 @@ $ SPDLOG_LEVEL=trace ./build/test_logging
 
 
 
-<div id="outline-container-orge3aa010" class="outline-2">
-<h2 id="orge3aa010"><span class="section-number-2">4</span> Possible future changes</h2>
+<div id="outline-container-org1b01f4a" class="outline-2">
+<h2 id="org1b01f4a"><span class="section-number-2">4</span> Possible future changes</h2>
 <div class="outline-text-2" id="text-4">
 <p>
 Currently, ZIO logs into the default front end of <code>spdlog</code> and only the

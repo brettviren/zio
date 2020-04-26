@@ -1,0 +1,26 @@
+digraph rpcsockets {
+        rankdir=LR
+        node[shape=Mrecord]
+
+        call0[label="{diner|{<c>c}}"]
+        call1[label="{diner|{<c>c}}"]
+        call2[label="{diner|{<c>c}}"]
+
+
+        oper0[label="{<i>s|waiter}"]
+        oper1[label="{<i>s|waiter}"]
+
+        {rank=same; call0; call1; call2}
+        {rank=same; oper0; oper1}
+
+        edge[dir=both,arrowtail="o"]
+        call0:e->oper0:w
+        call1:e->oper0:w
+        call2:e->oper0:w
+        call0:e->oper1:w
+        call1:e->oper1:w
+        call2:e->oper1:w
+
+        label="ZIO ROME: restaurant model."
+        
+}

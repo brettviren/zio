@@ -1,0 +1,24 @@
+digraph rpcsockets {
+        rankdir=LR
+        node[shape=Mrecord]
+        call0[label="{student|{<c>c}}"]
+        call1[label="{student|{<c>c}}"]
+        call2[label="{student|{<c>c|<c2>c}}"]
+        call3[label="{student|{<c>c}}"]
+
+        oper0[label="{<s>s|teacher}"]
+        oper1[label="{<s>s|teacher}"]
+
+        {rank=same; call0; call1; call2}
+        {rank=same; oper0; oper1}
+
+        edge[dir=both,arrowtail="o"]
+        call0:c->oper0:s
+        call1:c->oper0:s
+        call2:c->oper0:s
+        call2:c2->oper1:s
+        call3:c->oper1:s
+
+        label="ZIO ROME: classroom model."
+        
+}

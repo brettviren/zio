@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-04-16 Thu 08:34 -->
+<!-- 2020-04-26 Sun 15:11 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>ZIO data flow</title>
@@ -186,7 +186,7 @@
 @licstart  The following is the entire license notice for the
 JavaScript code in this tag.
 
-Copyright (C) 2012-2019 Free Software Foundation, Inc.
+Copyright (C) 2012-2018 Free Software Foundation, Inc.
 
 The JavaScript code in this tag is free software: you can
 redistribute it and/or modify it under the terms of the GNU
@@ -285,8 +285,8 @@ restrictions or limitations) are described in the section of the
 ZeroMQ guide covering <a href="http://zguide.zeromq.org/page:all#toc211">credit-based flow control</a>.
 </p>
 
-<div id="outline-container-org9a60bf2" class="outline-2">
-<h2 id="protocol"><a id="org9a60bf2"></a><span class="section-number-2">1</span> Flow protocol</h2>
+<div id="outline-container-org99a59d7" class="outline-2">
+<h2 id="protocol"><a id="org99a59d7"></a><span class="section-number-2">1</span> Flow protocol</h2>
 <div class="outline-text-2" id="text-protocol">
 <p>
 The ZIO <i>data flow protocol</i> is partly illustrated in the UML sequence
@@ -384,8 +384,8 @@ the other end is still online or not.
 </div>
 
 
-<div id="outline-container-org249b00a" class="outline-2">
-<h2 id="messages"><a id="org249b00a"></a><span class="section-number-2">2</span> Flow messages</h2>
+<div id="outline-container-orgdf18b04" class="outline-2">
+<h2 id="messages"><a id="orgdf18b04"></a><span class="section-number-2">2</span> Flow messages</h2>
 <div class="outline-text-2" id="text-messages">
 <p>
 ZIO data flow introduces a new ZIO message of type <b>FLOW</b>.  This message
@@ -429,8 +429,8 @@ and is free to fill the payload frame or frames of any <b>FLOW</b> message.
 </div>
 </div>
 
-<div id="outline-container-org2cd132d" class="outline-2">
-<h2 id="api"><a id="org2cd132d"></a><span class="section-number-2">3</span> Flow API</h2>
+<div id="outline-container-org9522920" class="outline-2">
+<h2 id="api"><a id="org9522920"></a><span class="section-number-2">3</span> Flow API</h2>
 <div class="outline-text-2" id="text-api">
 <p>
 ZIO provides an API to simplify developing software that participates
@@ -492,8 +492,8 @@ the application.
 </div>
 
 
-<div id="outline-container-org70d02e9" class="outline-2">
-<h2 id="server"><a id="org70d02e9"></a><span class="section-number-2">4</span> Simple Flow Server</h2>
+<div id="outline-container-org9e0ace9" class="outline-2">
+<h2 id="server"><a id="org9e0ace9"></a><span class="section-number-2">4</span> Simple Flow Server</h2>
 <div class="outline-text-2" id="text-server">
 <p>
 A <i>data flow server</i> may be directly implemented using an instance of
@@ -516,8 +516,8 @@ handler with each handler using a distinct <code>Flow</code> instance.
 </div>
 
 
-<div id="outline-container-org202c32d" class="outline-2">
-<h2 id="extending"><a id="org202c32d"></a><span class="section-number-2">5</span> Extending Flow API</h2>
+<div id="outline-container-org27aa5d1" class="outline-2">
+<h2 id="extending"><a id="org27aa5d1"></a><span class="section-number-2">5</span> Extending Flow API</h2>
 <div class="outline-text-2" id="text-extending">
 <p>
 As mentioned above, the <i>flow object</i> stored in the header prefix

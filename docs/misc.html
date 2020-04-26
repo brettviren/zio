@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-04-03 Fri 05:48 -->
+<!-- 2020-04-26 Sun 15:11 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Notes</title>
@@ -186,7 +186,7 @@
 @licstart  The following is the entire license notice for the
 JavaScript code in this tag.
 
-Copyright (C) 2012-2019 Free Software Foundation, Inc.
+Copyright (C) 2012-2018 Free Software Foundation, Inc.
 
 The JavaScript code in this tag is free software: you can
 redistribute it and/or modify it under the terms of the GNU
@@ -261,14 +261,14 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org357cf24">1. Thread safety</a></li>
-<li><a href="#orgdb78e37">2. Socket buffering</a></li>
-<li><a href="#org9b398f7">3. Going online with discovery</a></li>
-<li><a href="#org3e9914a">4. Interoperability</a>
+<li><a href="#org84e56fd">1. Thread safety</a></li>
+<li><a href="#org7f14a19">2. Socket buffering</a></li>
+<li><a href="#orgb60fa4b">3. Going online with discovery</a></li>
+<li><a href="#org863e1dc">4. Interoperability</a>
 <ul>
-<li><a href="#orgeac1b10">4.1. Data extraction/injection</a></li>
-<li><a href="#org8125858">4.2. Connecting co-executing WCT graphs</a></li>
-<li><a href="#orgecfece4">4.3. Work offloading</a></li>
+<li><a href="#org42a2fd5">4.1. Data extraction/injection</a></li>
+<li><a href="#orga55f927">4.2. Connecting co-executing WCT graphs</a></li>
+<li><a href="#orgbed4b00">4.3. Work offloading</a></li>
 </ul>
 </li>
 </ul>
@@ -293,8 +293,8 @@ assumptions about how some parts of ZIO or other systems work.  They
 may be both too terse or too verbose to be useful to others.
 </p>
 
-<div id="outline-container-org357cf24" class="outline-2">
-<h2 id="org357cf24"><span class="section-number-2">1</span> Thread safety</h2>
+<div id="outline-container-org84e56fd" class="outline-2">
+<h2 id="org84e56fd"><span class="section-number-2">1</span> Thread safety</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 Only recent "draft" sockets (CLIENT/SERVER and RADIO/DISH) are
@@ -311,8 +311,8 @@ any other thread.
 </div>
 </div>
 
-<div id="outline-container-orgdb78e37" class="outline-2">
-<h2 id="orgdb78e37"><span class="section-number-2">2</span> Socket buffering</h2>
+<div id="outline-container-org7f14a19" class="outline-2">
+<h2 id="org7f14a19"><span class="section-number-2">2</span> Socket buffering</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 Early termination can cause loss of messages that have been sent out a
@@ -323,8 +323,8 @@ transmission.
 </div>
 </div>
 
-<div id="outline-container-org9b398f7" class="outline-2">
-<h2 id="org9b398f7"><span class="section-number-2">3</span> Going online with discovery</h2>
+<div id="outline-container-orgb60fa4b" class="outline-2">
+<h2 id="orgb60fa4b"><span class="section-number-2">3</span> Going online with discovery</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 A potential Catch 22 with discovery and ephemeral ports can exist.
@@ -372,8 +372,8 @@ connections to be completed later.
 </div>
 
 
-<div id="outline-container-org3e9914a" class="outline-2">
-<h2 id="org3e9914a"><span class="section-number-2">4</span> Interoperability</h2>
+<div id="outline-container-org863e1dc" class="outline-2">
+<h2 id="org863e1dc"><span class="section-number-2">4</span> Interoperability</h2>
 <div class="outline-text-2" id="text-4">
 <p>
 One target for application of ZIO is the Wire-Cell Toolkit.  The
@@ -440,8 +440,8 @@ busy loop or never executing again.</li>
 
 
 
-<div id="outline-container-orgeac1b10" class="outline-3">
-<h3 id="orgeac1b10"><span class="section-number-3">4.1</span> Data extraction/injection</h3>
+<div id="outline-container-org42a2fd5" class="outline-3">
+<h3 id="org42a2fd5"><span class="section-number-3">4.1</span> Data extraction/injection</h3>
 <div class="outline-text-3" id="text-4-1">
 <p>
 Mixing ZIO and WCT thus faces a risk of deadlock.  Consider a simple
@@ -546,8 +546,8 @@ tuple.  So far, no mixed-type <code>IJoinNodes</code> have been used in WCT.
 
 
 
-<div id="outline-container-org8125858" class="outline-3">
-<h3 id="org8125858"><span class="section-number-3">4.2</span> Connecting co-executing WCT graphs</h3>
+<div id="outline-container-orga55f927" class="outline-3">
+<h3 id="orga55f927"><span class="section-number-3">4.2</span> Connecting co-executing WCT graphs</h3>
 <div class="outline-text-3" id="text-4-2">
 <p>
 The deadlock risk here is essentially the same as the one described
@@ -578,8 +578,8 @@ as synchronicity is required, deadlock is a risk.
 </div>
 </div>
 
-<div id="outline-container-orgecfece4" class="outline-3">
-<h3 id="orgecfece4"><span class="section-number-3">4.3</span> Work offloading</h3>
+<div id="outline-container-orgbed4b00" class="outline-3">
+<h3 id="orgbed4b00"><span class="section-number-3">4.3</span> Work offloading</h3>
 <div class="outline-text-3" id="text-4-3">
 <p>
 The model here is that a WCT graph has a component which performs a
