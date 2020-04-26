@@ -5,7 +5,8 @@
 #include <iostream>
 using namespace std;
 
-void dump_peer(zio::Peer& peer) {
+void dump_peer(zio::Peer& peer)
+{
     cerr << "peer '" << peer.nickname() << "' sees:" << endl;
 
     for (auto pi : peer.peers()) {
@@ -16,16 +17,16 @@ void dump_peer(zio::Peer& peer) {
     }
 }
 
-
-int main(int argc, char*argv[])
+int main(int argc, char* argv[])
 {
     bool verbose = true;
 
-    zio::Peer peer1("peer1",{{"Color","blue"},{"Pet","cat"}}, verbose);
+    zio::Peer peer1("peer1", {{"Color", "blue"}, {"Pet", "cat"}}, verbose);
 
-    std::string uuid2="";
+    std::string uuid2 = "";
     {
-        zio::Peer peer2("peer2",{{"Color","yellow"},{"Pet","dog"}}, verbose);
+        zio::Peer peer2("peer2", {{"Color", "yellow"}, {"Pet", "dog"}},
+                        verbose);
         auto pids1 = peer2.waitfor("peer1");
         assert(pids1.size());
         auto pids2 = peer1.waitfor("peer2");

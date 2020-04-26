@@ -44,9 +44,7 @@ void countdown_echo(zio::socket_t& link, std::string address, int socktype)
     while (countdown) {
         --countdown;
         std::stringstream ss;
-        if (countdown) {
-            ss << countdown << "...";
-        }
+        if (countdown) { ss << countdown << "..."; }
         else {
             ss << "blast off!";
         }
@@ -61,24 +59,22 @@ void countdown_echo(zio::socket_t& link, std::string address, int socktype)
         {
             std::stringstream ss;
             ss << "countdown echo [" << mmsg.size() << "]:";
-            while (mmsg.size()) {
-                ss << "\n\t" << mmsg.popstr();
-            }
+            while (mmsg.size()) { ss << "\n\t" << mmsg.popstr(); }
             zio::info(ss.str());
         }
     }
     link.send(zio::message_t{}, zio::send_flags::none);
     zio::message_t die;
     auto res = link.recv(die, zio::recv_flags::none);
-    res = {};                   // don't care
+    res = {};  // don't care
     zio::debug("countdown echo exiting");
 }
-
 
 void doit(int serverish, int clientish, int nclients, int nworkers)
 {
     std::stringstream ss;
-    ss<<"main doit("<<serverish<<","<<clientish<<","<<nworkers<<","<<nclients<<")";
+    ss << "main doit(" << serverish << "," << clientish << "," << nworkers
+       << "," << nclients << ")";
     zio::info(ss.str());
 
     zio::context_t ctx;
@@ -87,19 +83,22 @@ void doit(int serverish, int clientish, int nclients, int nworkers)
     std::vector<zio::zactor_t*> clients;
     std::vector<std::pair<std::string, zio::zactor_t*> > actors;
 
-
     zio::debug("main make broker actor");
-    actors.push_back({"broker",new zio::zactor_t(ctx, broker_actor, broker_address, serverish)});
+    actors.push_back({"broker", new zio::zactor_t(ctx, broker_actor,
+                                                  broker_address, serverish)});
 
     while (nworkers--) {
         zio::debug("main make worker actor");
-        actors.push_back({"worker",new zio::zactor_t(ctx, echo_worker, broker_address, clientish)});
+        actors.push_back(
+            {"worker",
+             new zio::zactor_t(ctx, echo_worker, broker_address, clientish)});
     }
 
     while (nclients--) {
         zio::debug("main make client actor");
-        auto client = new zio::zactor_t(ctx, countdown_echo, broker_address, clientish);
-        actors.push_back({"client",client});
+        auto client =
+            new zio::zactor_t(ctx, countdown_echo, broker_address, clientish);
+        actors.push_back({"client", client});
         clients.push_back(client);
     }
 
@@ -107,7 +106,7 @@ void doit(int serverish, int clientish, int nclients, int nworkers)
         zio::debug("main wait for client");
         zio::message_t done;
         auto res = client->link().recv(done, zio::recv_flags::none);
-        res = {};                   // don't care
+        res = {};  // don't care
     }
 
     // terminate backwards
@@ -125,26 +124,16 @@ int main(int argc, char* argv[])
     zio::catch_signals();
 
     std::string which = "server";
-    if (argc > 1) {
-        which = argv[1];
-    }
+    if (argc > 1) { which = argv[1]; }
 
     int nclients = 1;
-    if (argc > 2) {
-        nclients = atoi(argv[2]);
-    }
+    if (argc > 2) { nclients = atoi(argv[2]); }
     int nworkers = 1;
-    if (argc > 3) {
-        nworkers = atoi(argv[3]);
-    }
+    if (argc > 3) { nworkers = atoi(argv[3]); }
 
-    if (which == "server") {
-        doit(ZMQ_SERVER, ZMQ_CLIENT, nclients, nworkers);
-    }
+    if (which == "server") { doit(ZMQ_SERVER, ZMQ_CLIENT, nclients, nworkers); }
     else {
         doit(ZMQ_ROUTER, ZMQ_DEALER, nclients, nworkers);
     }
     return 0;
 }
-
-

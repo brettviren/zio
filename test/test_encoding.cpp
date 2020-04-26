@@ -1,10 +1,10 @@
-/** Test compatibility of cppzmq and CZMQ single/multipart codec. 
+/** Test compatibility of cppzmq and CZMQ single/multipart codec.
  */
 
 #include "zio/cppzmq.hpp"
 #include "zio/main.hpp"
 #include "zio/logging.hpp"
-#include <czmq.h>               // normally we don't use this directly in ZIO
+#include <czmq.h>  // normally we don't use this directly in ZIO
 #include <string>
 #include <vector>
 
@@ -12,16 +12,20 @@ int main()
 {
     zio::init_all();
 
-    const std::string prefix="ZIO4TEXTTo be or not to be that ?"; // length 33, ascii 33 is !
+    const std::string prefix =
+        "ZIO4TEXTTo be or not to be that ?";  // length 33, ascii 33 is !
 
     zmsg_t* msg = zmsg_new();
     zmsg_addstr(msg, prefix.c_str());
-    struct XYZ {
-        uint64_t a{0x6644444444444444},b{0x5555555555555555}, c{0x4466666666666666};
+    struct XYZ
+    {
+        uint64_t a{0x6644444444444444}, b{0x5555555555555555},
+            c{0x4466666666666666};
     } xyz;
     zmsg_addmem(msg, &xyz, sizeof(XYZ));
     zframe_t* frame = zmsg_encode(msg);
-    std::vector<std::uint8_t> ret(zframe_data(frame), zframe_data(frame) + zframe_size(frame));
+    std::vector<std::uint8_t> ret(zframe_data(frame),
+                                  zframe_data(frame) + zframe_size(frame));
 
     {
         zio::message_t cppmsg(zframe_data(frame), zframe_size(frame));
@@ -35,10 +39,9 @@ int main()
 
     zio::debug("{} {}", prefix.size(), prefix);
 
-    for (size_t ind=0; ind<ret.size(); ++ind) {
+    for (size_t ind = 0; ind < ret.size(); ++ind) {
         zio::debug("{}: {} ({})", ind, ret[ind], (int)ret[ind]);
     }
 
     return 0;
-
 }

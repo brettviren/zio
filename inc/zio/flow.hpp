@@ -13,27 +13,32 @@ namespace zio {
 
     namespace flow {
         /// Thrown when an EOT was received instead of expected message
-        struct end_of_transmission : public virtual std::out_of_range {
-            using std::out_of_range::out_of_range ;
+        struct end_of_transmission : public virtual std::out_of_range
+        {
+            using std::out_of_range::out_of_range;
         };
 
         /// Thrown if the application violates local flow protocol.
-        struct local_error : public virtual std::logic_error {
-            using std::logic_error::logic_error ;
+        struct local_error : public virtual std::logic_error
+        {
+            using std::logic_error::logic_error;
         };
         /// Thrown if the remote side violates flow protocol
-        struct remote_error : public virtual std::runtime_error {
-            using std::runtime_error::runtime_error ;
+        struct remote_error : public virtual std::runtime_error
+        {
+            using std::runtime_error::runtime_error;
         };
 
         enum class direction_e : int { unknown, inject, extract };
         enum class msgtype_e : int { unknown, bot, dat, pay, eot };
 
-        class Label{
+        class Label
+        {
             zio::Message& m_msg;
             zio::json m_fobj;
             bool m_dirty{false};
-        public:
+
+           public:
             Label(zio::Message& msg);
             ~Label();
             Label(Label&& rhs) = default;
@@ -42,7 +47,7 @@ namespace zio {
             zio::json object() const { return m_fobj; }
             zio::json& object() { return m_fobj; }
 
-            /// Emit a string rep 
+            /// Emit a string rep
             std::string str() const;
 
             /// Commit any changes back to the message
@@ -50,7 +55,7 @@ namespace zio {
 
             /// Return the direction of flow
             direction_e direction() const;
-            
+
             /// Return amount of credit in message or -1 if none/error
             int credit() const;
 
@@ -67,12 +72,13 @@ namespace zio {
             void credit(int cred);
         };
 
-    }
+    }  // namespace flow
 
     struct FlowImp;
 
-    class Flow {
-    public:
+    class Flow
+    {
+       public:
         /*! @brief Create one side of a data flow.
 
           The flow is created an initialized port, in the given
@@ -90,12 +96,12 @@ namespace zio {
           (bot(), etc).  They return true on success, false if a
           timeout occured and will throw zio::flow::protocol_error if
           the call violates the flow protocol.
-          
+
         */
         Flow(zio::portptr_t p, flow::direction_e direction, int credit,
              timeout_t tout = timeout_t{});
         ~Flow();
-        
+
         Flow(Flow&& rhs);
         Flow& operator=(Flow&& rhs);
 
@@ -180,18 +186,14 @@ namespace zio {
         /// must explicitly and periodically call pay().
         bool send(zio::Message& msg);
 
-    private:
+       private:
         portptr_t port;
 
         // Use pimpl pattern to access FSM to save on recompiling
         // boost.sml code.
-        std::unique_ptr<FlowImp> imp;        
-
-
+        std::unique_ptr<FlowImp> imp;
     };
-    
 
-}
+}  // namespace zio
 
 #endif
-

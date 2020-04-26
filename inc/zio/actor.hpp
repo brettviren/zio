@@ -17,18 +17,13 @@ namespace zio {
      *
      * First is bound and second is connected via inproc://
      */
-    inline
-    std::pair<socket_t, socket_t>
-    create_linked_pairs(context_t& ctx)
+    inline std::pair<socket_t, socket_t> create_linked_pairs(context_t& ctx)
     {
         std::pair<socket_t, socket_t> ret{socket_t(ctx, socket_type::pair),
                                           socket_t(ctx, socket_type::pair)};
 
         std::stringstream ss;
-        ss << "inproc://link-"
-           << std::hex
-           << ret.first.handle()
-           << "-"
+        ss << "inproc://link-" << std::hex << ret.first.handle() << "-"
            << ret.second.handle();
         std::string addr = ss.str();
         ret.first.bind(addr.c_str());
@@ -40,12 +35,12 @@ namespace zio {
 
       The actor function must take a socket and zero or more optional
       arguments such as:
-     
+
           void func(socket_t& sock, ...);
 
           zio::zactor_t actor(ctx, func, ...);
           actor.link().send(...);
-     
+
       The socket passed in to the actor function is one end of a
       bidirection link shared with the application thread.  The
       application thread may get the other end of that link by calling
@@ -70,14 +65,16 @@ namespace zio {
 
       - If send of "termination message" fails, the actor function
         shall be presumed to have already exited.
-            
+
      */
-    class zactor_t {
-    public:
+    class zactor_t
+    {
+       public:
         // Template constructor and not class to perform type erasure
         // of the function type.
-        template<typename Func, typename... Args>
-        zactor_t(context_t &ctx, Func fn, Args... args) {
+        template <typename Func, typename... Args>
+        zactor_t(context_t& ctx, Func fn, Args... args)
+        {
             socket_t asock;
             std::tie(asock, _sock) = create_linked_pairs(ctx);
 
@@ -91,43 +88,44 @@ namespace zio {
             startup();
         }
 
-        ~zactor_t() {
+        ~zactor_t()
+        {
             shutdown();
             _thread.join();
         }
 
         socket_ref link() { return _sock; }
 
-    private:
-
-        void startup() {
+       private:
+        void startup()
+        {
             // The default contract with the actor function is that it
             // shall notify us with a "signal" message that we may
             // continue.
-            message_t rmsg; 
+            message_t rmsg;
             auto res = link().recv(rmsg, recv_flags::none);
-            res = {};           // don't care
+            res = {};  // don't care
         }
 
-        void shutdown() {
+        void shutdown()
+        {
             // The default contract with the actor function is we will
             // notify it to terminate.  If sending that message is
             // successful we wait for the built-in confirmation
             // message.
-            auto sres = link().send(message_t("$TERM",5), send_flags::dontwait);
+            auto sres =
+                link().send(message_t("$TERM", 5), send_flags::dontwait);
             if (sres) {
                 message_t rmsg;
                 auto res = link().recv(rmsg, recv_flags::none);
-                res = {};       // don't care
+                res = {};  // don't care
             }
         }
 
-    private:
+       private:
         socket_t _sock;
         std::thread _thread;
-        
     };
-}
+}  // namespace zio
 
 #endif
-

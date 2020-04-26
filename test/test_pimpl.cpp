@@ -1,18 +1,17 @@
 struct Impl;
 
-struct Main {
+struct Main
+{
     Impl* imp;
     Main();
 };
 
-struct Impl {
+struct Impl
+{
     Main& main;
-    Impl(Main& m) : main(m) { }
+    Impl(Main& m) : main(m) {}
 };
 
 Main::Main() : imp(new Impl(*this)) {}
 
-int main()
-{
-    Main m;
-}
+int main() { Main m; }

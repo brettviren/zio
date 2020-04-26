@@ -1,7 +1,6 @@
 /** Exercise ZeroMQ PUB/SUB or PUSH/PULL
  */
 
-
 #include "zio/node.hpp"
 #include "zio/main.hpp"
 #include "zio/util.hpp"
@@ -13,30 +12,36 @@
 
 std::string usage();
 
-struct CountRate {
-    size_t ntocheck;            // check ever this number
-    std::string name{""};       // what to call me
+struct CountRate
+{
+    size_t ntocheck;       // check ever this number
+    std::string name{""};  // what to call me
     size_t count{0};
     zio::Stopwatch sw;
 
-    void operator()() {         // call each time something happens
+    void operator()()
+    {  // call each time something happens
         ++count;
         if (count and count % ntocheck == 0) {
-            double dt_lap = std::chrono::duration_cast<std::chrono::milliseconds>(sw.lap()).count();
-            double dt_tot = std::chrono::duration_cast<std::chrono::milliseconds>(sw.accum()).count();
-            zio::info("{}: rate: {:.4f} kHz, <{:.4f}> kHz",
-                      name, ntocheck/dt_lap, count/dt_tot);
+            double dt_lap =
+                std::chrono::duration_cast<std::chrono::milliseconds>(sw.lap())
+                    .count();
+            double dt_tot =
+                std::chrono::duration_cast<std::chrono::milliseconds>(
+                    sw.accum())
+                    .count();
+            zio::info("{}: rate: {:.4f} kHz, <{:.4f}> kHz", name,
+                      ntocheck / dt_lap, count / dt_tot);
         }
     }
 };
-
 
 void do_source(zio::Node& node, zio::json& cfg)
 {
     const size_t msg_size = cfg["size"].get<size_t>();
     const double msg_rate = cfg["rate"].get<double>();
 
-    int64_t zzz_ms = 1000.0/msg_rate;
+    int64_t zzz_ms = 1000.0 / msg_rate;
     if (zzz_ms < 2) {
         zio::debug("source: message rate too fast, will free run");
         zzz_ms = 0;
@@ -53,28 +58,21 @@ void do_source(zio::Node& node, zio::json& cfg)
         auto port = node.port(pname);
         auto& sock = port->socket();
         int stype = zio::sock_type(sock);
-        if (stype == ZMQ_PUB or stype == ZMQ_PUSH) {
-            socks.push_back(sock);
-        }
-
+        if (stype == ZMQ_PUB or stype == ZMQ_PUSH) { socks.push_back(sock); }
     }
-    if (socks.empty()) {
-        throw std::runtime_error("source given no PUBs");
-    }
+    if (socks.empty()) { throw std::runtime_error("source given no PUBs"); }
     zio::info("source with {} PUBs", socks.size());
 
     std::vector<std::byte> buf(msg_size, std::byte(0));
     zio::const_buffer cbuf(buf.data(), buf.size());
     cr.sw.start();
     while (true) {
-        if (zzz_ms) {
-            zio::sleep_ms(zio::time_unit_t{zzz_ms});
-        }
-        for (auto& sock: socks) {
+        if (zzz_ms) { zio::sleep_ms(zio::time_unit_t{zzz_ms}); }
+        for (auto& sock : socks) {
             sock.send(cbuf, zio::send_flags::none);
             cr();
         }
-    } // run forever
+    }  // run forever
 }
 void do_proxy(zio::Node& node, zio::json& cfg)
 {
@@ -88,13 +86,9 @@ void do_proxy(zio::Node& node, zio::json& cfg)
         int stype = zio::sock_type(sock);
         if (stype == ZMQ_SUB or stype == ZMQ_PULL) {
             subs.push_back(sock);
-            if (stype == ZMQ_SUB) {
-                port->subscribe("");
-            }
+            if (stype == ZMQ_SUB) { port->subscribe(""); }
         }
-        if (stype == ZMQ_PUB or stype == ZMQ_PUSH) {
-            pubs.push_back(sock);
-        }
+        if (stype == ZMQ_PUB or stype == ZMQ_PUSH) { pubs.push_back(sock); }
     }
     if (subs.empty() or pubs.empty()) {
         throw std::runtime_error("proxy not given enough PUBs or SUBs");
@@ -105,26 +99,23 @@ void do_proxy(zio::Node& node, zio::json& cfg)
     zio::info("proxy with {} SUBs, {} PUBs", nsubs, npubs);
 
     zio::poller_t<> poller;
-    for (auto& sock : subs) {
-        poller.add(sock, zio::event_flags::pollin);
-    }
+    for (auto& sock : subs) { poller.add(sock, zio::event_flags::pollin); }
 
     std::vector<zio::poller_event<>> events(nsubs);
     zio::message_t msg;
     cr.sw.start();
     while (true) {
         const int nevents = poller.wait_all(events, zio::time_unit_t{-1});
-        for (int iev=0; iev<nevents; ++iev) {
+        for (int iev = 0; iev < nevents; ++iev) {
             auto res = events[iev].socket.recv(msg, zio::recv_flags::none);
-            assert(res);        // we don't wait so this can never be false
+            assert(res);  // we don't wait so this can never be false
             zio::const_buffer cbuf(msg.data(), msg.size());
             for (auto& pub : pubs) {
                 pub.send(cbuf, zio::send_flags::none);
                 cr();
             }
         }
-    } // run forever
-
+    }  // run forever
 }
 void do_sink(zio::Node& node, zio::json& cfg)
 {
@@ -138,33 +129,27 @@ void do_sink(zio::Node& node, zio::json& cfg)
         int stype = zio::sock_type(sock);
         if (stype == ZMQ_SUB or stype == ZMQ_PULL) {
             socks.push_back(sock);
-            if (stype == ZMQ_SUB) {
-                port->subscribe("");
-            }
+            if (stype == ZMQ_SUB) { port->subscribe(""); }
         }
     }
-    if (socks.empty()) {
-        throw std::runtime_error("sink given no SUBs");
-    }
+    if (socks.empty()) { throw std::runtime_error("sink given no SUBs"); }
     const size_t nsocks = socks.size();
     zio::info("sink with {} SUBs", socks.size());
 
     zio::poller_t<> poller;
-    for (auto& sock : socks) {
-        poller.add(sock, zio::event_flags::pollin);
-    }
+    for (auto& sock : socks) { poller.add(sock, zio::event_flags::pollin); }
 
     std::vector<zio::poller_event<>> events(nsocks);
     zio::message_t msg;
     cr.sw.start();
     while (true) {
         const int nevents = poller.wait_all(events, zio::time_unit_t{-1});
-        for (int iev=0; iev<nevents; ++iev) {
+        for (int iev = 0; iev < nevents; ++iev) {
             auto res = events[iev].socket.recv(msg, zio::recv_flags::none);
-            assert(res);        // we don't wait so this can never be false
+            assert(res);  // we don't wait so this can never be false
             cr();
         }
-    } // run forever
+    }  // run forever
 }
 
 int main(int argc, char* argv[])
@@ -181,9 +166,7 @@ int main(int argc, char* argv[])
 
     std::function<void(zio::Node&, zio::json&)> proc;
     std::string type = cfg["type"].get<std::string>();
-    if (type == "source") {
-        proc = do_source;
-    }
+    if (type == "source") { proc = do_source; }
     else if (type == "proxy") {
         proc = do_proxy;
     }
@@ -210,18 +193,18 @@ int main(int argc, char* argv[])
             if (link == "bind") {
                 if (jaddr.is_string()) {
                     std::string addr = jaddr.get<std::string>();
-                    if (addr.empty()) {
-                        port->bind();
-                    }
+                    if (addr.empty()) { port->bind(); }
                     else {
                         port->bind(addr);
                     }
                 }
                 else if (jaddr.is_array()) {
-                    port->bind(jaddr[0].get<std::string>(), jaddr[1].get<int>());
+                    port->bind(jaddr[0].get<std::string>(),
+                               jaddr[1].get<int>());
                 }
                 else {
-                    throw std::runtime_error("unsupported bind address: " + jaddr.dump());
+                    throw std::runtime_error("unsupported bind address: " +
+                                             jaddr.dump());
                 }
             }
             else if (link == "connect") {
@@ -231,11 +214,13 @@ int main(int argc, char* argv[])
                 }
                 else if (jaddr.is_array()) {
                     if (jaddr[1].is_string()) {
-                        port->connect(jaddr[0].get<std::string>(), jaddr[1].get<std::string>());
+                        port->connect(jaddr[0].get<std::string>(),
+                                      jaddr[1].get<std::string>());
                     }
                 }
                 else {
-                    throw std::runtime_error("unsupported connect address: " + jaddr.dump());
+                    throw std::runtime_error("unsupported connect address: " +
+                                             jaddr.dump());
                 }
             }
             else {
@@ -243,18 +228,16 @@ int main(int argc, char* argv[])
             }
         }
     }
-    
+
     node.online();
 
     zio::debug("starting process {} with {}", type, cfg[type].dump());
     proc(node, cfg[type]);
-    sleep(1);                   // fake proc
+    sleep(1);  // fake proc
 
     node.offline();
     return 0;
 }
-
-
 
 std::string usage()
 {

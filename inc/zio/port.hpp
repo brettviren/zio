@@ -8,10 +8,9 @@
 #include <memory>
 #include <map>
 
-
 namespace zio {
 
-    /*! 
+    /*!
       @brief A port holds a socket in the context of a @ref node.
 
       A port provides an identity (name) for the socket in the context
@@ -24,8 +23,9 @@ namespace zio {
       to the ZIO conventions.
 
     */
-    class Port {
-    public:
+    class Port
+    {
+       public:
         typedef std::string address_t;
         typedef std::string nodename_t;
         typedef std::string portname_t;
@@ -115,17 +115,17 @@ namespace zio {
         /// @brief Send a message.
         ///
         /// The @ref zio::Message is modified to set its coordinates.
-        bool send(Message& msg, timeout_t timeout={});
+        bool send(Message& msg, timeout_t timeout = {});
 
         /// Recieve a message, return false if timeout occurred.
-        bool recv(Message& msg, timeout_t timeout={});
+        bool recv(Message& msg, timeout_t timeout = {});
 
         /// @brief Access the underlying cppzmq socket.
         ///
         /// This access is generally not recomended.
         zio::socket_t& socket() { return m_sock; }
 
-    private:
+       private:
         const std::string m_name;
         zio::context_t m_ctx;
         zio::socket_t m_sock;
@@ -139,13 +139,13 @@ namespace zio {
         std::vector<binder_t> m_binders;
 
         std::vector<address_t> m_connect_addresses, m_connected, m_bound;
-        std::vector< std::pair<nodename_t, portname_t> > m_connect_nodeports;
-        
+        std::vector<std::pair<nodename_t, portname_t> > m_connect_nodeports;
+
         bool m_verbose{false};
     };
 
     /// The context can't be copied and ports like to be shared.
     typedef std::shared_ptr<Port> portptr_t;
 
-}
+}  // namespace zio
 #endif

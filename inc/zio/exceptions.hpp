@@ -12,24 +12,23 @@ namespace zio {
     /*!
       @brief general exception class for zio
      */
-        
+
     class exception : public std::exception
     {
-    public:
+       public:
         /// returns the explanatory string
-        const char* what() const noexcept override {
-            return m.what();
-        }
+        const char* what() const noexcept override { return m.what(); }
         /// the id of the exception
         const int id;
 
-    protected:
+       protected:
         exception(int id_, const char* what_arg) : id(id_), m(what_arg) {}
-        static std::string name(const std::string& ename, int id_) {
+        static std::string name(const std::string& ename, int id_)
+        {
             return "[zio.exception." + ename + "." + std::to_string(id_) + "] ";
         }
 
-    private:
+       private:
         std::runtime_error m;
     };
 
@@ -39,11 +38,13 @@ namespace zio {
       This exception is thrown when the underlying socket operations
       indicate an error.  The ID is set to the errno.
     */
-    class socket_error : public exception {
-    public:
-        
+    class socket_error : public exception
+    {
+       public:
         /// Create a socket error with all data and optional extra message.
-        static socket_error create(int id_, const char* errmsg, const char* extra=NULL) {
+        static socket_error create(int id_, const char* errmsg,
+                                   const char* extra = NULL)
+        {
             std::string w = exception::name("socket_error", id_) + errmsg;
             if (extra) {
                 w += ": ";
@@ -54,13 +55,15 @@ namespace zio {
 
         /// Create a socket error with implicit use of errno/strerr
         /// and optional extra message.
-        static socket_error create(const char* extra=NULL) {
+        static socket_error create(const char* extra = NULL)
+        {
             return create(errno, strerror(errno), extra);
         }
 
-    private:
-        socket_error(int id_, const char* what_arg)
-            : exception(id_, what_arg) { }
+       private:
+        socket_error(int id_, const char* what_arg) : exception(id_, what_arg)
+        {
+        }
     };
 
     /*!
@@ -73,10 +76,12 @@ namespace zio {
       1. ...
 
      */
-    class message_error : public exception {
-    public:
-        static message_error create(int id_, const char* errmsg, 
-                                    const char* extra=NULL) {
+    class message_error : public exception
+    {
+       public:
+        static message_error create(int id_, const char* errmsg,
+                                    const char* extra = NULL)
+        {
             std::string w = exception::name("message_error", id_) + errmsg;
             if (extra) {
                 w += ": ";
@@ -85,11 +90,11 @@ namespace zio {
             return message_error(id_, w.c_str());
         }
 
-    private:
-        message_error(int id_, const char* what_arg)
-            : exception(id_, what_arg) { }
-
+       private:
+        message_error(int id_, const char* what_arg) : exception(id_, what_arg)
+        {
+        }
     };
-}
+}  // namespace zio
 
 #endif

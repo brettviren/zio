@@ -1,6 +1,6 @@
 // https://github.com/zeromq/libzmq/issues/3048
 
-#include <string> 
+#include <string>
 #include <unordered_set>
 #include <chrono>
 #include <thread>
@@ -11,9 +11,10 @@
 
 static void *ctx;
 static const char *endpoint = "inproc://tmp";
-//static const char *endpoint = "tcp://127.0.0.1:8899";
+// static const char *endpoint = "tcp://127.0.0.1:8899";
 
-void client(std::string str) {
+void client(std::string str)
+{
     auto socket = zmq_socket(ctx, ZMQ_CLIENT);
     zmq_connect(socket, endpoint);
 
@@ -21,8 +22,8 @@ void client(std::string str) {
         // send msgs
         {
             zmq_msg_t msg;
-            zmq_msg_init_size(&msg, str.size()+1);
-            memcpy(zmq_msg_data(&msg), str.c_str(), str.size()+1);
+            zmq_msg_init_size(&msg, str.size() + 1);
+            memcpy(zmq_msg_data(&msg), str.c_str(), str.size() + 1);
             zmq_msg_send(&msg, socket, 0);
             zmq_msg_close(&msg);
         }
@@ -37,13 +38,14 @@ void client(std::string str) {
                 zmq_msg_t msg;
                 zmq_msg_init(&msg);
                 zmq_msg_recv(&msg, socket, 0);
-                printf("client recv msg: %s\n", (char*)zmq_msg_data(&msg));
+                printf("client recv msg: %s\n", (char *)zmq_msg_data(&msg));
             }
         }
     }
 }
 
-void server() {
+void server()
+{
     using namespace std::chrono;
 
     std::unordered_set<uint32_t> routings;
@@ -59,13 +61,14 @@ void server() {
             zmq_msg_init(&msg);
             zmq_msg_recv(&msg, socket, 0);
             routings.insert(zmq_msg_routing_id(&msg));
-            printf("server recv msg: %s\n", (char*)zmq_msg_data(&msg));
+            printf("server recv msg: %s\n", (char *)zmq_msg_data(&msg));
             zmq_msg_close(&msg);
         }
 
         // refresh heartbeats
         auto now = steady_clock::now();
-        auto delta = duration_cast<milliseconds>(now - heartbeat_timestamp).count();
+        auto delta =
+            duration_cast<milliseconds>(now - heartbeat_timestamp).count();
         if (delta > 500) {
             heartbeat_timestamp = now;
             zmq_msg_t msg;
@@ -84,13 +87,14 @@ void server() {
     }
 }
 
-int main() {
+int main()
+{
     ctx = zmq_ctx_new();
     zmq_ctx_set(ctx, ZMQ_IO_THREADS, 4);
     std::thread t1(client, "hello from thread 1");
     std::thread t2(client, "hello from thread 2");
     std::thread t3(server);
-    int countdown=2;
+    int countdown = 2;
     while (countdown--) {
         using namespace std::chrono_literals;
         std::this_thread::sleep_for(1s);

@@ -8,7 +8,8 @@
 namespace zio {
 
     /*!
-      @brief output objects of a fixed native type with levels expressed as methods.
+      @brief output objects of a fixed native type with levels expressed as
+      methods.
 
       An Outbox provides a "logger" like object to simplfy use in code
       to send out messages of a fixed type.
@@ -18,42 +19,38 @@ namespace zio {
       native type to Message.
 
     */
-    template<typename NATIVE>
-    class Outbox {
-    public:
+    template <typename NATIVE>
+    class Outbox
+    {
+       public:
         typedef NATIVE native_type;
         typedef typename std::function<void(zio::level::MessageLevel lvl,
-                                            const native_type&)> sender_type;
+                                            const native_type&)>
+            sender_type;
 
-        explicit Outbox(const sender_type& sender) : m_send(sender) { }
-        virtual ~Outbox() { }
+        explicit Outbox(const sender_type& sender) : m_send(sender) {}
+        virtual ~Outbox() {}
 
-        void operator()(level::MessageLevel lvl, const native_type& nat) {
+        void operator()(level::MessageLevel lvl, const native_type& nat)
+        {
             send(lvl, nat);
         }
-        virtual void send(level::MessageLevel lvl, const native_type& nat) {
+        virtual void send(level::MessageLevel lvl, const native_type& nat)
+        {
             m_send(lvl, nat);
         }
 
         // bake levels semantics into method names
-        void trace(const native_type& nat)
-            { send(level::trace, nat); }
-        void verbose(const native_type& nat)
-            { send(level::verbose, nat); }
-        void debug(const native_type& nat)
-            { send(level::debug, nat); }
-        void info(const native_type& nat)
-            { send(level::info, nat); }
-        void summary(const native_type& nat)
-            { send(level::summary, nat); }
-        void warning(const native_type& nat)
-            { send(level::warning, nat); }
-        void error(const native_type& nat)
-            { send(level::error, nat); }
-        void fatal(const native_type& nat)
-            { send(level::fatal, nat); }
+        void trace(const native_type& nat) { send(level::trace, nat); }
+        void verbose(const native_type& nat) { send(level::verbose, nat); }
+        void debug(const native_type& nat) { send(level::debug, nat); }
+        void info(const native_type& nat) { send(level::info, nat); }
+        void summary(const native_type& nat) { send(level::summary, nat); }
+        void warning(const native_type& nat) { send(level::warning, nat); }
+        void error(const native_type& nat) { send(level::error, nat); }
+        void fatal(const native_type& nat) { send(level::fatal, nat); }
 
-    private:
+       private:
         sender_type m_send;
     };
 
@@ -67,6 +64,6 @@ namespace zio {
     /// Emit structured data.
     typedef Outbox<zio::json> Metric;
 
-}
+}  // namespace zio
 
 #endif

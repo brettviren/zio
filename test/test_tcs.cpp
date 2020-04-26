@@ -11,25 +11,24 @@ const int server_type = ZMQ_SERVER;
 const int client_type = ZMQ_CLIENT;
 
 /// inproc hangs.  no messages ever get received by server. tcp/ipc okay.
-//const char* addr = "inproc://test_tcs";
-//const char* addr = "tcp://127.0.0.1:5678";
+// const char* addr = "inproc://test_tcs";
+// const char* addr = "tcp://127.0.0.1:5678";
 const char* addr = "ipc://test_tcs.ipc";
 
-typedef std::chrono::duration<int64_t,std::micro> microseconds_type;
+typedef std::chrono::duration<int64_t, std::micro> microseconds_type;
 
 // a very very ugly server
-static
-void server(zio::socket_t& s)
+static void server(zio::socket_t& s)
 {
-    std::map<uint32_t,uint32_t> rids;
-    std::map<uint32_t, std::vector<int> > tosend;
+    std::map<uint32_t, uint32_t> rids;
+    std::map<uint32_t, std::vector<int>> tosend;
 
     zio::poller_t<> poller;
     poller.add(s, zio::event_flags::pollin);
     zio::info("server: loop starts");
     const auto wait = std::chrono::milliseconds{2000};
-    
-    int64_t ttot=0, tmin=0, tmax=0;
+
+    int64_t ttot = 0, tmin = 0, tmax = 0;
     int count = 0;
 
     int dead = 0;
@@ -49,31 +48,29 @@ void server(zio::socket_t& s)
             return;
         }
         auto t1 = std::chrono::high_resolution_clock::now();
-        const microseconds_type dtus = std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0);
+        const microseconds_type dtus =
+            std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0);
         const int64_t dt = dtus.count();
-        
-        if (count == 0) {
-            tmin = tmax = dt;
-        }
+
+        if (count == 0) { tmin = tmax = dt; }
         else {
             tmin = std::min(tmin, dt);
             tmax = std::max(tmax, dt);
         }
         count += 1;
         ttot += dt;
-        zio::info("server: #{} [{}, {}] <{}> tot={} dt={} [us]", count,
-                tmin, tmax, (ttot/count), ttot, dt);
-            
+        zio::info("server: #{} [{}, {}] <{}> tot={} dt={} [us]", count, tmin,
+                  tmax, (ttot / count), ttot, dt);
 
         zio::message_t msg;
         auto res = s.recv(msg);
         assert(res);
         uint32_t rid = msg.routing_id();
-        assert (rid > 0);
+        assert(rid > 0);
 
         if (msg.size() == 0) {
             if (dead) {
-                break;          // bail after more than 1
+                break;  // bail after more than 1
             }
             dead += 1;
         }
@@ -84,7 +81,7 @@ void server(zio::socket_t& s)
         zio::debug("server: recvd {} {}", rid, them);
 
         if (rids.empty()) {
-            rids[rid]=0;
+            rids[rid] = 0;
             tosend[rid].push_back(them);
             continue;
         }
@@ -104,7 +101,7 @@ void server(zio::socket_t& s)
             uint32_t rid = rid_v.first;
             for (auto them : rid_v.second) {
                 uint32_t orid = rids[rid];
-                zio::message_t msg(&them, sizeof(int));        
+                zio::message_t msg(&them, sizeof(int));
                 msg.set_routing_id(orid);
                 auto ses = s.send(msg, zio::send_flags::none);
                 assert(ses);
@@ -114,8 +111,7 @@ void server(zio::socket_t& s)
     }
 }
 
-static
-void client(zio::socket_t& c, int me)
+static void client(zio::socket_t& c, int me)
 {
     zio::debug("client {}: starts", me);
 
@@ -126,8 +122,8 @@ void client(zio::socket_t& c, int me)
     int zzz = 1000000;
     zio::info("client {}: sleeps for {}", me, zzz);
     usleep(zzz);
-    for (int count=0; count<2000; ++count) {
-        zio::message_t msg(&me, sizeof(int));        
+    for (int count = 0; count < 2000; ++count) {
+        zio::message_t msg(&me, sizeof(int));
         zio::debug("client {}: send", me);
         c.send(msg, zio::send_flags::none);
 
@@ -166,7 +162,6 @@ int main()
     zio::info("sleeping between server and client thread starts");
     usleep(100000);
 
-
     zio::socket_t c1(ctx, client_type);
     c1.connect(addr);
     zio::debug("client 1: connected");
@@ -176,10 +171,9 @@ int main()
     zio::debug("client 2: connected");
 
     std::thread cli1(client, std::ref(c1), 1);
-    std::thread cli2(client, std::ref(c2), 2);    
+    std::thread cli2(client, std::ref(c2), 2);
 
     cli1.join();
     cli2.join();
     ser.join();
-
 }

@@ -2,9 +2,9 @@
 namespace zio {
 
     /*! Use to mark how fast something goes */
-    class Stopwatch {
-    public:
-
+    class Stopwatch
+    {
+       public:
         typedef std::chrono::high_resolution_clock clock;
         typedef clock::time_point time_point;
         typedef clock::duration duration;
@@ -27,7 +27,8 @@ namespace zio {
         /// Stop the stop watch, return the elapsed time from start
         duration stop();
 
-        /// Return time since last lap (or full) start and set current lap start.
+        /// Return time since last lap (or full) start and set current lap
+        /// start.
         duration lap();
 
         /// Return total accumulated time when stopwatch was running.
@@ -36,10 +37,9 @@ namespace zio {
         /// Return an average rate in Hz if count things happened over accum
         double hz(size_t count);
 
-    private:
+       private:
         bool started{false};
         time_point t_start, t_lap;
         duration dt_accum;
-        
     };
-}
+}  // namespace zio

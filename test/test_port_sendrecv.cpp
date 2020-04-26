@@ -30,11 +30,10 @@ int main()
         assert(msg2.remote_id().size() > 0);
 
         msg2.set_seqno(2);
-        
+
         p1->send(msg2);
     }
     {
-        
         zio::Message msg3;
         p2->recv(msg3);
         assert(msg3.seqno() == 2);

@@ -1,31 +1,25 @@
 #include "zio/node.hpp"
 #include "zio/logging.hpp"
 
-static
-std::string get_hostname()
+static std::string get_hostname()
 {
-    zactor_t *beacon = zactor_new (zbeacon, NULL);
-    assert (beacon);
-    zsock_send (beacon, "si", "CONFIGURE", 31415);
-    char *tmp = zstr_recv (beacon);
+    zactor_t* beacon = zactor_new(zbeacon, NULL);
+    assert(beacon);
+    zsock_send(beacon, "si", "CONFIGURE", 31415);
+    char* tmp = zstr_recv(beacon);
     std::string ret = tmp;
-    zstr_free (&tmp);
-    zactor_destroy (&beacon);    
+    zstr_free(&tmp);
+    zactor_destroy(&beacon);
     return ret;
 }
 
-
-
-zio::Node::Node(nickname_t nick, origin_t origin,
-                const std::string& hostname)
+zio::Node::Node(nickname_t nick, origin_t origin, const std::string& hostname)
     : m_nick(nick)
     , m_origin(origin)
     , m_hostname(hostname)
     , m_peer(nullptr)
 {
-    if (m_hostname.empty()) {
-        m_hostname = get_hostname();
-    }
+    if (m_hostname.empty()) { m_hostname = get_hostname(); }
 }
 
 zio::Node::~Node()
@@ -49,12 +43,9 @@ zio::portptr_t zio::Node::port(const std::string& name, int stype)
 zio::portptr_t zio::Node::port(const std::string& name)
 {
     auto it = m_ports.find(name);
-    if (it == m_ports.end()) {
-        return nullptr;
-    }
-    return it->second;    
+    if (it == m_ports.end()) { return nullptr; }
+    return it->second;
 }
-
 
 void zio::Node::online(const headerset_t& extra_headers)
 {
@@ -70,32 +61,24 @@ void zio::Node::online(const headerset_t& extra_headers)
         zio::debug("\t{} = {}", hh.first.c_str(), hh.second.c_str());
     }
     m_peer = new Peer(m_nick, headers, m_verbose);
-    for (auto& np : m_ports) {
-        np.second->online(*m_peer);
-    }
+    for (auto& np : m_ports) { np.second->online(*m_peer); }
 }
 
 void zio::Node::offline()
 {
-    if (!m_peer) { return ; }
-    for (auto& np : m_ports) {
-        np.second->offline();
-    }
+    if (!m_peer) { return; }
+    for (auto& np : m_ports) { np.second->offline(); }
     delete m_peer;
     m_peer = nullptr;
 }
 
-
 void zio::Node::set_origin(origin_t origin)
 {
     m_origin = origin;
-    for (auto& np : m_ports) {
-        np.second->set_origin(origin);
-    }
+    for (auto& np : m_ports) { np.second->set_origin(origin); }
 }
 void zio::Node::set_verbose(bool verbose)
 {
     m_verbose = verbose;
-    if (m_peer) 
-        m_peer->set_verbose(verbose);
+    if (m_peer) m_peer->set_verbose(verbose);
 }

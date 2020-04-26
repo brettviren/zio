@@ -1,3 +1,4 @@
+#!/usr/bin/env waf
 VERSION='0.0.0'
 APPNAME='zio'
 
@@ -85,3 +86,7 @@ def build(bld):
     
     from waflib.Tools import waf_unit_test
     bld.add_post_fun(waf_unit_test.summary)
+
+# FIXME:
+# add support for runnign clang-format something like
+# for n in  $(find . -name '*.cpp' $(printf "! -path %s " $(cat .clang-format-ignore))); do echo $n; clang-format -i $n; done

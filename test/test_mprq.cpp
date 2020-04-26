@@ -13,7 +13,6 @@ void take_away(zio::multipart_t& mmsg)
     assert(q[0].size() == 1);
 }
 
-
 int main()
 {
     {
@@ -27,7 +26,7 @@ int main()
 
     {
         zio::multipart_t mp;
-        mp.pushmem(NULL,0);
+        mp.pushmem(NULL, 0);
         take_away(mp);
         assert(mp.size() == 0);
     }

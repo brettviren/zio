@@ -1,42 +1,43 @@
 #include <iostream>
 
-struct Thing {
+struct Thing
+{
     int x;
 
-    Thing(int exs) : x(exs) {
-        std::cout << "int constructor\n";
-    }
-    Thing(const Thing &rhs) {
+    Thing(int exs) : x(exs) { std::cout << "int constructor\n"; }
+    Thing(const Thing &rhs)
+    {
         std::cout << "rvalue reference copy constructor\n";
         x = rhs.x;
     }
-    Thing& operator=(Thing &rhs) {
+    Thing &operator=(Thing &rhs)
+    {
         std::cout << "rvalue reference assignment\n";
         x = rhs.x;
         return *this;
     }
-    Thing(const Thing &&rhs) {
+    Thing(const Thing &&rhs)
+    {
         std::cout << "rvalue reference copy constructor\n";
         x = rhs.x;
     }
-    Thing& operator=(Thing &&rhs) {
+    Thing &operator=(Thing &&rhs)
+    {
         std::cout << "rvalue reference assignment\n";
         x = rhs.x;
         return *this;
     }
-    ~Thing() {
-        std::cout << "destructor\n";
-    }
+    ~Thing() { std::cout << "destructor\n"; }
 };
 
 Thing share_my_thing()
 {
     Thing t{42};
-    //return std::move(t);
+    // return std::move(t);
     return t;
 }
 
-void use_thing(Thing&& thing = Thing{0})
+void use_thing(Thing &&thing = Thing{0})
 {
     std::cout << thing.x << std::endl;
     thing.x = -1;

@@ -2,62 +2,58 @@
 #include <complex>
 #include <typeinfo>
 
-
 namespace zio {
     namespace tens {
         const char* form = "TENS";
     }
-}
+}  // namespace zio
 
 // stolen from cnpy
 const char* zio::tens::type_name(const std::type_info& t)
 {
-    if(t == typeid(float) ) return "f";
-    if(t == typeid(double) ) return "f";
-    if(t == typeid(long double) ) return "f";
+    if (t == typeid(float)) return "f";
+    if (t == typeid(double)) return "f";
+    if (t == typeid(long double)) return "f";
 
-    if(t == typeid(int) ) return "i";
-    if(t == typeid(char) ) return "i";
-    if(t == typeid(short) ) return "i";
-    if(t == typeid(long) ) return "i";
-    if(t == typeid(long long) ) return "i";
-    if(t == typeid(int8_t) ) return "i";
-    if(t == typeid(int16_t) ) return "i";
-    if(t == typeid(int32_t) ) return "i";
-    if(t == typeid(int64_t) ) return "i";
+    if (t == typeid(int)) return "i";
+    if (t == typeid(char)) return "i";
+    if (t == typeid(short)) return "i";
+    if (t == typeid(long)) return "i";
+    if (t == typeid(long long)) return "i";
+    if (t == typeid(int8_t)) return "i";
+    if (t == typeid(int16_t)) return "i";
+    if (t == typeid(int32_t)) return "i";
+    if (t == typeid(int64_t)) return "i";
 
-    if(t == typeid(unsigned char) ) return "u";
-    if(t == typeid(unsigned short) ) return "u";
-    if(t == typeid(unsigned long) ) return "u";
-    if(t == typeid(unsigned long long) ) return "u";
-    if(t == typeid(unsigned int) ) return "u";
-    if(t == typeid(uint8_t) ) return "u";
-    if(t == typeid(uint16_t) ) return "u";
-    if(t == typeid(uint32_t) ) return "u";
-    if(t == typeid(uint64_t) ) return "u";
+    if (t == typeid(unsigned char)) return "u";
+    if (t == typeid(unsigned short)) return "u";
+    if (t == typeid(unsigned long)) return "u";
+    if (t == typeid(unsigned long long)) return "u";
+    if (t == typeid(unsigned int)) return "u";
+    if (t == typeid(uint8_t)) return "u";
+    if (t == typeid(uint16_t)) return "u";
+    if (t == typeid(uint32_t)) return "u";
+    if (t == typeid(uint64_t)) return "u";
 
-    if(t == typeid(bool) ) return "b";
+    if (t == typeid(bool)) return "b";
 
-    if(t == typeid(std::complex<float>) ) return "c";
-    if(t == typeid(std::complex<double>) ) return "c";
-    if(t == typeid(std::complex<long double>) ) return "c";
+    if (t == typeid(std::complex<float>)) return "c";
+    if (t == typeid(std::complex<double>)) return "c";
+    if (t == typeid(std::complex<long double>))
+        return "c";
 
-    else return "?";
+    else
+        return "?";
 }
 
 void zio::tens::append(zio::Message& msg, zio::message_t&& data,
-                       const std::vector<size_t>& shape,
-                       size_t word_size, const char* tn,
-                       const zio::json& metadata)
+                       const std::vector<size_t>& shape, size_t word_size,
+                       const char* tn, const zio::json& metadata)
 {
-    if (msg.form().empty()) {
-        msg.set_form(zio::tens::form);
-    }
+    if (msg.form().empty()) { msg.set_form(zio::tens::form); }
     zio::json lobj = zio::json::value_t::object;
     std::string label = msg.label();
-    if (! label.empty()) {
-        lobj = zio::json::parse(label);
-    }
+    if (!label.empty()) { lobj = zio::json::parse(label); }
     zio::json md = {
         {"shape", shape},
         {"word", word_size},
@@ -65,9 +61,7 @@ void zio::tens::append(zio::Message& msg, zio::message_t&& data,
         {"part", msg.payload().size()}
         // no order as this is C++
     };
-    if (! metadata.is_null()) {
-        md["metadata"] = metadata;
-    }
+    if (!metadata.is_null()) { md["metadata"] = metadata; }
     lobj[zio::tens::form]["tensors"].push_back(md);
     msg.set_label_object(lobj);
     msg.add(std::move(data));
@@ -81,15 +75,9 @@ const zio::message_t& zio::tens::at(const Message& msg, size_t index)
     auto ta = lobj[zio::tens::form];
     auto md = ta["tensors"][index];
 
-    if (md.is_null()) {
-        return bogus;
-    }
+    if (md.is_null()) { return bogus; }
     size_t part = index;
-    if (md["part"].is_number()) {
-        part = md["part"].get<size_t>();
-    }
-    if (part < 0 or part >= msg.payload().size()) {
-        return bogus;
-    }
+    if (md["part"].is_number()) { part = md["part"].get<size_t>(); }
+    if (part < 0 or part >= msg.payload().size()) { return bogus; }
     return msg.payload()[part];
 }

@@ -13,7 +13,7 @@ namespace zio {
       and has a ZeroMQ socket which may (simultaneously) bind and
       connect.
 
-      Every bind is advertised for discovery by a @ref zio::Peer.  
+      Every bind is advertised for discovery by a @ref zio::Peer.
 
       Each connect may be direct which completes immediately or
       indirect (given based on node/port names) which waits for peer
@@ -27,29 +27,31 @@ namespace zio {
       ports may be taken subsequently "offline" and the cycle repeated.
 
     */
-    class Node {
+    class Node
+    {
         nickname_t m_nick;
         origin_t m_origin;
 
         std::string m_hostname;
         Peer* m_peer;
         std::unordered_map<std::string, portptr_t> m_ports;
-        std::vector<std::string> m_portnames; // in order of creation.
+        std::vector<std::string> m_portnames;  // in order of creation.
         bool m_verbose{false};
 
-    public:
+       public:
         /// Create a node.
-        Node(nickname_t nick="", origin_t origin=0,
-             const std::string& hostname="");
+        Node(nickname_t nick = "", origin_t origin = 0,
+             const std::string& hostname = "");
 
         ~Node();
 
         /// Return a previously set node nickname
         nickname_t nick() const { return m_nick; }
-        /// Return a previously set node origin 
+        /// Return a previously set node origin
         origin_t origin() const { return m_origin; }
         /// Return names of all ports in order of their creation.
-        const std::vector<std::string>& portnames() const {
+        const std::vector<std::string>& portnames() const
+        {
             return m_portnames;
         }
 
@@ -70,17 +72,16 @@ namespace zio {
 
         /// Return a previously created port
         portptr_t port(const std::string& name);
-        
+
         /// @brief Bring the node online.
-        /// 
+        ///
         /// The extra headers are merged with those provided by this
         /// nodes @ref zio::Peer.
         void online(const headerset_t& extra_headers = {});
 
         /// Bring the node offline.
         void offline();
-
     };
-}
+}  // namespace zio
 
 #endif

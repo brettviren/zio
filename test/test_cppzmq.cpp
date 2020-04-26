@@ -34,36 +34,34 @@ int main()
     zio::debug("sending {}", hw);
     zio::message_t smsg(hw.data(), hw.size());
     auto ses = c.send(smsg, zio::send_flags::none);
-    assert (ses);
-    assert (*ses == hw.size());
-    assert (ses.value() == hw.size());
-
+    assert(ses);
+    assert(*ses == hw.size());
+    assert(ses.value() == hw.size());
 
     zio::debug("receiving");
     zio::message_t rmsg;
     auto res = s.recv(rmsg);
-    assert (res);
-    assert (*res == hw.size());
-    assert (res.value() == hw.size());
-    assert (rmsg.size() == hw.size());
+    assert(res);
+    assert(*res == hw.size());
+    assert(res.value() == hw.size());
+    assert(rmsg.size() == hw.size());
     std::string hw2(static_cast<char*>(rmsg.data()), rmsg.size());
-    assert (hw2.size() == hw.size());
-    assert (hw2 == hw);
+    assert(hw2.size() == hw.size());
+    assert(hw2 == hw);
 
-    assert (rmsg.routing_id());
+    assert(rmsg.routing_id());
 
     ses = s.send(rmsg, zio::send_flags::none);
     assert(ses);
 
     res = c.recv(rmsg);
-    assert (res);
-    assert (*res == hw.size());
-    assert (res.value() == hw.size());
-    assert (rmsg.size() == hw.size());
+    assert(res);
+    assert(*res == hw.size());
+    assert(res.value() == hw.size());
+    assert(rmsg.size() == hw.size());
     std::string hw3(static_cast<char*>(rmsg.data()), rmsg.size());
-    assert (hw3.size() == hw.size());
-    assert (hw3 == hw);
-    
+    assert(hw3.size() == hw.size());
+    assert(hw3 == hw);
 
     return 0;
 }

@@ -12,8 +12,7 @@ struct client_protocol
 {
     typedef std::vector<std::uint8_t> const_buffer;
 
-
-  // clang-format off
+    // clang-format off
 
   // public interface
   struct ev_connect{};
@@ -33,34 +32,34 @@ struct client_protocol
     const_buffer data;
   };
 
-  // clang-format on
+    // clang-format on
 
-  struct events
-  {
-    std::function<void()> established;
-    std::function<void()> disconnected;
-    std::function<void()> error;
-    std::function<void(const_buffer)> payload;
-  };
-
-  struct actions
-  {
-    std::function<void()> connect;
-    std::function<void(bool initiator)> disconnect;
-
-    std::function<void()> start_stream;
-    std::function<void()> send_handshake;
-    std::function<void()> wait_retry;
-  };
-
-  struct connected
-  {
-    auto operator()()
+    struct events
     {
-      using namespace boost::sml;
-      namespace sml = boost::sml;
+        std::function<void()> established;
+        std::function<void()> disconnected;
+        std::function<void()> error;
+        std::function<void(const_buffer)> payload;
+    };
 
-      // clang-format off
+    struct actions
+    {
+        std::function<void()> connect;
+        std::function<void(bool initiator)> disconnect;
+
+        std::function<void()> start_stream;
+        std::function<void()> send_handshake;
+        std::function<void()> wait_retry;
+    };
+
+    struct connected
+    {
+        auto operator()()
+        {
+            using namespace boost::sml;
+            namespace sml = boost::sml;
+
+            // clang-format off
       return make_transition_table(
           *"handshake"_s + sml::on_entry<_> / [](actions& ac) { ac.start_stream(); ac.send_handshake(); }
           ,"handshake"_s + sml::event<ev_handshake_ack> = "established"_s
@@ -70,18 +69,18 @@ struct client_protocol
             ev.payload(e.data);
           }
         );
-      // clang-format on
-    }
-  };
+            // clang-format on
+        }
+    };
 
-  struct protocol
-  {
-    auto operator()()
+    struct protocol
     {
-      using namespace boost::sml;
-      namespace sml = boost::sml;
+        auto operator()()
+        {
+            using namespace boost::sml;
+            namespace sml = boost::sml;
 
-      // clang-format off
+            // clang-format off
       return make_transition_table(
           *"disconnected"_s + sml::event<ev_connect> = "connecting"_s 
 
@@ -108,16 +107,16 @@ struct client_protocol
 
           ,"fin"_s + sml::on_entry<_> / [](actions& ac) { ac.disconnect(false); }
       );
-      // clang-format on
-    }
-  };
+            // clang-format on
+        }
+    };
 
-  auto operator()()
-  {
-    using namespace boost::sml;
-    namespace sml = boost::sml;
+    auto operator()()
+    {
+        using namespace boost::sml;
+        namespace sml = boost::sml;
 
-    // clang-format off
+        // clang-format off
     return make_transition_table(
         *state<protocol> + sml::event<ev_error> / [](actions& ac, events& ev)
         {
@@ -125,58 +124,62 @@ struct client_protocol
           ev.error();
         } = X
       );
-    // clang-format on
-  }
+        // clang-format on
+    }
 };
 
-
 template <class T>
-void dump_transition() noexcept {
+void dump_transition() noexcept
+{
     namespace sml = boost::sml;
 
-    auto src_state = std::string{sml::aux::string<typename T::src_state>{}.c_str()};
-    auto dst_state = std::string{sml::aux::string<typename T::dst_state>{}.c_str()};
-    if (dst_state == "X") {
-        dst_state = "[*]";
-    }
+    auto src_state =
+        std::string{sml::aux::string<typename T::src_state>{}.c_str()};
+    auto dst_state =
+        std::string{sml::aux::string<typename T::dst_state>{}.c_str()};
+    if (dst_state == "X") { dst_state = "[*]"; }
 
-    if (T::initial) {
-        std::cout << "[*] --> " << src_state << std::endl;
-    }
+    if (T::initial) { std::cout << "[*] --> " << src_state << std::endl; }
 
     std::cout << src_state << " --> " << dst_state;
 
-    const auto has_event = !sml::aux::is_same<typename T::event, sml::anonymous>::value;
-    const auto has_guard = !sml::aux::is_same<typename T::guard, sml::front::always>::value;
-    const auto has_action = !sml::aux::is_same<typename T::action, sml::front::none>::value;
+    const auto has_event =
+        !sml::aux::is_same<typename T::event, sml::anonymous>::value;
+    const auto has_guard =
+        !sml::aux::is_same<typename T::guard, sml::front::always>::value;
+    const auto has_action =
+        !sml::aux::is_same<typename T::action, sml::front::none>::value;
 
-    if (has_event || has_guard || has_action) {
-        std::cout << " :";
-    }
+    if (has_event || has_guard || has_action) { std::cout << " :"; }
 
     if (has_event) {
         std::cout << " " << boost::sml::aux::get_type_name<typename T::event>();
     }
 
     if (has_guard) {
-        std::cout << " [" << boost::sml::aux::get_type_name<typename T::guard::type>() << "]";
+        std::cout << " ["
+                  << boost::sml::aux::get_type_name<typename T::guard::type>()
+                  << "]";
     }
 
     if (has_action) {
-        std::cout << " / " << boost::sml::aux::get_type_name<typename T::action::type>();
+        std::cout << " / "
+                  << boost::sml::aux::get_type_name<typename T::action::type>();
     }
 
     std::cout << std::endl;
 }
 
 template <template <class...> class T, class... Ts>
-void dump_transitions(const T<Ts...>&) noexcept {
+void dump_transitions(const T<Ts...>&) noexcept
+{
     int _[]{0, (dump_transition<Ts>(), 0)...};
     (void)_;
 }
 
 template <class SM>
-void dump(const SM&) noexcept {
+void dump(const SM&) noexcept
+{
     std::cout << "@startuml" << std::endl << std::endl;
     dump_transitions(typename SM::transitions{});
     std::cout << std::endl << "@enduml" << std::endl;
@@ -186,19 +189,17 @@ int main()
 {
     namespace sml = boost::sml;
     using namespace sml;
-    client_protocol::actions ac {
+    client_protocol::actions ac{
         []() { std::cout << "connect\n"; },
-        [](bool initiator) { std::cout << "disconnect "<<initiator<<"\n"; },
+        [](bool initiator) { std::cout << "disconnect " << initiator << "\n"; },
         []() { std::cout << "start_stream\n"; },
         []() { std::cout << "send_handshake\n"; },
-        []() { std::cout << "wait_retry\n"; }
-    };
-    client_protocol::events ev {
+        []() { std::cout << "wait_retry\n"; }};
+    client_protocol::events ev{
         []() { std::cout << "established\n"; },
         []() { std::cout << "disconnected\n"; },
         []() { std::cout << "error\n"; },
-        [](client_protocol::const_buffer) { std::cout << "payload\n"; }
-    };
+        [](client_protocol::const_buffer) { std::cout << "payload\n"; }};
 
     sm<client_protocol> mysm{ev, ac};
     assert(mysm.is(state<client_protocol::protocol>));
@@ -219,5 +220,4 @@ int main()
     //     sm<client_protocol::protocol> p{ev,ac};
     //     dump(p);
     // }
-
 }

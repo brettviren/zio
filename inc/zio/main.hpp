@@ -11,7 +11,6 @@ namespace zio {
 
     // Initialize signal catching and logging.
     void init_all();
-}
+}  // namespace zio
 
 #endif
-

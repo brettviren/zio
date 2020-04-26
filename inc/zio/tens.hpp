@@ -1,4 +1,4 @@
-/** 
+/**
     Handle TENS message form.
 */
 
@@ -16,32 +16,36 @@ namespace zio {
 
         const char* type_name(const std::type_info& t);
 
-        template<typename Type>
-        const char* dtype() { return type_name(typeid(Type)); }
+        template <typename Type>
+        const char* dtype()
+        {
+            return type_name(typeid(Type));
+        }
 
         /*! Generic version of append. */
         void append(Message& msg, message_t&& data,
-                    const std::vector<size_t>& shape,
-                    size_t word_size, const char* tn,
-                    const zio::json& md = zio::json{});
+                    const std::vector<size_t>& shape, size_t word_size,
+                    const char* tn, const zio::json& md = zio::json{});
 
         /*! Append one array data of given shape to message.
          *
          * - shape :: number of elements in each dimension.
-         * 
+         *
          * This performs a copy of data.
          */
-        template<typename ElementType>
+        template <typename ElementType>
         void append(Message& msg, const ElementType* data,
-                    const std::vector<size_t>& shape, const zio::json& md = zio::json{}) {
+                    const std::vector<size_t>& shape,
+                    const zio::json& md = zio::json{})
+        {
             size_t nbytes = sizeof(ElementType);
             size_t word = nbytes;
             for (auto s : shape) { nbytes *= s; }
-            append(msg, zio::message_t((const void*)data, nbytes),
-                   shape, word, type_name(typeid(ElementType)), md);
+            append(msg, zio::message_t((const void*)data, nbytes), shape, word,
+                   type_name(typeid(ElementType)), md);
         }
-                    
-        /*! Return the tensor at the given index.  
+
+        /*! Return the tensor at the given index.
          *
          * Index is into the label object TENS JSON array which may
          * not be the message part index.
@@ -56,14 +60,15 @@ namespace zio {
          *
          * Index over/underflow or type mismatch returns NULL.
          */
-        template<typename ElementType>
-        const ElementType* at(const Message& msg, size_t index) {
+        template <typename ElementType>
+        const ElementType* at(const Message& msg, size_t index)
+        {
             const zio::message_t& ret = at(msg, index);
             if (ret.empty()) { return nullptr; }
-            return (const ElementType*) ret.data();
+            return (const ElementType*)ret.data();
         }
 
-    }
-}
+    }  // namespace tens
+}  // namespace zio
 
 #endif

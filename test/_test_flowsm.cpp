@@ -6,49 +6,61 @@
 #include <stdexcept>
 #include "zio/sml.hpp"
 
-struct flow_protocol {
-
+struct flow_protocol
+{
     typedef int endpoint_t;
     enum FlowDirection { undefined, extract, inject };
     typedef int direction_t;
     typedef int credit_t;
 
     // Events
-    struct ev_error {};
+    struct ev_error
+    {
+    };
 
     // All events which are also message have common base
-    struct ev_msg {
-        endpoint_t ep; // 0 means message came from a server thus we are in client mode
+    struct ev_msg
+    {
+        endpoint_t ep;  // 0 means message came from a server thus we are in
+                        // client mode
     };
     // begin-of-transmission
-    struct ev_bot : public ev_msg {
-        FlowDirection fdir; // server&&extract or client&&inject == recving
+    struct ev_bot : public ev_msg
+    {
+        FlowDirection fdir;  // server&&extract or client&&inject == recving
         credit_t credit;
     };
     // end-of-tranmission
-    struct ev_eot : public ev_msg {
-        bool ack;               // if true, send EOT to other end
+    struct ev_eot : public ev_msg
+    {
+        bool ack;  // if true, send EOT to other end
     };
     typedef ev_bot ev_checksr;
-    struct ev_sending{
+    struct ev_sending
+    {
         int credit;
     };
-    struct ev_recving{
+    struct ev_recving
+    {
         int credit;
     };
-    struct ev_dat : public ev_msg {
+    struct ev_dat : public ev_msg
+    {
         int data;
     };
-    struct ev_pay : public ev_msg {
+    struct ev_pay : public ev_msg
+    {
         int credit;
     };
 
     // Injected event callbacks
-    struct eventcbs {
+    struct eventcbs
+    {
         std::function<void()> error;
     };
     // Injected action callbacks
-    struct actioncbs {
+    struct actioncbs
+    {
         std::function<void(bool initiator)> disconnect;
         // use for server, BOT comes from app, should send a BOT to client
         std::function<void(const ev_bot&)> send_bot;
@@ -60,17 +72,18 @@ struct flow_protocol {
         std::function<void(const ev_pay&)> got_pay;
     };
 
-
-    struct protocol {
+    struct protocol
+    {
         int credit{0};
         int total_credit{0};
 
-        auto operator()() {
+        auto operator()()
+        {
             namespace sml = boost::sml;
             using namespace sml;
 
-            auto we_are_server = [](const ev_bot& b) { return b.ep>0; };
-            auto we_are_client = [](const ev_bot& b) { return b.ep==0; };
+            auto we_are_server = [](const ev_bot& b) { return b.ep > 0; };
+            auto we_are_client = [](const ev_bot& b) { return b.ep == 0; };
 
             return make_transition_table(
 
@@ -126,27 +139,25 @@ struct flow_protocol {
         }
     };
 
-    auto operator()() {
+    auto operator()()
+    {
         namespace sml = boost::sml;
         using namespace sml;
 
         return make_transition_table(
-            *state<protocol> + event<ev_eot> / 
-            [](const ev_eot& ev, actioncbs& ac)
-                {
-                    ac.eot(ev);
-                } = "fin"_s
-            ,"fin"_s / []{std::cout<<"exiting\n";} = X
+            *state<protocol> +
+                event<ev_eot> / [](const ev_eot& ev,
+                                   actioncbs& ac) { ac.eot(ev); } = "fin"_s,
+            "fin"_s / [] { std::cout << "exiting\n"; } = X
 
-            );
+        );
     }
-    
-
 };
 
 std::ostream& operator<<(std::ostream& o, const flow_protocol::ev_bot& bot)
 {
-    o << "<BOT ep=" << bot.ep << " fdir=" << bot.fdir << " credit=" << bot.credit << ">";
+    o << "<BOT ep=" << bot.ep << " fdir=" << bot.fdir
+      << " credit=" << bot.credit << ">";
     return o;
 }
 std::ostream& operator<<(std::ostream& o, const flow_protocol::ev_eot& eot)
@@ -173,32 +184,43 @@ int main()
     namespace sml = boost::sml;
     using namespace sml;
 
-    flow_protocol::actioncbs ac {
-        [](bool initiator) { std::cout << "disconnect "<<initiator<<"\n"; },
-        [](const flow_protocol::ev_bot& bot) { std::cout << "send_bot(" << bot << ")\n"; },
-        [](const flow_protocol::ev_bot& bot) { std::cout << "recv_bot(" << bot << ")\n"; },
-        [](const flow_protocol::ev_eot& eot) { std::cout << "eot(" << eot << ")\n"; },
-        [](const flow_protocol::ev_dat& dat) { std::cout << "got_dat(" << dat << ")\n"; },
-        [](const flow_protocol::ev_pay& pay) { std::cout << "got_pay(" << pay << ")\n"; }
-    };
-    flow_protocol::eventcbs ev {
+    flow_protocol::actioncbs ac{
+        [](bool initiator) { std::cout << "disconnect " << initiator << "\n"; },
+        [](const flow_protocol::ev_bot& bot) {
+            std::cout << "send_bot(" << bot << ")\n";
+        },
+        [](const flow_protocol::ev_bot& bot) {
+            std::cout << "recv_bot(" << bot << ")\n";
+        },
+        [](const flow_protocol::ev_eot& eot) {
+            std::cout << "eot(" << eot << ")\n";
+        },
+        [](const flow_protocol::ev_dat& dat) {
+            std::cout << "got_dat(" << dat << ")\n";
+        },
+        [](const flow_protocol::ev_pay& pay) {
+            std::cout << "got_pay(" << pay << ")\n";
+        }};
+    flow_protocol::eventcbs ev{
         []() { std::cout << "error\n"; },
     };
 
-    sm<flow_protocol, sml::defer_queue<std::deque>, sml::process_queue<std::queue> > mysm{ac, ev};
+    sm<flow_protocol, sml::defer_queue<std::deque>,
+       sml::process_queue<std::queue> >
+        mysm{ac, ev};
     assert(mysm.is(state<flow_protocol::protocol>));
     // non-zero ID means message came from a client so SM is a server.
     // server+extract means SM is recving
-    mysm.process_event(flow_protocol::ev_bot{1,flow_protocol::extract, 3});
+    mysm.process_event(flow_protocol::ev_bot{1, flow_protocol::extract, 3});
     assert(mysm.is(state<flow_protocol::protocol>));
-    //assert(mysm.is<decltype(state<flow_protocol::protocol>)>("established"_s));
-    //assert(mysm.is<decltype(state<flow_protocol::protocol>)>(X));
-    //assert(!mysm.is(X));
+    // assert(mysm.is<decltype(state<flow_protocol::protocol>)>("established"_s));
+    // assert(mysm.is<decltype(state<flow_protocol::protocol>)>(X));
+    // assert(!mysm.is(X));
 
-    mysm.process_event(flow_protocol::ev_dat{1,100});
-    mysm.process_event(flow_protocol::ev_dat{0,100}); // changing ID is an internal error, SM won't catch
+    mysm.process_event(flow_protocol::ev_dat{1, 100});
+    mysm.process_event(flow_protocol::ev_dat{
+        0, 100});  // changing ID is an internal error, SM won't catch
 
     mysm.process_event(flow_protocol::ev_eot{1});
     assert(mysm.is(X));
 };
-

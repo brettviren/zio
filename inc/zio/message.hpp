@@ -16,16 +16,24 @@ namespace zio {
 
     namespace level {
         enum MessageLevel {
-            undefined=0,
-            trace,verbose,debug,info,summary,warning,error,fatal,
+            undefined = 0,
+            trace,
+            verbose,
+            debug,
+            info,
+            summary,
+            warning,
+            error,
+            fatal,
         };
 
         const char* name(MessageLevel lvl);
-    }
+    }  // namespace level
 
-    struct PrefixHeader {
+    struct PrefixHeader
+    {
         level::MessageLevel level{level::undefined};
-        std::string form{"    "}; // we keep this exactly length 4
+        std::string form{"    "};  // we keep this exactly length 4
         std::string label{""};
 
         std::string dumps() const;
@@ -37,12 +45,14 @@ namespace zio {
     typedef uint64_t granule_t;
     typedef uint64_t seqno_t;
 
-    struct CoordHeader {
+    struct CoordHeader
+    {
         origin_t origin{0};
         granule_t granule{0};
         seqno_t seqno{0};
     };
-    struct Header {
+    struct Header
+    {
         PrefixHeader prefix;
         CoordHeader coord;
     };
@@ -56,15 +66,17 @@ namespace zio {
       Optional following parts are payload.
 
      */
-    class Message {
-    public:
+    class Message
+    {
+       public:
         typedef Header header_t;
 
         Message();
-        Message(const std::string& form, level::MessageLevel lvl = level::undefined);
+        Message(const std::string& form,
+                level::MessageLevel lvl = level::undefined);
         Message(const header_t h);
         Message(const header_t h, multipart_t&& pl);
-        
+
         level::MessageLevel level() const;
         void set_level(level::MessageLevel level);
 
@@ -86,7 +98,7 @@ namespace zio {
 
         /// Prepare for sending, advance seqno automatically, set
         /// granule (if 0 use time), origin (if 0, leave as is).
-        void set_coord(origin_t origin=0, granule_t gran=0);
+        void set_coord(origin_t origin = 0, granule_t gran = 0);
 
         /// Explicit set
         void set_seqno(int seqno) { m_header.coord.seqno = seqno; }
@@ -115,14 +127,12 @@ namespace zio {
         remote_identity_t remote_id() const { return m_remid; }
         void set_remote_id(remote_identity_t remid) { m_remid = remid; }
 
-    private:
+       private:
         header_t m_header;
         multipart_t m_payload;
         remote_identity_t m_remid;
-        
     };
 
-
-}
+}  // namespace zio
 
 #endif

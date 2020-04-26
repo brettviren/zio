@@ -7,7 +7,6 @@ int main()
         zio::socket_t sock(ctx, ZMQ_PUB);
         sock.bind("tcp://127.0.0.1:*");
     }
-        
 
     return 0;
 }
