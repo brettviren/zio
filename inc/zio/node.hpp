@@ -7,26 +7,25 @@
 namespace zio {
 
     /*!
-      @brief An identified vertex in a ported, directed graph
-
-      Each port (a @ref zio::Port) is named uniquely within the node
-      and has a ZeroMQ socket which may (simultaneously) bind and
-      connect.
-
-      Every bind is advertised for discovery by a @ref zio::Peer.
-
-      Each connect may be direct which completes immediately or
-      indirect (given based on node/port names) which waits for peer
-      discovery to resolve.
-
-      Nodes start in "offline" state.  During that state, ports may be
-      created.  The ports also start in "offline" state and while offline
-      they may bind() or connect().  When a node is brought "online" it
-      brings all ports "online" and it is then when any bind() or
-      connect() and associated discovery are performed.  A node and its
-      ports may be taken subsequently "offline" and the cycle repeated.
-
-    */
+     * @brief An identified vertex in a ported, directed graph
+     *
+     * Each port (a @ref zio::Port) is named uniquely within the node
+     * and has a ZeroMQ socket which may (simultaneously) bind and
+     * connect.
+     *
+     * Every bind is advertised for discovery by a @ref zio::Peer.
+     *
+     * Each connect may be direct which completes immediately or
+     * indirect (given based on node/port names) which waits for peer
+     * discovery to resolve.
+     *
+     * Nodes start in "offline" state.  During that state, ports may be
+     * created.  The ports also start in "offline" state and while offline
+     * they may bind() or connect().  When a node is brought "online" it
+     * brings all ports "online" and it is then when any bind() or
+     * connect() and associated discovery are performed.  A node and its
+     * ports may be taken subsequently "offline" and the cycle repeated.
+     */
     class Node
     {
         nickname_t m_nick;

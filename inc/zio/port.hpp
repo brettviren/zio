@@ -11,18 +11,17 @@
 namespace zio {
 
     /*!
-      @brief A port holds a socket in the context of a @ref node.
-
-      A port provides an identity (name) for the socket in the context
-      of a node to the network (via a peer) and to the application
-      (via a method).
-
-      It provides direct and discovery-based bind() and connect().
-
-      Finally, using its send() and recv() their messages will adhere
-      to the ZIO conventions.
-
-    */
+     * @brief A port holds a socket in the context of a @ref node.
+     * 
+     * A port provides an identity (name) for the socket in the context
+     * of a node to the network (via a peer) and to the application
+     * (via a method).
+     * 
+     * It provides direct and discovery-based bind() and connect().
+     *
+     * Finally, using its send() and recv() their messages will adhere
+     * to the ZIO conventions.
+     */
     class Port
     {
       public:

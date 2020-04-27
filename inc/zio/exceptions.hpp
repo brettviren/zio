@@ -10,9 +10,8 @@ namespace zio {
     // This is heavily cribbed from nlohmann::json!
 
     /*!
-      @brief general exception class for zio
+     * @brief general exception class for zio
      */
-
     class exception : public std::exception
     {
       public:
@@ -33,11 +32,11 @@ namespace zio {
     };
 
     /*!
-      @brief exception indicating a socket error
-
-      This exception is thrown when the underlying socket operations
-      indicate an error.  The ID is set to the errno.
-    */
+     * @brief exception indicating a socket error
+     *
+     * This exception is thrown when the underlying socket operations
+     * indicate an error.  The ID is set to the errno.
+     */
     class socket_error : public exception
     {
       public:
@@ -67,14 +66,10 @@ namespace zio {
     };
 
     /*!
-      @brief exception indicating message error
-
-      This exception is thrown when some error occurs related to the
-      fromation of a zio message.  See also @ref socket_error.
-
-      IDs:
-      1. ...
-
+     * @brief exception indicating message error
+     * 
+     * This exception is thrown when some error occurs related to the
+     * fromation of a zio message.  See also @ref socket_error.
      */
     class message_error : public exception
     {

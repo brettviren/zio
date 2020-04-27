@@ -36,11 +36,11 @@ namespace zio {
     typedef std::map<uuid_t, peer_info_t> peerset_t;
 
     /*!
-      @brief Peer at the network to discover peers and advertise self.
-
-      This is a C++ interface to ZeroMQ's Zyre which adds some memory
-      of peers seen and ways to iterate on their Zyre headers.
-    */
+     * @brief Peer at the network to discover peers and advertise self.
+     * 
+     * This is a C++ interface to ZeroMQ's Zyre which adds some memory
+     * of peers seen and ways to iterate on their Zyre headers.
+     */
     class Peer
     {
       public:

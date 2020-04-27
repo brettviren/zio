@@ -1,7 +1,6 @@
 /**
-   Functions to manage message data including send and receiving with
-   a socket.
-
+ *  Functions to manage message data including send and receiving with
+ *  a socket.
  */
 
 #ifndef ZIO_MESSAGE_HPP_SEEN
@@ -58,13 +57,13 @@ namespace zio {
     };
 
     /*!
-      @brief a ZIO message
-
-      This adds semantic methods over a zio::multipart_t message.
-
-      First part holds the prefix header, second the coord header.
-      Optional following parts are payload.
-
+     * @brief a ZIO message
+     *
+     * This adds semantic methods over a zio::multipart_t message.
+     *
+     * First part holds the prefix header, second the coord header.
+     * Optional following parts are payload.
+     *
      */
     class Message
     {

@@ -1,8 +1,8 @@
 /*! An actor is a function running in a thread with a control link to
-    the parent thread.
-
-    This actor implements the "mini protocol" for startup/shutdown used by CZMQ
-*/
+ *  the parent thread.
+ * 
+ * This actor implements the "mini protocol" for startup/shutdown used by CZMQ
+ */
 
 #ifndef ZIO_ACTOR_HPP_SEEN
 #define ZIO_ACTOR_HPP_SEEN
@@ -32,40 +32,39 @@ namespace zio {
     }
 
     /*! Spawn a function in a thread and communicate over a link.
-
-      The actor function must take a socket and zero or more optional
-      arguments such as:
-
-          void func(socket_t& sock, ...);
-
-          zio::zactor_t actor(ctx, func, ...);
-          actor.link().send(...);
-
-      The socket passed in to the actor function is one end of a
-      bidirection link shared with the application thread.  The
-      application thread may get the other end of that link by calling
-      zio::zactor_t::link().
-
-      The actor function is expected to participate in a protocol on
-      the link which is compatible with the requirements of CZMQ
-      zactor_fn actor functions:
-
-      - The function body shall send to the link an initial "ready
-        signal" message (message content does not matter).
-
-      - The parent thread shall block until receiving an initial
-        message from the link.
-
-      - The function body shall expect a "termination message" (5
-        bytes, content "$TERM") at any time from the link and shall
-        exit shortly upon receiving it.
-
-      - Upon successfull send of "termination message" the parent
-        thread shall block until the actor function exits.
-
-      - If send of "termination message" fails, the actor function
-        shall be presumed to have already exited.
-
+     *
+     * The actor function must take a socket and zero or more optional
+     * arguments such as:
+     *
+     *     void func(socket_t& sock, ...);
+     *
+     *     zio::zactor_t actor(ctx, func, ...);
+     *     actor.link().send(...);
+     *
+     * The socket passed in to the actor function is one end of a
+     * bidirection link shared with the application thread.  The
+     * application thread may get the other end of that link by calling
+     * zio::zactor_t::link().
+     *
+     * The actor function is expected to participate in a protocol on
+     * the link which is compatible with the requirements of CZMQ
+     * zactor_fn actor functions:
+     *
+     * - The function body shall send to the link an initial "ready
+     *   signal" message (message content does not matter).
+     *
+     * - The parent thread shall block until receiving an initial
+     *   message from the link.
+     *
+     * - The function body shall expect a "termination message" (5
+     *   bytes, content "$TERM") at any time from the link and shall
+     *   exit shortly upon receiving it.
+     *
+     * - Upon successfull send of "termination message" the parent
+     *   thread shall block until the actor function exits.
+     *
+     * - If send of "termination message" fails, the actor function
+     *   shall be presumed to have already exited.
      */
     class zactor_t
     {

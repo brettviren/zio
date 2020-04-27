@@ -8,17 +8,16 @@
 namespace zio {
 
     /*!
-      @brief output objects of a fixed native type with levels expressed as
-      methods.
-
-      An Outbox provides a "logger" like object to simplfy use in code
-      to send out messages of a fixed type.
-
-      It is templated on a native type and given a functional object
-      to handle actual sending.  This object should convert from
-      native type to Message.
-
-    */
+     * @brief output objects of a fixed native type with levels expressed as
+     * methods.
+     *
+     * An Outbox provides a "logger" like object to simplfy use in code
+     * to send out messages of a fixed type.
+     *
+     * It is templated on a native type and given a functional object
+     * to handle actual sending.  This object should convert from
+     * native type to Message.
+     */
     template <typename NATIVE>
     class Outbox
     {
@@ -55,8 +54,8 @@ namespace zio {
     };
 
     /*!
-      @brief two special types of outboxes.
-    */
+     * @brief two special types of outboxes.
+     */
 
     /// A text based logger to use like print().
     typedef Outbox<std::string> Logger;

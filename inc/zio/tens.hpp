@@ -1,6 +1,6 @@
 /**
-    Handle TENS message form.
-*/
+ *    Handle TENS message form.
+ */
 
 #ifndef ZIO_TENS_H_SEEN
 #define ZIO_TENS_H_SEEN

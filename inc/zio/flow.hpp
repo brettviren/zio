@@ -1,6 +1,6 @@
 /*!
-  @brief ZIO data flow protocol.
-*/
+ *  @brief ZIO data flow protocol.
+ */
 
 #ifndef ZIO_FLOW_HPP_SEEN
 #define ZIO_FLOW_HPP_SEEN
@@ -80,24 +80,23 @@ namespace zio {
     {
       public:
         /*! @brief Create one side of a data flow.
-
-          The flow is created an initialized port, in the given
-          direction and with the given initial credit.  Depending on
-          the socket type of the port the credit will be asserted (for
-          "serverish" ports) or used as an initial recomendation
-          ("clientish" ports).
-
-          A nominal timeout is given and used by all calls that
-          participate in the protocol.  If a differing timeout is
-          needed for a particular call, the set_timeout() method may
-          be used.
-
-          The remaining methods interact with the flow protocol
-          (bot(), etc).  They return true on success, false if a
-          timeout occured and will throw zio::flow::protocol_error if
-          the call violates the flow protocol.
-
-        */
+         *
+         * The flow is created an initialized port, in the given
+         * direction and with the given initial credit.  Depending on
+         * the socket type of the port the credit will be asserted (for
+         * "serverish" ports) or used as an initial recomendation
+         * ("clientish" ports).
+         *
+         * A nominal timeout is given and used by all calls that
+         * participate in the protocol.  If a differing timeout is
+         * needed for a particular call, the set_timeout() method may
+         * be used.
+         *
+         * The remaining methods interact with the flow protocol
+         * (bot(), etc).  They return true on success, false if a
+         * timeout occured and will throw zio::flow::protocol_error if
+         * the call violates the flow protocol.
+         */
         Flow(zio::portptr_t p, flow::direction_e direction, int credit,
              timeout_t tout = timeout_t{});
         ~Flow();
