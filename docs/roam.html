@@ -3,10 +3,10 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-04-26 Sun 15:34 -->
+<!-- 2020-04-27 Mon 09:29 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>ZIO RPC</title>
+<title>ZIO ROAM</title>
 <meta name="generator" content="Org mode" />
 <meta name="author" content="Brett Viren" />
 <style type="text/css">
@@ -234,17 +234,17 @@ for the JavaScript code in this tag.
  |
  <a accesskey="H" href="index.html"> HOME </a>
 </div><div id="content">
-<h1 class="title">ZIO RPC</h1>
+<h1 class="title">ZIO ROAM</h1>
 <div id="table-of-contents">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgd5ea2f6">1. Protocol</a></li>
-<li><a href="#org8774b09">2. Patterns</a>
+<li><a href="#org94bdc91">1. Protocol</a></li>
+<li><a href="#orgd461d35">2. Patterns</a>
 <ul>
-<li><a href="#org5fe9309">2.1. Classroom</a></li>
-<li><a href="#org337be38">2.2. Restaurant</a></li>
-<li><a href="#org4722744">2.3. Seeger</a></li>
+<li><a href="#orgc112616">2.1. Classroom</a></li>
+<li><a href="#org57a2cf3">2.2. Restaurant</a></li>
+<li><a href="#org1eb7c2b">2.3. Seeger</a></li>
 </ul>
 </li>
 </ul>
@@ -266,11 +266,11 @@ for the JavaScript code in this tag.
 There are many RPC systems.  Here is mine.
 </p>
 
-<div id="outline-container-orgd5ea2f6" class="outline-2">
-<h2 id="orgd5ea2f6"><span class="section-number-2">1</span> Protocol</h2>
+<div id="outline-container-org94bdc91" class="outline-2">
+<h2 id="org94bdc91"><span class="section-number-2">1</span> Protocol</h2>
 <div class="outline-text-2" id="text-1">
 <p>
-The ZIO remote object method execution (ROME) is an asynchronous,
+The ZIO remote object access method (ROAM) is an asynchronous,
 (mostly) symmetric and reliable protocol which allows one peer to
 issue a query on another and to receive a response.  It is
 asynchronous in that queries and responses may interleave and not
@@ -285,43 +285,43 @@ unresponsive and thus may abandon the conversation.
 When the query is interpreted as a request to execute some method or
 procedure on some object held by the remote endpoint then the response
 is considered to be the return value of that method.  Thus the ZIO
-ROME protocol can be seen as a generalization the more common and
+ROAM protocol can be seen as a generalization the more common and
 typically more restrictive remote procedure call (RPC) communication
-pattern.  ROME can simplify to RPC.
+pattern.  ROAM can simplify to RPC.
 </p>
 
 <p>
-Being part of ZIO, ROME uses the <a href="messages.html">ZIO message</a> for exchanging data.  The
-four byte message <i>form</i> is not surprisingly <code>ROME</code>.  Like the ZIO <a href="flow.html">flow</a>
-protocol, the label holds a JSON-encoded object.  All ZIO ROME
-messages must include a label object attribute <code>rome</code> to hold the value
-of one of the ROME message types listed below.  Additional label
-object attributes are required depending on the ROME message type,
+Being part of ZIO, ROAM uses the <a href="messages.html">ZIO message</a> for exchanging data.  The
+four byte message <i>form</i> is not surprisingly <code>ROAM</code>.  Like the ZIO <a href="flow.html">flow</a>
+protocol, the label holds a JSON-encoded object.  All ZIO ROAM
+messages must include a label object attribute <code>roam</code> to hold the value
+of one of the ROAM message types listed below.  Additional label
+object attributes are required depending on the ROAM message type,
 also in the message type list below.
 </p>
 
 <p>
-The prefix header is also required as part of the ZIO ROME protocol as
+The prefix header is also required as part of the ZIO ROAM protocol as
 defined:
 </p>
 
 <dl class="org-dl">
-<dt><code>seqno</code></dt><dd>shall hold the count of ZIO ROME messages that have been sent prior to the current message from the given application socket.</dd>
+<dt><code>seqno</code></dt><dd>shall hold the count of ZIO ROAM messages that have been sent prior to the current message from the given application socket.</dd>
 <dt><code>granule</code></dt><dd>shall hold the local time as determined by the sender and
 in an application-depended clock (eg, microseconds from Unix epoch).</dd>
 <dt><code>origin</code></dt><dd>may be used in an application-dependent manner.</dd>
 </dl>
 
 <p>
-The message payload parts are not strictly required by the ZIO ROME
+The message payload parts are not strictly required by the ZIO ROAM
 protocol and their use is application-dependent.  It is expected that
 applications will use them to hold data to be interpreted as method
-arguments or method return values by the ZIO ROME endpoint applications.
+arguments or method return values by the ZIO ROAM endpoint applications.
 </p>
 
 <p>
-The ZIO ROME protocol has three message types.  The type is identified
-by the <code>rome</code> label object attribute value.
+The ZIO ROAM protocol has three message types.  The type is identified
+by the <code>roam</code> label object attribute value.
 </p>
 
 <dl class="org-dl">
@@ -346,11 +346,11 @@ least 200 (OK).</dd>
 </div>
 </div>
 
-<div id="outline-container-org8774b09" class="outline-2">
-<h2 id="org8774b09"><span class="section-number-2">2</span> Patterns</h2>
+<div id="outline-container-orgd461d35" class="outline-2">
+<h2 id="orgd461d35"><span class="section-number-2">2</span> Patterns</h2>
 <div class="outline-text-2" id="text-2">
 <p>
-As mentioned, the ZIO ROME protocol is "mostly" symmetric.  ZeroMQ
+As mentioned, the ZIO ROAM protocol is "mostly" symmetric.  ZeroMQ
 sockets require some level of asymmetry.  For example, clientish
 sockets (CLIENT/DEALER) must send before serverish (SERVER/ROUTER) may
 reply.  That initial message may be provided by a clientish endpoint
@@ -366,23 +366,23 @@ requires then a pair of sockets, one for each directions.
 </p>
 
 <p>
-Thus the ZIO ROME protocol may be with a variety of socket patterns
+Thus the ZIO ROAM protocol may be with a variety of socket patterns
 based on the needs of the applications.  This section describes some
 compatible patterns which emerge.
 </p>
 </div>
 
-<div id="outline-container-org5fe9309" class="outline-3">
-<h3 id="org5fe9309"><span class="section-number-3">2.1</span> Classroom</h3>
+<div id="outline-container-orgc112616" class="outline-3">
+<h3 id="orgc112616"><span class="section-number-3">2.1</span> Classroom</h3>
 <div class="outline-text-3" id="text-2-1">
 
 <div class="figure">
-<p><img src="rome-classroom.png" alt="rome-classroom.png" />
+<p><img src="roam-classroom.png" alt="roam-classroom.png" />
 </p>
 </div>
 
 <p>
-The ZIO ROME classroom model is intended for applications that require
+The ZIO ROAM classroom model is intended for applications that require
 communication between a central "teacher" and multiple "students".  A
 student may make a CALL on the teacher ("ask a question") and the
 teacher may make a CALL on a student ("give instruction").
@@ -405,17 +405,17 @@ unique CLIENT socket for each in order to properly address a teacher.
 </div>
 
 
-<div id="outline-container-org337be38" class="outline-3">
-<h3 id="org337be38"><span class="section-number-3">2.2</span> Restaurant</h3>
+<div id="outline-container-org57a2cf3" class="outline-3">
+<h3 id="org57a2cf3"><span class="section-number-3">2.2</span> Restaurant</h3>
 <div class="outline-text-3" id="text-2-2">
 
 <div class="figure">
-<p><img src="rome-restaurant.png" alt="rome-restaurant.png" />
+<p><img src="roam-restaurant.png" alt="roam-restaurant.png" />
 </p>
 </div>
 
 <p>
-The ZIO ROME restaurant model is intended for applications that
+The ZIO ROAM restaurant model is intended for applications that
 require some redundancy.  It leverages the round-robin distribution
 pattern provided by some ZeroMQ sockets.
 </p>
@@ -443,17 +443,17 @@ one restaurant.
 </div>
 </div>
 
-<div id="outline-container-org4722744" class="outline-3">
-<h3 id="org4722744"><span class="section-number-3">2.3</span> Seeger</h3>
+<div id="outline-container-org1eb7c2b" class="outline-3">
+<h3 id="org1eb7c2b"><span class="section-number-3">2.3</span> Seeger</h3>
 <div class="outline-text-3" id="text-2-3">
 
 <div class="figure">
-<p><img src="rome-seeger.png" alt="rome-seeger.png" />
+<p><img src="roam-seeger.png" alt="roam-seeger.png" />
 </p>
 </div>
 
 <p>
-The ZIO ROME seeger model is intended for applications where one
+The ZIO ROAM seeger model is intended for applications where one
 individual ("singer") will make a CALL to a "crowd" of peers ("If I
 had a hammer") and the crowd will send BACK ("I'd hammer in the
 morning").  The crowd may be very large in number and/or it may not be

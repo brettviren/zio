@@ -1,4 +1,4 @@
-#+title: ZIO RPC
+#+title: ZIO ROAM
 #+setupfile: setup.org
 #+include: nav.org
 
@@ -6,7 +6,7 @@ There are many RPC systems.  Here is mine.
 
 * Protocol
 
-The ZIO remote object method execution (ROME) is an asynchronous,
+The ZIO remote object access method (ROAM) is an asynchronous,
 (mostly) symmetric and reliable protocol which allows one peer to
 issue a query on another and to receive a response.  It is
 asynchronous in that queries and responses may interleave and not
@@ -19,33 +19,33 @@ unresponsive and thus may abandon the conversation.
 When the query is interpreted as a request to execute some method or
 procedure on some object held by the remote endpoint then the response
 is considered to be the return value of that method.  Thus the ZIO
-ROME protocol can be seen as a generalization the more common and
+ROAM protocol can be seen as a generalization the more common and
 typically more restrictive remote procedure call (RPC) communication
-pattern.  ROME can simplify to RPC.
+pattern.  ROAM can simplify to RPC.
 
-Being part of ZIO, ROME uses the [[file:messages.org][ZIO message]] for exchanging data.  The
-four byte message /form/ is not surprisingly ~ROME~.  Like the ZIO [[file:flow.org][flow]]
-protocol, the label holds a JSON-encoded object.  All ZIO ROME
-messages must include a label object attribute ~rome~ to hold the value
-of one of the ROME message types listed below.  Additional label
-object attributes are required depending on the ROME message type,
+Being part of ZIO, ROAM uses the [[file:messages.org][ZIO message]] for exchanging data.  The
+four byte message /form/ is not surprisingly ~ROAM~.  Like the ZIO [[file:flow.org][flow]]
+protocol, the label holds a JSON-encoded object.  All ZIO ROAM
+messages must include a label object attribute ~roam~ to hold the value
+of one of the ROAM message types listed below.  Additional label
+object attributes are required depending on the ROAM message type,
 also in the message type list below.
 
-The prefix header is also required as part of the ZIO ROME protocol as
+The prefix header is also required as part of the ZIO ROAM protocol as
 defined:
 
-- ~seqno~ :: shall hold the count of ZIO ROME messages that have been sent prior to the current message from the given application socket.
+- ~seqno~ :: shall hold the count of ZIO ROAM messages that have been sent prior to the current message from the given application socket.
 - ~granule~ :: shall hold the local time as determined by the sender and
   in an application-depended clock (eg, microseconds from Unix epoch).
 - ~origin~ :: may be used in an application-dependent manner.
 
-The message payload parts are not strictly required by the ZIO ROME
+The message payload parts are not strictly required by the ZIO ROAM
 protocol and their use is application-dependent.  It is expected that
 applications will use them to hold data to be interpreted as method
-arguments or method return values by the ZIO ROME endpoint applications.
+arguments or method return values by the ZIO ROAM endpoint applications.
 
-The ZIO ROME protocol has three message types.  The type is identified
-by the ~rome~ label object attribute value.
+The ZIO ROAM protocol has three message types.  The type is identified
+by the ~roam~ label object attribute value.
 
 - BEAT :: a heartbeat message to be sent periodically at a
   predetermined rate in both directions.  An endpoint application may
@@ -67,7 +67,7 @@ by the ~rome~ label object attribute value.
 
 * Patterns
 
-As mentioned, the ZIO ROME protocol is "mostly" symmetric.  ZeroMQ
+As mentioned, the ZIO ROAM protocol is "mostly" symmetric.  ZeroMQ
 sockets require some level of asymmetry.  For example, clientish
 sockets (CLIENT/DEALER) must send before serverish (SERVER/ROUTER) may
 reply.  That initial message may be provided by a clientish endpoint
@@ -79,15 +79,15 @@ Other ZeroMQ sockets are very asymmetric in that they allow only send
 or recv but not both.  The ZIO RPC protocol may still be used but it
 requires then a pair of sockets, one for each directions.
 
-Thus the ZIO ROME protocol may be with a variety of socket patterns
+Thus the ZIO ROAM protocol may be with a variety of socket patterns
 based on the needs of the applications.  This section describes some
 compatible patterns which emerge.
 
 ** Classroom
 
-[[file:rome-classroom.png]]
+[[file:roam-classroom.png]]
 
-The ZIO ROME classroom model is intended for applications that require
+The ZIO ROAM classroom model is intended for applications that require
 communication between a central "teacher" and multiple "students".  A
 student may make a CALL on the teacher ("ask a question") and the
 teacher may make a CALL on a student ("give instruction").
@@ -105,9 +105,9 @@ unique CLIENT socket for each in order to properly address a teacher.
 
 ** Restaurant
 
-[[file:rome-restaurant.png]]
+[[file:roam-restaurant.png]]
 
-The ZIO ROME restaurant model is intended for applications that
+The ZIO ROAM restaurant model is intended for applications that
 require some redundancy.  It leverages the round-robin distribution
 pattern provided by some ZeroMQ sockets.
 
@@ -128,9 +128,9 @@ one restaurant.
 
 ** Seeger
 
-[[file:rome-seeger.png]]
+[[file:roam-seeger.png]]
 
-The ZIO ROME seeger model is intended for applications where one
+The ZIO ROAM seeger model is intended for applications where one
 individual ("singer") will make a CALL to a "crowd" of peers ("If I
 had a hammer") and the crowd will send BACK ("I'd hammer in the
 morning").  The crowd may be very large in number and/or it may not be
