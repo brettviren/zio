@@ -22,7 +22,7 @@ namespace zio {
     template <typename NATIVE>
     class Outbox
     {
-       public:
+      public:
         typedef NATIVE native_type;
         typedef typename std::function<void(zio::level::MessageLevel lvl,
                                             const native_type&)>
@@ -50,7 +50,7 @@ namespace zio {
         void error(const native_type& nat) { send(level::error, nat); }
         void fatal(const native_type& nat) { send(level::fatal, nat); }
 
-       private:
+      private:
         sender_type m_send;
     };
 

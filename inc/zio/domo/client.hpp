@@ -21,7 +21,7 @@ namespace zio {
 
         class Client
         {
-           public:
+          public:
             /// Create a client requesting service.  Caller keeps socket
             /// eg so to poll it along with others.
             Client(zio::socket_t& sock, std::string broker_address);
@@ -40,12 +40,12 @@ namespace zio {
             /// 7/MDP.  If an error occurs the reply is empty.
             void recv(zio::multipart_t& reply);
 
-           private:
+          private:
             zio::socket_t& m_sock;
             std::string m_address;
             time_unit_t m_timeout{HEARTBEAT_INTERVAL};
 
-           private:
+          private:
             std::function<zio::recv_result_t(zio::socket_t& socket,
                                              zio::multipart_t& mmsg,
                                              zio::recv_flags flags)>

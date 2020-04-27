@@ -38,7 +38,7 @@ namespace zio {
             zio::json m_fobj;
             bool m_dirty{false};
 
-           public:
+          public:
             Label(zio::Message& msg);
             ~Label();
             Label(Label&& rhs) = default;
@@ -78,7 +78,7 @@ namespace zio {
 
     class Flow
     {
-       public:
+      public:
         /*! @brief Create one side of a data flow.
 
           The flow is created an initialized port, in the given
@@ -186,7 +186,7 @@ namespace zio {
         /// must explicitly and periodically call pay().
         bool send(zio::Message& msg);
 
-       private:
+      private:
         portptr_t port;
 
         // Use pimpl pattern to access FSM to save on recompiling

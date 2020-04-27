@@ -69,7 +69,7 @@ namespace zio {
      */
     class zactor_t
     {
-       public:
+      public:
         // Template constructor and not class to perform type erasure
         // of the function type.
         template <typename Func, typename... Args>
@@ -96,7 +96,7 @@ namespace zio {
 
         socket_ref link() { return _sock; }
 
-       private:
+      private:
         void startup()
         {
             // The default contract with the actor function is that it
@@ -122,7 +122,7 @@ namespace zio {
             }
         }
 
-       private:
+      private:
         socket_t _sock;
         std::thread _thread;
     };

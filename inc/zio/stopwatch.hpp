@@ -4,7 +4,7 @@ namespace zio {
     /*! Use to mark how fast something goes */
     class Stopwatch
     {
-       public:
+      public:
         typedef std::chrono::high_resolution_clock clock;
         typedef clock::time_point time_point;
         typedef clock::duration duration;
@@ -37,7 +37,7 @@ namespace zio {
         /// Return an average rate in Hz if count things happened over accum
         double hz(size_t count);
 
-       private:
+      private:
         bool started{false};
         time_point t_start, t_lap;
         duration dt_accum;

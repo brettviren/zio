@@ -20,7 +20,7 @@ namespace zio {
 
         class Worker
         {
-           public:
+          public:
             /// Create a worker providing service.  Caller keeps socket eg
             /// so to poll it along with others.
             Worker(zio::socket_t& sock, std::string broker_address,
@@ -49,7 +49,7 @@ namespace zio {
             /// Empties will simply be ignored.
             void send(zio::multipart_t& reply);
 
-           private:
+          private:
             zio::socket_t& m_sock;
             std::string m_address;
             std::string m_service;
@@ -60,7 +60,7 @@ namespace zio {
             bool m_expect_reply{false};
             std::string m_reply_to{""};
 
-           private:
+          private:
             std::function<zio::recv_result_t(zio::socket_t& socket,
                                              zio::multipart_t& mmsg,
                                              zio::recv_flags flags)>

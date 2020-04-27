@@ -15,20 +15,20 @@ namespace zio {
 
     class exception : public std::exception
     {
-       public:
+      public:
         /// returns the explanatory string
         const char* what() const noexcept override { return m.what(); }
         /// the id of the exception
         const int id;
 
-       protected:
+      protected:
         exception(int id_, const char* what_arg) : id(id_), m(what_arg) {}
         static std::string name(const std::string& ename, int id_)
         {
             return "[zio.exception." + ename + "." + std::to_string(id_) + "] ";
         }
 
-       private:
+      private:
         std::runtime_error m;
     };
 
@@ -40,7 +40,7 @@ namespace zio {
     */
     class socket_error : public exception
     {
-       public:
+      public:
         /// Create a socket error with all data and optional extra message.
         static socket_error create(int id_, const char* errmsg,
                                    const char* extra = NULL)
@@ -60,7 +60,7 @@ namespace zio {
             return create(errno, strerror(errno), extra);
         }
 
-       private:
+      private:
         socket_error(int id_, const char* what_arg) : exception(id_, what_arg)
         {
         }
@@ -78,7 +78,7 @@ namespace zio {
      */
     class message_error : public exception
     {
-       public:
+      public:
         static message_error create(int id_, const char* errmsg,
                                     const char* extra = NULL)
         {
@@ -90,7 +90,7 @@ namespace zio {
             return message_error(id_, w.c_str());
         }
 
-       private:
+      private:
         message_error(int id_, const char* what_arg) : exception(id_, what_arg)
         {
         }

@@ -15,7 +15,7 @@ namespace zio {
 
         class Broker
         {
-           public:
+          public:
             /// Create a broker with a ROUTER or SERVER socket already
             /// bound.  Caller must keep socket, eg to mix with others in
             /// an actor's poller.
@@ -32,7 +32,7 @@ namespace zio {
             /// Do heartbeat processing given next heatbeat time.
             void proc_heartbeat(time_unit_t heartbeat_at);
 
-           private:
+          private:
             std::function<recv_result_t(
                 zio::socket_t& server_socket, zio::multipart_t& mmsg,
                 remote_identity_t& remid, recv_flags flags)>
@@ -76,7 +76,7 @@ namespace zio {
                 ~Service();
             };
 
-           private:
+          private:
             void purge_workers();
             Service* service_require(std::string name);
             void service_dispatch(Service* srv);
@@ -94,7 +94,7 @@ namespace zio {
             void client_process(remote_identity_t client_id,
                                 zio::multipart_t& mmsg);
 
-           private:
+          private:
             zio::socket_t& m_sock;
 
             // fixme: make configurable

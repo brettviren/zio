@@ -38,7 +38,7 @@ namespace zio {
         std::vector<std::string> m_portnames;  // in order of creation.
         bool m_verbose{false};
 
-       public:
+      public:
         /// Create a node.
         Node(nickname_t nick = "", origin_t origin = 0,
              const std::string& hostname = "");

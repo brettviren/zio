@@ -25,7 +25,7 @@ namespace zio {
     */
     class Port
     {
-       public:
+      public:
         typedef std::string address_t;
         typedef std::string nodename_t;
         typedef std::string portname_t;
@@ -125,7 +125,7 @@ namespace zio {
         /// This access is generally not recomended.
         zio::socket_t& socket() { return m_sock; }
 
-       private:
+      private:
         const std::string m_name;
         zio::context_t m_ctx;
         zio::socket_t m_sock;

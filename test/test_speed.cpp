@@ -9,7 +9,9 @@
 #include <vector>
 #include <deque>
 
-void nofree(void *data, void * /*hint*/) { /* no op */ }
+void nofree(void *data, void * /*hint*/)
+{ /* no op */
+}
 void dofree(void *data, void * /*hint*/) { free(data); }
 
 int main(int argc, char *argv[])

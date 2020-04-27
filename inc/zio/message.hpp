@@ -68,7 +68,7 @@ namespace zio {
      */
     class Message
     {
-       public:
+      public:
         typedef Header header_t;
 
         Message();
@@ -127,7 +127,7 @@ namespace zio {
         remote_identity_t remote_id() const { return m_remid; }
         void set_remote_id(remote_identity_t remid) { m_remid = remid; }
 
-       private:
+      private:
         header_t m_header;
         multipart_t m_payload;
         remote_identity_t m_remid;

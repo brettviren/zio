@@ -43,7 +43,7 @@ namespace zio {
     */
     class Peer
     {
-       public:
+      public:
         /// A timeout in milliseconds
         typedef int timeout_t;
 
@@ -97,7 +97,7 @@ namespace zio {
         /// Return all UUIDs with matching nickname.
         std::vector<uuid_t> nickmatch(const nickname_t& nick);
 
-       private:
+      private:
         std::string m_nick;
         bool m_verbose;
         zyre_t* m_zyre;
