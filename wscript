@@ -11,7 +11,7 @@ def options(opt):
     opt.add_option('--active-log-level', default='info',
                    choices='trace debug info warn error critical'.split(),
                    help='Set lowest compile time level (default=%default)')
-    opt.add_option('--quell-tests', action='store_true', default='false',
+    opt.add_option('--quell-tests', action='store_true', default=False,
                    help='Compile but do not run the tests (default=%default)')
 
 def configure(cfg):
@@ -45,6 +45,8 @@ def build(bld):
               source = sources, target='zio',
               uselib_store='ZIO', use=uses)
 
+    if bld.options.quell_tests:
+        print("building but not running tests")
     tsources = bld.path.ant_glob('test/test*.cpp')
     if tsources and not bld.options.no_tests:
         # fixme: it would be nice to have an option that builds but doesn't run
