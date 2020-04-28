@@ -154,3 +154,113 @@ should expect to not receive BEAT and BACK from some individuals some
 of the time.
 
 
+* Code mock up
+
+We consider these layers
+
+- API with native types
+- type-free message processing layer
+
+** Native API
+
+Application code may use a "native API" to a ROAM protocol.  It is
+"native" in that query names are methods on the API object and query
+augment data and return value are types in the native programming
+language.
+
+The native API may have *synchronous* and *asynchronous* methods.  As an
+example, assume a ROAM protocol with a single query "status".  The
+synchronous "client" may do like:
+
+#+begin_src c++
+  c = StatusAPI(port_description);
+
+  // synchronous client call
+  StatusAPI::status_type status;
+  try {
+      status = c.status_wait(timeout);
+  }
+  catch (const StatusAPI::timeout_occured& err) {
+      // handle
+  }
+  catch (const StatusAPI::synchronicity_error& err) {
+      // handle
+  }
+  cout << status.code << " " << status.message << endl;
+
+#+end_src
+
+The timeout may not be considered an exception per se and could be
+handled by returning the result in a ~std::optional~.  The synchronicity
+error means some message beside the expected ~BACK~ was received
+following the ~CALL~.  ROAM is an "asynchronous first" protocol and so
+synchronous calls must do extra work.
+
+The synchronous ~status_wait()~ method might be implemented as a wrapper around the "partly" asynchronous client call which may go like:
+
+#+begin_src c++
+  status_code status_wait(int timeout) {
+      auto callid = this->status();
+      auto result = this->back(timeout);
+      if (!result) {
+          throw timeout_error();
+      }
+      if (result.callid == callid) {
+          return status_type(result.get());
+      }
+      throw synchronicity_error(result.get());
+  }
+#+end_src
+
+For a client application that wants to be "partly" asynchronous it may
+call ~status()~ and ~back()~ directly and possibly in different contexts
+and add whatever handling it needs instead of catching exceptions.
+
+This is idiom is called "partly" asynchronous because the
+~back(timeout)~ blocks.  The client may be fully asynchronous by adding
+the API's actor link to its own poll/loop.
+
+#+begin_src c++
+  poller.add(c.actor().link());
+  int nevents = poller.wait_all(events);
+  // ...loop over process of poll events omitted
+  if (event.socket == c.actor().link()) {
+      // no timeout needed, message is guarateed waiting
+      auto result = c.back(0);
+      assert(result);
+      // handle result after checking callid as above.
+  }
+#+end_src
+
+Server thoughts.
+
+#+begin_src c++
+  // server program
+  class StatusAPIServer : public StatusAPI {
+    public:
+      struct status_type { int code, std::string message; }
+      virtual status_type status() { return status_type{200,"okay"}; };
+  };
+  int main () {
+      s = StatusAPIServer(port);
+      return 0;
+  }
+#+end_src
+
+
+** Low level
+
+   #+begin_src c++
+     roam = Roam(in_port_ptr, out_port_ptr);
+
+     // as a sync "client"
+     auto result_msg = roam.call(query_msg);
+
+     // as an async "client"
+     auto callid = roam.call_async(query_msg);
+     auto result_msg = roam.back_async(timeout);
+     // check result_msg's callid
+
+
+     // as a sync "server"
+   #+end_src

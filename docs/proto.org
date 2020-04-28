@@ -1,0 +1,171 @@
+#+title: ZIO Proto
+
+Musing on implmenting the ideas of zproto in cppzmq.
+
+* ZeroMQ Zproto
+
+Like ZeroMQ sockets are sockets on steroids, Zproto is gRPC/Thrift on
+steroids.  It models a client/server protocol and generates the
+message implementation as well as the bulk of the endpoint message
+handling code.  The model describes message fields and separately the
+client and server message processing state machines.  For the latter
+two, SM guard and action stubs are generated for the developer to fill
+in.
+
+
+* Separation of concerns
+
+The protocol endpoint has layers:
+
+- synchronous API fronting and actor
+- API exposes the API side of the actor link
+- API internals holds the actor
+- actor is function running in a thread
+- actor has a data structure and code
+- actor feeds a SM which calls code, modifies data structure
+- actor may have external sockets private to the actor which feed SM
+- actor function has other end of link end for communication with API which feed SM
+- actor may feed external or link sockets based on SM execution
+
+The "type" of the protocol endpoint determines:
+- the state machine
+- the synchronous API
+
+The state machine working object (data + guards + actions) may be a
+base class which allows application code to override guards and
+actions and access data and to provide behavior.  This internal class
+is equivalent to many RPC "server" classes in that it is purely
+reactionary code.  
+
+** Protocol Endpoint Interface
+
+The protocol endpoint is managed by an actor.  An application may
+interact with the actor through the actor command and message sockets.
+An API class provides methods which hide from the application the need
+to interact with these actor sockets.  Regardless of the application
+interface the actor provides the external protocol interface.
+
+One category of API methods are *actor commands methods.  Calling one
+may block and the control flow is as follows:
+
+1) An app calls an API actor command method
+
+2) Method body forms a message from method arguments.
+
+3) Method body sends the message to actor's command socket.
+
+4) Depending on the actor command protocol the method body may wait
+   for and receive a message back from the actor command socket.  This
+   is the potentially blocking behavior.
+
+5) Method forms and returns a value to calling application.
+
+The actor is polling its end of its actor command link socket as well
+as all protocol sockets.  These all may receive messages.  The
+processing of these sockets forms the core of the actor and goes like:
+
+1) execute a poll on sockets
+
+2) a socket has a message to ~recv()~
+
+3) ~recv()~ message and depending on socket and message form an SM event
+
+4) inject event in to SM
+
+5) SM may result in messages sent to actor command socket, actor message socket or external sockets
+
+The dichotomy between *actor command* and *actor message* sockets is
+created in order to keep two micro-protocols distinct.  The app-side
+of the actor command link will receive command results.  Depending on
+the actor protocol, these receives tend to happen in 1-to-1
+correspondence with a command message sent into the app-side of this
+link (eg, via a command method as described above).  
+
+OTOH, the app-side of the actor message link is intended to receive
+messages that arise from the protocol endpoint and are not typically
+or strongly associated with any API methods called by the application.
+Thus the application must ~poll~ and ~recv~ on the actor message socket or
+the API may also/instead consume from the actor message socket and
+provide helper methods which provide the application access to their
+content when later called.  
+
+** State machine 
+
+Above a state machine (SM) is mentioned.  Like all, the SM is defined
+in terms of states, events, guards and actions.  It is used here to
+provides both the protocol endpoint and actor command behavior.
+
+Events are constructed from messages received from actor command and
+message link and protocol sockets.  Events may also be formed from
+non-message sources such as "wakeup" timers set for some future time
+or "expiry" timers called when no other events were incoming for some
+time period.
+
+Guards and actions are methods on context object.  Guards should be
+effectively const methods with no side effects and return a Boolean.
+They should be brief as they are often called as the SM determines the
+branch to the next state.  Actions may modify the context and send
+messages out sockets but must not poll nor recv from sockets.  Actions
+return void.
+
+** Code mockup
+
+We want to use ~boost.sml~ state machine, either hand-written or
+generated.  It is defined in terms of concrete types.  Even with its
+supported dependency injection, the SM transition table must be
+compiled in a context with all types defined.  We further want to hide
+~boost.sml~ code from any header included by the application to avoid
+long build times of user code.  We also want the user to be able to
+override guards and actions.  Finally, there is a constraint that the
+SM context object must be constructed inside the actor thread if it
+will hold any (non-thread-safe) sockets.  
+
+I believe the only way to satisfy these requirements and constraints is to:
+
+- allow the context class to have virtual methods
+- allow the context object to be constructed by the application code
+- delay any socket creation until after construction and once inside the actor thread
+- provide a configuration object to hold directives needed for this delayed initialization
+- provide context as dependency-injected object
+- define SM in terms of context base class methods accessed by dependency-injected object.
+
+
+#+begin_src c++
+  template<typename context_t, typename actor_t>
+  class API {
+    public:
+      connect_result_t connect(std::string address);
+
+      // return status of protocol endpoint
+      status_t status();
+
+      socket_t cmdlink();
+      socket_t msglink();
+
+  };
+#+end_src
+
+
+An API method schema has
+- a name (type string)
+- method arguments (type list of arg)
+- a return (type depends)
+
+A method argument schema (arg) has
+- a name (type string)
+- a value (type depends)
+
+A return value has
+- a value (type depends)
+
+A method must:
+- build a method object
+- send method object to cmdpipe
+- if expect zero return types, return void
+- recv object on cmdpipe
+- convert to object and return
+
+
+Define some of these things
+#+begin_src json
+#+end_src
