@@ -3,8 +3,9 @@
 
 #include "zio/zmq_addon.hpp"
 
-// We intern cppzmq
+// All ZIO code is in zio namespace
 namespace zio {
+    // We intern cppzmq
     using namespace zmq;
 }
 

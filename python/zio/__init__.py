@@ -19,7 +19,7 @@ in the zio:: C++ namespace.
 >>> ok = f.put(dat)
 '''
 
-# emulate libzio's namespace/class tree 
+# emulate libzio's namespace/class tree
 from .message import *
 from .port import *
 from .node import *

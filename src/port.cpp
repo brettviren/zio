@@ -31,7 +31,7 @@ struct DirectBinder
 
 struct HostPortBinder
 {
-    zio::socket_t& sock;
+    zmq::socket_t& sock;
     std::string hostname;
     int tcpportnum{0};
     std::string operator()()

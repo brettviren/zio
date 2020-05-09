@@ -15,6 +15,7 @@ def options(opt):
                    help='Compile but do not run the tests (default=%default)')
 
 def configure(cfg):
+    cfg.load('clang_compilation_database', tooldir='.')
     #cfg.env.CXXFLAGS += ['-std=c++17', '-ggdb', '-O2', '-Wall', '-Wpedantic', '-Werror']
     cfg.env.CXXFLAGS += ['-std=c++17', '-ggdb3', '-Wall', '-Wpedantic', '-Werror']
 
