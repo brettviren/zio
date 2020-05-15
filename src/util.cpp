@@ -9,7 +9,7 @@ using namespace zio;
 
 int zio::sock_type(const zio::socket_t& sock)
 {
-    return sock.getsockopt<int>(ZMQ_TYPE);
+    return sock.get(zmq::sockopt::type);
 }
 
 std::string zio::sock_type_name(int stype)
@@ -46,12 +46,12 @@ std::string zio::binstr(const std::string& s)
 
 bool zio::is_serverish(zio::socket_t& sock)
 {
-    int stype = sock.getsockopt<int>(ZMQ_TYPE);
+    int stype = sock.get(zmq::sockopt::type);
     return ZMQ_SERVER == stype or ZMQ_ROUTER == stype;
 }
 bool zio::is_clientish(zio::socket_t& sock)
 {
-    int stype = sock.getsockopt<int>(ZMQ_TYPE);
+    int stype = sock.get(zmq::sockopt::type);
     return ZMQ_CLIENT == stype or ZMQ_DEALER == stype;
 }
 
@@ -60,7 +60,7 @@ zio::recv_result_t zio::recv_serverish(zio::socket_t& sock,
                                        zio::remote_identity_t& remid,
                                        recv_flags flags)
 {
-    int stype = sock.getsockopt<int>(ZMQ_TYPE);
+    int stype = sock.get(zmq::sockopt::type);
     if (ZMQ_SERVER == stype) { return recv_server(sock, mmsg, remid); }
     if (ZMQ_ROUTER == stype) { return recv_router(sock, mmsg, remid); }
     throw std::runtime_error("recv requires SERVER or ROUTER socket");
@@ -96,7 +96,7 @@ zio::send_result_t zio::send_serverish(zio::socket_t& sock,
                                        const zio::remote_identity_t& remid,
                                        send_flags flags)
 {
-    int stype = sock.getsockopt<int>(ZMQ_TYPE);
+    int stype = sock.get(zmq::sockopt::type);
     if (ZMQ_SERVER == stype) { return send_server(sock, mmsg, remid); }
     if (ZMQ_ROUTER == stype) { return send_router(sock, mmsg, remid); }
     throw std::runtime_error("send requires SERVER or ROUTER socket");
@@ -128,7 +128,7 @@ zio::send_result_t zio::send_router(zio::socket_t& router_socket,
 zio::recv_result_t zio::recv_clientish(zio::socket_t& socket,
                                        zio::multipart_t& mmsg, recv_flags flags)
 {
-    int stype = socket.getsockopt<int>(ZMQ_TYPE);
+    int stype = socket.get(zmq::sockopt::type);
     if (ZMQ_CLIENT == stype) { return recv_client(socket, mmsg); }
     if (ZMQ_DEALER == stype) { return recv_dealer(socket, mmsg); }
     throw std::runtime_error("recv requires CLIENT or DEALER socket");
@@ -156,7 +156,7 @@ zio::recv_result_t zio::recv_dealer(zio::socket_t& dealer_socket,
 zio::send_result_t zio::send_clientish(zio::socket_t& socket,
                                        zio::multipart_t& mmsg, send_flags flags)
 {
-    int stype = socket.getsockopt<int>(ZMQ_TYPE);
+    int stype = socket.get(zmq::sockopt::type);
     if (ZMQ_CLIENT == stype) { return send_client(socket, mmsg); }
     if (ZMQ_DEALER == stype) { return send_dealer(socket, mmsg); }
     throw std::runtime_error("send requires CLIENT or DEALER socket");

@@ -14,7 +14,7 @@ Broker::Service::~Service() {}
 
 Broker::Broker(zio::socket_t& sock) : m_sock(sock)
 {
-    int stype = m_sock.getsockopt<int>(ZMQ_TYPE);
+    int stype = m_sock.get(zmq::sockopt::type);
     if (ZMQ_SERVER == stype) {
         recv = recv_server;
         send = send_server;

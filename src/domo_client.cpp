@@ -8,7 +8,7 @@ Client::Client(zio::socket_t& sock, std::string broker_address)
     : m_sock(sock)
     , m_address(broker_address)
 {
-    int stype = m_sock.getsockopt<int>(ZMQ_TYPE);
+    int stype = m_sock.get(zmq::sockopt::type);
     if (ZMQ_CLIENT == stype) {
         really_recv = recv_client;
         really_send = send_client;
@@ -32,7 +32,7 @@ void Client::connect_to_broker(bool reconnect)
     if (reconnect) { m_sock.disconnect(m_address); }
 
     int linger = 0;
-    m_sock.setsockopt(ZMQ_LINGER, linger);
+    m_sock.set(zmq::sockopt::linger, linger);
     // set socket routing ID?
     m_sock.connect(m_address);
     zio::debug("zio::domo::Client connect to " + m_address);

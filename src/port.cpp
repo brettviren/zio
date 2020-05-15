@@ -102,7 +102,7 @@ void zio::Port::connect(const nodename_t& node, const portname_t& port)
 void zio::Port::subscribe(const std::string& prefix)
 {
     if (zio::sock_type(m_sock) == ZMQ_SUB) {
-        m_sock.setsockopt(ZMQ_SUBSCRIBE, prefix.c_str(), prefix.size());
+        m_sock.set(zmq::sockopt::subscribe, prefix);
     }
 }
 
