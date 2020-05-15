@@ -30,10 +30,12 @@ ZIO provides include:
 - A Python [[file:task-broker.org][task broker]] implementing a modified version of ZeroMQ's
   [[https://github.com/zeromq/majordomo][majordomo]] broker (WIP).
 
+There's also some half-backed / in-progress ideas.
+
+- An RPC'ish pattern [[file:roam.org][roam]].
+
 See the navigation links for other ways to enter the documentation.
 
 Known applications of ZIO include:
 
-- [[https://brettviren.github.io/wire-cell-zpb/][Wire-Cell Toolkit ZPB]] plugin package uses ZIO as a basis for
-  transport between multi-threaded WCT application components and
-  single-threaded file I/O resources.
+- [[https://github.com/wirecell/wire-cell-toolkit][The `zio` subpackage]] in WCT.

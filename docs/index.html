@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-04-26 Sun 15:11 -->
+<!-- 2020-05-15 Fri 14:14 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>ZIO - C++ interface to ZeroMQ and Zyre.</title>
@@ -161,6 +161,19 @@
   .footdef  { margin-bottom: 1em; }
   .figure { padding: 1em; }
   .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
   .inlinetask {
     padding: 10px;
     border: 2px solid gray;
@@ -187,7 +200,7 @@
 @licstart  The following is the entire license notice for the
 JavaScript code in this tag.
 
-Copyright (C) 2012-2018 Free Software Foundation, Inc.
+Copyright (C) 2012-2020 Free Software Foundation, Inc.
 
 The JavaScript code in this tag is free software: you can
 redistribute it and/or modify it under the terms of the GNU
@@ -274,6 +287,14 @@ handlers in a pluggable manner.</li>
 </ul>
 
 <p>
+There's also some half-backed / in-progress ideas.
+</p>
+
+<ul class="org-ul">
+<li>An RPC'ish pattern <a href="roam.html">roam</a>.</li>
+</ul>
+
+<p>
 See the navigation links for other ways to enter the documentation.
 </p>
 
@@ -282,9 +303,7 @@ Known applications of ZIO include:
 </p>
 
 <ul class="org-ul">
-<li><a href="https://brettviren.github.io/wire-cell-zpb/">Wire-Cell Toolkit ZPB</a> plugin package uses ZIO as a basis for
-transport between multi-threaded WCT application components and
-single-threaded file I/O resources.</li>
+<li><a href="https://github.com/wirecell/wire-cell-toolkit">The `zio` subpackage</a> in WCT.</li>
 </ul>
 </div>
 </body>
