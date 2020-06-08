@@ -33,7 +33,7 @@ int main(int argc, char* argv[])
     assert(feeds.size() == 1);
     zio::socket_t sub(ctx, ZMQ_SUB);
     std::string prefix = "";
-    sub.setsockopt(ZMQ_SUBSCRIBE, prefix.c_str(), prefix.size());
+    sub.set(zmq::sockopt::subscribe, prefix);
 
     sub.connect(feeds[""]);
 
