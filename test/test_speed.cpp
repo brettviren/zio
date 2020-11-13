@@ -17,9 +17,14 @@ void dofree(void *data, void * /*hint*/) { free(data); }
 int main(int argc, char *argv[])
 {
     zio::init_all();
-    if (argc != 3) { return -1; }
-    const size_t siz = atol(argv[1]);
-    const size_t num = atol(argv[2]);
+    size_t siz = 10000;
+    size_t num = 100;
+    if (argc > 1) {
+        siz = atol(argv[1]);
+    }
+    if (argc > 2) {
+        num = atol(argv[2]);
+    }
 
     zio::Stopwatch sw;
     zio::info("start: {} bytes, {} count", siz, num);

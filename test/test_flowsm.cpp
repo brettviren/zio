@@ -692,15 +692,18 @@ struct FlowDevice
 static void flow_endpoint(zio::socket_t& link, int socket, bool sender,
                           int credit)
 {
+    const std::string server_node_name = "test-flowsm-flow-endpoint-server";
+    const std::string client_node_name = "test-flowsm-flow-endpoint-client";
+
     // actor ready
     link.send(zio::message_t{}, zio::send_flags::none);
 
     // create node based on socket/sender config
-    std::string nodename = "client";
-    std::string othernode = "server";
+    std::string nodename = client_node_name;
+    std::string othernode = server_node_name;
     if (socket == ZMQ_SERVER) {
-        nodename = "server";
-        othernode = "client";
+        nodename = server_node_name;
+        othernode = client_node_name;
     }
     std::string direction = "inject";
     std::string portname = "recver";
@@ -717,7 +720,7 @@ static void flow_endpoint(zio::socket_t& link, int socket, bool sender,
 
     zio::Node node(nodename);
     auto port = node.port(portname, socket);
-    if (nodename == "server") {  // note, client can bind.
+    if (nodename == server_node_name) {  // note, client can bind.
         port->bind();            // here, simplify cfg.
     }
     else {
@@ -796,14 +799,16 @@ void test_longhand()
     using namespace boost;
 
     // this test interleaves client and server conversation
+    const std::string server_node_name = "test-flowsm-longhand-server";
+    const std::string client_node_name = "test-flowsm-longhand-client";
 
-    zio::Node snode("server", 1);
+    zio::Node snode(server_node_name, 1);
     auto sport = snode.port("recver", ZMQ_SERVER);
     sport->bind();
     snode.online();
-    zio::Node cnode("client", 2);
+    zio::Node cnode(client_node_name, 2);
     auto cport = cnode.port("sender", ZMQ_CLIENT);
-    cport->connect("server", "recver");
+    cport->connect(server_node_name, "recver");
     cnode.online();
 
     // this test only "half uses" the device see test_concise() for

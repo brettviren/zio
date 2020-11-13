@@ -8,15 +8,18 @@
 static void flow_endpoint(zio::socket_t& link, int socket, bool giver,
                           int credit)
 {
+    const std::string server_node_name = "test-flow-endpoint-server";
+    const std::string client_node_name = "test-flow-endpoint-client";
+
     // actor ready
     link.send(zio::message_t{}, zio::send_flags::none);
 
     // create node based on socket/giver config
-    std::string nodename = "client";
-    std::string othernode = "server";
+    std::string nodename = client_node_name;
+    std::string othernode = server_node_name;
     if (socket == ZMQ_SERVER or socket == ZMQ_ROUTER) {
-        nodename = "server";
-        othernode = "client";
+        nodename = server_node_name;
+        othernode = client_node_name;
     }
     zio::flow::direction_e direction = zio::flow::direction_e::inject;
     std::string portname = "taker";
@@ -38,8 +41,8 @@ static void flow_endpoint(zio::socket_t& link, int socket, bool giver,
 
     zio::Node node(nodename);
     auto port = node.port(portname, socket);
-    if (nodename == "server") {  // note, client okay to bind too
-        port->bind();            // but keep it simple here.
+    if (nodename == server_node_name) {  // note, client okay to bind too
+        port->bind();                    // but keep it simple here.
     }
     else {
         port->connect(othernode, otherport);
