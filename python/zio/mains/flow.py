@@ -4,7 +4,7 @@ from .. import jsonnet
 import click
 from .. import rules
 
-from zio.util import modlog
+from zio.util import modlog, logging, getLogger
 log = modlog(__name__)
 
 @click.group("flow")
@@ -130,7 +130,8 @@ def file_server(bind, format, name, port, verbosity, ruleset):
     from zio.flow.hdf import writer, reader
     assert(format == "hdf")
 
-    #log.level = getattr(logging, verbosity.upper(), "INFO")
+    getLogger("transitions").level = logging.WARNING
+    log.level = getattr(logging, verbosity.upper(), "INFO")
 
     ruleset = jsonnet_load(ruleset)
 
